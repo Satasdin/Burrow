@@ -563,6 +563,9 @@ extension VaultTools {
         let files = result.sources.map { "\($0.path):\($0.startLine)-\($0.endLine)" }
         record.trail = (record.trail ?? []) + [TrailStep(tool: name, asked: asked, files: Array(files.prefix(6)))]
         record.client = record.client ?? connectionClient
+        // The time on the record in hand moves too, not only on disk: a program that rejoins a recent session would otherwise
+        // carry the time it was loaded, and its handoff would be taken for the one before it (D-72).
+        record.updated = Date()
         connection = record
         try? sessions.save(record)
         return result
@@ -579,6 +582,7 @@ extension VaultTools {
         }
         let files = (given.text("files") ?? "").split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
         record.turns.append(SessionTurn(question: given.text("question")!, answer: given.text("answer")!, model: given.text("model") ?? "unnamed", server: "mcp", sources: files))
+        record.updated = Date()
         try sessions.save(record)
         if record.id == connection?.id { connection = record }
         return ToolResult(text: "Added to session \(record.id), which now has \(record.turns.count) turns.", summary: "logged to \(record.id)")

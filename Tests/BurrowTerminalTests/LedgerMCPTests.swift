@@ -51,7 +51,9 @@ final class LedgerMCPTests: XCTestCase {
         XCTAssertTrue(head.contains("written by qwen3:4b in opencode"), head)
         let found = try await call("burrow_find", #"{"query":"retry a failed charge"}"#)
         XCTAssertTrue(found.contains("The Ledger holds a correction on these files"), found)
-        XCTAssertFalse(found.contains("They retry three times"), found)
+        // The correction's own words are model-written: they may come with the search only inside the Ledger's fenced block (D-69).
+        let outsideLedger = found.components(separatedBy: "<ledger>").first ?? found
+        XCTAssertFalse(outsideLedger.contains("They retry three times"), found)
         let blame = try await call("burrow_blame", #"{"path":"Decisions/Retry.md"}"#)
         XCTAssertTrue(blame.hasPrefix("<ledger>"), blame)
     }
@@ -94,6 +96,22 @@ final class LedgerMCPTests: XCTestCase {
     func testCitedPathsStayInsideTheVault() async throws {
         _ = try await call("burrow_commit", #"{"kind":"fact","message":"Paths","files":"/etc/passwd, ../outside.md, Decisions/Retry.md"}"#)
         XCTAssertEqual(tools.ledger.log().first?.cites.keys.sorted(), ["Decisions/Retry.md"])
+    }
+
+    func testAProgramThatRejoinsItsSessionLeavesItsOwnHandoff() async throws {
+        // Stress workflow 4b, 12 November: claude -p runs within half an hour of each other share one saved session,
+        // and every run after the first left no handoff (D-72).
+        _ = try await call("burrow_commit", #"{"kind":"decision","message":"First run's decision","files":"Decisions/Retry.md"}"#)
+        await server.serve(readLine: { nil }, write: { _ in })
+        try await Task.sleep(nanoseconds: 1_100_000_000)
+        let again = MCPServer(tools: VaultTools(vault: tools.vault, embedder: nil) { _ in FakeAnswerer() }, keepsSessions: true)
+        again.toolSet = .door
+        _ = await again.handle(#"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"opencode","version":"1"}}}"#)
+        _ = await again.handle(#"{"jsonrpc":"2.0","id":9,"method":"tools/call","params":{"name":"burrow_commit","arguments":{"kind":"decision","message":"Second run's decision","files":"Decisions/Retry.md"}}}"#)
+        await again.serve(readLine: { nil }, write: { _ in })
+        let handoffs = tools.ledger.log().filter { $0.kind == .handoff }
+        XCTAssertEqual(handoffs.count, 2, handoffs.map(\.message).joined(separator: " | "))
+        XCTAssertEqual(Set(handoffs.map(\.session)).count, 1)
     }
 
     func testAClosedConnectionLeavesAHandoff() async throws {
