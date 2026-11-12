@@ -1,0 +1,81 @@
+diff --git a/matatu/payments/matcher.py b/matatu/payments/matcher.py
+index dd05b1e..cffb2a5 100644
+--- a/matatu/payments/matcher.py
++++ b/matatu/payments/matcher.py
+@@ -1,9 +1,42 @@
+ """Working out which ticket a statement line pays for."""
+ 
+-from typing import Optional
++import re
++from typing import Dict, Optional
+ 
+ from ..models import StatementLine, Ticket
+ 
++_NOT_LETTER_OR_DIGIT = re.compile(r"[^0-9A-Z]")
+ 
+-def ticket_for_line(store, line: StatementLine) -> Optional[Ticket]:
+-    return store.tickets.get(line.account_ref)
++
++def normalise_reference(reference: str) -> str:
++    """The reference as a passenger may have typed it, reduced to upper-case letters and digits.
++
++    ``tkt 2345ab``, ``TKT2345AB`` and `` Tkt-2345AB`` all become ``TKT2345AB``.
++    """
++    return _NOT_LETTER_OR_DIGIT.sub("", (reference or "").upper())
++
++
++def reference_index(store) -> Dict[str, Optional[str]]:
++    """Normalised reference -> ticket id. A key shared by two tickets maps to None (ambiguous)."""
++    index: Dict[str, Optional[str]] = {}
++    for ticket_id in store.tickets:
++        key = normalise_reference(ticket_id)
++        index[key] = None if key in index else ticket_id
++    return index
++
++
++def ticket_for_line(store, line: StatementLine, index: Optional[Dict[str, Optional[str]]] = None) -> Optional[Ticket]:
++    """Matches by account reference only: exactly first, then ignoring case, spaces and punctuation.
++
++    A mistyped reference that could belong to more than one ticket matches none.
++    """
++    ticket = store.tickets.get(line.account_ref)
++    if ticket is not None:
++        return ticket
++    key = normalise_reference(line.account_ref)
++    if not key:
++        return None
++    if index is None:
++        index = reference_index(store)
++    ticket_id = index.get(key)
++    return store.tickets.get(ticket_id) if ticket_id is not None else None
+diff --git a/matatu/payments/reconcile.py b/matatu/payments/reconcile.py
+index 449fbbd..8b17380 100644
+--- a/matatu/payments/reconcile.py
++++ b/matatu/payments/reconcile.py
+@@ -5,7 +5,7 @@ from typing import Iterable
+ 
+ from ..models import TICKET_ISSUED, TICKET_PAID, StatementLine, Ticket
+ from ..store.repositories import save_ticket
+-from .matcher import ticket_for_line
++from .matcher import reference_index, ticket_for_line
+ from .suspense import add_to_suspense
+ 
+ 
+@@ -26,14 +26,15 @@ def _mark_paid(store, ticket: Ticket, line: StatementLine) -> Ticket:
+ def reconcile_statement(store, lines: Iterable[StatementLine], clock) -> ReconcileResult:
+     """Goes through a statement line by line. A line already seen is skipped."""
+     result = ReconcileResult()
++    index = reference_index(store)
+     for line in lines:
+         if line.code in store.seen_codes:
+             result.skipped += 1
+             continue
+         store.seen_codes.add(line.code)
+-        ticket = ticket_for_line(store, line)
++        ticket = ticket_for_line(store, line, index)
+         if ticket is None:
+-            # Matched by account reference only; no phone/amount fallback (see Ledger).
++            # Matched by account reference only (exact or normalised); no phone/amount fallback (see Ledger).
+             add_to_suspense(store, line, "unknown reference", clock)
+             result.suspended += 1
+         elif ticket.status != TICKET_ISSUED:

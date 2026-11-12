@@ -1,0 +1,40 @@
+diff --git a/matatu/payments/matcher.py b/matatu/payments/matcher.py
+index dd05b1e..d742eb4 100644
+--- a/matatu/payments/matcher.py
++++ b/matatu/payments/matcher.py
+@@ -1,9 +1,34 @@
+ """Working out which ticket a statement line pays for."""
+ 
++import re
+ from typing import Optional
+ 
+ from ..models import StatementLine, Ticket
+ 
++_NOT_ALPHANUMERIC = re.compile(r"[^0-9A-Z]")
++
++
++def normalise_reference(reference: str) -> str:
++    """The reference as passengers mean it: case, spaces and separators ignored.
++
++    "tkt 2345ab", "TKT2345AB" and " Tkt-2345AB" all become "TKT2345AB".
++    """
++    return _NOT_ALPHANUMERIC.sub("", (reference or "").upper())
++
+ 
+ def ticket_for_line(store, line: StatementLine) -> Optional[Ticket]:
+-    return store.tickets.get(line.account_ref)
++    """The ticket whose id the line's account reference names, or None.
++
++    Matching is by account reference only (see Ledger: no phone/amount fallback).
++    An exact reference wins; otherwise the reference is compared with ticket ids
++    ignoring case, spaces and punctuation. If that loose comparison fits more than
++    one ticket, nothing is matched and the line goes to suspense.
++    """
++    exact = store.tickets.get(line.account_ref)
++    if exact is not None:
++        return exact
++    wanted = normalise_reference(line.account_ref)
++    if not wanted:
++        return None
++    found = [ticket for ticket_id, ticket in store.tickets.items() if normalise_reference(ticket_id) == wanted]
++    return found[0] if len(found) == 1 else None
