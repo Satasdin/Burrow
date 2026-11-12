@@ -104,6 +104,7 @@ public final class MCPServer {
         await last?.value
         stops.forEach { $0.cancel() }
         if keepsSessions, let line = tools.connectionEnded() { log(line) }
+        if let token = tools.connectionHold, let id = tools.connection?.id { tools.sessions.release(id, token: token); tools.connectionHold = nil }
     }
 
     func decode(_ line: String) -> Decoded {
@@ -141,12 +142,17 @@ public final class MCPServer {
             if keepsSessions {
                 tools.connectionClient = client
                 // A program that reconnects soon after, as one-shot runs like `opencode run` or `claude -p` do for every message, carries on its own session.
+                // Only a session no other open connection holds is carried on: two programs at once each get their own (D-73).
                 if tools.connection == nil {
-                    let recent = tools.sessions.list().first { $0.client == client && Date().timeIntervalSince($0.updated) < Self.sameSessionWithin }
+                    var recent: SessionRecord?
+                    for record in tools.sessions.list() where record.client == client && Date().timeIntervalSince(record.updated) < Self.sameSessionWithin {
+                        if let token = tools.sessions.hold(record.id) { recent = record; tools.connectionHold = token; break }
+                    }
                     var fresh = SessionRecord()
                     fresh.client = client
                     tools.connection = recent ?? fresh
                     tools.connectionIsNew = recent == nil
+                    if recent == nil { tools.connectionHold = tools.sessions.hold(fresh.id) }
                 }
             }
             return .reply(Self.success(id: id, [

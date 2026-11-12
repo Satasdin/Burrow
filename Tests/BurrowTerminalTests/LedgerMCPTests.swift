@@ -114,6 +114,34 @@ final class LedgerMCPTests: XCTestCase {
         XCTAssertEqual(Set(handoffs.map(\.session)).count, 1)
     }
 
+    func testTwoProgramsAtOnceKeepTheirOwnSessions() async throws {
+        // Stress workflow 4b, 12 November: two claude -p agents at once joined one session, overwrote each other's trail,
+        // and left one handoff that mixed both, carrying branch work onto main (D-73).
+        let other = MCPServer(tools: VaultTools(vault: tools.vault, embedder: nil) { _ in FakeAnswerer() }, keepsSessions: true)
+        other.toolSet = .door
+        _ = await other.handle(#"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"opencode","version":"1"}}}"#)
+        _ = try await call("burrow_commit", #"{"kind":"decision","message":"Agent A's decision","files":"Decisions/Retry.md"}"#)
+        _ = await other.handle(#"{"jsonrpc":"2.0","id":9,"method":"tools/call","params":{"name":"burrow_commit","arguments":{"kind":"decision","message":"Agent B's decision","files":"Decisions/Retry.md","branch":"luggage"}}}"#)
+        await server.serve(readLine: { nil }, write: { _ in })
+        await other.serve(readLine: { nil }, write: { _ in })
+        let handoffs = tools.ledger.log().filter { $0.kind == .handoff }
+        XCTAssertEqual(handoffs.count, 2, handoffs.map(\.message).joined(separator: " | "))
+        XCTAssertEqual(Set(handoffs.map(\.session)).count, 2)
+        for handoff in handoffs { XCTAssertTrue(handoff.message.contains("keeping 1 commit"), handoff.message) }
+        let open = try FileManager.default.contentsOfDirectory(atPath: tools.sessions.folder.path).filter { $0.hasSuffix(".open") }
+        XCTAssertEqual(open, [])
+    }
+
+    func testAHoldLeftByAProcessThatIsGoneIsCleared() throws {
+        let store = tools.sessions
+        try FileManager.default.createDirectory(at: store.folder, withIntermediateDirectories: true)
+        try "999999 left-by-a-crash".write(to: store.folder.appendingPathComponent("s9.open"), atomically: true, encoding: .utf8)
+        let token = try XCTUnwrap(store.hold("s9"))
+        XCTAssertNil(store.hold("s9"))
+        store.release("s9", token: token)
+        XCTAssertNotNil(store.hold("s9"))
+    }
+
     func testAClosedConnectionLeavesAHandoff() async throws {
         _ = try await call("burrow_find", #"{"query":"retry a failed charge"}"#)
         await server.serve(readLine: { nil }, write: { _ in })

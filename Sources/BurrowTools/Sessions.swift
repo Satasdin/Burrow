@@ -122,6 +122,36 @@ public struct SessionStore: Sendable {
             .sorted { $0.updated > $1.updated }
     }
 
+    /// While a connection is open it holds its session, so a second program that connects at the same time, under the same
+    /// name, starts a session of its own instead of writing over this one's trail (D-73). The hold is a file `<id>.open`
+    /// with the holding process's id and a token; a hold whose process has gone counts as released, so a crash frees it.
+    /// Returns the token to release it with, or nil when another live connection holds the session.
+    public func hold(_ id: String) -> String? {
+        try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        let path = folder.appendingPathComponent(id + ".open").path
+        let token = "\(getpid()) \(UUID().uuidString)"
+        for _ in 0..<2 {
+            let file = open(path, O_WRONLY | O_CREAT | O_EXCL, 0o644)
+            if file >= 0 {
+                _ = token.withCString { write(file, $0, strlen($0)) }
+                close(file)
+                return token
+            }
+            guard errno == EEXIST else { return nil }
+            let holder = (try? String(contentsOfFile: path, encoding: .utf8))?.split(separator: " ").first.flatMap { Int32($0) }
+            // A process that is gone cannot be signalled: its hold is stale and is cleared once.
+            if let holder, kill(holder, 0) == 0 || errno == EPERM { return nil }
+            unlink(path)
+        }
+        return nil
+    }
+
+    /// Lets go of a hold, only if it is still this connection's own.
+    public func release(_ id: String, token: String) {
+        let path = folder.appendingPathComponent(id + ".open").path
+        if (try? String(contentsOfFile: path, encoding: .utf8)) == token { unlink(path) }
+    }
+
     /// An id, the start of one, or "last": the newest conversation with logged turns that is not `excluding`
     /// (the caller's own session), or failing that the newest with any lookups.
     public func load(_ id: String, excluding: String? = nil) -> SessionRecord? {

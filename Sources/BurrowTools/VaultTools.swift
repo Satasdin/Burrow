@@ -98,6 +98,8 @@ public final class VaultTools {
     /// True when this connection's session was started by it. A session carried on from an earlier connection of the same
     /// program is the conversation the user means, so it stays visible to list and resume.
     public var connectionIsNew = true
+    /// The token of this connection's hold on its session (D-73), released when the connection ends.
+    public var connectionHold: String?
     var hiddenSession: String? { connectionIsNew ? connection?.id : nil }
     /// The program on the other end, as it named itself.
     public var connectionClient: String?

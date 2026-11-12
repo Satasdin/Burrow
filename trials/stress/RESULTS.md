@@ -17,7 +17,7 @@ reference only; phone-and-amount matching and closest-in-time matching are rejec
 
 ## Found and not yet fixed
 
-1. **Concurrent sessions are merged.** Two programs with the same client name that connect within 30 minutes join one saved session. Run at the same time (4b), they overwrite each other's trail, and the one handoff mixes both: "1 lookup and keeping 3 commits. Last: luggage bags charge extra", which carries branch `luggage` work onto `main`. Proposed fix: only rejoin a session whose connection has closed.
+1. **Concurrent sessions are merged.** *Fixed in D-73 (13 November); see 4b run 4.* Two programs with the same client name that connect within 30 minutes join one saved session. Run at the same time (4b), they overwrite each other's trail, and the one handoff mixes both: "1 lookup and keeping 3 commits. Last: luggage bags charge extra", which carries branch `luggage` work onto `main`. Proposed fix: only rejoin a session whose connection has closed.
 2. **A handoff cites whatever a stray search returned.** Claude's search for "task-04" returned `Photos/ask-sum.jpg` and `Project/Defence plan.md`, and the handoff cites them as files in play.
 3. **A decision loses its reasons.** Session 1's decision kept "Easter Monday, 31 tickets" but not *why* phone matching fails (conductors pay for a whole group from one phone). In 3 of the 15 runs of workflows 2 and 3 (control 2, note 3, person 3) Claude added "the payment must come from the ticket's phone" as a safeguard and failed the group-payment test; none of the 8 other Claude session-2 runs today did.
 
@@ -57,6 +57,7 @@ A did session 2 on `main` while B added the luggage charge with its decision on 
 | 1 | 36 | 14/14, 2/2 | 4/4 | yes | none (D-72 bug) |
 | 2 | 41 | 14/14, 2/2 | 4/4 | yes | none (D-72 bug) |
 | 3, after D-72 | | 16/16, 2/2 | 4/4 | no: the merged handoff carried it (finding 1) | 1, mixing both agents |
+| 4, after D-73 | | 14/14, 2/2 | 4/4 | yes | 2, one per agent, each in its own session, no stray files |
 
 ## 1. A relay across three models and three programs
 

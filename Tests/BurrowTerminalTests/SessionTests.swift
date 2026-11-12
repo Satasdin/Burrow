@@ -74,6 +74,8 @@ final class ConnectionSessionTests: XCTestCase {
         let (first, firstTools) = await connect("opencode")
         _ = await first.handle(#"{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"vault_search","arguments":{"query":"retry a failed charge"}}}"#)
         let id = try XCTUnwrap(firstTools.connection?.id)
+        // A one-shot run closes before the next one starts; while it is open, its session is its own (D-73).
+        await first.serve(readLine: { nil }, write: { _ in })
 
         let (_, againTools) = await connect("opencode")
         XCTAssertEqual(againTools.connection?.id, id, "the same program reconnecting carries on its session")
@@ -91,15 +93,16 @@ final class CarriedSessionTests: XCTestCase {
         let fixture = try VaultFixture()
         let vault = try await fixture.opened()
         let answerer = FakeAnswerer()
-        func connect() async -> VaultTools {
+        func connect() async -> (BurrowMCP.MCPServer, VaultTools) {
             let tools = VaultTools(vault: vault, embedder: nil) { _ in answerer }
             let server = BurrowMCP.MCPServer(tools: tools, keepsSessions: true)
             _ = await server.handle(#"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","clientInfo":{"name":"opencode","version":"1"}}}"#)
-            return tools
+            return (server, tools)
         }
-        let first = await connect()
+        let (firstServer, first) = await connect()
         _ = try await first.call("vault_session_log", arguments: ["session": "new", "question": "How many retries?", "answer": "Three."])
-        let again = await connect()
+        await firstServer.serve(readLine: { nil }, write: { _ in })
+        let (_, again) = await connect()
         XCTAssertFalse(again.connectionIsNew)
         let resumed = try await again.call("vault_session_resume", arguments: ["session": "last"])
         XCTAssertTrue(resumed.text.contains("Three."), "the carried-on conversation is not hidden from the program that carried it on")

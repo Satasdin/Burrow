@@ -1,0 +1,46 @@
+embedded 2 of 2   
+{
+ "run": "1",
+ "seconds": 46,
+ "A": "task=14/14 hidden=2/2",
+ "B_luggage_tests": "4/4",
+ "branches": [
+  "luggage",
+  "main"
+ ],
+ "ledger": [
+  [
+   "luggage",
+   "decision",
+   "Luggage charge: the first bag is free, and each bag after it costs Settings.luggage_extra_"
+  ],
+  [
+   "main",
+   "decision",
+   "A statement line is matched to a ticket by its account reference only; a line whose refere"
+  ],
+  [
+   "main",
+   "handoff",
+   "claude-code stopped after keeping 1 commit. Last: kept decision 20261112-200202-b674\n\nKept"
+  ],
+  [
+   "main",
+   "handoff",
+   "claude-code stopped after 1 lookup and keeping 1 commit. Last: luggage bags charge fare ex"
+  ],
+  [
+   "main",
+   "decision",
+   "Statement references are now matched after normalising (uppercase, drop spaces/punctuation"
+  ],
+  [
+   "main",
+   "handoff",
+   "claude-code stopped after 1 lookup and keeping 1 commit. Last: reconcile statement referen"
+  ]
+ ],
+ "handoffs_with_stray_files": [],
+ "luggage_on_main": false,
+ "resume_luggage_has_it": true
+}
