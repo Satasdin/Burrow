@@ -164,13 +164,13 @@ private func makeLedger() -> (Ledger, FakeFiles, URL) {
     @Test func aBranchKeepsItsTipSoACommitNeedNotReadTheLedger() throws {
         // Stress workflow 4a: with 1,600 commits a commit had slowed from 15 ms to 168 ms finding its parent (D-78).
         let (ledger, _, folder) = makeLedger()
-        let first = try ledger.commit(.fact, "First", author: "a")
+        let first = try ledger.commit(.fact, "First", author: "a", at: Date(timeIntervalSince1970: 1000))
         let tip = folder.appendingPathComponent("main/.tip")
         #expect(try String(contentsOf: tip, encoding: .utf8) == first.id)
-        let second = try ledger.commit(.fact, "Second", author: "a")
+        let second = try ledger.commit(.fact, "Second", author: "a", at: Date(timeIntervalSince1970: 2000))
         #expect(second.parent == first.id)
         try "20990101-000000-gone".write(to: tip, atomically: true, encoding: .utf8)
-        let third = try ledger.commit(.fact, "Third", author: "a")
+        let third = try ledger.commit(.fact, "Third", author: "a", at: Date(timeIntervalSince1970: 3000))
         #expect(third.parent == second.id)
         #expect(ledger.all().count == 3)
     }
