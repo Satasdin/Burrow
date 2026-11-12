@@ -50,6 +50,10 @@ import Testing
         let again = try Hooks.checkpoint(ledger: ledger, place: place, transcript: transcript, session: "abc", event: "SessionEnd")
         #expect(again.map(\.kind) == [.handoff])
         #expect(try Hooks.checkpoint(ledger: ledger, place: place, transcript: Hooks.Transcript(), session: "x", event: "SessionEnd").isEmpty)
+        // When Burrow's MCP connection has just written this session's handoff as it closed, the end hook does not write a second (D-70).
+        try ledger.commit(.handoff, "claude-code stopped after 1 lookup. Last: shelf", author: "claude-opus-5-5", client: "claude-code", session: "20261112-184151-002a")
+        #expect(try Hooks.checkpoint(ledger: ledger, place: place, transcript: transcript, session: "abc", event: "SessionEnd").isEmpty)
+        #expect(try Hooks.checkpoint(ledger: ledger, place: place, transcript: transcript, session: "abc", event: "PreCompact").map(\.kind) == [.handoff])
         let start = Hooks.sessionStart(ledger: ledger, place: place)
         #expect(start.contains("\"hookEventName\":\"SessionStart\""))
         #expect(start.contains("Show it in the app"))

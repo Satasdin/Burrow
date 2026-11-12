@@ -113,6 +113,33 @@ private func makeLedger() -> (Ledger, FakeFiles, URL) {
         #expect(made.body.contains("Turn 1. Asked: How long to report a breach? Answered (qwen3:4b): 72 hours"))
     }
 
+    @Test func aSessionThatOnlyResumedAndKeptADecisionStillLeavesAHandoff() throws {
+        // Clip 08c, 12 November: Claude Code called burrow_resume and burrow_commit, searched nothing, and left no handoff (D-70).
+        let (ledger, _, _) = makeLedger()
+        var record = SessionRecord(id: "s4")
+        record.client = "claude-code"
+        record.trail = [TrailStep(tool: "burrow_resume", asked: "", files: []), TrailStep(tool: "burrow_commit", asked: "", files: [])]
+        #expect(try ledger.handoff(from: record) == nil)
+        let kept = try ledger.commit(.decision, "Match by the reference only, ignoring case and punctuation", files: ["Sources/Shelf.swift"],
+                                     author: "claude-opus-5-5", client: "claude-code", session: "s4")
+        let made = try #require(try ledger.handoff(from: record))
+        #expect(made.message == "claude-code stopped after keeping 1 commit. Last: kept decision \(kept.id)")
+        #expect(made.body.contains("Kept decision \(kept.id): Match by the reference only"))
+        #expect(made.cites.keys.sorted() == ["Sources/Shelf.swift"])
+    }
+
+    @Test func theConnectionsHandoffStandsAsideForClaudeCodesHook() throws {
+        let (ledger, _, _) = makeLedger()
+        var record = SessionRecord(id: "s5")
+        record.client = "claude-code"
+        record.trail = [TrailStep(tool: "vault_search", asked: "shelf limit", files: ["Notes/plan.md:1-2"])]
+        try ledger.commit(.handoff, "Claude Code stopped when the session ended. Last asked: shelf limit", author: "claude-opus-5-5",
+                          client: "claude-code", session: "claude-abc")
+        #expect(try ledger.handoff(from: record) == nil)
+        record.client = "opencode"
+        #expect(try ledger.handoff(from: record) != nil)
+    }
+
     @Test func notesMatchByWordsAndSkipWrongOrStaleOnes() throws {
         let (ledger, files, _) = makeLedger()
         let good = try ledger.commit(.fact, "The shelf limit is twelve gigabytes", files: ["Sources/Shelf.swift"], author: "a")

@@ -45,6 +45,9 @@ public final class MCPServer {
     /// The tools a client is shown. Every tool still answers when called by name, so old setups keep working.
     /// `burrow mcp` shows the four-tool door by default; a server made in code keeps the classic list unless told otherwise.
     public var toolSet = ToolSet.classic
+    /// When on, SIGINT and SIGTERM end the connection the way closed input does, so what runs at the end still runs.
+    /// Claude Code stops its MCP servers with SIGINT rather than closing their input (D-70). `burrow mcp` turns this on.
+    public var endsOnSignals = false
 
     public init(tools: VaultTools, keepsSessions: Bool = false, log: @escaping (String) -> Void = { _ in }) {
         self.tools = tools
@@ -69,7 +72,17 @@ public final class MCPServer {
 
     /// Serves until the input ends. Protocol messages are answered at once, and tool calls run one at a time, because a vault can't be shared between threads.
     public func serve(readLine: @escaping () -> String?, write: @escaping (String) -> Void) async {
+        var stops: [DispatchSourceSignal] = []
         let lines = AsyncStream<String> { continuation in
+            if endsOnSignals {
+                for number in [SIGINT, SIGTERM] {
+                    signal(number, SIG_IGN)
+                    let stop = DispatchSource.makeSignalSource(signal: number, queue: .global())
+                    stop.setEventHandler { continuation.finish() }
+                    stop.resume()
+                    stops.append(stop)
+                }
+            }
             Thread.detachNewThread {
                 while let line = readLine() { continuation.yield(line) }
                 continuation.finish()
@@ -89,6 +102,7 @@ public final class MCPServer {
             }
         }
         await last?.value
+        stops.forEach { $0.cancel() }
         if keepsSessions, let line = tools.connectionEnded() { log(line) }
     }
 

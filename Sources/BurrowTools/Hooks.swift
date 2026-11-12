@@ -114,6 +114,9 @@ public enum Hooks {
                                               client: "claude-code", branch: place.branch, session: "claude-" + session))
             }
         }
+        // At the end, Burrow's MCP connection may already have written this session's handoff as it closed (D-70); one is enough.
+        let closing = ledger.log(limit: 20).first { $0.kind == .handoff && $0.client == "claude-code" && !($0.session ?? "").hasPrefix("claude-") }
+        if event != "PreCompact", let closing, Date().timeIntervalSince(closing.at) < 120 { return made }
         let when = event == "PreCompact" ? "before compacting" : "when the session ended"
         let last = transcript.asked.last.map { String($0.prefix(220)) } ?? "editing"
         var body = ["Asked: " + transcript.asked.suffix(4).map { String($0.prefix(160)) }.joined(separator: " | ")]

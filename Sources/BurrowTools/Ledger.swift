@@ -333,13 +333,24 @@ public struct Ledger: Sendable {
     @discardableResult
     public func handoff(from record: SessionRecord, branch: String? = nil, author: String? = nil) throws -> LedgerCommit? {
         let trail = (record.trail ?? []).filter { !$0.asked.isEmpty }
-        guard !trail.isEmpty || !record.turns.isEmpty else { return nil }
+        let everything = all()
+        // What the session kept counts as work too: a model that resumed and kept a decision, and never searched, still stopped somewhere (D-70).
+        let kept = everything.filter { $0.session == record.id && $0.kind != .handoff }   // newest first
+        guard !trail.isEmpty || !record.turns.isEmpty || !kept.isEmpty else { return nil }
         // One handoff per conversation: a second stop updates nothing that is already written.
         // Commit times are kept to the second, so a handoff counts as current up to a second before the conversation's last change.
-        if all().contains(where: { $0.session == record.id && $0.kind == .handoff && $0.at.addingTimeInterval(1) >= record.updated }) { return nil }
+        if everything.contains(where: { $0.session == record.id && $0.kind == .handoff && $0.at.addingTimeInterval(1) >= record.updated }) { return nil }
+        // Claude Code's own hook writes its handoffs (sessions named "claude-..."); this one is the fallback for programs without hooks,
+        // so it stands aside when the hook has already written one during this connection (D-70).
+        if let client = record.client, everything.contains(where: { $0.kind == .handoff && $0.client == client
+            && ($0.session ?? "").hasPrefix("claude-") && $0.at.addingTimeInterval(1) >= record.started }) { return nil }
         let questions = record.turns.map(\.question) + trail.filter { $0.tool != "vault_remember" }.map(\.asked)
-        let last = questions.last.map { cut($0, 200) } ?? "a lookup"
-        let message = "\(record.client ?? "A program") stopped after \(trail.count) lookup\(trail.count == 1 ? "" : "s")\(record.turns.isEmpty ? "" : " and \(record.turns.count) answered turn\(record.turns.count == 1 ? "" : "s")"). Last: \(last)"
+        let last = questions.last.map { cut($0, 200) } ?? kept.first.map { "kept \($0.kind.rawValue) \($0.id)" } ?? "a lookup"
+        var did: [String] = []
+        if !trail.isEmpty { did.append("\(trail.count) lookup\(trail.count == 1 ? "" : "s")") }
+        if !record.turns.isEmpty { did.append("\(record.turns.count) answered turn\(record.turns.count == 1 ? "" : "s")") }
+        if !kept.isEmpty { did.append("keeping \(kept.count) commit\(kept.count == 1 ? "" : "s")") }
+        let message = "\(record.client ?? "A program") stopped after \(did.joined(separator: " and ")). Last: \(last)"
         var body: [String] = []
         // What was concluded matters as much as what was asked: each answered turn keeps its question and the start of its answer.
         for (number, turn) in record.turns.enumerated().suffix(5) {
@@ -347,8 +358,10 @@ public struct Ledger: Sendable {
         }
         let looked = trail.suffix(8).map { cut($0.asked, 100) }
         if !looked.isEmpty { body.append("Looked up: " + looked.joined(separator: "; ")) }
+        for commit in kept.prefix(4).reversed() { body.append("Kept \(commit.kind.rawValue) \(commit.id): \(cut(commit.message, 160))") }
         var files: [String] = []
         for place in record.filesInPlay { let file = place.components(separatedBy: ":").first ?? place; if !files.contains(file) { files.append(file) } }
+        for file in kept.flatMap({ $0.cites.keys.sorted() }) where !files.contains(file) { files.append(file) }
         return try commit(.handoff, message, body: body.joined(separator: "\n"), files: Array(files.prefix(12)),
                           author: author ?? record.models.first ?? record.client ?? "unknown", client: record.client,
                           branch: branch, session: record.id)

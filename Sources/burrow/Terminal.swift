@@ -77,6 +77,7 @@ func runTerminalCommand(_ arguments: [String]) async throws -> Bool {
         let server = MCPServer(tools: tools, keepsSessions: !options.flags.contains("--no-sessions"), log: logToStandardError)
         guard let set = ToolSet(rawValue: options.values["--tools"] ?? "door") else { throw Failure("--tools takes door, full or classic") }
         server.toolSet = set
+        server.endsOnSignals = true
         // Baseline arms of Evaluation 3 only: the search without the trust line, or without Ledger notes.
         if options.flags.contains("--no-trust") { tools.trustLinesOn = false }
         if options.flags.contains("--no-ledger-notes") { tools.ledgerNotesOn = false }
