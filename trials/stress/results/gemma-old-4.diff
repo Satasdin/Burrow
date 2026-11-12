@@ -1,0 +1,67 @@
+diff --git a/matatu/payments/matcher.py b/matatu/payments/matcher.py
+index dd05b1e..91c654d 100644
+--- a/matatu/payments/matcher.py
++++ b/matatu/payments/matcher.py
+@@ -6,4 +6,11 @@ from ..models import StatementLine, Ticket
+ 
+ 
+ def ticket_for_line(store, line: StatementLine) -> Optional[Ticket]:
+-    return store.tickets.get(line.account_ref)
++    ticket = store.tickets.get(line.account_ref)
++    if ticket:
++        return ticket
++    
++    for ticket in store.tickets.values():
++        if ticket.phone == line.phone and ticket.fare_kes == line.amount_kes:
++            return ticket
++    return None
+diff --git a/matatu/payments/reconcile.py b/matatu/payments/reconcile.py
+index 449fbbd..583354d 100644
+--- a/matatu/payments/reconcile.py
++++ b/matatu/payments/reconcile.py
+@@ -33,7 +33,8 @@ def reconcile_statement(store, lines: Iterable[StatementLine], clock) -> Reconci
+         store.seen_codes.add(line.code)
+         ticket = ticket_for_line(store, line)
+         if ticket is None:
+-            # Matched by account reference only; no phone/amount fallback (see Ledger).
++            # No matching ticket found (not by reference, phone, or amount).
++
+             add_to_suspense(store, line, "unknown reference", clock)
+             result.suspended += 1
+         elif ticket.status != TICKET_ISSUED:
+diff --git a/tests/test_reconcile_unknown.py b/tests/test_reconcile_unknown.py
+index e302566..36a8bc2 100644
+--- a/tests/test_reconcile_unknown.py
++++ b/tests/test_reconcile_unknown.py
+@@ -7,16 +7,13 @@ from matatu.payments.suspense import pending_suspense
+ from matatu.store.memory import InMemoryStore
+ from matatu.store.repositories import save_ticket
+ 
+-
+ def ticket(identifier, phone, fare=80):
+     return Ticket(id=identifier, trip_id="TR1", route_id="46", vehicle_id="V1", from_stage="KAW", to_stage="CBD",
+                   phone=phone, fare_kes=fare, issued_at=1000)
+ 
+-
+ def line(code, phone, amount, reference):
+     return StatementLine(code=code, phone=phone, amount_kes=amount, account_ref=reference, at=2000)
+ 
+-
+ class UnknownReferences(unittest.TestCase):
+     def setUp(self):
+         self.store = InMemoryStore()
+@@ -40,3 +37,14 @@ class UnknownReferences(unittest.TestCase):
+     def test_wrong_amount_still_goes_to_suspense(self):
+         reconcile_statement(self.store, [line("QA3", "+254700000001", 70, "TKT-2345AB")], FixedClock())
+         self.assertEqual(pending_suspense(self.store)[0].reason, "wrong amount")
++
++    def test_matching_phone_and_amount_with_unknown_reference(self):
++        # Line has unknown reference but matching phone and amount
++        lines = [line("QA4", "+254700000001", 80, "UNKNOWN")]
++        result = reconcile_statement(self.store, lines, FixedClock())
++        self.assertEqual(result.matched, 1)
++        self.assertEqual(self.store.tickets["TKT-2345AB"].status, TICKET_PAID)
++        self.assertEqual(self.store.tickets["TKT-2345AB"].payment_code, "QA4")
++
++if __name__ == "__main__":
++    unittest.main()

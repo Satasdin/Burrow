@@ -1,0 +1,25 @@
+diff --git a/matatu/payments/reconcile.py b/matatu/payments/reconcile.py
+index 449fbbd..c60c503 100644
+--- a/matatu/payments/reconcile.py
++++ b/matatu/payments/reconcile.py
+@@ -33,10 +33,16 @@ def reconcile_statement(store, lines: Iterable[StatementLine], clock) -> Reconci
+         store.seen_codes.add(line.code)
+         ticket = ticket_for_line(store, line)
+         if ticket is None:
+-            # Matched by account reference only; no phone/amount fallback (see Ledger).
+-            add_to_suspense(store, line, "unknown reference", clock)
+-            result.suspended += 1
+-        elif ticket.status != TICKET_ISSUED:
++            # Try fallback for unknown reference: same amount and phone
++            ticket = next((t for t in store.tickets.values()
++                           if t.fare_kes == line.amount_kes
++                           and t.phone == line.phone
++                           and t.status == TICKET_ISSUED), None)
++            if ticket is None:
++                add_to_suspense(store, line, "unknown reference", clock)
++                result.suspended += 1
++                continue
++        if ticket.status != TICKET_ISSUED:
+             add_to_suspense(store, line, "ticket not open", clock)
+             result.suspended += 1
+         elif line.amount_kes != ticket.fare_kes:

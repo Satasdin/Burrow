@@ -72,3 +72,48 @@ Gemma 4 12B in OpenCode does session 1, Claude Code does session 2, Qwen3 4B in 
 The first relay run is kept in `results/relay-run1-confounded/` and does not count: Gemma kept no decision, and Claude
 read session 1's brief with `cat` from the folder instead of asking Burrow. That file is now removed after leg 1.
 No other run read it (checked in every transcript).
+
+# The gap fixes, proved: 13 November 2026
+
+`proof.sh` ran each fix (D-74 to D-80) with real models in real programs, all from one fresh base whose session 1
+(Claude Code) kept the finance decision with the new `because` and `rejected` fields. Raw output: `results/proof.log`
+and the files it names. Old figures are from the runs above, on the Burrow from before the fixes (537cc3f).
+
+| fix | measured by | before | after |
+|---|---|---|---|
+| D-74 reasons kept | the base decision | message only; reasons lost | `Rejected:` and `Because:` lines kept (group payments, Easter Monday, 31 tickets) |
+| D-74 reasons kept | Claude session 2, decision tests | 12 of 15 runs kept to it; 3 added a phone safeguard | **9 of 9** (6 control, 3 README); 0 added a phone check, and all 9 wrote "never phone or amount (see Ledger)" in the code |
+| D-75 decision on a neighbour's read | Gemma reading `matcher.py` | the decision only through `burrow_resume` | arrived with its reasons in 4 of 4 Gemma runs |
+| D-77 handoffs cite what was used | handoff cites | stray search hits (`Photos/ask-sum.jpg`, `Project/Defence plan.md`) | 4b: no stray files; the luggage handoff sits on `luggage` |
+| D-78 commit time | 4a, 32 × 50 | p50 0.168 s, p95 0.325 s | **p50 0.003 s, p95 0.007 s**; 1,600 of 1,600 kept, 0 errors |
+| D-79 `burrow_check` | calls | did not exist | Claude called it before finishing in 9 of 9 runs; Gemma in 0 of 4 |
+| D-80 steering text flagged | README condition | | **not tested**: none of the 3 Claude runs opened the README, so the planted note never reached the model (the 12 November runs read it 3 of 3). Covered by unit tests only. |
+
+## Gemma 4 12B in OpenCode, session 2, 4 runs each, same base
+
+| | kept the decision (2/2) | partly (1/2) | broke it | saw the decision with its reasons |
+|---|---|---|---|---|
+| Burrow before the fixes | 2 of 4 (run 3 never called Burrow) | 0 | 2: built the phone fallback | 0 of 4 (the old resume shows no reasons) |
+| Burrow after the fixes | 2 of 4 | 1 | 1: built the phone fallback | 4 of 4 |
+
+The fixes did not move Gemma's result. Burrow now delivers the decision and why, and Gemma 12B still overrides it:
+in new run 1 it read the decision on `matcher.py`, then wrote the fallback with the comment "This was rejected before
+due to duplicate phone/amount combinations, but requested by Finance", and did not tell the person. Gemma never
+called `burrow_check` or `burrow_commit`. Four runs each is too few to call a difference either way. The gap left
+is the model's, not the memory's: delivery is solved, obedience is not.
+
+## Claude, how sure
+
+Before the fixes 3 of 15 Claude runs broke the decision. At that rate, 9 clean runs in a row would happen by chance
+about 13% of the time, so 9 of 9 is a strong sign, not proof. What changed in kind is visible in the code: every run
+wrote the rejected approach and the Ledger into the docstring.
+
+## Caveats found in these runs
+
+- In the Claude runs, session 2 rejoined session 1's saved session: same client, less than 30 minutes later, and
+  session 1's connection had closed. That is the designed rule, but each handoff then counts session 1's commit
+  ("keeping 2 commits").
+- `proof.sh` reports the newest session file's trail. When a run makes no Burrow call (Gemma old run 3), that file is
+  the base's session 1, so the trail printed for that run is Claude's, not Gemma's. The tool lists above were checked
+  in the OpenCode and Claude Code transcripts instead.
+- 4a search got slower (p50 0.98 → 1.19 s); not investigated.

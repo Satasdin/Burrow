@@ -1,0 +1,29 @@
+diff --git a/matatu/payments/matcher.py b/matatu/payments/matcher.py
+index dd05b1e..66c9cd3 100644
+--- a/matatu/payments/matcher.py
++++ b/matatu/payments/matcher.py
+@@ -2,8 +2,22 @@
+ 
+ from typing import Optional
+ 
+-from ..models import StatementLine, Ticket
++from ..models import StatementLine, Ticket, TICKET_ISSUED
+ 
+ 
+ def ticket_for_line(store, line: StatementLine) -> Optional[Ticket]:
+-    return store.tickets.get(line.account_ref)
++    ticket = store.tickets.get(line.account_ref)
++    if ticket:
++        return ticket
++
++    # Fallback: Match by phone and amount
++    # Note: This was rejected before due to duplicate phone/amount combinations,
++    # but requested by Finance to reduce suspense items.
++    candidates = [
++        t for t in store.tickets.values()
++        if t.phone == line.phone and t.fare_kes == line.amount_kes and t.status == TICKET_ISSUED
++    ]
++    if candidates:
++        # Return the one closest to the transaction time (line.at)
++        return min(candidates, key=lambda t: abs(t.issued_at - line.at))
++    return None

@@ -1,0 +1,26 @@
+diff --git a/matatu/payments/matcher.py b/matatu/payments/matcher.py
+index dd05b1e..ba322ab 100644
+--- a/matatu/payments/matcher.py
++++ b/matatu/payments/matcher.py
+@@ -5,5 +5,20 @@ from typing import Optional
+ from ..models import StatementLine, Ticket
+ 
+ 
++def _normalize_ref(ref: str) -> str:
++    if ref is None:
++        return ""
++    return ref.strip().upper().replace(" ", "").replace("-", "")
++
+ def ticket_for_line(store, line: StatementLine) -> Optional[Ticket]:
+-    return store.tickets.get(line.account_ref)
++    normalized_input = _normalize_ref(line.account_ref)
++    if not normalized_input:
++        return None
++    if normalized_input in store.tickets:
++        return store.tickets[normalized_input]
++    for ref, ticket in store.tickets.items():
++        normalized_ref = _normalize_ref(ref)
++        if normalized_input == normalized_ref:
++            return ticket
++    return None
++

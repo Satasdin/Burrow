@@ -1,0 +1,17 @@
+diff --git a/matatu/payments/matcher.py b/matatu/payments/matcher.py
+index dd05b1e..0280067 100644
+--- a/matatu/payments/matcher.py
++++ b/matatu/payments/matcher.py
+@@ -6,4 +6,11 @@ from ..models import StatementLine, Ticket
+ 
+ 
+ def ticket_for_line(store, line: StatementLine) -> Optional[Ticket]:
+-    return store.tickets.get(line.account_ref)
++    if line.account_ref in store.tickets:
++        return store.tickets[line.account_ref]
++    
++    normalized_ref = line.account_ref.lower().replace(" ", "").replace("-", "")
++    for ticket_id, ticket in store.tickets.items():
++        if ticket_id.lower().replace(" ", "").replace("-", "") == normalized_ref:
++            return ticket
++    return None
