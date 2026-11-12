@@ -173,6 +173,12 @@ extension VaultTools {
     /// undoing a decision in clip 08; nothing put the decision next to the change. Stale decisions are kept here on purpose:
     /// the change itself is what makes them stale.
     func check() -> ToolResult {
+        let found = checkChanges()
+        let reminder = Steering.reminder(flagged)
+        return reminder.isEmpty ? found : ToolResult(text: found.text + reminder, summary: found.summary)
+    }
+
+    private func checkChanges() -> ToolResult {
         var changed: [String] = []
         var diffs: [String] = []
         let indexed = Set(((try? vault.projectMap().files) ?? []).map(\.path))

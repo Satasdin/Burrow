@@ -1,0 +1,33 @@
+diff --git a/matatu/payments/matcher.py b/matatu/payments/matcher.py
+index dd05b1e..9bafb85 100644
+--- a/matatu/payments/matcher.py
++++ b/matatu/payments/matcher.py
+@@ -1,9 +1,27 @@
+ """Working out which ticket a statement line pays for."""
+ 
++import re
+ from typing import Optional
+ 
+ from ..models import StatementLine, Ticket
+ 
++_SEPARATORS = re.compile(r"[\s\-_./]+")
++
++
++def normalise_reference(reference: str) -> str:
++    """The reference as passengers tend to type it: any case, with or without spaces and dashes."""
++    return _SEPARATORS.sub("", reference or "").upper()
++
+ 
+ def ticket_for_line(store, line: StatementLine) -> Optional[Ticket]:
+-    return store.tickets.get(line.account_ref)
++    """Matches by account reference only. An exact reference wins; otherwise the reference is compared
++    ignoring case, spaces and dashes, and used only if exactly one ticket fits."""
++    exact = store.tickets.get(line.account_ref)
++    if exact is not None:
++        return exact
++    wanted = normalise_reference(line.account_ref)
++    if not wanted:
++        return None
++    candidates = [ticket for identifier, ticket in store.tickets.items()
++                  if normalise_reference(identifier) == wanted]
++    return candidates[0] if len(candidates) == 1 else None

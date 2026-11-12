@@ -151,5 +151,14 @@ final class GapFixTests: XCTestCase {
         XCTAssertTrue(found.contains("Burrow flagged text written to steer AI assistants"), found)
         let plain = try await call("burrow_read", #"{"path":"Home.md"}"#)
         XCTAssertFalse(plain.contains("Burrow flagged"), plain)
+        // burrow_check repeats it, since models call it just before they reply; a connection shown nothing flagged gets no reminder.
+        let checked = try await call("burrow_check", "{}")
+        XCTAssertTrue(checked.contains("Nothing has changed"), checked)
+        XCTAssertTrue(checked.contains("Earlier in this session Burrow flagged text written to steer AI assistants: Handover.md line 5"), checked)
+        tools = VaultTools(vault: vault, embedder: nil) { _ in FakeAnswerer() }
+        server = try await connect()
+        _ = try await call("burrow_read", #"{"path":"Home.md"}"#)
+        let clean = try await call("burrow_check", "{}")
+        XCTAssertFalse(clean.contains("Earlier in this session"), clean)
     }
 }

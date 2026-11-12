@@ -100,6 +100,9 @@ public final class VaultTools {
     public var connectionIsNew = true
     /// The token of this connection's hold on its session (D-73), released when the connection ends.
     public var connectionHold: String?
+    /// Lines flagged as written to steer an AI (D-80) in what this connection was shown, repeated by burrow_check, which
+    /// models call just before they reply, so the reminder to tell the person lands where the reply is written.
+    var flagged: [(path: String, line: Int)] = []
     var hiddenSession: String? { connectionIsNew ? connection?.id : nil }
     /// The program on the other end, as it named itself.
     public var connectionClient: String?
@@ -402,9 +405,14 @@ public final class VaultTools {
         let body = excerpts.map(ProjectContent.block).joined(separator: "\n\n")
         let trust = trustLine(found)
         let steering = excerpts.flatMap { piece in Steering.lines(in: piece.text, firstLine: piece.startLine).map { (path: piece.path, line: $0.line) } }
+        remember(steering)
         return ToolResult(text: "\(ProjectContent.notice)\n\(trust.isEmpty ? "" : trust + "\n")\(excerpts.count) excerpts for \"\(query)\"\(inFolder). \(found.how)\n\n\(body)\(ledgerNotes(for: query, shown: Set(excerpts.map(\.path))))\(Steering.notice(steering))",
                           sources: sources(found.retrieved),
                           summary: "\(excerpts.count) excerpts from \(found.retrieved.paths.count) files, \(found.retrieved.characters) characters")
+    }
+
+    private func remember(_ found: [(path: String, line: Int)]) {
+        for place in found where !flagged.contains(where: { $0.path == place.path && $0.line == place.line }) { flagged.append(place) }
     }
 
     private func read(_ given: ToolArguments) async throws -> ToolResult {
@@ -428,9 +436,11 @@ public final class VaultTools {
         let more = last < all.count ? " Continue with start_line \(last + 1)." : ""
         let isNote = (try? vault.projectMap().files.first { $0.path == path }?.isNote) ?? nil ?? false
         let body = ProjectContent.block(path: path, lines: "\(start)-\(last)", kind: isNote ? "note" : Extractor.handles(path) ? "document" : "code", why: nil, body: kept.joined(separator: "\n"))
+        let steering = Steering.lines(in: all[(start - 1)..<last].joined(separator: "\n"), firstLine: start).map { (path: path, line: $0.line) }
+        remember(steering)
         // A read carries the Ledger's notes on this file and its import neighbours, as a search does (D-75):
         // the file a model reads is often the one it is about to change.
-        return ToolResult(text: "\(ProjectContent.notice)\n\(path) has \(all.count) lines. Showing \(start) to \(last).\(more)\n\n\(body)\(ledgerNotes(for: "", shown: [path]))\(Steering.notice(Steering.lines(in: all[(start - 1)..<last].joined(separator: "\n"), firstLine: start).map { (path: path, line: $0.line) }))",
+        return ToolResult(text: "\(ProjectContent.notice)\n\(path) has \(all.count) lines. Showing \(start) to \(last).\(more)\n\n\(body)\(ledgerNotes(for: "", shown: [path]))\(Steering.notice(steering))",
                           sources: [ToolResult.Source(path: path, startLine: start, endLine: last, reason: "read")],
                           summary: "\(path) lines \(start) to \(last) of \(all.count)")
     }
