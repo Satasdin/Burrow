@@ -27,7 +27,7 @@ claude_run() {
 # unrestricted, as in clip 08. Its read tool refuses files outside the working folder.
 gemma_run() {
   (cd "$R/code" && OPENCODE_CONFIG="$R/code/opencode.json" PWD="$R/code" \
-     opencode run --standalone --auto --agent coder --format json "$1" > "$2" 2> "$2.err")
+     timeout 1800 opencode run --standalone --auto --agent coder --format json "$1" > "$2" 2> "$2.err")
 }
 
 # The task's tests and the given hidden tests, as "task=PASSED/RAN hidden=PASSED/RAN".
