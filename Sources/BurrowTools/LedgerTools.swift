@@ -156,12 +156,12 @@ extension VaultTools {
     /// The trust line every search starts with: how much the vault holds for this, and any correction on what it found.
     /// The thresholds are the engine's own (D-52), so the line and the engine's choice agree.
     /// Ledger notes that match the question, fenced as data, for the end of a search result. Empty when none match.
-    func ledgerNotes(for question: String) -> String {
+    func ledgerNotes(for question: String, shown files: Set<String> = []) -> String {
         guard ledgerNotesOn else { return "" }
-        let notes = ledger.notes(for: question)
+        let notes = ledger.notes(for: question, shown: files)
         guard !notes.isEmpty else { return "" }
         let lines = notes.map { "- [\($0.kind.rawValue)] \($0.message) (written by \($0.author)\($0.client.map { " in \($0)" } ?? ""); rests on \($0.cites.keys.sorted().prefix(3).joined(separator: ", ")))" }
-        return "\n\nNotes earlier sessions left in the Ledger that match this question. Check them against the excerpts above before relying on them:\n<ledger>\n" + Ledger.defanged(lines.joined(separator: "\n")) + "\n</ledger>"
+        return "\n\nNotes earlier sessions left in the Ledger that match this question or rest on these files. Check them against the excerpts above before relying on them:\n<ledger>\n" + Ledger.defanged(lines.joined(separator: "\n")) + "\n</ledger>"
     }
 
     func trustLine(_ found: Found) -> String {

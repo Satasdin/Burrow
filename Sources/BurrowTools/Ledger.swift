@@ -231,15 +231,19 @@ public struct Ledger: Sendable {
 
     /// Commits whose words match a question, best first: checked facts, decisions and corrections an earlier session
     /// left, so a later model finds them while searching. Wrong and stale commits are left out; so are handoffs and plans.
-    public func notes(for question: String, limit: Int = 3) -> [LedgerCommit] {
+    /// Notes for a search: those that rest on a file the search returned (D-69), then those that share words with the
+    /// question. Stale and reverted notes are left out.
+    public func notes(for question: String, shown files: Set<String> = [], limit: Int = 3) -> [LedgerCommit] {
         let words = Self.words(question)
-        guard !words.isEmpty else { return [] }
+        guard !words.isEmpty || !files.isEmpty else { return [] }
         let wrong = reverted()
         let scored = all().compactMap { commit -> (LedgerCommit, Int)? in
             guard [.fact, .decision, .correction].contains(commit.kind), !wrong.contains(commit.id), changed(commit).isEmpty else { return nil }
+            // A note on a file in front of the model comes with it, however the question was worded.
+            if !files.isDisjoint(with: commit.cites.keys) { return (commit, 1_000) }
             let shared = words.intersection(Self.words(commit.message + " " + commit.body)).count
             // At least two shared words, or one when the question is that short, so a lone common word does not match.
-            return shared >= min(2, words.count) ? (commit, shared) : nil
+            return !words.isEmpty && shared >= min(2, words.count) ? (commit, shared) : nil
         }
         return scored.sorted { $0.1 == $1.1 ? $0.0.at > $1.0.at : $0.1 > $1.1 }.prefix(limit).map(\.0)
     }

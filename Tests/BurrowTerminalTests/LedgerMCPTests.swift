@@ -63,6 +63,15 @@ final class LedgerMCPTests: XCTestCase {
         XCTAssertEqual(tools.ledger.log().first?.author, "qwen3-4b-instruct")
     }
 
+    func testANoteComesWithTheFileItRestsOnHoweverTheSearchIsWorded() async throws {
+        // In the 12 November rehearsal a fresh session searched "reconciliation suspense": one shared word, so the
+        // decision on the file it was shown did not come with it (D-69).
+        _ = try await call("burrow_commit", #"{"kind":"decision","message":"Zebras are counted by stripe alone","files":"Decisions/Retry.md"}"#)
+        let found = try await call("burrow_find", #"{"query":"retry a failed charge"}"#)
+        XCTAssertTrue(found.contains("Decisions/Retry.md"), found)
+        XCTAssertTrue(found.contains("Zebras are counted by stripe alone"), found)
+    }
+
     func testMatchingLedgerNotesComeWithSearchAndCanBeTurnedOff() async throws {
         _ = try await call("burrow_commit", #"{"kind":"fact","message":"A failed charge is retried three times before the order is cancelled","files":"Decisions/Retry.md","model":"claude-opus"}"#)
         let found = try await call("burrow_find", #"{"query":"how many times is a failed charge retried"}"#)
