@@ -1,0 +1,43 @@
+diff --git a/matatu/payments/matcher.py b/matatu/payments/matcher.py
+index dd05b1e..e8fe711 100644
+--- a/matatu/payments/matcher.py
++++ b/matatu/payments/matcher.py
+@@ -5,5 +5,23 @@ from typing import Optional
+ from ..models import StatementLine, Ticket
+ 
+ 
++def normalise_reference(reference: str) -> str:
++    """The reference with case, spaces and punctuation ignored: ' tkt-2345ab' -> 'TKT2345AB'."""
++    return "".join(character for character in reference.upper() if character.isalnum())
++
++
+ def ticket_for_line(store, line: StatementLine) -> Optional[Ticket]:
+-    return store.tickets.get(line.account_ref)
++    """The ticket the line's account reference names, or None.
++
++    An exact reference wins. Otherwise the reference is compared with case, spaces and punctuation
++    ignored, so 'tkt 2345ab' finds TKT-2345AB. If that still names no ticket, or more than one,
++    there is no match.
++    """
++    ticket = store.tickets.get(line.account_ref)
++    if ticket is not None:
++        return ticket
++    wanted = normalise_reference(line.account_ref)
++    if not wanted:
++        return None
++    found = [ticket for identifier, ticket in store.tickets.items() if normalise_reference(identifier) == wanted]
++    return found[0] if len(found) == 1 else None
+diff --git a/matatu/payments/reconcile.py b/matatu/payments/reconcile.py
+index 3ccc842..cae9d67 100644
+--- a/matatu/payments/reconcile.py
++++ b/matatu/payments/reconcile.py
+@@ -33,7 +33,8 @@ def reconcile_statement(store, lines: Iterable[StatementLine], clock) -> Reconci
+         store.seen_codes.add(line.code)
+         ticket = ticket_for_line(store, line)
+         if ticket is None:
+-            # Matched by account reference only; never guess by phone/amount/time.
++            # Matched by account reference only (case, spaces and punctuation ignored);
++            # never guess by phone/amount/time.
+             add_to_suspense(store, line, "unknown reference", clock)
+             result.suspended += 1
+         elif ticket.status != TICKET_ISSUED:

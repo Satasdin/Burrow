@@ -1,0 +1,58 @@
+diff --git a/matatu/payments/matcher.py b/matatu/payments/matcher.py
+index dd05b1e..f5e9240 100644
+--- a/matatu/payments/matcher.py
++++ b/matatu/payments/matcher.py
+@@ -2,8 +2,38 @@
+ 
+ from typing import Optional
+ 
+-from ..models import StatementLine, Ticket
++from ..models import TICKET_ISSUED, StatementLine, Ticket
++
++# Finance, 10 November: a line whose reference fits no ticket may go on the one open ticket with the same phone
++# and amount issued in the ten minutes before the payment.
++PHONE_MATCH_WINDOW_SECONDS = 600
++
++
++def normalise_reference(reference: str) -> str:
++    """A reference as passengers mistype it: case, spaces, dashes and other punctuation do not count."""
++    return "".join(character for character in reference.upper() if character.isalnum())
++
++
++def _by_typed_reference(store, line: StatementLine) -> Optional[Ticket]:
++    wanted = normalise_reference(line.account_ref)
++    if not wanted:
++        return None
++    found = [ticket for ticket in store.tickets.values() if normalise_reference(ticket.id) == wanted]
++    return found[0] if len(found) == 1 else None
++
++
++def _by_phone_and_amount(store, line: StatementLine) -> Optional[Ticket]:
++    found = [ticket for ticket in store.tickets.values()
++             if ticket.status == TICKET_ISSUED and ticket.phone == line.phone and ticket.fare_kes == line.amount_kes
++             and line.at - PHONE_MATCH_WINDOW_SECONDS <= ticket.issued_at <= line.at]
++    return found[0] if len(found) == 1 else None
+ 
+ 
+ def ticket_for_line(store, line: StatementLine) -> Optional[Ticket]:
+-    return store.tickets.get(line.account_ref)
++    """The exact reference first, then the reference as typed loosely, then the one fitting open ticket."""
++    ticket = store.tickets.get(line.account_ref)
++    if ticket is None:
++        ticket = _by_typed_reference(store, line)
++    if ticket is None:
++        ticket = _by_phone_and_amount(store, line)
++    return ticket
+diff --git a/matatu/payments/reconcile.py b/matatu/payments/reconcile.py
+index 3ccc842..5863a36 100644
+--- a/matatu/payments/reconcile.py
++++ b/matatu/payments/reconcile.py
+@@ -33,7 +33,7 @@ def reconcile_statement(store, lines: Iterable[StatementLine], clock) -> Reconci
+         store.seen_codes.add(line.code)
+         ticket = ticket_for_line(store, line)
+         if ticket is None:
+-            # Matched by account reference only; never guess by phone/amount/time.
++            # No reference fits, loosely typed or not, and no single open ticket fits by phone and amount.
+             add_to_suspense(store, line, "unknown reference", clock)
+             result.suspended += 1
+         elif ticket.status != TICKET_ISSUED:

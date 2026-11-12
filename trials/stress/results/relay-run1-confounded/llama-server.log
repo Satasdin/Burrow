@@ -1,0 +1,30 @@
+0.00.001.930 W server tools or MCP servers are enabled, using localhost as default CORS origin (change via --cors-origins)
+0.00.001.973 I srv  llama_server: initializing ...
+0.00.126.117 I cmn  common_param: common_params_print_info: verbosity = 3 (adjust with the `-lv N` CLI arg)
+0.00.149.012 I srv         start: MCP warmup: 'burrow' discovered 4 tools
+0.00.149.773 I srv         setup: Added 4 MCP tools
+0.00.149.778 W srv  server_setup: security: MCP servers (experimental) enabled - do not expose to untrusted environments
+0.00.151.680 I srv    load_model: loading model '/Users/p3wrky/.ollama/models/blobs/sha256-85e4a5b7b8ef0e48af0e8658f5aaab9c2324c76c1641493f4d1e25fce54b18b9'
+0.00.258.710 W load: control-looking token: 128247 '</s>' was not control-type; this is probably a bug in the model. its type will be overridden
+0.01.002.635 I cmn          init: llama threadpool init, n_threads = 5
+0.01.270.128 I srv    load_model: initializing, n_slots = 2, n_ctx_slot = 32768, kv_unified = 'false'
+0.01.278.682 I srv  server_run_i: model loaded
+0.01.278.687 I srv  server_on_li: listening on http://127.0.0.1:8080
+0.05.680.337 I slot get_availabl: id  0 | task -1 | selected slot by LRU, n_tokens = 0, t_last = -1
+0.05.680.472 I slot launch_slot_: id  0 | task 0 | processing task, is_child = 0
+0.06.681.741 I slot print_timing: id  0 | task 0 | prompt eval time =     623.37 ms /  1117 tokens (    0.56 ms per token,  1791.89 tokens per second)
+0.06.681.744 I slot print_timing: id  0 | task 0 |        eval time =     377.88 ms /    25 tokens (   15.75 ms per token,    63.51 tokens per second)
+0.06.681.744 I slot print_timing: id  0 | task 0 |       total time =    1001.25 ms /  1142 tokens
+0.06.681.745 I slot print_timing: id  0 | task 0 |    graphs reused =         24
+0.06.681.745 I slot print_timing: id  0 | task 0 |   graph reallocs =          0    /     0        (same size) / (changed size)
+0.06.681.825 I slot      release: id  0 | task 0 | stop processing: n_tokens = 1141, truncated = 0
+0.08.821.796 I slot get_availabl: id  0 | task -1 | selected slot by LCP similarity, f_sim_best = 0.722 (> 0.100 thold), f_keep = 1.000
+0.08.821.919 I slot launch_slot_: id  0 | task 28 | processing task, is_child = 0
+0.12.119.604 I slot print_timing: id  0 | task 28 | n_gen =    246, tg =  81.64 t/s, tg_3s =  81.98 t/s
+0.14.231.131 I slot print_timing: id  0 | task 28 | prompt eval time =     296.76 ms /   439 tokens (    0.68 ms per token,  1479.29 tokens per second)
+0.14.231.136 I slot print_timing: id  0 | task 28 |        eval time =    5112.43 ms /   417 tokens (   12.29 ms per token,    81.37 tokens per second)
+0.14.231.136 I slot print_timing: id  0 | task 28 |       total time =    5409.20 ms /   856 tokens
+0.14.231.137 I slot print_timing: id  0 | task 28 |    graphs reused =        438
+0.14.231.138 I slot print_timing: id  0 | task 28 |   graph reallocs =          0    /     0        (same size) / (changed size)
+0.14.231.224 I slot      release: id  0 | task 28 | stop processing: n_tokens = 1996, truncated = 0
+3.56.764.243 I srv    operator(): operator(): cleaning up before exit...

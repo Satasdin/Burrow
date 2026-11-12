@@ -1,0 +1,12 @@
+20261112-203420-2379  main  handoff  claude-code
+    claude-code stopped after 1 lookup and keeping 1 commit. Last: task-04
+    cites Photos/ask-sum.jpg, Project/Defence plan.md, Project/Sources/BurrowTUI/App.swift, Project/Sources/BurrowTrial/Runner.swift, Report/Proposal.pdf
+20261112-203414-66e6  main  decision  Claude Opus 5.5
+    Statement lines still match tickets by account reference only, but the comparison now ignores case, spaces and punctuation (letters and digits, upper-cased). An exact match is tried first. If more than one ticket has the same cleaned-up reference, the line goes to suspense. Phone number and amount are still never used to match.
+    cites matatu/matatu/payments/matcher.py, matatu/tests/test_matcher_normalised_refs.py
+20261112-203340-583c  main  handoff  opencode
+    opencode stopped after keeping 1 commit. Last: kept decision 20261112-203334-8992
+    cites matatu/matatu/payments/reconcile.py
+20261112-203334-8992  main  decision  Gemma 4 12B
+    A statement line is matched to a ticket by its account reference and nothing else. A line whose reference matches no ticket goes to a person through suspense. Rejected matching on phone number/amount or closest in time.
+    cites matatu/matatu/payments/reconcile.py

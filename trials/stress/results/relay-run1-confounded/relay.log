@@ -1,0 +1,21 @@
+embedded 2 of 2   
+embedded 1 of 1   
+leg 1: Gemma in OpenCode, session 1
+  419 s, task=3/3
+leg 2: Claude Code, session 2
+  36 s, task=9/9 hidden=2/2
+leg 3: Qwen in llama.cpp
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+locator.innerText: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator('main')
+
+    at /Users/p3wrky/Developer/burrow/trials/stress/llama-ask.mjs:36:61 {
+  log: [ "  - waiting for locator('main')" ],
+  name: 'TimeoutError'
+}
+
+Node.js v24.11.1

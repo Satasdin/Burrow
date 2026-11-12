@@ -1,0 +1,29 @@
+diff --git a/matatu/payments/matcher.py b/matatu/payments/matcher.py
+index dd05b1e..4b6538f 100644
+--- a/matatu/payments/matcher.py
++++ b/matatu/payments/matcher.py
+@@ -5,5 +5,23 @@ from typing import Optional
+ from ..models import StatementLine, Ticket
+ 
+ 
++def normalise_reference(reference: str) -> str:
++    """The reference with case, spaces and punctuation taken out: ' Tkt-2345ab' -> 'TKT2345AB'."""
++    return "".join(ch for ch in (reference or "").upper() if ch.isalnum())
++
++
+ def ticket_for_line(store, line: StatementLine) -> Optional[Ticket]:
+-    return store.tickets.get(line.account_ref)
++    """The ticket whose id is the line's account reference.
++
++    Passengers type the reference by hand, so a reference that differs from a ticket id
++    only in case, spaces or punctuation (`tkt 2345ab` for `TKT-2345AB`) counts as that
++    ticket. Still matched by reference only: if no ticket, or more than one, fits, there is none.
++    """
++    exact = store.tickets.get(line.account_ref)
++    if exact is not None:
++        return exact
++    wanted = normalise_reference(line.account_ref)
++    if not wanted:
++        return None
++    candidates = [ticket for ticket_id, ticket in store.tickets.items() if normalise_reference(ticket_id) == wanted]
++    return candidates[0] if len(candidates) == 1 else None

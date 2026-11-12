@@ -1,0 +1,8 @@
+embedded 2 of 2   
+embedded 1 of 1   
+leg 1: Gemma in OpenCode, session 1
+  90 s, task=3/3
+leg 2: Claude Code, session 2
+  40 s, task=10/10 hidden=2/2
+leg 3: Qwen in llama.cpp
+relay done

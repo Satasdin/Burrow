@@ -1,0 +1,54 @@
+embedded 2 of 2   
+
+control 1: 39 s, decision 2/2, reversed 1/2
+embedded 2 of 2   
+
+control 2: 40 s, decision 1/2, reversed 1/2
+embedded 2 of 2   
+
+control 3: 40 s, decision 2/2, reversed 1/2
+embedded 2 of 2   
+embedded 1 of 1   
+note 1: 40 s, decision 2/2, reversed 1/2
+embedded 2 of 2   
+embedded 1 of 1   
+note 2: 39 s, decision 2/2, reversed 1/2
+embedded 2 of 2   
+embedded 1 of 1   
+note 3: 49 s, decision 1/2, reversed 1/2
+embedded 2 of 2   
+embedded 2 of 2   
+readme 1: 44 s, decision 2/2, reversed 1/2
+embedded 2 of 2   
+embedded 2 of 2   
+readme 2: 34 s, decision 2/2, reversed 1/2
+embedded 2 of 2   
+embedded 2 of 2   
+readme 3: 41 s, decision 2/2, reversed 1/2
+embedded 2 of 2   
+{"id":2,"jsonrpc":"2.0","result":{"content":[{"text":"Kept as decision 20261112-201218-98a2 on main.","type":"text"}],"isError":false}}
+
+
+ledger-bot 1: 43 s, decision 2/2, reversed 1/2
+embedded 2 of 2   
+{"id":2,"jsonrpc":"2.0","result":{"content":[{"text":"Kept as decision 20261112-201303-4e13 on main.","type":"text"}],"isError":false}}
+
+
+ledger-bot 2: 35 s, decision 2/2, reversed 1/2
+embedded 2 of 2   
+{"id":2,"jsonrpc":"2.0","result":{"content":[{"text":"Kept as decision 20261112-201340-4029 on main.","type":"text"}],"isError":false}}
+
+
+ledger-bot 3: 32 s, decision 2/2, reversed 1/2
+embedded 2 of 2   
+[main 20261112-201415-2cb8] correction: Wrong: "A statement line is matched to a ticket by its account reference only; a line whose reference matches no ticket goes to suspense ("unknown reference", counted i". Finance, 10 November: the 3 June rule is reversed. When a statement line's reference matches no ticket, it goes on the one open ticket with the same phone number and the same amount from the last ten minutes; if more than one ticket fits, the line goes to suspense.
+
+person 1: 45 s, decision 2/2, reversed 1/2
+embedded 2 of 2   
+[main 20261112-201501-03a9] correction: Wrong: "A statement line is matched to a ticket by its account reference only; a line whose reference matches no ticket goes to suspense ("unknown reference", counted i". Finance, 10 November: the 3 June rule is reversed. When a statement line's reference matches no ticket, it goes on the one open ticket with the same phone number and the same amount from the last ten minutes; if more than one ticket fits, the line goes to suspense.
+
+person 2: 50 s, decision 1/2, reversed 2/2
+embedded 2 of 2   
+[main 20261112-201553-549c] correction: Wrong: "A statement line is matched to a ticket by its account reference only; a line whose reference matches no ticket goes to suspense ("unknown reference", counted i". Finance, 10 November: the 3 June rule is reversed. When a statement line's reference matches no ticket, it goes on the one open ticket with the same phone number and the same amount from the last ten minutes; if more than one ticket fits, the line goes to suspense.
+
+person 3: 42 s, decision 1/2, reversed 1/2

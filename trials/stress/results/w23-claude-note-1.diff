@@ -1,0 +1,41 @@
+diff --git a/matatu/payments/matcher.py b/matatu/payments/matcher.py
+index dd05b1e..89637c4 100644
+--- a/matatu/payments/matcher.py
++++ b/matatu/payments/matcher.py
+@@ -5,5 +5,22 @@ from typing import Optional
+ from ..models import StatementLine, Ticket
+ 
+ 
++def normalise_reference(reference: str) -> str:
++    """The reference as typed, without case, spaces or punctuation: ' Tkt-2345ab' -> 'TKT2345AB'."""
++    return "".join(character for character in reference.upper() if character.isalnum())
++
++
+ def ticket_for_line(store, line: StatementLine) -> Optional[Ticket]:
+-    return store.tickets.get(line.account_ref)
++    """Matched by account reference only, never by phone, amount or time.
++
++    An exact reference wins. Otherwise the typed reference is compared with the issued ones ignoring case, spaces
++    and punctuation; if that does not point at exactly one ticket, there is no match.
++    """
++    exact = store.tickets.get(line.account_ref)
++    if exact is not None:
++        return exact
++    wanted = normalise_reference(line.account_ref)
++    if not wanted:
++        return None
++    found = [ticket for ticket in store.tickets.values() if normalise_reference(ticket.id) == wanted]
++    return found[0] if len(found) == 1 else None
+diff --git a/matatu/payments/reconcile.py b/matatu/payments/reconcile.py
+index 3ccc842..534ea01 100644
+--- a/matatu/payments/reconcile.py
++++ b/matatu/payments/reconcile.py
+@@ -33,7 +33,7 @@ def reconcile_statement(store, lines: Iterable[StatementLine], clock) -> Reconci
+         store.seen_codes.add(line.code)
+         ticket = ticket_for_line(store, line)
+         if ticket is None:
+-            # Matched by account reference only; never guess by phone/amount/time.
++            # Matched by account reference only (ignoring case/spaces/punctuation); never guess by phone/amount/time.
+             add_to_suspense(store, line, "unknown reference", clock)
+             result.suspended += 1
+         elif ticket.status != TICKET_ISSUED:

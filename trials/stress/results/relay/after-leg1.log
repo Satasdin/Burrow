@@ -1,0 +1,6 @@
+20261112-203340-583c  main  handoff  opencode
+    opencode stopped after keeping 1 commit. Last: kept decision 20261112-203334-8992
+    cites matatu/matatu/payments/reconcile.py
+20261112-203334-8992  main  decision  Gemma 4 12B
+    A statement line is matched to a ticket by its account reference and nothing else. A line whose reference matches no ticket goes to a person through suspense. Rejected matching on phone number/amount or closest in time.
+    cites matatu/matatu/payments/reconcile.py

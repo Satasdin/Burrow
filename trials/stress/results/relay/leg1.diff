@@ -1,0 +1,15 @@
+diff --git a/matatu/payments/reconcile.py b/matatu/payments/reconcile.py
+index ee19ecd..ce4119a 100644
+--- a/matatu/payments/reconcile.py
++++ b/matatu/payments/reconcile.py
+@@ -34,7 +34,9 @@ def reconcile_statement(store, lines: Iterable[StatementLine], clock) -> Reconci
+         store.seen_codes.add(line.code)
+         ticket = ticket_for_line(store, line)
+         if ticket is None:
+-            raise NotFound("ticket", line.account_ref)
++            add_to_suspense(store, line, "unknown reference", clock)
++            result.suspended += 1
++            continue
+         if ticket.status != TICKET_ISSUED:
+             add_to_suspense(store, line, "ticket not open", clock)
+             result.suspended += 1

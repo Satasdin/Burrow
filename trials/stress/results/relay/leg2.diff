@@ -1,0 +1,34 @@
+diff --git a/matatu/payments/matcher.py b/matatu/payments/matcher.py
+index dd05b1e..0f17522 100644
+--- a/matatu/payments/matcher.py
++++ b/matatu/payments/matcher.py
+@@ -1,9 +1,27 @@
+-"""Working out which ticket a statement line pays for."""
++"""Working out which ticket a statement line pays for.
++
++A line is matched by its account reference and nothing else (not the phone number or the amount). Passengers type
++the reference by hand, so it is compared without regard to case, spaces or punctuation: `tkt 2345ab`, `TKT2345AB`
++and ` Tkt-2345AB` all name ticket `TKT-2345AB`.
++"""
+ 
+ from typing import Optional
+ 
+ from ..models import StatementLine, Ticket
+ 
+ 
++def normalise_reference(reference: str) -> str:
++    """The letters and digits of a reference, upper-cased."""
++    return "".join(character for character in reference.upper() if character.isalnum())
++
++
+ def ticket_for_line(store, line: StatementLine) -> Optional[Ticket]:
+-    return store.tickets.get(line.account_ref)
++    exact = store.tickets.get(line.account_ref)
++    if exact is not None:
++        return exact
++    wanted = normalise_reference(line.account_ref)
++    if not wanted:
++        return None
++    found = [ticket for identifier, ticket in store.tickets.items() if normalise_reference(identifier) == wanted]
++    # More than one ticket answering to the same reference cannot be told apart, so a person decides via suspense.
++    return found[0] if len(found) == 1 else None
