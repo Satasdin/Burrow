@@ -140,6 +140,25 @@ private func makeLedger() -> (Ledger, FakeFiles, URL) {
         #expect(try ledger.handoff(from: record) != nil)
     }
 
+    @Test func twoCommitsOnOneIdBothSurvive() throws {
+        // The stress run of 12 November: 41 commits in one second, ids of that second and four random characters (D-71).
+        final class Ids: @unchecked Sendable { var left = ["20261112-200246-aaaa", "20261112-200246-aaaa", "20261112-200246-bbbb"] }
+        let ids = Ids()
+        var (ledger, _, _) = makeLedger()
+        ledger.makeID = { _ in ids.left.removeFirst() }
+        let first = try ledger.commit(.fact, "The first commit of that second", author: "a")
+        let second = try ledger.commit(.fact, "The second commit of that second", author: "b")
+        #expect(first.id == "20261112-200246-aaaa")
+        #expect(second.id == "20261112-200246-bbbb")
+        #expect(ledger.find(first.id)?.message == "The first commit of that second")
+        #expect(ledger.all().count == 2)
+        let stuck = { @Sendable (_: Date) in "20261112-200246-aaaa" }
+        ledger.makeID = stuck
+        #expect(throws: LedgerProblem.self) { try ledger.commit(.fact, "No free id", author: "c") }
+        #expect(ledger.find(first.id)?.message == "The first commit of that second")
+        #expect(try FileManager.default.contentsOfDirectory(atPath: ledger.folder.appendingPathComponent("main").path).allSatisfy { $0.hasSuffix(".md") })
+    }
+
     @Test func notesMatchByWordsAndSkipWrongOrStaleOnes() throws {
         let (ledger, files, _) = makeLedger()
         let good = try ledger.commit(.fact, "The shelf limit is twelve gigabytes", files: ["Sources/Shelf.swift"], author: "a")

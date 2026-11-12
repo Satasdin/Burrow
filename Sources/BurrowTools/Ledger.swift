@@ -69,6 +69,8 @@ public struct Ledger: Sendable {
     public let folder: URL
     private let read: @Sendable (String) -> String?
     private let modified: @Sendable (String) -> Date?
+    /// Makes a commit's id from its time. Tests replace it to force two commits onto one id.
+    var makeID: @Sendable (Date) -> String = Ledger.newID
 
     public static let defaultBranch = "main"
 
@@ -164,13 +166,23 @@ public struct Ledger: Sendable {
         guard text.count <= 600 else { throw LedgerProblem("A commit message holds 600 characters; put the rest in its body.") }
         let name = try Self.branchName(branch ?? current)
         let parent = log(branch: name, limit: 1).first?.id
-        let entry = LedgerCommit(id: Self.newID(at), branch: name, parent: parent, kind: kind, message: text,
+        var entry = LedgerCommit(id: makeID(at), branch: name, parent: parent, kind: kind, message: text,
                                  body: String(body.replacingOccurrences(of: "\0", with: "").prefix(8_000)), author: author, client: client,
                                  cites: hashes(files), at: at, reverts: reverts, sha: sha, session: session)
         let place = folder.appendingPathComponent(name, isDirectory: true)
         try FileManager.default.createDirectory(at: place, withIntermediateDirectories: true)
-        try Self.markdown(entry).write(to: place.appendingPathComponent(entry.id + ".md"), atomically: true, encoding: .utf8)
-        return entry
+        // Many programs can commit in the same second, and an id is that second and four random characters, so two can meet.
+        // The commit is written whole to a file of its own, then given its name with link(2), which refuses a name that is
+        // taken: a commit already there is never replaced, and the new one takes another id (D-71).
+        for _ in 0..<64 {
+            let draft = place.appendingPathComponent(".draft-\(UUID().uuidString)")
+            try Self.markdown(entry).write(to: draft, atomically: false, encoding: .utf8)
+            defer { unlink(draft.path) }
+            if link(draft.path, place.appendingPathComponent(entry.id + ".md").path) == 0 { return entry }
+            guard errno == EEXIST else { throw LedgerProblem("Could not keep commit \(entry.id): \(String(cString: strerror(errno))).") }
+            entry.id = makeID(at)
+        }
+        throw LedgerProblem("Could not find a free id for a commit made at \(at).")
     }
 
     /// Marks a commit wrong. Nothing is deleted: the correction is shown wherever the old commit would be.
