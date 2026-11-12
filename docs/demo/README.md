@@ -11,8 +11,19 @@ Nothing is staged: the models answered live, and every number on screen was meas
 | 04-what-the-model-reads.mp4 | `find` (which files and lines, 0.05 s), `brief` (the exact text handed to the model), `ask` with Gemma 4 12B citing line 133, time to first word and tokens read | 38 s | `vhs tapes/04-what-the-model-reads.tape` |
 | 05-speed-time-to-first-word.mp4 | The shelf: the same question cold (2,773 tokens read, 1.66 s to first word) and from saved working memory (20 tokens, 0.18 s), Qwen3 4B in llama.cpp | 34 s | `vhs tapes/05-speed-ttfw.tape`, with llama-server on port 8080 and `--slot-save-path` set to the vault's `.burrow/kv` |
 | 06-weaknesses-burrow-covers.mp4 | Reasoning: plain retrieval makes Gemma refuse a sum, the engine leaves the vault out and gets 756. Hallucination: Ugandan law, "I don't know from what you were shown". Stale memory: the cited Act is edited and the Ledger says check again | 60 s | `vhs tapes/06-weaknesses.tape` |
+| 07-llama-session-cached.mp4 | llama.cpp's own chat page with Burrow as its MCP server, Qwen3 4B: it fetches the 72-hour rule (section 43(1)(a), line 133), answers the follow-up from what is still in its working memory, and keeps a decision in the Ledger | 74 s | `tapes/07-llama-cached.sh`: a fresh llama-server (`-np 2`, q8_0 caches, temperature 0, seed 7) with `--mcp-servers-config`, the page driven headless by Playwright |
 
 The clips are kept out of git (see `.gitignore`); the tapes re-record them. The demo vault lives in `~/BurrowDemo/Notes`.
 
 Note for the edit: in clip 4 the first word came after 0.12 s because Ollama still held the same excerpts from a run a
 minute earlier; the cold figure on that question was 7.34 s. Clip 5 is the deliberate comparison.
+
+## Stills for the report (Section 5.4.7)
+
+One still per use case, in `docs/report/figures/workflow/`, 1600 px wide and cropped to the chat so it reads at 6.2 inches.
+
+- `llama-cached-session.png` (clip 07, 12 November): a session that stays cached. Two frames of one run, stacked.
+  The first question read 6,175 tokens in 4.5 s (Burrow's excerpts); the follow-up read 21 tokens in 0.1 s, with the same server log.
+
+Note on clip 07: the Ledger commit it made was signed `claude-opus-5-5`, a name Qwen copied from the commit before it.
+It carries a correction (`20261112-101708-fd7b`), and Burrow now signs a commit with the model the server reports.

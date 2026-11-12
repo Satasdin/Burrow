@@ -100,7 +100,8 @@ extension VaultTools {
         // The Ledger's writes belong to programs the person connected over MCP. Burrow's own chat asks before keeping
         // anything, so there they are refused rather than run without that question.
         if !tool.readOnly, !ledgerWrites { return .failure("\(name) is not available here. Keeping things in the Ledger happens through a connected program or `burrow commit`.") }
-        let who = given.text("model") ?? connection?.turns.last?.model ?? connectionClient ?? "unknown"
+        // What Burrow knows beats what the model says about itself: the serving model, then the program's logged turns.
+        let who = servingModel ?? connection?.turns.last?.model ?? given.text("model") ?? connectionClient ?? "unknown"
         do {
             switch name {
             case "burrow_find": return try await call("vault_search", arguments: arguments)

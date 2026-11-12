@@ -56,6 +56,13 @@ final class LedgerMCPTests: XCTestCase {
         XCTAssertTrue(blame.hasPrefix("<ledger>"), blame)
     }
 
+    func testTheServingModelSignsACommitNotTheNameTheModelGives() async throws {
+        // A small model in llama.cpp copied "claude-opus-5-5" from an earlier commit (12 November demo).
+        tools.servingModel = "qwen3-4b-instruct"
+        _ = try await call("burrow_commit", #"{"kind":"decision","message":"Forms use regulation 38(1) as headings","model":"claude-opus-5-5"}"#)
+        XCTAssertEqual(tools.ledger.log().first?.author, "qwen3-4b-instruct")
+    }
+
     func testMatchingLedgerNotesComeWithSearchAndCanBeTurnedOff() async throws {
         _ = try await call("burrow_commit", #"{"kind":"fact","message":"A failed charge is retried three times before the order is cancelled","files":"Decisions/Retry.md","model":"claude-opus"}"#)
         let found = try await call("burrow_find", #"{"query":"how many times is a failed charge retried"}"#)

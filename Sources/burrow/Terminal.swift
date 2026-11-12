@@ -84,7 +84,7 @@ func runTerminalCommand(_ arguments: [String]) async throws -> Bool {
             // Whatever a lookup returns is also read into the model's cache on a spare slot, after the reply (D-60).
             let store = options.values["--store"]
             let warmer = KVWarmer(settings: KVWarmer.Settings(server: url), open: { try openVault(folder, store: store) }, log: logToStandardError)
-            if case let .ready(_, _, window) = await warmer.connect() { tools.packWindow = window }
+            if case let .ready(model, _, window) = await warmer.connect() { tools.packWindow = window; tools.servingModel = model }
             server.afterCall = { name, arguments, result in
                 if name == "vault_pack" {
                     let part = (arguments["part"] as? NSNumber)?.intValue ?? Int("\(arguments["part"] ?? 1)") ?? 1

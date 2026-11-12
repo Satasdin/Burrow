@@ -116,6 +116,10 @@ public final class VaultTools {
     /// The window `vault_pack` sizes its parts for. Set from the llama.cpp server when Burrow keeps its caches (D-59),
     /// so the text a client reads is the text that was cached.
     public var packWindow = KVShelf.defaultPackWindow
+    /// The model the serving program reports, when Burrow can ask it (llama.cpp with `--llama`). A Ledger commit is
+    /// signed with this rather than the name the model types into the call, which a small model may copy from an
+    /// earlier commit.
+    public var servingModel: String?
     public static let longestReadCharacters = 40_000
     public static let longestNote = 20_000
     public static let longestListing = 300
