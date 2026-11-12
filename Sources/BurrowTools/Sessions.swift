@@ -107,7 +107,14 @@ public struct SessionStore: Sendable {
         return decoder
     }()
 
+    /// A session id becomes a file name, and a session file can come from anywhere a vault is synced or shared,
+    /// so only plain ids are used: letters, digits and dashes, as `SessionRecord.newID` makes them.
+    static func isPlainID(_ id: String) -> Bool {
+        !id.isEmpty && id.count <= 64 && id.unicodeScalars.allSatisfy { CharacterSet.alphanumerics.contains($0) && $0.isASCII || $0 == "-" }
+    }
+
     public func save(_ record: SessionRecord) throws {
+        guard Self.isPlainID(record.id) else { throw CocoaError(.fileWriteInvalidFileName) }
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         var record = record
         record.updated = Date()
@@ -119,6 +126,7 @@ public struct SessionStore: Sendable {
         let names = (try? FileManager.default.contentsOfDirectory(atPath: folder.path)) ?? []
         return names.filter { $0.hasSuffix(".json") }
             .compactMap { try? Self.decoder.decode(SessionRecord.self, from: Data(contentsOf: folder.appendingPathComponent($0))) }
+            .filter { Self.isPlainID($0.id) }
             .sorted { $0.updated > $1.updated }
     }
 
@@ -127,6 +135,7 @@ public struct SessionStore: Sendable {
     /// with the holding process's id and a token; a hold whose process has gone counts as released, so a crash frees it.
     /// Returns the token to release it with, or nil when another live connection holds the session.
     public func hold(_ id: String) -> String? {
+        guard Self.isPlainID(id) else { return nil }
         try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         let path = folder.appendingPathComponent(id + ".open").path
         let token = "\(getpid()) \(UUID().uuidString)"
@@ -148,6 +157,7 @@ public struct SessionStore: Sendable {
 
     /// Lets go of a hold, only if it is still this connection's own.
     public func release(_ id: String, token: String) {
+        guard Self.isPlainID(id) else { return }
         let path = folder.appendingPathComponent(id + ".open").path
         if (try? String(contentsOfFile: path, encoding: .utf8)) == token { unlink(path) }
     }

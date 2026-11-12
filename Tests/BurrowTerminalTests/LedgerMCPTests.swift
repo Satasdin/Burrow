@@ -140,6 +140,14 @@ final class LedgerMCPTests: XCTestCase {
         XCTAssertNil(store.hold("s9"))
         store.release("s9", token: token)
         XCTAssertNotNil(store.hold("s9"))
+        // A session file from a synced or shared vault cannot steer a hold, a release or a save outside the sessions folder.
+        XCTAssertNil(store.hold("../../outside"))
+        var crafted = SessionRecord(id: "../escape")
+        crafted.client = "opencode"
+        XCTAssertThrowsError(try store.save(crafted))
+        try #"{"id":"../../x","started":"2026-11-12T00:00:00Z","updated":"2099-01-01T00:00:00Z","turns":[]}"#
+            .write(to: store.folder.appendingPathComponent("crafted.json"), atomically: true, encoding: .utf8)
+        XCTAssertFalse(store.list().contains { $0.id.contains("/") })
     }
 
     func testAClosedConnectionLeavesAHandoff() async throws {
