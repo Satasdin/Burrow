@@ -65,6 +65,15 @@ public struct LedgerProblem: Error, CustomStringConvertible {
 
 /// The Ledger: plain Markdown files under the vault's store, one per commit, a folder per branch. Readable in Obsidian,
 /// safe to keep in real git, and never deleted: a wrong commit is answered by a correction, not removed.
+extension LedgerCommit {
+    /// What the commit says, with a decision's reasons when it kept them: "… Rejected: … Because: …" (D-74).
+    /// A reason is what stops the next model from re-deriving an idea that was turned down, so it travels with the decision.
+    public var stated: String {
+        let reasons = body.split(separator: "\n").map(String.init).filter { $0.hasPrefix("Rejected: ") || $0.hasPrefix("Because: ") }
+        return ([message] + reasons).joined(separator: " ")
+    }
+}
+
 public struct Ledger: Sendable {
     public let folder: URL
     private let read: @Sendable (String) -> String?
@@ -165,11 +174,16 @@ public struct Ledger: Sendable {
         guard !text.isEmpty else { throw LedgerProblem("A commit needs a message.") }
         guard text.count <= 600 else { throw LedgerProblem("A commit message holds 600 characters; put the rest in its body.") }
         let name = try Self.branchName(branch ?? current)
-        let parent = log(branch: name, limit: 1).first?.id
+        let place = folder.appendingPathComponent(name, isDirectory: true)
+        // The branch's newest commit is kept in a small tip file, so a commit does not read the whole Ledger to find its
+        // parent: with 1,600 commits a commit had slowed from 15 ms to 168 ms (D-78). Without a tip, or with one that
+        // names a commit that is not there, the Ledger is read as before.
+        let tip = (try? String(contentsOf: place.appendingPathComponent(".tip"), encoding: .utf8))?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let parent = tip.flatMap { FileManager.default.fileExists(atPath: place.appendingPathComponent($0 + ".md").path) ? $0 : nil }
+            ?? log(branch: name, limit: 1).first?.id
         var entry = LedgerCommit(id: makeID(at), branch: name, parent: parent, kind: kind, message: text,
                                  body: String(body.replacingOccurrences(of: "\0", with: "").prefix(8_000)), author: author, client: client,
                                  cites: hashes(files), at: at, reverts: reverts, sha: sha, session: session)
-        let place = folder.appendingPathComponent(name, isDirectory: true)
         try FileManager.default.createDirectory(at: place, withIntermediateDirectories: true)
         // Many programs can commit in the same second, and an id is that second and four random characters, so two can meet.
         // The commit is written whole to a file of its own, then given its name with link(2), which refuses a name that is
@@ -178,7 +192,10 @@ public struct Ledger: Sendable {
             let draft = place.appendingPathComponent(".draft-\(UUID().uuidString)")
             try Self.markdown(entry).write(to: draft, atomically: false, encoding: .utf8)
             defer { unlink(draft.path) }
-            if link(draft.path, place.appendingPathComponent(entry.id + ".md").path) == 0 { return entry }
+            if link(draft.path, place.appendingPathComponent(entry.id + ".md").path) == 0 {
+                try? entry.id.write(to: place.appendingPathComponent(".tip"), atomically: true, encoding: .utf8)
+                return entry
+            }
             guard errno == EEXIST else { throw LedgerProblem("Could not keep commit \(entry.id): \(String(cString: strerror(errno))).") }
             entry.id = makeID(at)
         }
@@ -245,14 +262,17 @@ public struct Ledger: Sendable {
     /// left, so a later model finds them while searching. Wrong and stale commits are left out; so are handoffs and plans.
     /// Notes for a search: those that rest on a file the search returned (D-69), then those that share words with the
     /// question. Stale and reverted notes are left out.
-    public func notes(for question: String, shown files: Set<String> = [], limit: Int = 3) -> [LedgerCommit] {
+    /// `near` holds files one import away from those shown: a decision on `reconcile.py` also governs the `matcher.py`
+    /// it imports, which is where a model may make the change (clip 08, 12 November; D-75). They rank below files shown.
+    public func notes(for question: String, shown files: Set<String> = [], near: Set<String> = [], limit: Int = 3) -> [LedgerCommit] {
         let words = Self.words(question)
-        guard !words.isEmpty || !files.isEmpty else { return [] }
+        guard !words.isEmpty || !files.isEmpty || !near.isEmpty else { return [] }
         let wrong = reverted()
         let scored = all().compactMap { commit -> (LedgerCommit, Int)? in
             guard [.fact, .decision, .correction].contains(commit.kind), !wrong.contains(commit.id), changed(commit).isEmpty else { return nil }
             // A note on a file in front of the model comes with it, however the question was worded.
             if !files.isDisjoint(with: commit.cites.keys) { return (commit, 1_000) }
+            if !near.isDisjoint(with: commit.cites.keys) { return (commit, 500) }
             let shared = words.intersection(Self.words(commit.message + " " + commit.body)).count
             // At least two shared words, or one when the question is that short, so a lone common word does not match.
             return !words.isEmpty && shared >= min(2, words.count) ? (commit, shared) : nil
@@ -303,7 +323,7 @@ public struct Ledger: Sendable {
         let wrong = reverted()
         func line(_ commit: LedgerCommit) -> String {
             let stale = changed(commit)
-            var text = "- [\(commit.kind.rawValue)] \(cut(commit.message, 260)) (written by \(commit.author)\(commit.client.map { " in \($0)" } ?? ""), \(Self.when(commit.at)), \(commit.id))"
+            var text = "- [\(commit.kind.rawValue)] \(cut(commit.stated, 520)) (written by \(commit.author)\(commit.client.map { " in \($0)" } ?? ""), \(Self.when(commit.at)), \(commit.id))"
             if wrong.contains(commit.id) { text += " MARKED WRONG, see the correction" }
             if !stale.isEmpty { text += " CHECK AGAIN: \(stale.prefix(3).joined(separator: ", ")) changed since" }
             return text
@@ -371,12 +391,16 @@ public struct Ledger: Sendable {
         let looked = trail.suffix(8).map { cut($0.asked, 100) }
         if !looked.isEmpty { body.append("Looked up: " + looked.joined(separator: "; ")) }
         for commit in kept.prefix(4).reversed() { body.append("Kept \(commit.kind.rawValue) \(commit.id): \(cut(commit.message, 160))") }
+        // A handoff cites what the session used: files it read, files its answers cited, and files its commits rest on.
+        // Not every search hit: one search for "task-04" put a photo and the defence plan into a handoff (D-77).
+        let used = (record.trail ?? []).filter { ["vault_read", "burrow_read"].contains($0.tool) }.flatMap(\.files)
+            + record.turns.flatMap(\.sources) + kept.flatMap { $0.cites.keys.sorted() }
         var files: [String] = []
-        for place in record.filesInPlay { let file = place.components(separatedBy: ":").first ?? place; if !files.contains(file) { files.append(file) } }
-        for file in kept.flatMap({ $0.cites.keys.sorted() }) where !files.contains(file) { files.append(file) }
+        for place in used { let file = place.components(separatedBy: ":").first ?? place; if !files.contains(file) { files.append(file) } }
+        // It goes where the session's own work went, so branch work is not handed off on main.
         return try commit(.handoff, message, body: body.joined(separator: "\n"), files: Array(files.prefix(12)),
                           author: author ?? record.models.first ?? record.client ?? "unknown", client: record.client,
-                          branch: branch, session: record.id)
+                          branch: branch ?? kept.first?.branch, session: record.id)
     }
 
     // MARK: The file format

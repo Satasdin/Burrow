@@ -30,7 +30,7 @@ final class LedgerMCPTests: XCTestCase {
         let line = await server.handle(#"{"jsonrpc":"2.0","id":2,"method":"tools/list"}"#)
         let reply = try JSONSerialization.jsonObject(with: XCTUnwrap(line).data(using: .utf8)!) as! [String: Any]
         let names = ((reply["result"] as! [String: Any])["tools"] as! [[String: Any]]).compactMap { $0["name"] as? String }
-        XCTAssertEqual(Set(names), ["burrow_find", "burrow_read", "burrow_resume", "burrow_commit"])
+        XCTAssertEqual(Set(names), ["burrow_find", "burrow_read", "burrow_resume", "burrow_commit", "burrow_check"])  // burrow_check joined the door in D-79
         let old = try await call("vault_search", #"{"query":"retry a failed charge"}"#)
         XCTAssertTrue(old.contains("\nTrust: "), old)
         XCTAssertTrue(old.contains("Retry"))
@@ -61,14 +61,14 @@ final class LedgerMCPTests: XCTestCase {
     func testTheServingModelSignsACommitNotTheNameTheModelGives() async throws {
         // A small model in llama.cpp copied "claude-opus-5-5" from an earlier commit (12 November demo).
         tools.servingModel = "qwen3-4b-instruct"
-        _ = try await call("burrow_commit", #"{"kind":"decision","message":"Forms use regulation 38(1) as headings","model":"claude-opus-5-5"}"#)
+        _ = try await call("burrow_commit", #"{"kind":"decision","because":"The test says so.","message":"Forms use regulation 38(1) as headings","model":"claude-opus-5-5"}"#)
         XCTAssertEqual(tools.ledger.log().first?.author, "qwen3-4b-instruct")
     }
 
     func testANoteComesWithTheFileItRestsOnHoweverTheSearchIsWorded() async throws {
         // In the 12 November rehearsal a fresh session searched "reconciliation suspense": one shared word, so the
         // decision on the file it was shown did not come with it (D-69).
-        _ = try await call("burrow_commit", #"{"kind":"decision","message":"Zebras are counted by stripe alone","files":"Decisions/Retry.md"}"#)
+        _ = try await call("burrow_commit", #"{"kind":"decision","because":"The test says so.","message":"Zebras are counted by stripe alone","files":"Decisions/Retry.md"}"#)
         let found = try await call("burrow_find", #"{"query":"retry a failed charge"}"#)
         XCTAssertTrue(found.contains("Decisions/Retry.md"), found)
         XCTAssertTrue(found.contains("Zebras are counted by stripe alone"), found)
@@ -101,13 +101,13 @@ final class LedgerMCPTests: XCTestCase {
     func testAProgramThatRejoinsItsSessionLeavesItsOwnHandoff() async throws {
         // Stress workflow 4b, 12 November: claude -p runs within half an hour of each other share one saved session,
         // and every run after the first left no handoff (D-72).
-        _ = try await call("burrow_commit", #"{"kind":"decision","message":"First run's decision","files":"Decisions/Retry.md"}"#)
+        _ = try await call("burrow_commit", #"{"kind":"decision","because":"The test says so.","message":"First run's decision","files":"Decisions/Retry.md"}"#)
         await server.serve(readLine: { nil }, write: { _ in })
         try await Task.sleep(nanoseconds: 1_100_000_000)
         let again = MCPServer(tools: VaultTools(vault: tools.vault, embedder: nil) { _ in FakeAnswerer() }, keepsSessions: true)
         again.toolSet = .door
         _ = await again.handle(#"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"opencode","version":"1"}}}"#)
-        _ = await again.handle(#"{"jsonrpc":"2.0","id":9,"method":"tools/call","params":{"name":"burrow_commit","arguments":{"kind":"decision","message":"Second run's decision","files":"Decisions/Retry.md"}}}"#)
+        _ = await again.handle(#"{"jsonrpc":"2.0","id":9,"method":"tools/call","params":{"name":"burrow_commit","arguments":{"kind":"decision","because":"The test says so.","message":"Second run's decision","files":"Decisions/Retry.md"}}}"#)
         await again.serve(readLine: { nil }, write: { _ in })
         let handoffs = tools.ledger.log().filter { $0.kind == .handoff }
         XCTAssertEqual(handoffs.count, 2, handoffs.map(\.message).joined(separator: " | "))
@@ -120,8 +120,8 @@ final class LedgerMCPTests: XCTestCase {
         let other = MCPServer(tools: VaultTools(vault: tools.vault, embedder: nil) { _ in FakeAnswerer() }, keepsSessions: true)
         other.toolSet = .door
         _ = await other.handle(#"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"opencode","version":"1"}}}"#)
-        _ = try await call("burrow_commit", #"{"kind":"decision","message":"Agent A's decision","files":"Decisions/Retry.md"}"#)
-        _ = await other.handle(#"{"jsonrpc":"2.0","id":9,"method":"tools/call","params":{"name":"burrow_commit","arguments":{"kind":"decision","message":"Agent B's decision","files":"Decisions/Retry.md","branch":"luggage"}}}"#)
+        _ = try await call("burrow_commit", #"{"kind":"decision","because":"The test says so.","message":"Agent A's decision","files":"Decisions/Retry.md"}"#)
+        _ = await other.handle(#"{"jsonrpc":"2.0","id":9,"method":"tools/call","params":{"name":"burrow_commit","arguments":{"kind":"decision","because":"The test says so.","message":"Agent B's decision","files":"Decisions/Retry.md","branch":"luggage"}}}"#)
         await server.serve(readLine: { nil }, write: { _ in })
         await other.serve(readLine: { nil }, write: { _ in })
         let handoffs = tools.ledger.log().filter { $0.kind == .handoff }

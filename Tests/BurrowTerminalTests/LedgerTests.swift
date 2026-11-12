@@ -98,7 +98,8 @@ private func makeLedger() -> (Ledger, FakeFiles, URL) {
         let made = try #require(try ledger.handoff(from: record))
         #expect(made.kind == .handoff)
         #expect(made.message.contains("opencode stopped after 1 lookup"))
-        #expect(made.cites.keys.sorted() == ["Notes/plan.md"])
+        // A search hit is not cited: only files read, cited in answers, or under the session's own commits (D-77).
+        #expect(made.cites.isEmpty)
         #expect(made.session == "s1")
         #expect(try ledger.handoff(from: record) == nil)
         #expect(try ledger.handoff(from: SessionRecord(id: "empty")) == nil)
@@ -156,7 +157,22 @@ private func makeLedger() -> (Ledger, FakeFiles, URL) {
         ledger.makeID = stuck
         #expect(throws: LedgerProblem.self) { try ledger.commit(.fact, "No free id", author: "c") }
         #expect(ledger.find(first.id)?.message == "The first commit of that second")
-        #expect(try FileManager.default.contentsOfDirectory(atPath: ledger.folder.appendingPathComponent("main").path).allSatisfy { $0.hasSuffix(".md") })
+        // No draft is left behind; the branch's .tip file (D-78) is the only other file there.
+        #expect(try FileManager.default.contentsOfDirectory(atPath: ledger.folder.appendingPathComponent("main").path).allSatisfy { $0.hasSuffix(".md") || $0 == ".tip" })
+    }
+
+    @Test func aBranchKeepsItsTipSoACommitNeedNotReadTheLedger() throws {
+        // Stress workflow 4a: with 1,600 commits a commit had slowed from 15 ms to 168 ms finding its parent (D-78).
+        let (ledger, _, folder) = makeLedger()
+        let first = try ledger.commit(.fact, "First", author: "a")
+        let tip = folder.appendingPathComponent("main/.tip")
+        #expect(try String(contentsOf: tip, encoding: .utf8) == first.id)
+        let second = try ledger.commit(.fact, "Second", author: "a")
+        #expect(second.parent == first.id)
+        try "20990101-000000-gone".write(to: tip, atomically: true, encoding: .utf8)
+        let third = try ledger.commit(.fact, "Third", author: "a")
+        #expect(third.parent == second.id)
+        #expect(ledger.all().count == 3)
     }
 
     @Test func notesMatchByWordsAndSkipWrongOrStaleOnes() throws {

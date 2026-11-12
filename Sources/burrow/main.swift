@@ -1,4 +1,5 @@
 import BurrowCore
+import BurrowTools
 import Foundation
 
 let usage = """
@@ -21,6 +22,7 @@ burrow: private project memory for local models
   burrow note  <project> "text" [--kind decision|rejected|bug|convention|note]
   burrow links <project> <file>
   burrow stats <project>
+  burrow steering <project>                                      lines in the files written to steer an AI assistant
   burrow kv <vault> list|save|ask [files...] ["question"] [--server URL] [--cold]   model working memory kept on disk (llama.cpp)
   burrow kv <vault> pack <folder> [--part N] [--window TOKENS]    print one part of a folder read whole, to use as a system message
   burrow kv <vault> warm <folder> [--server URL]                  read every part of a folder into the model's cache and keep it
@@ -227,6 +229,15 @@ func run() async throws {
         for link in try vault.neighbours(of: text) {
             print("\(link.forward ? "->" : "<-") \(link.path)   [\(link.kind.rawValue)\(link.via.map { " " + $0 } ?? "")]")
         }
+
+    case "steering":
+        // Text written to steer AI assistants, for the person to see (D-80).
+        var count = 0
+        for file in try vault.projectMap().files {
+            guard let text = vault.text(of: file.path) else { continue }
+            for found in Steering.lines(in: text) { print("\(file.path):\(found.line): \(found.text)"); count += 1 }
+        }
+        print(count == 0 ? "Nothing in the files reads as written to steer an AI assistant." : "\(count) line\(count == 1 ? "" : "s") written to steer an AI assistant. Burrow shows them as content and flags them wherever a model sees them.")
 
     case "stats":
         let stats = try vault.stats()
