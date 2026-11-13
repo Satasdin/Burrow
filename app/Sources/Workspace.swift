@@ -876,6 +876,7 @@ final class Library {
     private static func applyCheckHooks(_ workspace: Workspace, _ environment: [String: String]) {
         if let path = environment["BURROW_OPEN"] { workspace.go(.file(path)) }
         if environment["BURROW_READING"] != nil { workspace.isReading = true }
+        if let theme = environment["BURROW_THEME"] { UserDefaults.standard.set(theme, forKey: SkyTheme.key) }
         if environment["BURROW_TAB"] == "ask" { workspace.go(.ask) }
         if environment["BURROW_TAB"] == "graph" { workspace.go(.graph) }
         switch environment["BURROW_TAB"] {

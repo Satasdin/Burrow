@@ -50,7 +50,7 @@ struct ProgramsPage: View {
                 .padding(.horizontal, 28).padding(.vertical, 22)
             }
         }
-        .background(Night.ground)
+        .background(NightSky())
         .environment(\.colorScheme, .dark)
         .task(id: workspace.sessions.count) { await refresh() }
         .overlay(alignment: .bottom) {
@@ -144,7 +144,7 @@ struct ProgramsPage: View {
                 .frame(height: 80)
             }
         }
-        .padding(14).background(Night.card, in: .rect(cornerRadius: 12))
+        .padding(14).skyCard(radius: 12)
     }
 }
 

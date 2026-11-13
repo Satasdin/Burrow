@@ -40,8 +40,8 @@ struct ConversationsPage: View {
                     VStack(alignment: .leading, spacing: 12) {
                         Text(day.day.dayTitle).font(.system(size: 15, weight: .semibold))
                         LazyVGrid(columns: [GridItem(.adaptive(minimum: 300, maximum: 420), spacing: 16, alignment: .top)], alignment: .leading, spacing: 16) {
-                            ForEach(day.records, id: \.id) { record in
-                                SessionCard(workspace: workspace, record: record).onTapGesture { workspace.go(.session(record.id)) }
+                            ForEach(Array(day.records.enumerated()), id: \.element.id) { index, record in
+                                SessionCard(workspace: workspace, record: record).onTapGesture { workspace.go(.session(record.id)) }.arrive(index)
                             }
                         }
                     }
@@ -49,7 +49,7 @@ struct ConversationsPage: View {
             }
             .padding(.horizontal, 28).padding(.vertical, 22)
         }
-        .background(Night.ground)
+        .background(NightSky())
         .environment(\.colorScheme, .dark)
     }
 }
@@ -58,7 +58,6 @@ struct ConversationsPage: View {
 struct SessionCard: View {
     let workspace: Workspace
     let record: VaultSession
-    @State private var hovering = false
 
     private var files: [String] {
         var seen: [String] = []
@@ -102,10 +101,8 @@ struct SessionCard: View {
             }
         }
         .padding(14)
-        .background(hovering ? Night.cardHover : Night.card, in: .rect(cornerRadius: 12))
-        .overlay { RoundedRectangle(cornerRadius: 12).strokeBorder(record.program.colour.opacity(hovering ? 0.55 : 0.18)) }
+        .skyCard(tint: record.program.colour, radius: 12)
         .contentShape(Rectangle())
-        .onHover { hovering = $0 }
     }
 
     private func stat(_ symbol: String, _ text: String) -> some View {
@@ -158,7 +155,7 @@ struct SessionPage: View {
                     }
                     VStack(alignment: .leading, spacing: 0) {
                         ForEach(Array(steps.enumerated()), id: \.offset) { index, step in
-                            TrailRow(workspace: workspace, step: step, last: index == steps.count - 1, tint: record.program.colour)
+                            TrailRow(workspace: workspace, step: step, last: index == steps.count - 1, tint: record.program.colour).arrive(index)
                         }
                     }
                 }
@@ -168,7 +165,7 @@ struct SessionPage: View {
             }
         }
         .frame(maxWidth: .infinity)
-        .background(Night.ground)
+        .background(NightSky())
         .environment(\.colorScheme, .dark)
     }
 }
@@ -359,7 +356,7 @@ struct ShelfPage: View {
             }
             .padding(.horizontal, 28).padding(.vertical, 22)
         }
-        .background(Night.ground)
+        .background(NightSky())
         .environment(\.colorScheme, .dark)
     }
 
@@ -419,7 +416,7 @@ struct ShelfPage: View {
             .chartYAxis { AxisMarks { _ in AxisValueLabel().foregroundStyle(Night.dim) } }
             .frame(height: CGFloat(min(max(workspace.shelf.filter { !$0.isSpine }.count, 1), 12)) * 26 + 24)
         }
-        .padding(14).background(Night.card, in: .rect(cornerRadius: 12))
+        .padding(14).skyCard(radius: 12)
     }
 }
 
@@ -467,8 +464,7 @@ struct PackCard: View {
             }
         }
         .padding(12)
-        .background(Night.card, in: .rect(cornerRadius: 12))
-        .overlay { RoundedRectangle(cornerRadius: 12).strokeBorder((stale > 0 ? Night.stale : Night.cache).opacity(0.22)) }
+        .skyCard(tint: stale > 0 ? Night.stale : Night.cache, radius: 12)
     }
 }
 
@@ -513,7 +509,6 @@ struct ShelfRow: View {
             .monospacedDigit()
         }
         .padding(12)
-        .background(Night.card, in: .rect(cornerRadius: 12))
-        .overlay { RoundedRectangle(cornerRadius: 12).strokeBorder((item.stale == nil ? Night.cache : Night.stale).opacity(0.22)) }
+        .skyCard(tint: item.stale == nil ? Night.cache : Night.stale, radius: 12)
     }
 }

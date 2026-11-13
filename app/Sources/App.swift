@@ -171,9 +171,31 @@ struct Welcome: View {
 
 struct SettingsView: View {
     let library: Library
+    @AppStorage(SkyTheme.key) private var themeName = SkyTheme.nebula.rawValue
 
     var body: some View {
         Form {
+            Section("Night sky") {
+                HStack(spacing: 14) {
+                    ForEach(SkyTheme.allCases) { theme in
+                        Button { withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) { themeName = theme.rawValue } } label: {
+                            VStack(spacing: 6) {
+                                ZStack {
+                                    Circle().fill(RadialGradient(colors: [theme.glows.0, theme.glows.1, .black], center: .topTrailing, startRadius: 2, endRadius: 40))
+                                    Circle().fill(theme.accent).frame(width: 10, height: 10).shadow(color: theme.accent, radius: 5)
+                                }
+                                .frame(width: 44, height: 44)
+                                .overlay { Circle().strokeBorder(themeName == theme.rawValue ? theme.accent : .clear, lineWidth: 2.5).padding(-4) }
+                                .scaleEffect(themeName == theme.rawValue ? 1.06 : 1)
+                                Text(theme.name).font(.system(size: 11.5, weight: themeName == theme.rawValue ? .semibold : .regular))
+                            }
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("\(theme.name) theme")
+                    }
+                }
+                .padding(.vertical, 6)
+            }
             if let workspace = library.workspace {
                 Section("Model") {
                     Picker("Answers with", selection: Binding(get: { workspace.model }, set: { workspace.model = $0 })) {
@@ -195,6 +217,6 @@ struct SettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .frame(width: 460, height: 340)
+        .frame(width: 460, height: 450)
     }
 }

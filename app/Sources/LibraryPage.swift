@@ -52,7 +52,7 @@ struct LibraryPage: View {
             }
             .padding(.horizontal, 28).padding(.vertical, 22)
         }
-        .background(Night.ground)
+        .background(NightSky())
         .environment(\.colorScheme, .dark)
     }
 
@@ -217,12 +217,12 @@ struct LibraryInspector: View {
                 .padding(16)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(Night.ground)
+            .background(NightSky())
             .environment(\.colorScheme, .dark)
         } else {
             ContentUnavailableView("Choose a file", systemImage: "square.grid.2x2", description: Text("Its preview, pages and the conversations that read it show here."))
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(Night.ground)
+                .background(NightSky())
                 .environment(\.colorScheme, .dark)
         }
     }

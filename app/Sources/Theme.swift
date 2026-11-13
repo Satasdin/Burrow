@@ -68,3 +68,135 @@ extension String {
     }
     var isMarkdownPath: Bool { ["md", "markdown"].contains((self as NSString).pathExtension.lowercased()) }
 }
+
+// MARK: Colour themes
+
+/// The night's colour: it tints the sky behind every dark page, the selection, the active tab and the buttons.
+/// Kind colours (decision, handoff, stale) stay fixed whatever the theme, so colour keeps its meaning.
+enum SkyTheme: String, CaseIterable, Identifiable {
+    case nebula, aurora, ember, tide
+
+    static let key = "burrow.skyTheme"
+    var id: String { rawValue }
+
+    var name: String {
+        switch self {
+        case .nebula: return "Nebula"
+        case .aurora: return "Aurora"
+        case .ember: return "Ember"
+        case .tide: return "Tide"
+        }
+    }
+
+    var accent: Color {
+        switch self {
+        case .nebula: return Color(red: 0.66, green: 0.55, blue: 1.00)
+        case .aurora: return Color(red: 0.35, green: 0.92, blue: 0.70)
+        case .ember: return Color(red: 1.00, green: 0.55, blue: 0.42)
+        case .tide: return Color(red: 0.38, green: 0.72, blue: 1.00)
+        }
+    }
+
+    /// Two glows that drift slowly across the sky.
+    var glows: (Color, Color) {
+        switch self {
+        case .nebula: return (Color(red: 0.42, green: 0.22, blue: 0.85), Color(red: 0.10, green: 0.45, blue: 0.80))
+        case .aurora: return (Color(red: 0.05, green: 0.60, blue: 0.45), Color(red: 0.20, green: 0.30, blue: 0.75))
+        case .ember: return (Color(red: 0.80, green: 0.25, blue: 0.20), Color(red: 0.65, green: 0.35, blue: 0.10))
+        case .tide: return (Color(red: 0.10, green: 0.35, blue: 0.85), Color(red: 0.05, green: 0.60, blue: 0.70))
+        }
+    }
+
+    static var current: SkyTheme { SkyTheme(rawValue: UserDefaults.standard.string(forKey: key) ?? "") ?? .nebula }
+}
+
+/// The ground of every dark page: near-black with two soft glows that drift, and a sparse field of stars that twinkle.
+/// It stays still when Reduce Motion is on, and it never takes a click.
+struct NightSky: View {
+    @AppStorage(SkyTheme.key) private var themeName = SkyTheme.nebula.rawValue
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    private var theme: SkyTheme { SkyTheme(rawValue: themeName) ?? .nebula }
+
+    private static let stars: [(x: CGFloat, y: CGFloat, r: CGFloat, phase: Double)] = {
+        var seed: UInt64 = 0x9E3779B97F4A7C15
+        func next() -> CGFloat {
+            seed = seed &* 6364136223846793005 &+ 1442695040888963407
+            return CGFloat(seed >> 33) / CGFloat(UInt32.max >> 1)
+        }
+        return (0..<140).map { _ in (next(), next(), 0.4 + next() * 1.1, Double(next()) * 6.28) }
+    }()
+
+    var body: some View {
+        TimelineView(.animation(minimumInterval: 1 / 20, paused: reduceMotion)) { context in
+            let t = reduceMotion ? 0 : context.date.timeIntervalSinceReferenceDate
+            Canvas { canvas, size in
+                canvas.fill(Path(CGRect(origin: .zero, size: size)), with: .color(Color(red: 0.012, green: 0.012, blue: 0.025)))
+                let (a, b) = theme.glows
+                let reach = max(size.width, size.height)
+                let first = CGPoint(x: size.width * (0.78 + 0.06 * sin(t / 23)), y: size.height * (0.08 + 0.05 * cos(t / 31)))
+                let second = CGPoint(x: size.width * (0.12 + 0.07 * cos(t / 27)), y: size.height * (0.92 + 0.04 * sin(t / 19)))
+                for (centre, colour, radius) in [(first, a, reach * 0.62), (second, b, reach * 0.5)] {
+                    canvas.fill(Path(ellipseIn: CGRect(x: centre.x - radius, y: centre.y - radius, width: radius * 2, height: radius * 2)),
+                                with: .radialGradient(Gradient(colors: [colour.opacity(0.22), colour.opacity(0.06), .clear]),
+                                                      center: centre, startRadius: 0, endRadius: radius))
+                }
+                for star in Self.stars {
+                    let twinkle = 0.35 + 0.35 * (1 + sin(t * 0.9 + star.phase)) / 2
+                    let rect = CGRect(x: star.x * size.width, y: star.y * size.height, width: star.r, height: star.r)
+                    canvas.fill(Path(ellipseIn: rect), with: .color(.white.opacity(twinkle * 0.55)))
+                }
+            }
+        }
+        .ignoresSafeArea()
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
+}
+
+/// Cards rise and fade in one after another as a page opens; at once when Reduce Motion is on.
+struct Arrive: ViewModifier {
+    let index: Int
+    @State private var shown = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    func body(content: Content) -> some View {
+        content
+            .opacity(shown ? 1 : 0)
+            .offset(y: shown || reduceMotion ? 0 : 10)
+            .onAppear {
+                withAnimation(reduceMotion ? nil : .spring(response: 0.45, dampingFraction: 0.85).delay(Double(min(index, 12)) * 0.045)) { shown = true }
+            }
+    }
+}
+
+extension View {
+    func arrive(_ index: Int) -> some View { modifier(Arrive(index: index)) }
+}
+
+/// A card on the night sky: frosted, with a hairline edge that brightens and a small lift on hover.
+struct SkyCard: ViewModifier {
+    var tint: Color = .white
+    var radius: CGFloat = 14
+    @State private var hovering = false
+
+    func body(content: Content) -> some View {
+        content
+            .background {
+                RoundedRectangle(cornerRadius: radius)
+                    .fill(LinearGradient(colors: [tint.opacity(hovering ? 0.13 : 0.09), Color.white.opacity(0.03)], startPoint: .topLeading, endPoint: .bottomTrailing))
+                    .background(.ultraThinMaterial.opacity(0.35), in: .rect(cornerRadius: radius))
+            }
+            .overlay {
+                RoundedRectangle(cornerRadius: radius)
+                    .strokeBorder(LinearGradient(colors: [tint.opacity(hovering ? 0.55 : 0.32), Color.white.opacity(0.06)], startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 1)
+            }
+            .shadow(color: tint.opacity(hovering ? 0.22 : 0.0), radius: 18, y: 6)
+            .scaleEffect(hovering ? 1.004 : 1)
+            .animation(.easeOut(duration: 0.18), value: hovering)
+            .onHover { hovering = $0 }
+    }
+}
+
+extension View {
+    func skyCard(tint: Color = .white, radius: CGFloat = 14) -> some View { modifier(SkyCard(tint: tint, radius: radius)) }
+}

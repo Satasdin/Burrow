@@ -5,6 +5,9 @@ struct MainWindow: View {
     let library: Library
     @Bindable var workspace: Workspace
     @State private var showInspector = true
+    @AppStorage(SkyTheme.key) private var themeName = SkyTheme.nebula.rawValue
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    private var theme: SkyTheme { SkyTheme(rawValue: themeName) ?? .nebula }
 
     private var subtitle: String {
         if let progress = workspace.progress { return progress }
@@ -19,7 +22,12 @@ struct MainWindow: View {
         } detail: {
             VStack(spacing: 0) {
                 TabStrip(workspace: workspace)
-                content
+                ZStack {
+                    content
+                        .id(workspace.currentTab?.content)
+                        .transition(reduceMotion ? .opacity : .asymmetric(insertion: .opacity.combined(with: .offset(y: 8)), removal: .opacity))
+                }
+                .animation(.easeOut(duration: 0.22), value: workspace.currentTab?.content)
             }
             .inspector(isPresented: $showInspector) {
                 InspectorPane(workspace: workspace)
@@ -37,6 +45,7 @@ struct MainWindow: View {
             }
         }
         .animation(.spring(response: 0.25, dampingFraction: 1), value: workspace.paletteOpen)
+        .tint(theme.accent)
         .safeAreaInset(edge: .bottom, spacing: 0) {
             VStack(spacing: 0) {
                 if let warning = workspace.warning {
@@ -134,17 +143,20 @@ struct MainWindow: View {
 
 struct TabStrip: View {
     let workspace: Workspace
+    @Namespace private var underline
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 2) {
-                ForEach(workspace.tabs) { tab in TabButton(workspace: workspace, tab: tab) }
+                ForEach(workspace.tabs) { tab in TabButton(workspace: workspace, tab: tab, underline: underline) }
                 Button { Task { await workspace.newNote() } } label: {
                     Image(systemName: "plus").frame(width: 26, height: 26).contentShape(Rectangle())
                 }
                 .buttonStyle(.plain).foregroundStyle(.secondary).help("New note (⌘N)").accessibilityLabel("New note")
             }
             .padding(.horizontal, 8).padding(.vertical, 4)
+            .animation(.spring(response: 0.32, dampingFraction: 0.82), value: workspace.activeTab)
+            .animation(.spring(response: 0.32, dampingFraction: 0.82), value: workspace.tabs)
         }
         .background(.bar)
         .overlay(alignment: .bottom) { Divider() }
@@ -154,7 +166,10 @@ struct TabStrip: View {
 struct TabButton: View {
     let workspace: Workspace
     let tab: Tab
+    let underline: Namespace.ID
     @State private var hovering = false
+    @AppStorage(SkyTheme.key) private var themeName = SkyTheme.nebula.rawValue
+    private var theme: SkyTheme { SkyTheme(rawValue: themeName) ?? .nebula }
 
     private var active: Bool { workspace.activeTab == tab.id }
     private var icon: String {
@@ -172,7 +187,7 @@ struct TabButton: View {
 
     var body: some View {
         HStack(spacing: 6) {
-            Image(systemName: icon).imageScale(.small).foregroundStyle(.secondary)
+            Image(systemName: icon).imageScale(.small).foregroundStyle(active ? AnyShapeStyle(theme.accent) : AnyShapeStyle(.secondary))
             Text(workspace.tabTitle(tab)).lineLimit(1).frame(maxWidth: 170, alignment: .leading)
             Button { workspace.close(tab) } label: { Image(systemName: "xmark").font(.system(size: 9, weight: .bold)).frame(width: 16, height: 16) }
                 .buttonStyle(.plain).foregroundStyle(.secondary).opacity(hovering || active ? 1 : 0)
@@ -180,7 +195,15 @@ struct TabButton: View {
         }
         .font(.system(size: 12.5))
         .padding(.leading, 10).padding(.trailing, 6).frame(height: 28)
-        .background(active ? Color.primary.opacity(0.11) : hovering ? Color.primary.opacity(0.05) : .clear, in: .rect(cornerRadius: 7))
+        .background(active ? theme.accent.opacity(0.14) : hovering ? Color.primary.opacity(0.05) : .clear, in: .rect(cornerRadius: 7))
+        .overlay(alignment: .bottom) {
+            if active {
+                Capsule().fill(theme.accent).frame(height: 2).padding(.horizontal, 8).offset(y: 4)
+                    .shadow(color: theme.accent, radius: 4)
+                    .matchedGeometryEffect(id: "underline", in: underline)
+            }
+        }
+        .transition(.scale(scale: 0.9).combined(with: .opacity))
         .contentShape(Rectangle())
         .onTapGesture { workspace.activeTab = tab.id }
         .onHover { hovering = $0 }
@@ -234,13 +257,16 @@ struct StatusBar: View {
     }
 
     var body: some View {
-        HStack(spacing: 14) {
+        HStack(spacing: 9) {
             if let progress = workspace.progress {
                 ProgressView().controlSize(.mini)
                 Text(progress).lineLimit(1)
             }
             Spacer()
-            ForEach(items, id: \.self) { Text($0) }
+            ForEach(Array(items.enumerated()), id: \.element) { index, item in
+                if index > 0 { Circle().fill(Color.secondary.opacity(0.4)).frame(width: 2.5, height: 2.5) }
+                Text(item).contentTransition(.numericText())
+            }
         }
         .font(.system(size: 11)).foregroundStyle(.secondary).monospacedDigit()
         .padding(.horizontal, 12).frame(height: 22)
