@@ -92,7 +92,7 @@ struct RibbonButton: View {
         Button(action: action) {
             Image(systemName: icon).font(.system(size: 14, weight: on ? .semibold : .regular))
                 .frame(width: 30, height: 28)
-                .foregroundStyle(on ? Color.primary : .secondary)
+                .foregroundStyle(on ? Color.primary : Color.primary.opacity(0.5))
                 .background(on ? Color.primary.opacity(0.13) : hovering ? Color.primary.opacity(0.06) : .clear, in: .rect(cornerRadius: 6))
                 .overlay(alignment: .topTrailing) {
                     if let dot { Circle().fill(dot).frame(width: 6, height: 6).shadow(color: dot, radius: 3).padding(3) }
@@ -115,7 +115,7 @@ struct ExplorerTab: View {
     var body: some View {
         Button(action: action) {
             Image(systemName: icon).font(.system(size: 12)).frame(width: 26, height: 22)
-                .foregroundStyle(on ? Color.primary : .secondary)
+                .foregroundStyle(on ? Color.primary : Color.primary.opacity(0.5))
                 .background(on ? Color.primary.opacity(0.12) : .clear, in: .rect(cornerRadius: 5))
                 .contentShape(Rectangle())
         }

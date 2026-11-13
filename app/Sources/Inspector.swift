@@ -10,13 +10,21 @@ struct InspectorPane: View {
     let workspace: Workspace
 
     var body: some View {
-        switch workspace.currentTab?.content {
-        case let .file(path): FileInspector(workspace: workspace, path: path, document: workspace.document(path))
-        case .ask: AskInspector(workspace: workspace)
-        case .library: LibraryInspector(workspace: workspace, path: workspace.librarySelection)
-        case .ledger, .session, .conversations, .programs, .shelf: PageInspector(workspace: workspace)
-        default: OverviewInspector(workspace: workspace)
+        Group {
+            switch workspace.currentTab?.content {
+            case let .file(path): FileInspector(workspace: workspace, path: path, document: workspace.document(path))
+            case .ask: AskInspector(workspace: workspace)
+            case .library: LibraryInspector(workspace: workspace, path: workspace.librarySelection)
+            case .ledger, .session, .conversations, .programs, .shelf, .graph: PageInspector(workspace: workspace)
+            default: OverviewInspector(workspace: workspace)
+            }
         }
+        // One night sky down the whole right side, whichever page is open, so the panel reads as part of the window.
+        .scrollContentBackground(.hidden)
+        // An explicit colour: the inspector column is vibrant, and on a dark sky its .primary text blends nearly to black.
+        .foregroundStyle(Night.note)
+        .background(NightSky())
+        .environment(\.colorScheme, .dark)
     }
 }
 

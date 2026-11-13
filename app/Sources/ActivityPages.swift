@@ -284,9 +284,7 @@ struct TrailRow: View {
         }
     }
 
-    private func toolName(_ tool: String) -> String {
-        tool.replacingOccurrences(of: "vault_", with: "").replacingOccurrences(of: "_", with: " ")
-    }
+    private func toolName(_ tool: String) -> String { tool.toolTitle }
 
     @ViewBuilder private func files(_ places: [String]) -> some View {
         let paths = places.map { $0.components(separatedBy: ":").first ?? $0 }.reduce(into: [String]()) { if !$0.contains($1) { $0.append($1) } }

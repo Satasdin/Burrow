@@ -41,8 +41,9 @@ struct LibraryPage: View {
                             Text("\(group.files.count)").font(.system(size: 13)).foregroundStyle(Night.faint).monospacedDigit()
                         }
                         LazyVGrid(columns: [GridItem(.adaptive(minimum: 168, maximum: 240), spacing: 16, alignment: .top)], alignment: .leading, spacing: 18) {
-                            ForEach(group.files, id: \.path) { file in
+                            ForEach(Array(group.files.enumerated()), id: \.element.path) { index, file in
                                 CoverCard(workspace: workspace, path: file.path, selected: workspace.librarySelection == file.path)
+                                    .arrive(index)
                                     .onTapGesture(count: 2) { workspace.go(.file(file.path), newTab: true) }
                                     .simultaneousGesture(TapGesture().onEnded { workspace.librarySelection = file.path })
                             }
@@ -102,7 +103,9 @@ struct CoverCard: View {
                         .strokeBorder(selected ? Color.accentColor : (LibraryKind.colour(of: path) ?? Night.line).opacity(selected ? 1 : 0.55),
                                       lineWidth: selected ? 2.5 : 1)
                 }
-                .shadow(color: (LibraryKind.colour(of: path) ?? .clear).opacity(hovering ? 0.35 : 0), radius: 12)
+                .shadow(color: (LibraryKind.colour(of: path) ?? Night.conversation).opacity(hovering ? 0.4 : 0), radius: 14, y: 6)
+                .scaleEffect(hovering ? 1.025 : 1)
+                .offset(y: hovering ? -3 : 0)
             VStack(alignment: .leading, spacing: 1) {
                 Text(path.title).font(.system(size: 12.5, weight: .medium)).lineLimit(1).truncationMode(.middle)
                 Text(detail).font(.system(size: 11)).foregroundStyle(Night.faint).lineLimit(1)
@@ -111,7 +114,7 @@ struct CoverCard: View {
         }
         .contentShape(Rectangle())
         .onHover { hovering = $0 }
-        .animation(.easeOut(duration: 0.15), value: hovering)
+        .animation(.spring(response: 0.3, dampingFraction: 0.72), value: hovering)
         .help(path)
         .contextMenu {
             Button("Open") { workspace.go(.file(path)) }

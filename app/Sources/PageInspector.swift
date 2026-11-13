@@ -143,7 +143,7 @@ struct SessionGlance: View {
     var body: some View {
         if let record = workspace.sessions.first(where: { $0.id == id }) {
             let trail = record.trail ?? []
-            let tools = Dictionary(grouping: trail, by: \.tool).map { ($0.key, $0.value.count) }.sorted { $0.1 > $1.1 }
+            let tools = Dictionary(grouping: trail, by: \.tool.toolTitle).map { ($0.key, $0.value.count) }.sorted { $0.1 > $1.1 }
             let files = record.filesInPlay.map { $0.components(separatedBy: ":").first ?? $0 }.reduce(into: [String]()) { if !$0.contains($1) { $0.append($1) } }
             let kept = workspace.ledger.commits.filter { $0.session == id }
 

@@ -66,6 +66,12 @@ extension String {
         let name = fileName
         return ["md", "markdown"].contains((name as NSString).pathExtension.lowercased()) ? (name as NSString).deletingPathExtension : name
     }
+    /// A tool's name the way a person reads it: vault_search and burrow_find become "search" and "find".
+    var toolTitle: String {
+        var name = self
+        for prefix in ["vault_", "burrow_"] where name.hasPrefix(prefix) { name = String(name.dropFirst(prefix.count)) }
+        return name.replacingOccurrences(of: "_", with: " ")
+    }
     var isMarkdownPath: Bool { ["md", "markdown"].contains((self as NSString).pathExtension.lowercased()) }
 }
 

@@ -219,15 +219,56 @@ struct EmptyPage: View {
 
     var body: some View {
         ZStack {
-            Theme.page
-            VStack(spacing: 14) {
-                Text("Nothing open").font(.title2.weight(.semibold)).foregroundStyle(Theme.ink)
-                HStack(spacing: 10) {
-                    Button("New Note") { Task { await workspace.newNote() } }
-                    Button("Quick Open") { workspace.paletteOpen = true }
-                    Button("Library") { workspace.go(.library(.all)) }
+            NightSky()
+            VStack(spacing: 18) {
+                Image(systemName: "sparkles").font(.system(size: 34, weight: .light)).foregroundStyle(.tint).symbolEffect(.pulse)
+                Text(workspace.name).font(.system(size: 30, weight: .bold)).foregroundStyle(Night.note)
+                if let stats = workspace.stats {
+                    Text("\(stats.notes.formatted()) notes · \(stats.files.formatted()) files · \(workspace.ledger.commits.count.counted("Ledger commit"))")
+                        .font(.system(size: 13)).foregroundStyle(Night.dim).monospacedDigit()
                 }
+                HStack(spacing: 10) {
+                    Button { Task { await workspace.newNote() } } label: { Label("New Note", systemImage: "square.and.pencil") }
+                    Button { workspace.paletteOpen = true } label: { Label("Quick Open", systemImage: "magnifyingglass") }
+                    Button { workspace.go(.library(.all)) } label: { Label("Library", systemImage: "square.grid.2x2") }
+                    Button { workspace.go(.ledger(nil)) } label: { Label("Ledger", systemImage: "books.vertical") }
+                }
+                .controlSize(.large)
             }
+        }
+        .environment(\.colorScheme, .dark)
+    }
+}
+
+/// A small light in the status bar: green when nothing needs a look, amber when changed code rests on a decision, red when
+/// the vault holds text written to steer AI assistants. A click opens the Ledger, where the Watch panel says what it is.
+struct WatchLight: View {
+    let workspace: Workspace
+    @State private var glow = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    private var state: (colour: Color, text: String) {
+        let ledger = workspace.ledger
+        if !ledger.flagged.isEmpty { return (Night.stale, ledger.flagged.count.counted("line") + " written to steer AI") }
+        if let check = ledger.check, !check.rules.isEmpty { return (WatchPanel.amber, "Changed code rests on " + check.rules.count.counted("decision")) }
+        return (WatchPanel.mint, ledger.inForce.count.counted("rule") + " in force")
+    }
+
+    var body: some View {
+        let now = state
+        Button { workspace.go(.ledger(nil)) } label: {
+            HStack(spacing: 6) {
+                Circle().fill(now.colour).frame(width: 7, height: 7)
+                    .shadow(color: now.colour, radius: glow ? 5 : 1)
+                Text(now.text).lineLimit(1)
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .help("Open the Ledger's Watch panel")
+        .onAppear {
+            guard !reduceMotion else { return }
+            withAnimation(.easeInOut(duration: 1.6).repeatForever(autoreverses: true)) { glow = true }
         }
     }
 }
@@ -262,6 +303,7 @@ struct StatusBar: View {
                 ProgressView().controlSize(.mini)
                 Text(progress).lineLimit(1)
             }
+            WatchLight(workspace: workspace)
             Spacer()
             ForEach(Array(items.enumerated()), id: \.element) { index, item in
                 if index > 0 { Circle().fill(Color.secondary.opacity(0.4)).frame(width: 2.5, height: 2.5) }

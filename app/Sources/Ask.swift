@@ -49,7 +49,8 @@ struct AskPage: View {
             AskField(workspace: workspace, text: $question, prompt: "Ask your vault", wantsChange: $wantsChange, staysHere: true)
                 .frame(maxWidth: 760).padding(.horizontal, 16).padding(.vertical, 10)
         }
-        .background(Theme.page)
+        .background(NightSky())
+        .environment(\.colorScheme, .dark)
     }
 }
 
