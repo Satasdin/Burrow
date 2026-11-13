@@ -265,11 +265,8 @@ struct CommitRow: View {
 
     private var author: some View {
         let who = commit.author
-        let initials = String(who.split(whereSeparator: { $0 == "-" || $0 == " " }).prefix(2).compactMap(\.first)).uppercased()
-        let hue = Double(who.unicodeScalars.reduce(0) { ($0 &* 31 &+ Int($1.value)) % 360 }) / 360
         return HStack(spacing: 6) {
-            Text(initials.isEmpty ? "?" : initials).font(.system(size: 9, weight: .bold)).foregroundStyle(.black)
-                .frame(width: 20, height: 20).background(Color(hue: hue, saturation: 0.45, brightness: 1), in: .circle)
+            AuthorBadge(name: who)
             Text("\(who)\(commit.client.map { $0 == who ? "" : " · \($0)" } ?? "")\(commit.sha.map { " · \($0.prefix(7))" } ?? "")")
                 .font(.system(size: 11.5)).foregroundStyle(Night.faint).lineLimit(1)
         }

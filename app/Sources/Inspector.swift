@@ -14,6 +14,7 @@ struct InspectorPane: View {
         case let .file(path): FileInspector(workspace: workspace, path: path, document: workspace.document(path))
         case .ask: AskInspector(workspace: workspace)
         case .library: LibraryInspector(workspace: workspace, path: workspace.librarySelection)
+        case .ledger, .session, .conversations, .programs, .shelf: PageInspector(workspace: workspace)
         default: OverviewInspector(workspace: workspace)
         }
     }
@@ -48,6 +49,7 @@ struct FileInspector: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            FlaggedBanner(workspace: workspace, path: path)
             LocalGraph(workspace: workspace, path: path).frame(height: 210).clipped()
             HStack(spacing: 2) {
                 ExplorerTab(icon: "link", help: "Backlinks and links", on: pane == .links) { pane = .links }
