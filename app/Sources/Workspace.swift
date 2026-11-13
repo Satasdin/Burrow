@@ -29,7 +29,24 @@ actor Engine {
         let commits = ledger.log(limit: 2_000)
         var stale: [String: [String]] = [:]
         for commit in commits { let changed = ledger.changed(commit); if !changed.isEmpty { stale[commit.id] = changed } }
-        return LedgerState(commits: commits, reverted: ledger.reverted(), stale: stale, current: ledger.current)
+        var state = LedgerState(commits: commits, reverted: ledger.reverted(), stale: stale, current: ledger.current)
+        state.inForce = VaultTools.inForce(ledger).map(\.id)
+        state.check = VaultTools.checkReport(vault: vault, ledger: ledger)
+        state.flagged = flaggedText()
+        return state
+    }
+
+    /// Lines in the vault's notes and code written to steer AI assistants (D-80), the same pattern burrow_read flags.
+    /// Documents and images are left out: their text is extracted, and a long PDF would slow every refresh.
+    private func flaggedText() -> [FlaggedLine] {
+        guard let files = try? vault.projectMap().files else { return [] }
+        var out: [FlaggedLine] = []
+        for file in files where [.notes, .code].contains(LibraryKind.of(file.path)) || file.path.hasSuffix(".txt") {
+            guard let text = vault.text(of: file.path), text.utf8.count < 400_000 else { continue }
+            for hit in Steering.lines(in: text) { out.append(FlaggedLine(path: file.path, line: hit.line, text: hit.text)) }
+            if out.count >= 50 { break }
+        }
+        return out
     }
     func commit(_ kind: LedgerCommit.Kind, _ message: String, files: [String], branch: String?, session: String?) throws -> LedgerCommit {
         try Ledger(vault: vault).commit(kind, message, files: files, author: "person", client: "Burrow app", branch: branch, session: session)

@@ -12,6 +12,13 @@ public enum ToolSet: String, Sendable, CaseIterable {
     case classic
 }
 
+/// What burrow_check found: see VaultTools.checkReport.
+public struct CheckReport: Sendable {
+    public var changed: [String]
+    public var diffs: [String]
+    public var rules: [LedgerCommit]
+}
+
 extension VaultTools {
     /// The Ledger's tools and the git-named doorway to the vault, with `burrow` in front of git's words.
     public static let ledgerDefinitions: [ToolDefinition] = [
@@ -179,30 +186,9 @@ extension VaultTools {
     }
 
     private func checkChanges() -> ToolResult {
-        var changed: [String] = []
-        var diffs: [String] = []
-        let indexed = Set(((try? vault.projectMap().files) ?? []).map(\.path))
-        for folder in vault.linkedFolders() {
-            guard FileManager.default.fileExists(atPath: folder.url.appendingPathComponent(".git").path) else { continue }
-            let tracked = Self.git(folder.url, ["diff", "HEAD", "--name-only", "-z"]) ?? ""
-            let fresh = Self.git(folder.url, ["ls-files", "--others", "--exclude-standard", "-z"]) ?? ""
-            let relative = (tracked + fresh).split(separator: "\0").map(String.init)
-            changed += relative.map { folder.name + "/" + $0 }.filter { !changed.contains($0) }
-            // The diff shows only files the vault itself holds, so a change to a file Burrow does not index (a secret,
-            // a binary) is named but never shown; no external diff tool or text converter runs.
-            let held = relative.filter { indexed.contains(folder.name + "/" + $0) }
-            if !held.isEmpty, let diff = Self.git(folder.url, ["diff", "HEAD", "--no-color", "--no-ext-diff", "--no-textconv", "-U2", "--"] + held), !diff.isEmpty {
-                diffs.append(diff)
-            }
-        }
+        let report = Self.checkReport(vault: vault, ledger: ledger)
+        let changed = report.changed, diffs = report.diffs, rules = report.rules
         guard !changed.isEmpty else { return ToolResult(text: "Nothing has changed in the linked code since its last git commit.", summary: "no changes") }
-        var near: Set<String> = []
-        for file in changed { for neighbour in (try? vault.neighbours(of: file)) ?? [] where neighbour.kind != .about { near.insert(neighbour.path) } }
-        let wrong = ledger.reverted()
-        let rules = ledger.log(limit: 300).filter { commit in
-            [.decision, .correction].contains(commit.kind) && !wrong.contains(commit.id)
-                && (!Set(changed).isDisjoint(with: commit.cites.keys) || !near.isDisjoint(with: commit.cites.keys))
-        }.prefix(6)
         // File names come from the repository and can say anything: control characters go, and the list is shown as content.
         let names = changed.prefix(20).map { String($0.unicodeScalars.filter { !CharacterSet.controlCharacters.contains($0) }) }
         let list = ProjectContent.block(path: "changed files", lines: "", kind: "code", why: nil, body: names.joined(separator: "\n"))
@@ -217,6 +203,45 @@ extension VaultTools {
             + ProjectContent.block(path: "git diff", lines: "", kind: "code", why: nil, body: diff)
             + "\n\nFor each decision, check whether your change keeps to it. If it does not, undo that part, or tell the person plainly which decision it goes against and why."
         return ToolResult(text: text, summary: "\(changed.count) changed, \(rules.count) decisions to check")
+    }
+
+    /// What burrow_check compares, for the app as well as the tool: the files changed in linked git folders since their
+    /// last commit, their diffs (only for files the vault indexes), and the decisions and corrections in force that rest
+    /// on those files or the files they import or are imported by.
+    public static func checkReport(vault: Vault, ledger: Ledger) -> CheckReport {
+        var changed: [String] = []
+        var diffs: [String] = []
+        let indexed = Set(((try? vault.projectMap().files) ?? []).map(\.path))
+        for folder in vault.linkedFolders() {
+            guard FileManager.default.fileExists(atPath: folder.url.appendingPathComponent(".git").path) else { continue }
+            let tracked = git(folder.url, ["diff", "HEAD", "--name-only", "-z"]) ?? ""
+            let fresh = git(folder.url, ["ls-files", "--others", "--exclude-standard", "-z"]) ?? ""
+            let relative = (tracked + fresh).split(separator: "\0").map(String.init)
+            changed += relative.map { folder.name + "/" + $0 }.filter { !changed.contains($0) }
+            // The diff shows only files the vault itself holds, so a change to a file Burrow does not index (a secret,
+            // a binary) is named but never shown; no external diff tool or text converter runs.
+            let held = relative.filter { indexed.contains(folder.name + "/" + $0) }
+            if !held.isEmpty, let diff = git(folder.url, ["diff", "HEAD", "--no-color", "--no-ext-diff", "--no-textconv", "-U2", "--"] + held), !diff.isEmpty {
+                diffs.append(diff)
+            }
+        }
+        guard !changed.isEmpty else { return CheckReport(changed: [], diffs: [], rules: []) }
+        var near: Set<String> = []
+        for file in changed { for neighbour in (try? vault.neighbours(of: file)) ?? [] where neighbour.kind != .about { near.insert(neighbour.path) } }
+        let wrong = ledger.reverted()
+        let rules = ledger.log(limit: 300).filter { commit in
+            [.decision, .correction].contains(commit.kind) && !wrong.contains(commit.id)
+                && (!Set(changed).isDisjoint(with: commit.cites.keys) || !near.isDisjoint(with: commit.cites.keys))
+        }.prefix(6)
+        return CheckReport(changed: changed, diffs: diffs, rules: Array(rules))
+    }
+
+    /// The decisions and corrections a program is handed when it connects (D-76), as commits rather than text, for the app.
+    public static func inForce(_ ledger: Ledger) -> [LedgerCommit] {
+        let wrong = ledger.reverted()
+        return ledger.log(branch: ledger.current, limit: 300)
+            .filter { [.decision, .correction].contains($0.kind) && !wrong.contains($0.id) && ledger.changed($0).isEmpty }
+            .filter { Steering.lines(in: "\($0.stated) \($0.author) \($0.client ?? "") \($0.cites.keys.joined(separator: " "))").isEmpty }
     }
 
     static func git(_ folder: URL, _ arguments: [String]) -> String? {

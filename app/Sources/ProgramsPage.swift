@@ -68,7 +68,13 @@ struct ProgramsPage: View {
         var read = await Connections.read(vault: workspace.folder)
         // A program that has used this vault was set up somewhere: most often a project's own settings file,
         // which Burrow can't know to look in. Say so rather than "Not set up".
-        for program in programs where read[program]?.state == .notSetUp && !workspace.sessions(for: program).isEmpty {
+        // Global settings that point at another vault say nothing about a project's own settings, so a program that has
+        // used this vault counts as set up here either way.
+        for program in programs where !workspace.sessions(for: program).isEmpty {
+            switch read[program]?.state {
+            case .notSetUp, .otherVault: break
+            default: continue
+            }
             read[program] = Connection(state: .usedElsewhere)
         }
         links = read

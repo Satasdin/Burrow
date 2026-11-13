@@ -158,6 +158,17 @@ struct SessionPage: View {
                             TrailRow(workspace: workspace, step: step, last: index == steps.count - 1, tint: record.program.colour).arrive(index)
                         }
                     }
+                    let kept = workspace.ledger.commits.filter { $0.session == record.id }
+                    if !kept.isEmpty {
+                        VStack(alignment: .leading, spacing: 10) {
+                            Label("Kept in the Ledger from this conversation", systemImage: "books.vertical")
+                                .font(.system(size: 15, weight: .semibold)).foregroundStyle(Night.note)
+                            ForEach(Array(kept.enumerated()), id: \.element.id) { index, commit in
+                                CommitRow(workspace: workspace, commit: commit, last: index == kept.count - 1).arrive(steps.count + index)
+                            }
+                        }
+                        .padding(.top, 10)
+                    }
                 }
                 .padding(.horizontal, 28).padding(.vertical, 22).frame(maxWidth: 860, alignment: .leading)
             } else {

@@ -10,10 +10,22 @@ struct LedgerState: Sendable {
     /// Commit id → the cited files that changed since it was written.
     var stale: [String: [String]] = [:]
     var current = Ledger.defaultBranch
+    /// The decisions and corrections handed to every program when it connects, by id (D-76).
+    var inForce: [String] = []
+    /// What burrow_check would show right now (D-79).
+    var check: CheckReport?
+    /// Text in the vault written to steer AI assistants (D-80).
+    var flagged: [FlaggedLine] = []
 
     var branches: [String] { Array(Set(commits.map(\.branch))).sorted() }
     func commits(on branch: String?) -> [LedgerCommit] { branch.map { name in commits.filter { $0.branch == name } } ?? commits }
     func citing(_ path: String) -> [LedgerCommit] { commits.filter { $0.cites.keys.contains(path) } }
+}
+
+struct FlaggedLine: Sendable, Hashable {
+    var path: String
+    var line: Int
+    var text: String
 }
 
 extension LedgerCommit.Kind {
@@ -82,6 +94,7 @@ struct LedgerPage: View {
                         .help("What a model that lost its memory would be handed for this branch")
                 }
                 branchChips
+                WatchPanel(workspace: workspace)
                 if let resume { resumeCard(resume) }
                 if commits.isEmpty {
                     ContentUnavailableView("Nothing kept yet", systemImage: "books.vertical",
