@@ -1,0 +1,17 @@
+[
+  {
+    "sha256": "c7cb0f4e06864930447e47ec170cde2b6dd625d691585a1c345dc14d4b311048",
+    "anchors": 15,
+    "defect": ""
+  },
+  {
+    "sha256": "bafa6bcc4b44d9b3be585525a939d9b68e90b7b945c4dc4078de535d8c8f12ec",
+    "anchors": 15,
+    "defect": "Top of the rim was 3 units and vanished at 16 px; the opening moved down to make it 8."
+  },
+  {
+    "sha256": "30980ee372ca0055f018dfbff2638715746477e68ca06384460a978419a107e4",
+    "anchors": 15,
+    "defect": "A centred dot inside a ring read as an eye; the star moved to the upper edge of the opening, smaller, like a star seen past the rim."
+  }
+]

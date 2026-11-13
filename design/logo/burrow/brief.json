@@ -1,0 +1,48 @@
+{
+  "schema": "brand-identity/brief@1",
+  "brand": "Burrow",
+  "tagline": "Your AI's memory, kept on your Mac",
+  "site": null,
+  "languages": [
+    "en"
+  ],
+  "doc_lang": "en",
+  "numbers": true,
+  "components": {
+    "logo": "new",
+    "type": "new",
+    "palette": "keep"
+  },
+  "sources": {
+    "palette": "source/palette-kept.json"
+  },
+  "sets": 3,
+  "sector": "Local AI memory for the Mac (notes, documents, linked code, a ledger of AI decisions)",
+  "audience": "Developers and researchers who work with several AI models and keep their material on their own Mac",
+  "attributes": [
+    "private",
+    "lucid",
+    "nocturnal"
+  ],
+  "competitors": [
+    "Obsidian",
+    "Mem",
+    "Rewind",
+    "Raycast",
+    "Bear",
+    "Reflect"
+  ],
+  "axes": [],
+  "copy": {
+    "sentence": {
+      "en": "Every model that connects reads what you decided, and why."
+    },
+    "nav": [
+      "Library",
+      "Ledger",
+      "Map",
+      "Ask"
+    ],
+    "cta": "Open a vault"
+  }
+}

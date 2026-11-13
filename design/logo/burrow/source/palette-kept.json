@@ -1,0 +1,56 @@
+{
+  "schema": "brand-identity/palette@1",
+  "name": "Kept",
+  "direction": "the brand's existing colours",
+  "brand": [
+    {
+      "id": "brand-1",
+      "name": "Primary",
+      "hex": "#030306",
+      "source": "chosen",
+      "locked": true
+    },
+    {
+      "id": "brand-2",
+      "name": "Accent",
+      "hex": "#FFD685",
+      "source": "chosen",
+      "locked": true
+    },
+    {
+      "id": "brand-3",
+      "name": "Ground",
+      "hex": "#A88CFF",
+      "source": "chosen",
+      "locked": true
+    },
+    {
+      "id": "brand-4",
+      "name": "Extra 1",
+      "hex": "#59EBB3",
+      "source": "chosen",
+      "locked": true
+    },
+    {
+      "id": "brand-5",
+      "name": "Extra 2",
+      "hex": "#FF8C6B",
+      "source": "chosen",
+      "locked": true
+    },
+    {
+      "id": "brand-6",
+      "name": "Extra 2",
+      "hex": "#61B8FF",
+      "source": "chosen",
+      "locked": true
+    },
+    {
+      "id": "brand-7",
+      "name": "Extra 2",
+      "hex": "#63D1FF",
+      "source": "chosen",
+      "locked": true
+    }
+  ]
+}

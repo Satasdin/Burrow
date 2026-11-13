@@ -1,0 +1,22 @@
+[
+  {
+    "sha256": "949196fa4f0e8e761fce068fd6e00c6cbffd837bfe5ee8330ebd30d799088fc7",
+    "anchors": 43,
+    "defect": ""
+  },
+  {
+    "sha256": "dd9c3e3508bce989203acc6d43732dd063b2c346c0f9b95b4fb3aa96e919a667",
+    "anchors": 43,
+    "defect": "The shallow cut left two legs under a stack and read as a menu icon on a bench; the tunnel is now deep enough to read as an arch through the strata."
+  },
+  {
+    "sha256": "726767ff901b4fec49ffd3f3c1a12bc8fa752aa56ee9e8f3bc423782ada3daf2",
+    "anchors": 44,
+    "defect": "Round 3, to clear a clich\u00e9 reading (a menu icon): the tunnel is now an arch-topped doorway cut through the lower two strata, wide enough to read at 16 px."
+  },
+  {
+    "sha256": "4dad904d526769ef9b034f81757388b8ab24951b0d53a1acdb91742cc42735f9",
+    "anchors": 44,
+    "defect": "Round 3, to clear a clich\u00e9 reading (a menu icon): the tunnel is now an arch-topped doorway cut through the lower two strata, wide enough to read at 16 px."
+  }
+]

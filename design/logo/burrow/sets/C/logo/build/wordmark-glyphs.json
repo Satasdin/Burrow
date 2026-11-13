@@ -1,0 +1,126 @@
+{
+ "units": "wordmark: cap height 100, cap top y=0, baseline y=100, x from the pen origin; index = data-glyph",
+ "text": "burrow",
+ "glyphs": [
+  {
+   "index": 1,
+   "char": "b",
+   "x0": 9.58,
+   "x1": 80.0,
+   "pen_x": 0.0,
+   "advance": 85.56,
+   "cap_top": 0,
+   "baseline": 100,
+   "stems": [
+    [
+     9.58,
+     24.38
+    ],
+    [
+     62.29,
+     80.0
+    ]
+   ]
+  },
+  {
+   "index": 2,
+   "char": "u",
+   "x0": 89.72,
+   "x1": 158.54,
+   "pen_x": 81.39,
+   "advance": 86.88,
+   "cap_top": 0,
+   "baseline": 100,
+   "stems": [
+    [
+     89.72,
+     106.69
+    ],
+    [
+     141.74,
+     158.54
+    ]
+   ]
+  },
+  {
+   "index": 3,
+   "char": "r",
+   "x0": 173.82,
+   "x1": 216.04,
+   "pen_x": 164.1,
+   "advance": 55.42,
+   "cap_top": 0,
+   "baseline": 100,
+   "stems": [
+    [
+     173.82,
+     190.62
+    ]
+   ]
+  },
+  {
+   "index": 4,
+   "char": "r",
+   "x0": 225.07,
+   "x1": 267.29,
+   "pen_x": 215.35,
+   "advance": 54.03,
+   "cap_top": 0,
+   "baseline": 100,
+   "stems": [
+    [
+     225.07,
+     241.88
+    ]
+   ]
+  },
+  {
+   "index": 5,
+   "char": "o",
+   "x0": 270.76,
+   "x1": 345.49,
+   "pen_x": 265.21,
+   "advance": 83.06,
+   "cap_top": 0,
+   "baseline": 100,
+   "stems": [
+    [
+     270.76,
+     288.47
+    ],
+    [
+     327.78,
+     345.49
+    ]
+   ]
+  },
+  {
+   "index": 6,
+   "char": "w",
+   "x0": 346.88,
+   "x1": 452.78,
+   "pen_x": 344.1,
+   "advance": 111.46,
+   "cap_top": 0,
+   "baseline": 100,
+   "stems": [
+    [
+     358.35,
+     374.68
+    ],
+    [
+     381.2,
+     395.16
+    ],
+    [
+     404.44,
+     418.4
+    ],
+    [
+     424.92,
+     441.32
+    ]
+   ]
+  }
+ ]
+}

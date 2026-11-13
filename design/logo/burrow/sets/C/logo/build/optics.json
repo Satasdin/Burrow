@@ -1,0 +1,11 @@
+{
+  "cap_height": 1440.0,
+  "x_height": 1080.0,
+  "upm": 2000,
+  "overshoot_top": 0.0208,
+  "overshoot_bottom": 0.0208,
+  "x_overshoot_top": 0.0278,
+  "stem": 16.667,
+  "crossbar": 15.694,
+  "crossbar_stem_ratio": 0.942
+}
