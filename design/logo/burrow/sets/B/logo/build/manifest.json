@@ -33,22 +33,44 @@
       "device": null,
       "parts": [
         {
+          "role": "brand-3",
+          "ids": [
+            "rect-1"
+          ],
+          "hex": "#a88cff",
+          "area": 3222.09
+        },
+        {
+          "role": "brand-4",
+          "ids": [
+            "rect-2"
+          ],
+          "hex": "#59ebb3",
+          "area": 3222.08
+        },
+        {
+          "role": "brand-5",
+          "ids": [
+            "rect-3"
+          ],
+          "hex": "#ff8c6b",
+          "area": 1900.11
+        },
+        {
           "role": "brand-6",
           "ids": [
-            "s1",
-            "s3",
-            "s4"
+            "rect-5"
           ],
           "hex": "#61b8ff",
-          "area": 6622.55
+          "area": 1500.36
         },
         {
           "role": "brand-2",
           "ids": [
-            "s2"
+            "circle-8"
           ],
           "hex": "#ffd685",
-          "area": 3222.08
+          "area": 281.78
         },
         {
           "role": "text",
@@ -74,22 +96,44 @@
       "device": null,
       "parts": [
         {
+          "role": "brand-3",
+          "ids": [
+            "rect-1"
+          ],
+          "hex": "#a88cff",
+          "area": 3222.09
+        },
+        {
+          "role": "brand-4",
+          "ids": [
+            "rect-2"
+          ],
+          "hex": "#59ebb3",
+          "area": 3222.08
+        },
+        {
+          "role": "brand-5",
+          "ids": [
+            "rect-3"
+          ],
+          "hex": "#ff8c6b",
+          "area": 1900.11
+        },
+        {
           "role": "brand-6",
           "ids": [
-            "s1",
-            "s3",
-            "s4"
+            "rect-5"
           ],
           "hex": "#61b8ff",
-          "area": 6622.55
+          "area": 1500.36
         },
         {
           "role": "brand-2",
           "ids": [
-            "s2"
+            "circle-8"
           ],
           "hex": "#ffd685",
-          "area": 3222.08
+          "area": 281.78
         },
         {
           "role": "text",
@@ -115,16 +159,17 @@
       "device": null,
       "parts": [
         {
-          "role": "brand-6",
+          "role": "brand-3",
           "ids": [
-            "s1",
-            "s3",
-            "s4",
-            "s2",
+            "rect-1",
+            "rect-2",
+            "rect-3",
+            "rect-5",
+            "circle-8",
             "wordmark"
           ],
           "hex": "#1c1c1c",
-          "area": 27975.94
+          "area": 28257.72
         }
       ]
     },
@@ -142,16 +187,17 @@
       "device": null,
       "parts": [
         {
-          "role": "brand-6",
+          "role": "brand-3",
           "ids": [
-            "s1",
-            "s3",
-            "s4",
-            "s2",
+            "rect-1",
+            "rect-2",
+            "rect-3",
+            "rect-5",
+            "circle-8",
             "wordmark"
           ],
           "hex": "#f3f3f3",
-          "area": 26923.82
+          "area": 27152.75
         }
       ]
     },
@@ -169,22 +215,44 @@
       "device": null,
       "parts": [
         {
+          "role": "brand-3",
+          "ids": [
+            "rect-1"
+          ],
+          "hex": "#a88cff",
+          "area": 3222.09
+        },
+        {
+          "role": "brand-4",
+          "ids": [
+            "rect-2"
+          ],
+          "hex": "#59ebb3",
+          "area": 3222.08
+        },
+        {
+          "role": "brand-5",
+          "ids": [
+            "rect-3"
+          ],
+          "hex": "#ff8c6b",
+          "area": 1900.11
+        },
+        {
           "role": "brand-6",
           "ids": [
-            "s1",
-            "s3",
-            "s4"
+            "rect-5"
           ],
           "hex": "#61b8ff",
-          "area": 6622.55
+          "area": 1500.36
         },
         {
           "role": "brand-2",
           "ids": [
-            "s2"
+            "circle-8"
           ],
           "hex": "#ffd685",
-          "area": 3222.08
+          "area": 281.78
         },
         {
           "role": "text",
@@ -210,22 +278,44 @@
       "device": null,
       "parts": [
         {
+          "role": "brand-3",
+          "ids": [
+            "rect-1"
+          ],
+          "hex": "#a88cff",
+          "area": 2921.97
+        },
+        {
+          "role": "brand-4",
+          "ids": [
+            "rect-2"
+          ],
+          "hex": "#59ebb3",
+          "area": 2921.97
+        },
+        {
+          "role": "brand-5",
+          "ids": [
+            "rect-3"
+          ],
+          "hex": "#ff8c6b",
+          "area": 1644.31
+        },
+        {
           "role": "brand-6",
           "ids": [
-            "s1",
-            "s3",
-            "s4"
+            "rect-5"
           ],
           "hex": "#61b8ff",
-          "area": 5870.54
+          "area": 1304.26
         },
         {
           "role": "brand-2",
           "ids": [
-            "s2"
+            "circle-8"
           ],
           "hex": "#ffd685",
-          "area": 2921.97
+          "area": 228.93
         },
         {
           "role": "text",
@@ -251,16 +341,17 @@
       "device": null,
       "parts": [
         {
-          "role": "brand-6",
+          "role": "brand-3",
           "ids": [
-            "s1",
-            "s3",
-            "s4",
-            "s2",
+            "rect-1",
+            "rect-2",
+            "rect-3",
+            "rect-5",
+            "circle-8",
             "wordmark"
           ],
           "hex": "#ffffff",
-          "area": 27975.94
+          "area": 28257.72
         }
       ]
     },
@@ -278,16 +369,17 @@
       "device": null,
       "parts": [
         {
-          "role": "brand-6",
+          "role": "brand-3",
           "ids": [
-            "s1",
-            "s3",
-            "s4",
-            "s2",
+            "rect-1",
+            "rect-2",
+            "rect-3",
+            "rect-5",
+            "circle-8",
             "wordmark"
           ],
           "hex": "#0f0f0f",
-          "area": 27975.94
+          "area": 28257.72
         }
       ]
     },
@@ -305,22 +397,44 @@
       "device": null,
       "parts": [
         {
-          "role": "brand-6",
+          "role": "brand-3",
           "ids": [
-            "s1",
-            "s3",
-            "s4"
+            "rect-1"
           ],
           "hex": "#1c1c1c",
-          "area": 1846.28
+          "area": 898.28
+        },
+        {
+          "role": "brand-4",
+          "ids": [
+            "rect-2"
+          ],
+          "hex": "#59ebb3",
+          "area": 898.28
+        },
+        {
+          "role": "brand-5",
+          "ids": [
+            "rect-3"
+          ],
+          "hex": "#ff8c6b",
+          "area": 529.73
+        },
+        {
+          "role": "brand-6",
+          "ids": [
+            "rect-5"
+          ],
+          "hex": "#61b8ff",
+          "area": 418.28
         },
         {
           "role": "brand-2",
           "ids": [
-            "s2"
+            "circle-8"
           ],
           "hex": "#ffd685",
-          "area": 898.28
+          "area": 78.56
         }
       ]
     },
@@ -338,22 +452,44 @@
       "device": null,
       "parts": [
         {
-          "role": "brand-6",
+          "role": "brand-3",
           "ids": [
-            "s1",
-            "s3",
-            "s4"
+            "rect-1"
           ],
           "hex": "#1c1c1c",
-          "area": 1846.28
+          "area": 898.28
+        },
+        {
+          "role": "brand-4",
+          "ids": [
+            "rect-2"
+          ],
+          "hex": "#59ebb3",
+          "area": 898.28
+        },
+        {
+          "role": "brand-5",
+          "ids": [
+            "rect-3"
+          ],
+          "hex": "#ff8c6b",
+          "area": 529.73
+        },
+        {
+          "role": "brand-6",
+          "ids": [
+            "rect-5"
+          ],
+          "hex": "#61b8ff",
+          "area": 418.28
         },
         {
           "role": "brand-2",
           "ids": [
-            "s2"
+            "circle-8"
           ],
           "hex": "#ffd685",
-          "area": 898.28
+          "area": 78.56
         }
       ]
     },
@@ -371,22 +507,44 @@
       "device": null,
       "parts": [
         {
-          "role": "brand-6",
+          "role": "brand-3",
           "ids": [
-            "s1",
-            "s3",
-            "s4"
+            "rect-1"
           ],
           "hex": "#1c1c1c",
-          "area": 1846.28
+          "area": 898.28
+        },
+        {
+          "role": "brand-4",
+          "ids": [
+            "rect-2"
+          ],
+          "hex": "#59ebb3",
+          "area": 898.28
+        },
+        {
+          "role": "brand-5",
+          "ids": [
+            "rect-3"
+          ],
+          "hex": "#ff8c6b",
+          "area": 529.73
+        },
+        {
+          "role": "brand-6",
+          "ids": [
+            "rect-5"
+          ],
+          "hex": "#61b8ff",
+          "area": 418.28
         },
         {
           "role": "brand-2",
           "ids": [
-            "s2"
+            "circle-8"
           ],
           "hex": "#ffd685",
-          "area": 898.28
+          "area": 78.56
         }
       ]
     },
@@ -404,22 +562,44 @@
       "device": null,
       "parts": [
         {
-          "role": "brand-6",
+          "role": "brand-3",
           "ids": [
-            "s1",
-            "s3",
-            "s4"
+            "rect-1"
           ],
           "hex": "#1c1c1c",
-          "area": 1846.28
+          "area": 898.28
+        },
+        {
+          "role": "brand-4",
+          "ids": [
+            "rect-2"
+          ],
+          "hex": "#59ebb3",
+          "area": 898.28
+        },
+        {
+          "role": "brand-5",
+          "ids": [
+            "rect-3"
+          ],
+          "hex": "#ff8c6b",
+          "area": 529.73
+        },
+        {
+          "role": "brand-6",
+          "ids": [
+            "rect-5"
+          ],
+          "hex": "#61b8ff",
+          "area": 418.28
         },
         {
           "role": "brand-2",
           "ids": [
-            "s2"
+            "circle-8"
           ],
           "hex": "#ffd685",
-          "area": 898.28
+          "area": 78.56
         }
       ]
     },
@@ -437,15 +617,16 @@
       "device": null,
       "parts": [
         {
-          "role": "brand-6",
+          "role": "brand-3",
           "ids": [
-            "s1",
-            "s3",
-            "s4",
-            "s2"
+            "rect-1",
+            "rect-2",
+            "rect-3",
+            "rect-5",
+            "circle-8"
           ],
           "hex": "#1c1c1c",
-          "area": 2744.56
+          "area": 2823.12
         }
       ]
     },
@@ -463,15 +644,16 @@
       "device": null,
       "parts": [
         {
-          "role": "brand-6",
+          "role": "brand-3",
           "ids": [
-            "s1",
-            "s3",
-            "s4",
-            "s2"
+            "rect-1",
+            "rect-2",
+            "rect-3",
+            "rect-5",
+            "circle-8"
           ],
           "hex": "#f3f3f3",
-          "area": 2498.22
+          "area": 2563.92
         }
       ]
     },
@@ -489,15 +671,16 @@
       "device": null,
       "parts": [
         {
-          "role": "brand-6",
+          "role": "brand-3",
           "ids": [
-            "s1",
-            "s3",
-            "s4",
-            "s2"
+            "rect-1",
+            "rect-2",
+            "rect-3",
+            "rect-5",
+            "circle-8"
           ],
           "hex": "#1c1c1c",
-          "area": 2744.56
+          "area": 2823.12
         }
       ]
     },
@@ -515,15 +698,16 @@
       "device": null,
       "parts": [
         {
-          "role": "brand-6",
+          "role": "brand-3",
           "ids": [
-            "s1",
-            "s3",
-            "s4",
-            "s2"
+            "rect-1",
+            "rect-2",
+            "rect-3",
+            "rect-5",
+            "circle-8"
           ],
           "hex": "#f3f3f3",
-          "area": 2498.22
+          "area": 2563.92
         }
       ]
     },
@@ -541,15 +725,16 @@
       "device": null,
       "parts": [
         {
-          "role": "brand-6",
+          "role": "brand-3",
           "ids": [
-            "s1",
-            "s3",
-            "s4",
-            "s2"
+            "rect-1",
+            "rect-2",
+            "rect-3",
+            "rect-5",
+            "circle-8"
           ],
           "hex": "#ffffff",
-          "area": 2744.56
+          "area": 2823.12
         }
       ]
     }
@@ -557,7 +742,7 @@
   "small": {},
   "sources": {
     "symbol": {
-      "sha256": "4dad904d526769ef9b034f81757388b8ab24951b0d53a1acdb91742cc42735f9"
+      "sha256": "b33c439963790eff74dd978325830f323a71eb9febd84c4e456bf246da38befc"
     }
   },
   "optics": {
@@ -576,7 +761,7 @@
   },
   "primary": "lockup-horizontal",
   "anchors": {
-    "symbol": 44
+    "symbol": 49
   },
   "clear_space": {
     "unit": "cap-height",
@@ -608,38 +793,38 @@
   "light_swaps": [
     {
       "version": "symbol-only",
-      "role": "brand-6",
-      "from": "#61b8ff",
+      "role": "brand-3",
+      "from": "#a88cff",
       "to": "#1c1c1c",
       "ground": "#ffffff",
-      "ratio": 2.14,
+      "ratio": 2.67,
       "colour_lost": true
     },
     {
       "version": "favicon-16",
-      "role": "brand-6",
-      "from": "#61b8ff",
+      "role": "brand-3",
+      "from": "#a88cff",
       "to": "#1c1c1c",
       "ground": "#ffffff",
-      "ratio": 2.14,
+      "ratio": 2.67,
       "colour_lost": true
     },
     {
       "version": "favicon-32",
-      "role": "brand-6",
-      "from": "#61b8ff",
+      "role": "brand-3",
+      "from": "#a88cff",
       "to": "#1c1c1c",
       "ground": "#ffffff",
-      "ratio": 2.14,
+      "ratio": 2.67,
       "colour_lost": true
     },
     {
       "version": "favicon-48",
-      "role": "brand-6",
-      "from": "#61b8ff",
+      "role": "brand-3",
+      "from": "#a88cff",
       "to": "#1c1c1c",
       "ground": "#ffffff",
-      "ratio": 2.14,
+      "ratio": 2.67,
       "colour_lost": true
     }
   ],

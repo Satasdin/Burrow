@@ -206,3 +206,35 @@ struct SkyCard: ViewModifier {
 extension View {
     func skyCard(tint: Color = .white, radius: CGFloat = 14) -> some View { modifier(SkyCard(tint: tint, radius: radius)) }
 }
+
+// MARK: The mark
+
+/// Burrow's mark (Ledger Strata, chosen 13 Nov 2026): one band per sky theme, Nebula to Tide, with a burrow dug through
+/// the lower two and a gold light at its end. Drawn from the brand master on a 100-unit grid (design/logo).
+struct BurrowMark: View {
+    var size: CGFloat = 64
+    /// One colour, for small sizes on light grounds; nil draws the four theme colours and the gold light.
+    var ink: Color? = nil
+
+    private static let bands: [(y: CGFloat, colour: Color)] = [
+        (14, Color(red: 0.659, green: 0.549, blue: 1.0)), (32, Color(red: 0.349, green: 0.922, blue: 0.702)),
+        (50, Color(red: 1.0, green: 0.549, blue: 0.420)), (68, Color(red: 0.380, green: 0.722, blue: 1.0)),
+    ]
+
+    var body: some View {
+        Canvas { context, canvas in
+            let unit = canvas.width / 100
+            context.scaleBy(x: unit, y: unit)
+            let tunnel = Path(ellipseIn: CGRect(x: 30, y: 48, width: 40, height: 40)).union(Path(CGRect(x: 30, y: 68, width: 40, height: 14)))
+            for band in Self.bands {
+                let shape = Path(roundedRect: CGRect(x: 12, y: band.y, width: 76, height: 12), cornerRadius: 4).subtracting(tunnel)
+                context.fill(shape, with: .color(ink ?? band.colour))
+            }
+            if ink == nil {
+                context.fill(Path(ellipseIn: CGRect(x: 45, y: 67, width: 10, height: 10)), with: .color(Theme.gold))
+            }
+        }
+        .frame(width: size, height: size)
+        .accessibilityLabel("Burrow")
+    }
+}

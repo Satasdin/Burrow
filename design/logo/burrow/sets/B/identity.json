@@ -25,9 +25,9 @@
   "set": {
     "id": "B",
     "name": "Ledger Strata",
-    "recommended": false,
-    "mechanism": "Memory as layers of earth and ledger lines at once: ruled bands with a burrow cut through the bottom, the line the model read in gold, a monospaced name like a ledger entry.",
-    "expression_move": "The tunnel cut through the lower strata is the only curve.",
+    "recommended": true,
+    "mechanism": "Memory as layers of earth and ledger lines at once: one band per sky theme (Nebula, Aurora, Ember, Tide), a burrow dug through the lower two with a gold light at its end, and a monospaced name like a ledger entry.",
+    "expression_move": "The four theme colours stacked in the mark are the only loud thing; the name and ground stay plain.",
     "differs_by": "Nothing on the AI-tool shelf is typographic or ruled; this reads as a record book, which is what the Ledger is, in Tide blue rather than the category's violet."
   },
   "axes": {
@@ -93,7 +93,7 @@
   },
   "logo": {
     "type": "symbol+wordmark",
-    "concept": "Ruled strata with a burrow dug through them; the gold line is the entry the model read.",
+    "concept": "Strata that are also ledger lines, one per sky theme, with a burrow through them and a gold light at the end of the tunnel: what the model read.",
     "symbol": "logo/symbol.svg",
     "wordmark": {
       "text": "burrow",
@@ -108,8 +108,11 @@
       "stacked"
     ],
     "colors": {
-      "strata": "brand-6",
-      "read": "brand-2",
+      "nebula": "brand-3",
+      "aurora": "brand-4",
+      "ember": "brand-5",
+      "tide": "brand-6",
+      "light": "brand-2",
       "wordmark": "text"
     },
     "tags": [
@@ -124,10 +127,37 @@
       "px": 16,
       "mm": 6
     },
-    "defect": "Round 3, to clear a cliché reading (a menu icon): the tunnel is now an arch-topped doorway cut through the lower two strata, wide enough to read at 16 px."
+    "defect": "Chosen variant B3 (picked by Ibrahim on the canvas, 13 Nov 2026): the four bands take the four theme colours and the gold moves into the tunnel.",
+    "misuse": [
+      {
+        "do": "stretch"
+      },
+      {
+        "do": "recolour"
+      },
+      {
+        "do": "effects"
+      },
+      {
+        "do": "low-contrast"
+      },
+      {
+        "svg": "logo/misuse-1.svg",
+        "label": "Never reorder the bands: Nebula on top, Tide at the bottom"
+      },
+      {
+        "svg": "logo/misuse-2.svg",
+        "label": "Never fill the tunnel"
+      }
+    ]
   },
   "palette": "palette.json",
-  "defaults_used": [],
+  "defaults_used": [
+    {
+      "id": "many-colors",
+      "why": "The four colours are the app's four existing sky themes (kept palette); the mark shows the whole app."
+    }
+  ],
   "rationale": [
     {
       "claim": "The Ledger (what sessions decided, read first by every model) is the product's distinct feature; ruled lines name it without a book icon.",
@@ -143,7 +173,7 @@
         "type",
         "palette"
       ],
-      "inputs_sha256": "72be732d99d8279f49b84d52f87269a0a06a805b599409a1f47a3be824819c5c"
+      "inputs_sha256": "e1216771bb3aedf4eff5f98008b17701e924af5148cc802a99eaa566426fe5ff"
     }
   ],
   "audit": {
@@ -151,8 +181,8 @@
     "passed": true,
     "counts": {
       "gate": 0,
-      "warn": 18,
-      "info": 10
+      "warn": 28,
+      "info": 11
     },
     "findings": [
       {
@@ -436,6 +466,51 @@
         "suggested_fix": null
       },
       {
+        "id": "logo.ids",
+        "component": "logo",
+        "severity": "info",
+        "measured": null,
+        "threshold": null,
+        "message": "symbol.svg: 8 element(s) without an id",
+        "suggested_fix": "give every primitive a semantic id so edits change one element per round"
+      },
+      {
+        "id": "logo.contrast",
+        "component": "logo",
+        "severity": "warn",
+        "measured": 2.67,
+        "threshold": ">= 3.0:1 (WCAG 2.2 SC 1.4.11, practice)",
+        "message": "full-color: brand-3 #a88cff on #ffffff is 2.67:1",
+        "suggested_fix": "use a one-colour version on this ground, or declare logo.device tile|outline",
+        "roles": [
+          "brand-3"
+        ]
+      },
+      {
+        "id": "logo.contrast",
+        "component": "logo",
+        "severity": "warn",
+        "measured": 1.5,
+        "threshold": ">= 3.0:1 (WCAG 2.2 SC 1.4.11, practice)",
+        "message": "full-color: brand-4 #59ebb3 on #ffffff is 1.50:1",
+        "suggested_fix": "use a one-colour version on this ground, or declare logo.device tile|outline",
+        "roles": [
+          "brand-4"
+        ]
+      },
+      {
+        "id": "logo.contrast",
+        "component": "logo",
+        "severity": "warn",
+        "measured": 2.28,
+        "threshold": ">= 3.0:1 (WCAG 2.2 SC 1.4.11, practice)",
+        "message": "full-color: brand-5 #ff8c6b on #ffffff is 2.28:1",
+        "suggested_fix": "use a one-colour version on this ground, or declare logo.device tile|outline",
+        "roles": [
+          "brand-5"
+        ]
+      },
+      {
         "id": "logo.contrast",
         "component": "logo",
         "severity": "warn",
@@ -457,6 +532,42 @@
         "suggested_fix": "use a one-colour version on this ground, or declare logo.device tile|outline",
         "roles": [
           "brand-2"
+        ]
+      },
+      {
+        "id": "logo.contrast",
+        "component": "logo",
+        "severity": "warn",
+        "measured": 2.67,
+        "threshold": ">= 3.0:1 (WCAG 2.2 SC 1.4.11, practice)",
+        "message": "on-light-background: brand-3 #a88cff on #ffffff is 2.67:1",
+        "suggested_fix": "use a one-colour version on this ground, or declare logo.device tile|outline",
+        "roles": [
+          "brand-3"
+        ]
+      },
+      {
+        "id": "logo.contrast",
+        "component": "logo",
+        "severity": "warn",
+        "measured": 1.5,
+        "threshold": ">= 3.0:1 (WCAG 2.2 SC 1.4.11, practice)",
+        "message": "on-light-background: brand-4 #59ebb3 on #ffffff is 1.50:1",
+        "suggested_fix": "use a one-colour version on this ground, or declare logo.device tile|outline",
+        "roles": [
+          "brand-4"
+        ]
+      },
+      {
+        "id": "logo.contrast",
+        "component": "logo",
+        "severity": "warn",
+        "measured": 2.28,
+        "threshold": ">= 3.0:1 (WCAG 2.2 SC 1.4.11, practice)",
+        "message": "on-light-background: brand-5 #ff8c6b on #ffffff is 2.28:1",
+        "suggested_fix": "use a one-colour version on this ground, or declare logo.device tile|outline",
+        "roles": [
+          "brand-5"
         ]
       },
       {
@@ -487,6 +598,42 @@
         "id": "logo.contrast",
         "component": "logo",
         "severity": "warn",
+        "measured": 1.5,
+        "threshold": ">= 3.0:1 (WCAG 2.2 SC 1.4.11, practice)",
+        "message": "symbol-only: brand-4 #59ebb3 on #ffffff is 1.50:1",
+        "suggested_fix": "use a one-colour version on this ground, or declare logo.device tile|outline",
+        "roles": [
+          "brand-4"
+        ]
+      },
+      {
+        "id": "logo.contrast",
+        "component": "logo",
+        "severity": "warn",
+        "measured": 2.28,
+        "threshold": ">= 3.0:1 (WCAG 2.2 SC 1.4.11, practice)",
+        "message": "symbol-only: brand-5 #ff8c6b on #ffffff is 2.28:1",
+        "suggested_fix": "use a one-colour version on this ground, or declare logo.device tile|outline",
+        "roles": [
+          "brand-5"
+        ]
+      },
+      {
+        "id": "logo.contrast",
+        "component": "logo",
+        "severity": "warn",
+        "measured": 2.14,
+        "threshold": ">= 3.0:1 (WCAG 2.2 SC 1.4.11, practice)",
+        "message": "symbol-only: brand-6 #61b8ff on #ffffff is 2.14:1",
+        "suggested_fix": "use a one-colour version on this ground, or declare logo.device tile|outline",
+        "roles": [
+          "brand-6"
+        ]
+      },
+      {
+        "id": "logo.contrast",
+        "component": "logo",
+        "severity": "warn",
         "measured": 1.38,
         "threshold": ">= 3.0:1 (WCAG 2.2 SC 1.4.11, practice)",
         "message": "symbol-only: brand-2 #ffd685 on #ffffff is 1.38:1",
@@ -499,49 +646,58 @@
         "id": "logo.light-swap",
         "component": "logo",
         "severity": "info",
-        "measured": 2.14,
+        "measured": 2.67,
         "threshold": null,
-        "message": "symbol-only: brand-6 #61b8ff is 2.14:1 on #ffffff; drawn in the light text colour #1c1c1c (a colour stays only where it reads)",
+        "message": "symbol-only: brand-3 #a88cff is 2.67:1 on #ffffff; drawn in the light text colour #1c1c1c (a colour stays only where it reads)",
         "suggested_fix": null,
         "roles": [
-          "brand-6"
+          "brand-3"
         ]
       },
       {
         "id": "logo.light-swap",
         "component": "logo",
         "severity": "info",
-        "measured": 2.14,
+        "measured": 2.67,
         "threshold": null,
-        "message": "favicon-16: brand-6 #61b8ff is 2.14:1 on #ffffff; drawn in the light text colour #1c1c1c (a colour stays only where it reads)",
+        "message": "favicon-16: brand-3 #a88cff is 2.67:1 on #ffffff; drawn in the light text colour #1c1c1c (a colour stays only where it reads)",
         "suggested_fix": null,
         "roles": [
-          "brand-6"
+          "brand-3"
         ]
       },
       {
         "id": "logo.light-swap",
         "component": "logo",
         "severity": "info",
-        "measured": 2.14,
+        "measured": 2.67,
         "threshold": null,
-        "message": "favicon-32: brand-6 #61b8ff is 2.14:1 on #ffffff; drawn in the light text colour #1c1c1c (a colour stays only where it reads)",
+        "message": "favicon-32: brand-3 #a88cff is 2.67:1 on #ffffff; drawn in the light text colour #1c1c1c (a colour stays only where it reads)",
         "suggested_fix": null,
         "roles": [
-          "brand-6"
+          "brand-3"
         ]
       },
       {
         "id": "logo.light-swap",
         "component": "logo",
         "severity": "info",
-        "measured": 2.14,
+        "measured": 2.67,
         "threshold": null,
-        "message": "favicon-48: brand-6 #61b8ff is 2.14:1 on #ffffff; drawn in the light text colour #1c1c1c (a colour stays only where it reads)",
+        "message": "favicon-48: brand-3 #a88cff is 2.67:1 on #ffffff; drawn in the light text colour #1c1c1c (a colour stays only where it reads)",
         "suggested_fix": null,
         "roles": [
-          "brand-6"
+          "brand-3"
         ]
+      },
+      {
+        "id": "logo.colors",
+        "component": "logo",
+        "severity": "warn",
+        "measured": 6,
+        "threshold": "<= 3 (heuristic, uncalibrated)",
+        "message": "6 colours in the logo",
+        "suggested_fix": "fewer colours or logo.colors_why"
       },
       {
         "id": "cohesion.sets-close",

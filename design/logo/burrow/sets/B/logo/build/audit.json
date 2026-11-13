@@ -2,6 +2,51 @@
   "schema": "brand-identity/audit@1",
   "findings": [
     {
+      "id": "logo.ids",
+      "component": "logo",
+      "severity": "info",
+      "measured": null,
+      "threshold": null,
+      "message": "symbol.svg: 8 element(s) without an id",
+      "suggested_fix": "give every primitive a semantic id so edits change one element per round"
+    },
+    {
+      "id": "logo.contrast",
+      "component": "logo",
+      "severity": "warn",
+      "measured": 2.67,
+      "threshold": ">= 3.0:1 (WCAG 2.2 SC 1.4.11, practice)",
+      "message": "full-color: brand-3 #a88cff on #ffffff is 2.67:1",
+      "suggested_fix": "use a one-colour version on this ground, or declare logo.device tile|outline",
+      "roles": [
+        "brand-3"
+      ]
+    },
+    {
+      "id": "logo.contrast",
+      "component": "logo",
+      "severity": "warn",
+      "measured": 1.5,
+      "threshold": ">= 3.0:1 (WCAG 2.2 SC 1.4.11, practice)",
+      "message": "full-color: brand-4 #59ebb3 on #ffffff is 1.50:1",
+      "suggested_fix": "use a one-colour version on this ground, or declare logo.device tile|outline",
+      "roles": [
+        "brand-4"
+      ]
+    },
+    {
+      "id": "logo.contrast",
+      "component": "logo",
+      "severity": "warn",
+      "measured": 2.28,
+      "threshold": ">= 3.0:1 (WCAG 2.2 SC 1.4.11, practice)",
+      "message": "full-color: brand-5 #ff8c6b on #ffffff is 2.28:1",
+      "suggested_fix": "use a one-colour version on this ground, or declare logo.device tile|outline",
+      "roles": [
+        "brand-5"
+      ]
+    },
+    {
       "id": "logo.contrast",
       "component": "logo",
       "severity": "warn",
@@ -23,6 +68,42 @@
       "suggested_fix": "use a one-colour version on this ground, or declare logo.device tile|outline",
       "roles": [
         "brand-2"
+      ]
+    },
+    {
+      "id": "logo.contrast",
+      "component": "logo",
+      "severity": "warn",
+      "measured": 2.67,
+      "threshold": ">= 3.0:1 (WCAG 2.2 SC 1.4.11, practice)",
+      "message": "on-light-background: brand-3 #a88cff on #ffffff is 2.67:1",
+      "suggested_fix": "use a one-colour version on this ground, or declare logo.device tile|outline",
+      "roles": [
+        "brand-3"
+      ]
+    },
+    {
+      "id": "logo.contrast",
+      "component": "logo",
+      "severity": "warn",
+      "measured": 1.5,
+      "threshold": ">= 3.0:1 (WCAG 2.2 SC 1.4.11, practice)",
+      "message": "on-light-background: brand-4 #59ebb3 on #ffffff is 1.50:1",
+      "suggested_fix": "use a one-colour version on this ground, or declare logo.device tile|outline",
+      "roles": [
+        "brand-4"
+      ]
+    },
+    {
+      "id": "logo.contrast",
+      "component": "logo",
+      "severity": "warn",
+      "measured": 2.28,
+      "threshold": ">= 3.0:1 (WCAG 2.2 SC 1.4.11, practice)",
+      "message": "on-light-background: brand-5 #ff8c6b on #ffffff is 2.28:1",
+      "suggested_fix": "use a one-colour version on this ground, or declare logo.device tile|outline",
+      "roles": [
+        "brand-5"
       ]
     },
     {
@@ -53,6 +134,42 @@
       "id": "logo.contrast",
       "component": "logo",
       "severity": "warn",
+      "measured": 1.5,
+      "threshold": ">= 3.0:1 (WCAG 2.2 SC 1.4.11, practice)",
+      "message": "symbol-only: brand-4 #59ebb3 on #ffffff is 1.50:1",
+      "suggested_fix": "use a one-colour version on this ground, or declare logo.device tile|outline",
+      "roles": [
+        "brand-4"
+      ]
+    },
+    {
+      "id": "logo.contrast",
+      "component": "logo",
+      "severity": "warn",
+      "measured": 2.28,
+      "threshold": ">= 3.0:1 (WCAG 2.2 SC 1.4.11, practice)",
+      "message": "symbol-only: brand-5 #ff8c6b on #ffffff is 2.28:1",
+      "suggested_fix": "use a one-colour version on this ground, or declare logo.device tile|outline",
+      "roles": [
+        "brand-5"
+      ]
+    },
+    {
+      "id": "logo.contrast",
+      "component": "logo",
+      "severity": "warn",
+      "measured": 2.14,
+      "threshold": ">= 3.0:1 (WCAG 2.2 SC 1.4.11, practice)",
+      "message": "symbol-only: brand-6 #61b8ff on #ffffff is 2.14:1",
+      "suggested_fix": "use a one-colour version on this ground, or declare logo.device tile|outline",
+      "roles": [
+        "brand-6"
+      ]
+    },
+    {
+      "id": "logo.contrast",
+      "component": "logo",
+      "severity": "warn",
       "measured": 1.38,
       "threshold": ">= 3.0:1 (WCAG 2.2 SC 1.4.11, practice)",
       "message": "symbol-only: brand-2 #ffd685 on #ffffff is 1.38:1",
@@ -65,49 +182,58 @@
       "id": "logo.light-swap",
       "component": "logo",
       "severity": "info",
-      "measured": 2.14,
+      "measured": 2.67,
       "threshold": null,
-      "message": "symbol-only: brand-6 #61b8ff is 2.14:1 on #ffffff; drawn in the light text colour #1c1c1c (a colour stays only where it reads)",
+      "message": "symbol-only: brand-3 #a88cff is 2.67:1 on #ffffff; drawn in the light text colour #1c1c1c (a colour stays only where it reads)",
       "suggested_fix": null,
       "roles": [
-        "brand-6"
+        "brand-3"
       ]
     },
     {
       "id": "logo.light-swap",
       "component": "logo",
       "severity": "info",
-      "measured": 2.14,
+      "measured": 2.67,
       "threshold": null,
-      "message": "favicon-16: brand-6 #61b8ff is 2.14:1 on #ffffff; drawn in the light text colour #1c1c1c (a colour stays only where it reads)",
+      "message": "favicon-16: brand-3 #a88cff is 2.67:1 on #ffffff; drawn in the light text colour #1c1c1c (a colour stays only where it reads)",
       "suggested_fix": null,
       "roles": [
-        "brand-6"
+        "brand-3"
       ]
     },
     {
       "id": "logo.light-swap",
       "component": "logo",
       "severity": "info",
-      "measured": 2.14,
+      "measured": 2.67,
       "threshold": null,
-      "message": "favicon-32: brand-6 #61b8ff is 2.14:1 on #ffffff; drawn in the light text colour #1c1c1c (a colour stays only where it reads)",
+      "message": "favicon-32: brand-3 #a88cff is 2.67:1 on #ffffff; drawn in the light text colour #1c1c1c (a colour stays only where it reads)",
       "suggested_fix": null,
       "roles": [
-        "brand-6"
+        "brand-3"
       ]
     },
     {
       "id": "logo.light-swap",
       "component": "logo",
       "severity": "info",
-      "measured": 2.14,
+      "measured": 2.67,
       "threshold": null,
-      "message": "favicon-48: brand-6 #61b8ff is 2.14:1 on #ffffff; drawn in the light text colour #1c1c1c (a colour stays only where it reads)",
+      "message": "favicon-48: brand-3 #a88cff is 2.67:1 on #ffffff; drawn in the light text colour #1c1c1c (a colour stays only where it reads)",
       "suggested_fix": null,
       "roles": [
-        "brand-6"
+        "brand-3"
       ]
+    },
+    {
+      "id": "logo.colors",
+      "component": "logo",
+      "severity": "warn",
+      "measured": 6,
+      "threshold": "<= 3 (heuristic, uncalibrated)",
+      "message": "6 colours in the logo",
+      "suggested_fix": "fewer colours or logo.colors_why"
     }
   ]
 }

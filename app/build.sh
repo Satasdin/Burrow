@@ -8,6 +8,8 @@ rm -rf "$bundle"
 mkdir -p "$bundle/Contents/MacOS"
 cp "$(swift build -c release --show-bin-path)/Burrow" "$bundle/Contents/MacOS/Burrow"
 cp Info.plist "$bundle/Contents/Info.plist"
+mkdir -p "$bundle/Contents/Resources"
+cp Resources/AppIcon.icns "$bundle/Contents/Resources/AppIcon.icns"
 # The burrow command rides inside the app, so the Programs page can point every program at a full path that exists.
 (cd .. && swift build -c release --product burrow)
 mkdir -p "$bundle/Contents/Resources/bin"

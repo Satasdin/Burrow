@@ -18,5 +18,10 @@
     "sha256": "4dad904d526769ef9b034f81757388b8ab24951b0d53a1acdb91742cc42735f9",
     "anchors": 44,
     "defect": "Round 3, to clear a clich\u00e9 reading (a menu icon): the tunnel is now an arch-topped doorway cut through the lower two strata, wide enough to read at 16 px."
+  },
+  {
+    "sha256": "b33c439963790eff74dd978325830f323a71eb9febd84c4e456bf246da38befc",
+    "anchors": 49,
+    "defect": "Chosen variant B3 (picked by Ibrahim on the canvas, 13 Nov 2026): the four bands take the four theme colours and the gold moves into the tunnel."
   }
 ]

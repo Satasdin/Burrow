@@ -223,7 +223,7 @@ struct EmptyPage: View {
         ZStack {
             NightSky()
             VStack(spacing: 18) {
-                Image(systemName: "sparkles").font(.system(size: 38, weight: .light)).foregroundStyle(theme.accent).shadow(color: theme.accent.opacity(0.8), radius: 14)
+                BurrowMark(size: 96).shadow(color: Theme.gold.opacity(0.35), radius: 18)
                 Text(workspace.name).font(.system(size: 30, weight: .bold)).foregroundStyle(Night.note)
                 if let stats = workspace.stats {
                     Text("\(stats.notes.formatted()) notes · \(stats.files.formatted()) files · \(workspace.ledger.commits.count.counted("Ledger commit"))")
