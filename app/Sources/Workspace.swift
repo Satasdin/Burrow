@@ -903,6 +903,7 @@ final class Library {
         case "programs": workspace.go(.programs)
         case "ledger": workspace.go(.ledger(nil))
         case "documents": workspace.go(.library(.documents))
+        case "none": workspace.tabs.forEach(workspace.close)
         default: break
         }
         if let pick = environment["BURROW_SELECT"] { workspace.librarySelection = pick }

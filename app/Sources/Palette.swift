@@ -7,6 +7,9 @@ struct Palette: View {
     @State private var text = ""
     @State private var selected = 0
     @FocusState private var focused: Bool
+    @Namespace private var highlight
+    @AppStorage(SkyTheme.key) private var themeName = SkyTheme.nebula.rawValue
+    private var theme: SkyTheme { SkyTheme(rawValue: themeName) ?? .nebula }
 
     private struct Item: Identifiable {
         let id: String
@@ -32,7 +35,14 @@ struct Palette: View {
             Item(id: "c-graph", title: "Map", detail: "⇧⌘G", icon: "circle.hexagongrid") { w.go(.graph) },
             Item(id: "c-search", title: "Search Vault", detail: "⇧⌘F", icon: "magnifyingglass") { w.sidebarMode = .search },
             Item(id: "c-read", title: "Read Vault Again", detail: "⌘R", icon: "arrow.clockwise") { Task { await w.readAgain() } },
+            Item(id: "c-ask", title: "Ask Your Vault", detail: "", icon: "bubble.left.and.text.bubble.right") { w.go(.ask) },
+            Item(id: "c-watch", title: "Watch: Rules, Changes and Flags", detail: "Ledger", icon: "checkmark.shield") { w.go(.ledger(nil)) },
         ]
+        for sky in SkyTheme.allCases {
+            out.append(Item(id: "c-theme-\(sky.rawValue)", title: "Theme: \(sky.name)", detail: sky.rawValue == themeName ? "In use" : "", icon: "paintpalette") {
+                withAnimation(.easeInOut(duration: 0.4)) { UserDefaults.standard.set(sky.rawValue, forKey: SkyTheme.key) }
+            })
+        }
         return out
     }
 
@@ -63,7 +73,7 @@ struct Palette: View {
         }
         if query.isEmpty {
             let open_ = w.tabs.compactMap { tab -> String? in if case let .file(path) = tab.content { return path } else { return nil } }
-            return open_.reversed().map(open) + commands.prefix(5)
+            return open_.reversed().map(open) + commands.filter { ["c-new", "c-day", "c-ask", "c-library", "c-ledger", "c-graph"].contains($0.id) }
         }
         var ranked: [(Int, Item)] = []
         for command in commands { if let s = score(query, command.title) { ranked.append((s + 2, command)) } }
@@ -81,7 +91,7 @@ struct Palette: View {
         let list = items
         VStack(spacing: 0) {
             HStack(spacing: 10) {
-                Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
+                Image(systemName: "magnifyingglass").foregroundStyle(theme.accent)
                 TextField("Open a note, or run a command", text: $text).textFieldStyle(.plain).font(.system(size: 18)).focused($focused)
                     .onSubmit { run(list) }
             }
@@ -99,14 +109,21 @@ struct Palette: View {
                     }
                     .padding(6)
                 }
-                .frame(maxHeight: 340)
+                .frame(height: min(340, CGFloat(list.count) * 33 + 12))
+                .animation(.spring(response: 0.3, dampingFraction: 0.85), value: list.count)
                 .onChange(of: selected) { _, new in reader.scrollTo(new) }
             }
         }
         .frame(width: 600)
-        .background(.regularMaterial, in: .rect(cornerRadius: 16))
-        .overlay { RoundedRectangle(cornerRadius: 16).strokeBorder(Color.primary.opacity(0.12)) }
-        .shadow(color: .black.opacity(0.35), radius: 30, y: 12)
+        .background {
+            RoundedRectangle(cornerRadius: 16).fill(.ultraThinMaterial)
+                .overlay { RoundedRectangle(cornerRadius: 16).fill(LinearGradient(colors: [theme.glows.0.opacity(0.28), Color.black.opacity(0.55)], startPoint: .topLeading, endPoint: .bottomTrailing)) }
+        }
+        .overlay { RoundedRectangle(cornerRadius: 16).strokeBorder(LinearGradient(colors: [theme.accent.opacity(0.6), .white.opacity(0.08)], startPoint: .top, endPoint: .bottom)) }
+        .shadow(color: theme.accent.opacity(0.25), radius: 40, y: 10)
+        .shadow(color: .black.opacity(0.4), radius: 20, y: 12)
+        .environment(\.colorScheme, .dark)
+        .animation(.spring(response: 0.25, dampingFraction: 0.85), value: selected)
         .onAppear { focused = true }
         .onChange(of: text) { _, _ in selected = 0 }
         .onKeyPress(.downArrow) { selected = min(selected + 1, max(0, list.count - 1)); return .handled }
@@ -117,14 +134,20 @@ struct Palette: View {
 
     private func row(_ item: Item, active: Bool) -> some View {
         HStack(spacing: 10) {
-            Image(systemName: item.icon).frame(width: 18).foregroundStyle(active ? .white : .secondary)
+            Image(systemName: item.icon).frame(width: 18).foregroundStyle(active ? Color.black : theme.accent.opacity(0.85))
             Text(item.title).lineLimit(1)
             Spacer(minLength: 12)
-            Text(item.detail).font(.caption).lineLimit(1).foregroundStyle(active ? .white.opacity(0.8) : .secondary)
+            Text(item.detail).font(.caption).lineLimit(1).foregroundStyle(active ? Color.black.opacity(0.65) : Night.dim)
         }
-        .foregroundStyle(active ? .white : .primary)
+        .foregroundStyle(active ? Color.black : Night.note)
         .padding(.horizontal, 10).frame(height: 32)
-        .background(active ? Color.accentColor : .clear, in: .rect(cornerRadius: 8))
+        .background {
+            if active {
+                RoundedRectangle(cornerRadius: 8).fill(LinearGradient(colors: [theme.accent, theme.accent.opacity(0.78)], startPoint: .leading, endPoint: .trailing))
+                    .shadow(color: theme.accent.opacity(0.5), radius: 8)
+                    .matchedGeometryEffect(id: "highlight", in: highlight)
+            }
+        }
         .contentShape(Rectangle())
     }
 

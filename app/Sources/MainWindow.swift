@@ -216,12 +216,14 @@ struct TabButton: View {
 
 struct EmptyPage: View {
     let workspace: Workspace
+    @AppStorage(SkyTheme.key) private var themeName = SkyTheme.nebula.rawValue
+    private var theme: SkyTheme { SkyTheme(rawValue: themeName) ?? .nebula }
 
     var body: some View {
         ZStack {
             NightSky()
             VStack(spacing: 18) {
-                Image(systemName: "sparkles").font(.system(size: 34, weight: .light)).foregroundStyle(.tint).symbolEffect(.pulse)
+                Image(systemName: "sparkles").font(.system(size: 38, weight: .light)).foregroundStyle(theme.accent).shadow(color: theme.accent.opacity(0.8), radius: 14)
                 Text(workspace.name).font(.system(size: 30, weight: .bold)).foregroundStyle(Night.note)
                 if let stats = workspace.stats {
                     Text("\(stats.notes.formatted()) notes · \(stats.files.formatted()) files · \(workspace.ledger.commits.count.counted("Ledger commit"))")
