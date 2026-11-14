@@ -95,6 +95,12 @@ final class SecretsNoBypassTests: XCTestCase {
         XCTAssertFalse(out.isEmpty)
     }
 
+    func testANameRightAfterAnotherNamesSignIsStillChecked() {
+        let out = Secrets.redacted("A_TOKEN=B_KEY=\"inner secret value\" after")
+        XCTAssertFalse(out.contains("inner secret value"))
+        XCTAssertTrue(out.hasSuffix(" after"))
+    }
+
     func testWhatIsNotASecretStaysAsPrinted() {
         for line in ["max_tokens=4096", "InvalidTokenError: token expired", "Invalid token: expired", "tokenizer=bpe", "monkey=banana42",
                      "export KEY=$HOME", "port: 8080"] {

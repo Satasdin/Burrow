@@ -59,9 +59,12 @@ public enum Secrets {
     /// position, so a long line costs no more than reading it, and nothing is skipped for being long. A quoted value that
     /// never closes is removed to the end of its line (fails closed).
     static func namedValuesRemoved(_ text: String) -> String {
+        let folded = text.lowercased()
+        guard nameWords.contains(where: folded.contains) else { return text }   // no secret's word, nothing to read
         let chars = Array(text)
         // Lowercased one character at a time, so positions line up even where a letter's lowercase is longer.
         let lower = chars.map { c -> Character in let l = String(c).lowercased(); return l.count == 1 ? Character(l) : c }
+        let jumps = Jumps(chars)
         var cuts: [Range<Int>] = []
         var seen = Set<Int>()
         var i = 0
@@ -73,10 +76,8 @@ public enum Secrets {
             while to < chars.count, isNameChar(chars[to]) { to += 1 }
             i = to
             guard seen.insert(from).inserted, isSecretName(String(chars[from..<to])) else { continue }
-            if let value = value(after: to, nameFrom: from, in: chars) {
-                cuts.append(value)
-                i = max(i, value.upperBound)   // read on after the value, so each character is read once and cuts never overlap
-            }
+            // Every name is checked, names inside an earlier value too (A_TOKEN=B_KEY="..."): the cuts are joined below.
+            if let value = value(after: to, nameFrom: from, in: chars, jumps) { cuts.append(value) }
         }
         guard !cuts.isEmpty else { return text }
         // Built front to back from the original: a cut that begins inside one already taken is joined to it.
@@ -131,46 +132,63 @@ public enum Secrets {
 
     /// The range of the value after a secret's name that ends at `to`, or nil when what follows is not `=` or `:` and a
     /// value. Mirrors the old patterns: NAME = value, or a name (quoted alike on both sides, or not) then `:` and a value.
-    private static func value(after to: Int, nameFrom from: Int, in chars: [Character]) -> Range<Int>? {
+    /// For each position, where the next character of a kind is, worked out once from the end of the text, so finding a
+    /// value's end is one look-up and checking every name stays a single pass however many names a line holds.
+    struct Jumps {
+        let nonSpace, equalsStop, colonStop, doubleQuote, singleQuote, lineEnd, digitsEnd: [Int]
+
+        init(_ chars: [Character]) {
+            let n = chars.count
+            func from(_ test: (Character) -> Bool) -> [Int] {
+                var next = [Int](repeating: n, count: n + 1)
+                var k = n - 1
+                while k >= 0 { next[k] = test(chars[k]) ? k : next[k + 1]; k -= 1 }
+                return next
+            }
+            let equalsStops: Set<Character> = [" ", "\t", "\n", "\r", "\"", "'", "&", ";", ",", ")"]
+            let colonStops: Set<Character> = [" ", "\t", "\n", "\r", "\"", "'", ",", "}"]
+            nonSpace = from { !$0.isWhitespace }
+            equalsStop = from { equalsStops.contains($0) || $0.isWhitespace }
+            colonStop = from { colonStops.contains($0) || $0.isWhitespace }
+            doubleQuote = from { $0 == "\"" }
+            singleQuote = from { $0 == "'" }
+            lineEnd = from { $0 == "\n" || $0 == "\r" }
+            digitsEnd = from { !($0.isASCII && $0.isNumber) }
+        }
+    }
+
+    /// The range of the value after a secret's name that ends at `to`, or nil when what follows is not `=` or `:` and a
+    /// value. NAME = value, or a name (quoted alike on both sides, or not) then `:` and a value.
+    private static func value(after to: Int, nameFrom from: Int, in chars: [Character], _ jump: Jumps) -> Range<Int>? {
+        let n = chars.count
         var j = to
         // "name": the same quote after the name as before it.
-        var quoted: Character? = nil
-        if from > 0, chars[from - 1] == "\"" || chars[from - 1] == "'", j < chars.count, chars[j] == chars[from - 1] {
-            quoted = chars[j]; j += 1
-        }
-        while j < chars.count, chars[j].isWhitespace { j += 1 }
-        guard j < chars.count, chars[j] == "=" || chars[j] == ":" else { return nil }
+        var quoted = false
+        if from > 0, chars[from - 1] == "\"" || chars[from - 1] == "'", j < n, chars[j] == chars[from - 1] { quoted = true; j += 1 }
+        j = jump.nonSpace[j]
+        guard j < n, chars[j] == "=" || chars[j] == ":" else { return nil }
         let colon = chars[j] == ":"
-        if quoted != nil, !colon { return nil }
-        j += 1
-        while j < chars.count, chars[j].isWhitespace { j += 1 }
-        guard j < chars.count else { return nil }
+        if quoted, !colon { return nil }
+        j = jump.nonSpace[j + 1]
+        guard j < n else { return nil }
         // Already removed, a shell variable, or only digits (a count, a port, a size): leave it.
-        if String(chars[j..<min(chars.count, j + marker.count)]) == marker { return nil }
+        if j + marker.count <= n, String(chars[j..<(j + marker.count)]) == marker { return nil }
         if !colon, chars[j] == "$" { return nil }
-        var digits = j
-        while digits < chars.count, chars[digits].isASCII, chars[digits].isNumber { digits += 1 }
-        if digits > j, digits == chars.count || !(isNameChar(chars[digits]) && chars[digits] != "." ) { return nil }
+        let digits = jump.digitsEnd[j]
+        if digits > j, digits == n || !(isNameChar(chars[digits]) && chars[digits] != ".") { return nil }
         if chars[j] == "\"" || chars[j] == "'" {
-            let q = chars[j]
-            var k = j + 1
-            while k < chars.count, chars[k] != q { k += 1 }
-            if k < chars.count {
-                if colon, k == j + 1 { return nil }   // "name": "" holds nothing
-                return j..<(k + 1)
+            let close = (chars[j] == "\"" ? jump.doubleQuote : jump.singleQuote)[j + 1]
+            if close < n {
+                if colon, close == j + 1 { return nil }   // "name": "" holds nothing
+                return j..<(close + 1)
             }
-            // Never closed: everything to the end of the line goes.
-            var end = j
-            while end < chars.count, chars[end] != "\n" { end += 1 }
-            return j..<end
+            return j..<jump.lineEnd[j]   // never closed: everything to the end of the line goes
         }
-        let stops: Set<Character> = colon ? [" ", "\t", "\n", "\r", "\"", "'", ",", "}"] : [" ", "\t", "\n", "\r", "\"", "'", "&", ";", ",", ")"]
-        var k = j
-        while k < chars.count, !stops.contains(chars[k]) { k += 1 }
-        if k == j { return nil }
+        let end = (colon ? jump.colonStop : jump.equalsStop)[j]
+        if end == j { return nil }
         // Unquoted after a colon, the value must be 8 or more characters: "Invalid token: expired" stays as printed.
-        if colon, k - j < 8 { return nil }
-        return j..<k
+        if colon, end - j < 8 { return nil }
+        return j..<end
     }
 
     /// The text cut before secrets are taken out, generously: taking secrets out reads a text once, so this only bounds
