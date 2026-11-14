@@ -23,10 +23,34 @@ func openVault(_ path: String, store: String?, sayLinks: Bool = true) throws -> 
 }
 
 /// Every command that opens a vault: a linked folder the person on this Mac has not approved is taken out of the index
-/// and skipped (D-101), and the person is told once, in one plain line, how to approve it.
+/// and skipped (D-101), and the person is told once, in one plain line, how to approve it. Names and paths only when
+/// stderr is a terminal; through a pipe, where a connected program with a shell may be the reader, only a count (D-104).
 func meetLinks(_ vault: Vault, say: Bool = true) {
     do { try vault.dropUnapprovedFromIndex() } catch { logToStandardError("could not take unapproved linked folders out of the index: \(error)") }
-    if say, let line = vault.linksAwaitingApprovalLine() { logToStandardError(line) }
+    if say, let line = vault.linksAwaitingApprovalLine(detailed: isatty(STDERR_FILENO) == 1) { logToStandardError(line) }
+}
+
+/// True when burrow runs in a person's own terminal, where what it asks is shown and the answer is typed (D-104). A
+/// program that runs burrow through its own shell tool (Claude Code, OpenCode, Hermes, OpenClaw) gives it pipes instead.
+func inPersonsTerminal() -> Bool { isatty(STDIN_FILENO) == 1 && isatty(STDERR_FILENO) == 1 }
+
+/// Said when a step only the person may take is run without a terminal (D-104).
+let needsThePerson = "only you can approve a linked folder: approve it in the Burrow app, or run this in your own terminal. It can't be done through a pipe or by a program you've connected to Burrow."
+
+/// Shows the person what they are about to allow and waits for them to type yes. Throws for anything else.
+func askThePerson(_ lines: [String]) throws {
+    guard inPersonsTerminal() else { throw Failure(needsThePerson) }
+    let question = lines.joined(separator: "\n") + "\nType yes to allow, anything else to stop: "
+    FileHandle.standardError.write(Data(question.utf8))
+    let answer = readLine(strippingNewline: true)?.trimmingCharacters(in: .whitespaces).lowercased()
+    guard answer == "yes" else { throw Failure("nothing was approved") }
+}
+
+/// A linked folder as the person is asked about it: its name, and the real path Burrow would read.
+private func shownForApproval(_ state: LinkState) -> String {
+    let real = Printable.clean(state.realPath)
+    let listed = state.leadsElsewhere ? " (listed as \(Printable.clean(state.folder.path)))" : ""
+    return "  \(Printable.clean(state.folder.name))   \(real)\(listed)\(state.exists ? "" : "   (folder not found)")"
 }
 
 /// Where the last-opened vault is remembered, so `burrow` alone can go back to it.
@@ -134,10 +158,20 @@ func runTerminalCommand(_ arguments: [String]) async throws -> Bool {
         let target = URL(fileURLWithPath: options.positional[1])
         var isFolder: ObjCBool = false
         guard FileManager.default.fileExists(atPath: target.path, isDirectory: &isFolder), isFolder.boolValue else { throw Failure("\(target.path) is not a folder") }
+        // Linking here approves the folder, so it needs the person in their own terminal too (D-104): otherwise a
+        // connected program could link, and so approve, any folder on this Mac.
+        guard inPersonsTerminal() else { throw Failure(needsThePerson) }
+        let real = Vault.realPath(target.path)
+        let path = target.standardizedFileURL.path
+        try askThePerson([
+            "Link this folder into \(Printable.clean(vault.root.path)) and approve it on this Mac?",
+            "  \(Printable.clean(real))\(!LinkState.samePlace(real, path) ? " (you named \(Printable.clean(path)))" : "")",
+            "Burrow reads it where it is and never changes it. Search, Ask and every program you connect to this vault can read it.",
+        ])
         let linked: LinkedFolder
-        do { linked = try vault.linkFolder(target) } catch let problem as NoteProblem { throw Failure(problem.description) }
-        print("linked \(linked.path) as \(linked.name), read-only, approved on this Mac")
-        if let line = vault.linksAwaitingApprovalLine() { logToStandardError(line) }
+        do { linked = try vault.linkFolder(target, expected: real) } catch let problem as NoteProblem { throw Failure(problem.description) }
+        print("linked \(Printable.clean(linked.path)) as \(Printable.clean(linked.name)), read-only, approved on this Mac")
+        if let line = vault.linksAwaitingApprovalLine(detailed: true) { logToStandardError(line) }
     default: break
     }
     return true
@@ -148,39 +182,58 @@ func runTerminalCommand(_ arguments: [String]) async throws -> Bool {
 private func linkApprovals(_ action: String, _ words: [String], all: Bool, store: String?) async throws {
     guard let folder = words.first else {
         throw Failure(action == "list" ? "link list needs a vault folder: burrow link list <vault>"
-                                       : "link approve needs a vault folder: burrow link approve <vault> --all | <folder>")
+                                       : "link approve needs a vault folder: burrow link approve <vault> <folder>")
     }
+    // Approving needs the person in their own terminal (D-104), checked before anything is opened.
+    if action == "approve", !inPersonsTerminal() { throw Failure(needsThePerson) }
     let vault = try openVault(folder, store: store, sayLinks: false)
-    let shown = vault.root.path.contains(" ") ? "\"\(vault.root.path)\"" : vault.root.path
+    // Everything printed from the vault's list is cleaned of control characters, since anyone who shared the vault could
+    // have written it (D-104), and every suggested command quotes its words so a pasted path can't run anything.
+    let shown = Printable.shellWord(vault.root.path)
     let states = vault.linkStates()
     if action == "list" {
         guard !states.isEmpty else {
-            print("\(vault.root.path) links no folders. Link one with: burrow link \(shown) <folder>")
+            print("\(Printable.clean(vault.root.path)) links no folders. Link one with: burrow link \(shown) <folder>")
             return
         }
         for state in states {
-            let place = state.leadsElsewhere ? "\(state.folder.path) -> \(state.realPath)" : state.folder.path
+            let place = state.leadsElsewhere ? "\(Printable.clean(state.folder.path)) -> \(Printable.clean(state.realPath))" : Printable.clean(state.folder.path)
             let missing = state.exists ? "" : " (folder not found)"
-            if state.approved {
-                print("\(state.folder.name)   \(place)\(missing)   approved")
+            let name = Printable.clean(state.folder.name)
+            if let why = state.refusal {
+                print("\(name)   \(place)\(missing)   never followed: \(why)")
+            } else if state.approved {
+                print("\(name)   \(place)\(missing)   approved")
             } else {
-                let name = state.folder.name.contains(" ") ? "\"\(state.folder.name)\"" : state.folder.name
-                print("\(state.folder.name)   \(place)\(missing)   not approved on this Mac, so skipped. Approve it with: burrow link approve \(shown) \(name)")
+                print("\(name)   \(place)\(missing)   not approved on this Mac, so skipped. If you linked it yourself, approve it in the Burrow app, or in your own terminal with: burrow link approve \(shown) \(Printable.shellWord(state.realPath))")
             }
         }
         return
     }
     let names = Array(words.dropFirst())
     guard all || !names.isEmpty else {
-        throw Failure("say which to approve: burrow link approve \(shown) --all, or a folder's name from burrow link list \(shown)")
+        throw Failure("say which to approve, by its path from burrow link list \(shown): burrow link approve \(shown) <folder>")
     }
     guard !states.isEmpty else {
-        print("\(vault.root.path) links no folders, so there is nothing to approve.")
+        print("\(Printable.clean(vault.root.path)) links no folders, so there is nothing to approve.")
         return
     }
-    let approved: [LinkedFolder]
-    do { approved = try vault.approveLinks(all ? nil : names) } catch let problem as NoteProblem { throw Failure(problem.description) }
-    for folder in approved { print("approved \(folder.name) (\(folder.path)) for \(vault.root.lastPathComponent) on this Mac") }
+    let chosen: [LinkState]
+    do { chosen = try vault.linksToApprove(all ? nil : names) } catch let problem as NoteProblem { throw Failure(problem.description) }
+    guard !chosen.isEmpty else {
+        print("Nothing on \(Printable.clean(vault.root.path))'s list of linked folders can be approved. See burrow link list \(shown)")
+        return
+    }
+    // The real paths are what is approved, and what the person is shown; the list changing before they answer approves
+    // nothing (Vault.approve).
+    try askThePerson([
+        "Approve \(chosen.count == 1 ? "this folder" : "these \(chosen.count) folders") for \(Printable.clean(vault.root.path)) on this Mac?"]
+        + chosen.map(shownForApproval)
+        + ["A vault's list of linked folders can come from whoever shared the vault with you. Approve only folders you linked yourself.",
+           "Approved, Burrow reads \(chosen.count == 1 ? "it" : "them") where \(chosen.count == 1 ? "it is" : "they are"), and search, Ask and every program you connect to this vault can read \(chosen.count == 1 ? "it" : "them")."])
+    let approved: [LinkState]
+    do { approved = try vault.approve(chosen) } catch let problem as NoteProblem { throw Failure(problem.description) }
+    for state in approved { print("approved \(Printable.clean(state.folder.name)) (\(Printable.clean(state.realPath))) for \(Printable.clean(vault.root.lastPathComponent)) on this Mac") }
     // Back into the index now, by meaning too when the vault already searches by meaning.
     let ollama = Ollama()
     var report: IndexReport

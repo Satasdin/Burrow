@@ -164,7 +164,8 @@ final class LinkApprovalTests: XCTestCase {
         let vault = try open(home)
         let code = try vault.linkFolder(top.appendingPathComponent("Code"))
         XCTAssertEqual(vault.linkStates().map(\.approved), [true])
-        XCTAssertEqual(vault.linkedFolders(), [code])
+        // A reader gets the real path the approval was checked against (D-104).
+        XCTAssertEqual(vault.linkedFolders(), [LinkedFolder(name: code.name, path: Vault.realPath(code.path))])
         try await vault.refresh()
         XCTAssertTrue(try vault.projectMap().files.contains { $0.path == "Code/fares.py" })
         let saved = try String(contentsOf: LinkApprovalStore.file(in: state), encoding: .utf8)
@@ -321,11 +322,12 @@ final class LinkApprovalTests: XCTestCase {
     func testTheCommandLineAndMCPServerSkipUntilApproved() throws {
         try plant([("Private", privateFolder)], in: home)
         XCTAssertEqual(try burrow(["index", home.path, "--vault", "--no-embed"]).status, 0)
-        // find: nothing from the folder, and one plain line saying what was skipped and how to approve it.
+        // find: nothing from the folder, and one plain line saying what was skipped. Through a pipe, where a connected
+        // program may be reading, it gives a count and where to approve, never the name or path (D-104).
         let find = try burrow(["find", home.path, "kitty password diary", "--vault"])
         XCTAssertFalse(find.out.contains("Private/Diary.md"), find.out)
-        XCTAssertTrue(find.err.contains("skipped because you haven't approved it on this Mac: Private (\(privateFolder.path))"), find.err)
-        XCTAssertTrue(find.err.contains("burrow link approve \(home.path) --all"), find.err)
+        XCTAssertTrue(find.err.contains("1 linked folder was skipped because it isn't approved on this Mac. Only you can approve it"), find.err)
+        XCTAssertFalse(find.err.contains("Private") || find.err.contains(privateFolder.path) || find.err.contains("--all"), find.err)
         XCTAssertEqual(find.err.split(separator: "\n").count, 1, find.err)
         // MCP: nothing from it, and the first result and the instructions say how many are waiting, not which.
         var mcp = try overMCP()
@@ -339,9 +341,11 @@ final class LinkApprovalTests: XCTestCase {
         let list = try burrow(["link", "list", home.path])
         XCTAssertTrue(list.out.contains("Private   \(privateFolder.path)   not approved on this Mac"), list.out)
         XCTAssertNotEqual(try burrow(["link", "approve", home.path]).status, 0, "approve says which")
-        let approve = try burrow(["link", "approve", home.path, "--all"])
-        XCTAssertEqual(approve.status, 0, approve.err)
-        XCTAssertTrue(approve.out.contains("approved Private (\(privateFolder.path))"), approve.out)
+        // Approving needs the person in a terminal, typing yes (D-104).
+        XCTAssertNotEqual(try burrow(["link", "approve", home.path, "--all"]).status, 0)
+        let approve = try BurrowBinary.inTerminal(["link", "approve", home.path, "--all"], state: state, answer: "yes")
+        XCTAssertEqual(approve.status, 0, approve.out)
+        XCTAssertTrue(approve.out.contains("approved Private (\(Vault.realPath(privateFolder.path)))"), approve.out)
         XCTAssertTrue(try burrow(["link", "list", home.path]).out.contains("Private   \(privateFolder.path)   approved"))
         let after = try burrow(["find", home.path, "kitty password diary", "--vault"])
         XCTAssertTrue(after.out.contains("Private/Diary.md"), after.out)
@@ -352,8 +356,9 @@ final class LinkApprovalTests: XCTestCase {
     }
 
     func testAVaultLinkedWithTheCommandLineNeedsNoOtherStep() throws {
-        let link = try burrow(["link", home.path, top.appendingPathComponent("Code").path])
-        XCTAssertEqual(link.status, 0, link.err)
+        // Linking approves, so it is asked in the person's terminal too (D-104).
+        let link = try BurrowBinary.inTerminal(["link", home.path, top.appendingPathComponent("Code").path], state: state, answer: "yes")
+        XCTAssertEqual(link.status, 0, link.out)
         XCTAssertTrue(link.out.contains("approved on this Mac"), link.out)
         XCTAssertEqual(try burrow(["index", home.path, "--vault", "--no-embed"]).status, 0)
         let find = try burrow(["find", home.path, "matatu_fare", "--vault"])

@@ -10,9 +10,9 @@ burrow: private project memory for local models
   burrow chat  <vault-folder> [--model NAME] [--folder F] [--tools-only]
   burrow mcp   <vault-folder> [--no-sessions] [--llama URL] [--tools door|full|classic]   MCP server on stdin and stdout; each connection is kept as a session.
                With --llama, what lookups return is also read into that llama.cpp server's cache, in the background
-  burrow link  <vault-folder> <code-folder>                     link a folder; linking it here approves it on this Mac
+  burrow link  <vault-folder> <code-folder>                     link a folder and approve it on this Mac (in your own terminal, typing yes)
   burrow link list <vault-folder>                               linked folders, and which are approved on this Mac
-  burrow link approve <vault-folder> --all | <folder>           approve linked folders a vault came with; until then they are skipped
+  burrow link approve <vault-folder> <folder> | --all           approve linked folders a vault came with (in your own terminal, typing yes); until then they are skipped
 
   burrow index <project> [--no-embed] [--vault]
   burrow find  <project> "question" [--mode search|walk] [--json]

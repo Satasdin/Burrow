@@ -16,7 +16,13 @@ public enum Hooks {
         public func vaultPath(_ file: String) -> String? {
             let absolute = file.hasPrefix("/") ? file : root.appendingPathComponent(file).path
             let base = root.standardizedFileURL.path
-            let standard = URL(fileURLWithPath: absolute).standardizedFileURL.path
+            var standard = URL(fileURLWithPath: absolute).standardizedFileURL.path
+            if !standard.hasPrefix(base + "/") {
+                // A linked folder's root is its real path (D-104); a file named through a symlink above it (/tmp, /var,
+                // a shortcut) is the same file once its folder is resolved.
+                let url = URL(fileURLWithPath: standard)
+                standard = Vault.realPath(url.deletingLastPathComponent().path) + "/" + url.lastPathComponent
+            }
             guard standard.hasPrefix(base + "/") else { return nil }
             let rest = String(standard.dropFirst(base.count + 1))
             return prefix.isEmpty ? rest : prefix + "/" + rest
@@ -26,9 +32,11 @@ public enum Hooks {
     /// The place for a working folder: the linked folder that holds it, else the vault when it holds it, else nil.
     public static func place(for directory: URL, vaultRoot: URL, linked: [LinkedFolder]) -> Place? {
         let here = directory.standardizedFileURL.path
+        // Linked folders come with their real paths (D-104), so the working folder is matched resolved too.
+        let real = Vault.realPath(here)
         for folder in linked {
             let base = folder.url.standardizedFileURL.path
-            if here == base || here.hasPrefix(base + "/") {
+            if [here, real].contains(where: { $0 == base || $0.hasPrefix(base + "/") }) {
                 return Place(branch: (try? Ledger.branchName(folder.name)) ?? Ledger.defaultBranch, root: folder.url, prefix: folder.name)
             }
         }

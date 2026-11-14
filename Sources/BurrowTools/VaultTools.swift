@@ -392,8 +392,16 @@ public final class VaultTools {
         var clean = Self.tidy(asked)
         if let bridged = resolveBridged(clean) { return bridged }
         if clean.hasPrefix(vault.root.path + "/") { clean = String(clean.dropFirst(vault.root.path.count + 1)) }
-        for folder in vault.linkedFolders() where clean.hasPrefix(folder.path + "/") {
-            clean = folder.name + "/" + clean.dropFirst(folder.path.count + 1)
+        // A linked folder comes with its real path (D-104); a path named through a symlink above it is matched resolved.
+        let resolvedClean = clean.hasPrefix("/") ? Vault.realPath((clean as NSString).deletingLastPathComponent) + "/" + (clean as NSString).lastPathComponent : clean
+        for folder in vault.linkedFolders() {
+            if clean.hasPrefix(folder.path + "/") {
+                clean = folder.name + "/" + clean.dropFirst(folder.path.count + 1)
+                break
+            } else if resolvedClean.hasPrefix(folder.path + "/") {
+                clean = folder.name + "/" + resolvedClean.dropFirst(folder.path.count + 1)
+                break
+            }
         }
         var paths = try vault.projectMap().files.map(\.path)
         if !paths.contains(clean) {

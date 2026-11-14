@@ -14,13 +14,21 @@ WORK=${WORK:-$HOME/BurrowStress/gate}
 RES=$HERE/results
 mkdir -p "$WORK"
 
+# `burrow link approve` only works in a terminal, with yes typed after it asks (D-104). This is the trial standing in for
+# the person: script(1) gives burrow a pseudo-terminal, and yes is typed two seconds in, once burrow has asked (typed at
+# once, script's end-of-input can reach burrow first and nothing is approved). Stops the run if nothing was approved.
+approve_in_terminal() {
+  { sleep 2; echo yes; sleep 1; } | script -q /dev/null "$B" link approve "$1" "$2" > /dev/null 2>&1
+  "$B" link list "$1" 2>/dev/null | grep -q "   approved$" || { echo "gate.sh: could not approve $2 for $1" >&2; exit 1; }
+}
+
 fixture() {
   local D=$1
   rm -rf "$D"; mkdir -p "$D"
   rsync -a --delete "$HOME/BurrowStress/base/" "$D/"
   printf '[{"name":"matatu","path":"%s"}]' "$D/code/matatu" > "$D/Notes/.burrow/folders.json"
-  # A list written by hand is followed only once approved on this Mac (D-101).
-  "$B" link approve "$D/Notes" --all > /dev/null 2>&1
+  # A list written by hand is followed only once approved on this Mac (D-101), by the person in a terminal (D-104).
+  approve_in_terminal "$D/Notes" "$D/code/matatu"
   rm -rf "$D/Notes/.burrow/checks"
   "$B" index "$D/Notes" --vault > /dev/null 2>&1
 }
