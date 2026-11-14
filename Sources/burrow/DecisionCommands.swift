@@ -11,11 +11,15 @@ let decisionUsage = """
 /// Said when a step only the person may take is run without a terminal (D-104, D-107).
 let checksNeedThePerson = "only you can confirm, change or override a decision's check: do it in the Burrow app, or run this in your own terminal. It can't be done through a pipe or by a program you've connected to Burrow."
 
-/// Shows the person what they are about to allow and waits for a typed yes. False for anything else.
-func personSaysYes(_ lines: [String]) -> Bool {
-    guard inPersonsTerminal() else { return false }
-    FileHandle.standardError.write(Data((lines.joined(separator: "\n") + "\nType yes to allow, anything else to stop: ").utf8))
-    return readLine(strippingNewline: true)?.trimmingCharacters(in: .whitespaces).lowercased() == "yes"
+/// Shows the person what they are about to allow and waits for a typed yes. False for anything else. Confirming,
+/// clearing or overriding a check defeats the gate a connected program is held by, so each also needs the one-time code
+/// Burrow shows outside the terminal, typed before the yes (D-113); a wrong or missing code is said and allows nothing.
+func personSaysYes(_ lines: [String], code action: String) -> Bool {
+    do { try askThePerson(lines, code: action) } catch {
+        logToStandardError("\(error)")
+        return false
+    }
+    return true
 }
 
 /// What the person is shown before a check runs on this Mac: exactly what would run, where, and for how long.
@@ -47,7 +51,7 @@ func checkFolder(_ vault: Vault, _ decision: LedgerCommit) -> String? {
 /// Keeps a check for a decision: confirmed when the person is at their own terminal and types yes, else proposed, shown
 /// and never run (D-107). Returns the line to print.
 func keepCheck(_ check: DecisionCheck, for decision: LedgerCommit, vault: Vault) throws -> String {
-    if inPersonsTerminal(), personSaysYes(checkQuestion(check, decision: decision, folder: checkFolder(vault, decision))) {
+    if inPersonsTerminal(), personSaysYes(checkQuestion(check, decision: decision, folder: checkFolder(vault, decision)), code: "confirm the check for decision \(decision.id)") {
         try DecisionChecks.confirm(check, for: decision.id, vault: vault)
         return "    check confirmed: \(check.shown). burrow check runs it whenever a change touches this decision." + tryNow(check, decision, vault)
     }
@@ -82,9 +86,7 @@ func runDecisionCommand(_ arguments: [String]) async throws -> Bool {
     let action = positional[0]
     // Changing what runs, or letting a breaking change through, needs the person in their own terminal (D-104), checked
     // before anything is opened. Setting a check without one only proposes it.
-    if action == "override" || switches.contains("--confirm") || switches.contains("--clear"), !inPersonsTerminal() {
-        throw Failure(checksNeedThePerson)
-    }
+    if action == "override" || switches.contains("--confirm") || switches.contains("--clear") { try requireThePerson(checksNeedThePerson) }
     let vault = try openVault(positional[1], store: values["--store"])
     let ledger = Ledger(vault: vault)
     guard let decision = ledger.find(positional[2]), [.decision, .correction].contains(decision.kind) else {
@@ -103,7 +105,7 @@ func runDecisionCommand(_ arguments: [String]) async throws -> Bool {
         var lines = ["Decision \(decision.id): \(Printable.clean(String(decision.message.prefix(200))))", "Your change breaks it: " + Printable.clean(verdict.line)]
         if case let .ran(_, run) = verdict.check { lines.append(run.output.components(separatedBy: "\n").suffix(12).map { "  " + $0 }.joined(separator: "\n")) }
         lines.append("Let this exact change through? Any further edit to these files is checked again.")
-        guard personSaysYes(lines) else { throw Failure("nothing was let through") }
+        guard personSaysYes(lines, code: "let a change through although it breaks decision \(decision.id)") else { throw Failure("nothing was let through") }
         try DecisionChecks.override(decision.id, fingerprint: changeID, vault: vault)
         print("let through: this exact change, for \(decision.id). Any further edit to these files is checked again.")
         return true
@@ -111,7 +113,8 @@ func runDecisionCommand(_ arguments: [String]) async throws -> Bool {
 
     if switches.contains("--clear") {
         guard confirmed != nil || proposed != nil else { print("\(decision.id) has no check."); return true }
-        guard personSaysYes(["Take away the check for \(decision.id) (\((confirmed ?? proposed)!.shown))? Changes are then no longer tested against it."]) else {
+        guard personSaysYes(["Take away the check for \(decision.id) (\((confirmed ?? proposed)!.shown))? Changes are then no longer tested against it."],
+                            code: "take away the check for decision \(decision.id)") else {
             throw Failure("nothing was changed")
         }
         try DecisionChecks.clear(for: decision.id, vault: vault)
@@ -131,7 +134,9 @@ func runDecisionCommand(_ arguments: [String]) async throws -> Bool {
             print(confirmed.map { "\(decision.id)'s check is already confirmed: \($0.shown)" } ?? "\(decision.id) has no proposed check to confirm.")
             return true
         }
-        guard personSaysYes(checkQuestion(check, decision: decision, folder: checkFolder(vault, decision))) else { throw Failure("nothing was confirmed") }
+        guard personSaysYes(checkQuestion(check, decision: decision, folder: checkFolder(vault, decision)), code: "confirm the check for decision \(decision.id)") else {
+            throw Failure("nothing was confirmed")
+        }
         try DecisionChecks.confirm(check, for: decision.id, vault: vault)
         print("check confirmed: \(check.shown). burrow check runs it whenever a change touches \(decision.id)." + tryNow(check, decision, vault))
         return true

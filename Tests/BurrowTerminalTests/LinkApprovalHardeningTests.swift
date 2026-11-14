@@ -42,37 +42,94 @@ enum BurrowBinary {
         var text: String { lock.lock(); defer { lock.unlock() }; return String(decoding: data, as: UTF8.self) }
     }
 
+    /// What to type when burrow asks for the one-time code it shows outside the terminal (D-113).
+    enum CodeAnswer {
+        /// Nothing: the input ends, as if the person walked away.
+        case none
+        /// The code burrow showed, read through the debug-only BURROW_TEST_CODE_FILE hook, as the person reads it off
+        /// the notification or the app.
+        case shown
+        /// These words, every time it asks.
+        case typed(String)
+    }
+
+    /// Every variable an agent sets (D-113), taken out: the environment of the person's own Terminal.
+    static func personsEnvironment(_ state: URL) -> [String: String] {
+        var environment = environment(state)
+        for name in PersonPresence.markers.keys { environment[name] = nil }
+        return environment
+    }
+
     /// In a pseudo-terminal made by `script`, the same kind of terminal Terminal.app gives a shell. When burrow asks the
-    /// person to type yes, `answer` is typed. stdout and stderr arrive together, as on a screen, with line ends as "\n".
-    static func inTerminal(_ arguments: [String], state: URL, answer: String? = nil) throws -> (status: Int32, out: String) {
+    /// person to type yes, `answer` is typed; when it asks for its one-time code, `code`. stdout and stderr arrive
+    /// together, as on a screen, with line ends as "\n".
+    ///
+    /// These tests may themselves run inside an agent (Claude Code runs `swift test`), which burrow refuses (D-113). So
+    /// unless `detached` is false, the terminal is started the way a program set on it could: every agent variable taken
+    /// out, and `script` detached from this process tree (its parent exits, so launchd adopts it). That is exactly the
+    /// path layers 1 and 2 can't stop, which is why the steps that defeat the gate also need the code.
+    static func inTerminal(_ arguments: [String], state: URL, answer: String? = nil, code: CodeAnswer = .none,
+                           detached: Bool = true, environment extra: [String: String] = [:]) throws -> (status: Int32, out: String) {
         XCTAssertTrue(FileManager.default.isExecutableFile(atPath: url.path), "build burrow first: \(url.path)")
+        try FileManager.default.createDirectory(at: state, withIntermediateDirectories: true)
+        let codeFile = state.appendingPathComponent("shown-code-\(UUID().uuidString)")
+        let statusFile = state.appendingPathComponent("status-\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: codeFile); try? FileManager.default.removeItem(at: statusFile) }
         let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/script")
-        process.arguments = ["-q", "/dev/null", url.path] + arguments
-        process.environment = environment(state)
+        var environment = detached ? personsEnvironment(state) : environment(state)
+        environment["BURROW_TEST_CODE_FILE"] = codeFile.path
+        environment["BURROW_TEST_STATUS"] = statusFile.path
+        for (key, value) in extra { environment[key] = value }
+        process.environment = environment
+        let command = ["/usr/bin/script", "-q", "/dev/null", url.path] + arguments
+        if detached {
+            process.executableURL = URL(fileURLWithPath: "/bin/sh")
+            process.arguments = ["-c", "exec 3<&0; ( sleep 0.3; \"$@\" <&3; echo $? > \"$BURROW_TEST_STATUS\" ) & exit 0", "sh"] + command
+        } else {
+            process.executableURL = URL(fileURLWithPath: command[0])
+            process.arguments = Array(command.dropFirst())
+        }
         let feed = Pipe(), out = Pipe()
         process.standardInput = feed
         process.standardOutput = out
         process.standardError = out
         let collected = Collected()
-        out.fileHandleForReading.readabilityHandler = { handle in collected.add(handle.availableData) }
+        let ended = Collected()
+        out.fileHandleForReading.readabilityHandler = { handle in
+            let data = handle.availableData
+            if data.isEmpty { ended.add(Data("eof".utf8)); handle.readabilityHandler = nil } else { collected.add(data) }
+        }
         try process.run()
         let deadline = Date().addingTimeInterval(60)
-        var answered = false
-        while process.isRunning, Date() < deadline {
+        var answered = false, codesTyped = 0, closed = false
+        func close() { if !closed { try? feed.fileHandleForWriting.close(); closed = true } }
+        while ended.text.isEmpty, Date() < deadline {
+            let text = collected.text
             // Typed only once burrow has asked, as a person would.
-            if !answered, let answer, collected.text.contains("Type yes") {
+            let asks = text.components(separatedBy: "Type the code").count - 1
+            if asks > codesTyped, !closed {
+                codesTyped = asks
+                switch code {
+                case .none: close()
+                case .shown: feed.fileHandleForWriting.write(Data(((try? String(contentsOf: codeFile, encoding: .utf8)) ?? "") .appending("\n").utf8))
+                case let .typed(words): feed.fileHandleForWriting.write(Data((words + "\n").utf8))
+                }
+            }
+            if !answered, !closed, let answer, text.contains("Type yes") {
                 feed.fileHandleForWriting.write(Data((answer + "\n").utf8))
                 answered = true
             }
             Thread.sleep(forTimeInterval: 0.05)
         }
-        if process.isRunning { process.terminate() }
+        close()
         process.waitUntilExit()
-        out.fileHandleForReading.readabilityHandler = nil
-        collected.add(out.fileHandleForReading.readDataToEndOfFile())
-        try? feed.fileHandleForWriting.close()
-        return (process.terminationStatus, collected.text.replacingOccurrences(of: "\r\n", with: "\n"))
+        if !detached { return (process.terminationStatus, collected.text.replacingOccurrences(of: "\r\n", with: "\n")) }
+        var status: Int32 = -1
+        for _ in 0..<40 {
+            if let text = try? String(contentsOf: statusFile, encoding: .utf8), let value = Int32(text.trimmingCharacters(in: .whitespacesAndNewlines)) { status = value; break }
+            Thread.sleep(forTimeInterval: 0.05)
+        }
+        return (status, collected.text.replacingOccurrences(of: "\r\n", with: "\n"))
     }
 }
 

@@ -289,6 +289,8 @@ public enum DecisionChecks {
         var environment = ProcessInfo.processInfo.environment
         // A test run leaves no __pycache__ in the person's code.
         environment["PYTHONDONTWRITEBYTECODE"] = "1"
+        // A check runs the code a program may just have changed: nothing it starts is ever taken for the person (D-113).
+        environment[PersonPresence.checkMarker] = "1"
         process.environment = environment
         process.standardInput = FileHandle.nullDevice
         process.standardOutput = handle

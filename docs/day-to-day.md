@@ -181,6 +181,12 @@ connected, it only says how many. Until you say yes, nothing in them is indexed,
 Approving, and linking (which approves), only work in your own Terminal window: Burrow shows each folder's real path
 and asks you to type yes. Run from Claude Code or any other program, or through a pipe, they refuse and say to use the
 app or your own terminal, so a vault someone gave you can't talk a connected program into approving its folders.
+A terminal alone isn't taken as you any more (D-113): a program with a shell can open one and type yes. So burrow also
+refuses when it can see a connected program started it: Claude Code's, OpenCode's, Codex's, OpenClaw's, Hermes's,
+Gemini CLI's or Cursor's own variables in its environment, or one of them among the programs that started it or its
+terminal (Claude's own terminal pane counts). Use Terminal.app, iTerm or your editor's terminal, or the app. The same
+goes for joining a team and approving a share; overriding or confirming a decision's check also asks for a code Burrow
+shows outside the terminal (see the Ledger guide).
 
 ```
 burrow link list ~/Notes                                  # each linked folder, approved or not, with its real path
