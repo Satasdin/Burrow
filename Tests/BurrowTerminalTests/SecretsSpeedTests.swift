@@ -101,6 +101,18 @@ final class SecretsNoBypassTests: XCTestCase {
         XCTAssertTrue(out.hasSuffix(" after"))
     }
 
+    func testALoneCarriageReturnDoesNotEndAnUnclosedValue() {
+        let out = Secrets.redacted("API_TOKEN=\"part-one\rpart-two-secret\nnext")
+        XCTAssertFalse(out.contains("part-two-secret"))
+        XCTAssertEqual(out, "API_TOKEN=[secret removed]\nnext")
+        XCTAssertEqual(Secrets.redacted("API_TOKEN=\"abc def\r\nnext"), "API_TOKEN=[secret removed]\r\nnext")
+    }
+
+    func testAFlagMatchesOnlyWhenItStartsItsOwnWord() {
+        XCTAssertEqual(Secrets.redacted("mysql --password hunter2 -h db"), "mysql --password [secret removed] -h db")
+        XCTAssertEqual(Secrets.redacted("ran part-two-secret\nnext step"), "ran part-two-secret\nnext step")
+    }
+
     func testWhatIsNotASecretStaysAsPrinted() {
         for line in ["max_tokens=4096", "InvalidTokenError: token expired", "Invalid token: expired", "tokenizer=bpe", "monkey=banana42",
                      "export KEY=$HOME", "port: 8080"] {

@@ -36,8 +36,9 @@ public enum Secrets {
         (#"\bhf_[A-Za-z0-9]{30,}"#, marker),                                                        // Hugging Face
         (#"\bnpm_[A-Za-z0-9]{36}"#, marker),                                                        // npm
         (#"\beyJ[A-Za-z0-9_-]{8,}\.eyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}"#, marker),              // a JWT
-        // A command-line flag that takes a secret: --password hunter2, --api-key=..., --token "...".
-        (#"(?i)(--?(?:password|passwd|token|api[-_]?key|secret|client[-_]?secret|access[-_]?key|auth[-_]?token)(?:\s+|=))"# + notMarker
+        // A command-line flag that takes a secret: --password hunter2, --api-key=..., --token "...". Only a flag that starts
+        // its own word: "part-two-secret" is a name, not -secret.
+        (#"(?i)(?<![A-Za-z0-9_.-])(--?(?:password|passwd|token|api[-_]?key|secret|client[-_]?secret|access[-_]?key|auth[-_]?token)(?:\s+|=))"# + notMarker
             + #"("[^"]*"|'[^']*'|[^\s"'-][^\s"']*)"#, "$1" + marker),
     ].map { (try! NSRegularExpression(pattern: $0.0), $0.1) }
 
@@ -152,7 +153,7 @@ public enum Secrets {
             colonStop = from { colonStops.contains($0) || $0.isWhitespace }
             doubleQuote = from { $0 == "\"" }
             singleQuote = from { $0 == "'" }
-            lineEnd = from { $0 == "\n" || $0 == "\r" }
+            lineEnd = from { $0 == "\n" || $0 == "\r\n" }   // a lone carriage return does not end the line: an unclosed value runs on
             digitsEnd = from { !($0.isASCII && $0.isNumber) }
         }
     }
