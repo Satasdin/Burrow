@@ -97,14 +97,23 @@ yourself, with `burrow link` or **Link a Folder…** in the app, is approved as 
 
 The first time a vault opens with a linked folder you haven't approved, the app shows the folders and asks: **Allow**
 reads them from then on, **Not now** leaves them out and asks again next time. In Terminal, any command that opens the
-vault says in one line which folders it skipped. Until you say yes, nothing in them is indexed, searched, read, checked
-by `burrow check`, or shown to a connected program, which is only told how many are waiting.
+vault says in one line which folders it skipped, with each one's real path; run through a pipe, or by a program you've
+connected, it only says how many. Until you say yes, nothing in them is indexed, searched, read, checked by
+`burrow check`, or shown to a connected program, which is only told how many are waiting.
+
+Approving, and linking (which approves), only work in your own Terminal window: Burrow shows each folder's real path
+and asks you to type yes. Run from Claude Code or any other program, or through a pipe, they refuse and say to use the
+app or your own terminal, so a vault someone gave you can't talk a connected program into approving its folders.
 
 ```
-burrow link list ~/Notes                       # each linked folder, approved or not
-burrow link approve ~/Notes matatu             # one, by its name (or its path)
-burrow link approve ~/Notes --all              # every one on the list; the index takes them in at once
+burrow link list ~/Notes                                  # each linked folder, approved or not, with its real path
+burrow link approve ~/Notes /Users/me/code/matatu         # one, by its real path from the list (or its name); asks, type yes
 ```
+
+Names and paths from a vault's list are printed with control characters taken out, so a list someone else wrote can't
+rewrite your terminal. Burrow never follows a linked folder that is the vault itself, holds the vault, or is or holds
+its `.burrow` store, whoever approved it. If an approved folder's path is a symlink that is later pointed somewhere
+else, the new place isn't approved: it is skipped until you approve it.
 
 A vault you linked folders into with an earlier build needs this once: approvals are new (D-101), and Burrow can't tell a link
 you made from one someone else wrote into the list. Approvals are kept in Burrow's own folder, never in the vault, and
