@@ -14,7 +14,7 @@ burrow: private project memory for local models
 
   burrow index <project> [--no-embed] [--vault]
   burrow find  <project> "question" [--mode search|walk] [--json]
-  burrow ask   <project> "question" [--mode engine|none|search|walk] [--model NAME] [--json] [--no-skills] [--no-check] [--characters N]
+  burrow ask   <project> "question" [--mode engine|none|search|walk] [--model NAME] [--json] [--no-skills] [--no-check] [--no-ledger] [--characters N]
   burrow brief <project> "question" [--characters N] [--json]     the question packed for any other model
   burrow fit   <project> [--model NAME]                           measure a model and set how much it is shown
   burrow skills <project> [--install]                             list the skills, or add the starter set
@@ -125,6 +125,27 @@ func run() async throws {
         guard let text else { throw Failure("ask needs a question") }
         let asJSON = options.flags.contains("--json")
         let model = options.values["--model"] ?? Ollama.defaultModel
+        // Both paths hear the Ledger as `burrow chat` and the app's Ask do, from AskLedger, and print the answer a line at
+        // a time with its citations checked, so a place it was not given never reads as a source (D-96). The engine's own
+        // words are unchanged; `--no-ledger` leaves the Ledger out, for a baseline.
+        let stream = CheckedStream { words in if !asJSON { FileHandle.standardOutput.write(Data(words.utf8)) } }
+        let ledgerOn = !options.flags.contains("--no-ledger")
+        let notes = NoteSource { question, read in
+            let handed = ledgerOn ? AskLedger.handed(vault: vault, question: question, shown: Set(read.paths)) : nil
+            stream.shown = read.excerpts.map(ShownLines.init)
+            stream.ledger = Set(handed?.ids ?? [])
+            return handed
+        }
+        func checkedLines(_ handed: HandedNotes?, _ checked: CheckedAnswer) {
+            if let handed {
+                print("Ledger notes given: " + handed.ids.map { AskLedger.label($0) + (checked.ledgerCited.contains($0) ? " (cited)" : "") }.joined(separator: ", "))
+            }
+            if !checked.unverified.isEmpty { print("Not among what it read, so not a source: " + checked.unverified.joined(separator: ", ")) }
+        }
+        func checkedFields(_ handed: HandedNotes?, _ checked: CheckedAnswer) -> [String: Any] {
+            // "answer" stays as the model wrote it, as the evaluation scripts read it; the checked text sits beside it.
+            ["checked_answer": checked.text, "unverified": checked.unverified, "ledger_given": handed?.ids ?? [], "ledger_cited": checked.ledgerCited]
+        }
         if options.values["--mode"] == "engine" {
             var profile = await vault.profile(for: model, ollama: ollama)
             // For measuring how the amount shown changes the answers: a fixed budget in place of the fitted one.
@@ -137,12 +158,13 @@ func run() async throws {
             settings.useSkills = !options.flags.contains("--no-skills")
             settings.check = !options.flags.contains("--no-check")
             let reply = try await vault.engage(text, profile: profile, embedder: try embedderIfIndexed(vault, ollama), scope: options.values["--folder"],
-                                               answerer: ollama.answerer(model: model, contextWords: profile.windowTokens), settings: settings) { word in
-                if !asJSON { FileHandle.standardOutput.write(Data(word.utf8)) }
-            }
+                                               answerer: ollama.answerer(model: model, contextWords: profile.windowTokens), settings: settings,
+                                               notes: notes) { word in stream.add(word) }
+            stream.finish()
             let found = reply.brief.retrieved
+            let checked = reply.checked
             if asJSON {
-                print(try jsonLine([
+                print(try jsonLine(checkedFields(reply.handed, checked).merging([
                     "answer": reply.result.text, "first_word_s": reply.result.secondsToFirstWord, "total_s": reply.result.totalSeconds + reply.brief.seconds,
                     "retrieve_s": reply.brief.seconds, "prompt_tokens": reply.result.promptTokens, "answer_tokens": reply.result.answerTokens,
                     "characters": found.characters, "excerpts": describe(found),
@@ -151,29 +173,31 @@ func run() async throws {
                     "citations": ["named": reply.citations.count, "not_shown": reply.unverified.count],
                     "retried": reply.retried, "budget_characters": profile.budgetCharacters, "window_tokens": profile.windowTokens,
                     "nearest": found.signal.nearest.map { Double($0) } as Any? ?? NSNull(),
-                ]))
+                ]) { _, engine in engine }))
             } else {
-                if reply.retried { print("\n\nChecked: the first answer pointed at lines it was not shown, so it was asked again.\n\n" + reply.result.text) }
+                if reply.retried { print("\n\nChecked: the first answer pointed at lines it was not shown, so it was asked again.\n\n" + checked.text) }
                 print("\n\nDecided: \(reply.brief.route.mode.rawValue), because \(reply.brief.route.why)")
                 if let skill = reply.brief.skill { print("Skill: \(skill.name)") }
                 print("Read: " + (found.paths.isEmpty ? "nothing" : found.paths.joined(separator: ", ")))
                 print("Cited \(reply.citations.count) places, \(reply.unverified.count) not among what it read")
+                checkedLines(reply.handed, checked)
                 print(String(format: "Prepared in %.3f s, first word %.2f s, whole answer %.2f s, %d tokens read", reply.brief.seconds, reply.result.secondsToFirstWord, reply.result.totalSeconds, reply.result.promptTokens))
             }
             return
         }
         let answer = try await vault.ask(text, mode: try mode(options, default: .walk), embedder: try embedderIfIndexed(vault, ollama),
-                                         answerer: ollama.answerer(model: model)) { word in
-            if !asJSON { FileHandle.standardOutput.write(Data(word.utf8)) }
-        }
+                                         answerer: ollama.answerer(model: model), notes: notes) { word in stream.add(word) }
+        stream.finish()
+        let checked = answer.checked
         if asJSON {
-            print(try jsonLine([
+            print(try jsonLine(checkedFields(answer.handed, checked).merging([
                 "answer": answer.result.text, "first_word_s": answer.result.secondsToFirstWord, "total_s": answer.result.totalSeconds,
                 "retrieve_s": answer.retrieved.seconds, "prompt_tokens": answer.result.promptTokens, "answer_tokens": answer.result.answerTokens,
                 "characters": answer.retrieved.characters, "excerpts": describe(answer.retrieved),
-            ]))
+            ]) { _, plain in plain }))
         } else {
             print("\n\nRead: " + (answer.retrieved.paths.isEmpty ? "nothing" : answer.retrieved.paths.joined(separator: ", ")))
+            checkedLines(answer.handed, checked)
             print(String(format: "First word %.2f s, whole answer %.2f s, %d tokens read", answer.result.secondsToFirstWord, answer.result.totalSeconds, answer.result.promptTokens))
         }
 

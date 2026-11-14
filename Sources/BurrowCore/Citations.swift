@@ -32,8 +32,34 @@ public struct CheckedAnswer: Sendable, Equatable {
     public let ledgerCited: [String]
 }
 
+/// Holds streamed words until a line ends, then lets the line out with its citations checked (D-91). `burrow chat` and
+/// `burrow ask` both print through this (D-96).
+public final class CheckedStream: @unchecked Sendable {
+    private var pending = ""
+    private let emit: (String) -> Void
+    public var shown: [ShownLines] = []
+    public var ledger: Set<String> = []
+
+    public init(emit: @escaping (String) -> Void) { self.emit = emit }
+
+    public func add(_ words: String) {
+        pending += words
+        while let newline = pending.firstIndex(of: "\n") {
+            let line = String(pending[...newline])
+            pending.removeSubrange(...newline)
+            emit(Citations.check(line, shown: shown, ledger: ledger).text)
+        }
+    }
+
+    public func finish() {
+        guard !pending.isEmpty else { return }
+        emit(Citations.check(pending, shown: shown, ledger: ledger).text)
+        pending = ""
+    }
+}
+
 /// Checks an answer's citations: files and lines against the excerpts a model read, Ledger ids against the commits it
-/// was handed. One check for the app's Ask and `burrow chat` (D-91).
+/// was handed. One check for the app's Ask, `burrow chat`, `burrow ask` and `vault_ask` (D-91, D-96).
 public enum Citations {
     /// A Ledger commit id: `20261114-065345-a355`.
     static let ledgerID = try! NSRegularExpression(pattern: #"(?<![0-9A-Za-z])\d{8}-\d{6}-[0-9a-f]{4}(?![0-9A-Za-z])"#)
