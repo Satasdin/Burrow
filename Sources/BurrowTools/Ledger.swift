@@ -471,7 +471,7 @@ public struct Ledger: Sendable {
     }
 
     /// Text that can't open or close the Ledger's block, or a vault excerpt, from inside.
-    static func defanged(_ text: String) -> String {
+    public static func defanged(_ text: String) -> String {
         var out = ProjectContent.defanged(text)
         for tag in ["</ledger", "<ledger"] { out = out.replacingOccurrences(of: tag, with: "&lt;" + tag.dropFirst(), options: .caseInsensitive) }
         return out

@@ -227,7 +227,7 @@ struct OverviewInspector: View {
             Section("This vault") {
                 if let stats = workspace.stats {
                     LabeledContent("Notes", value: "\(stats.notes)")
-                    LabeledContent("Files", value: "\(stats.files)")
+                    LabeledContent("Files", value: "\(stats.allFiles)")
                     LabeledContent("Links", value: "\(stats.links)")
                     LabeledContent("Index", value: ByteCountFormatter.string(fromByteCount: Int64(stats.indexBytes), countStyle: .file))
                 }

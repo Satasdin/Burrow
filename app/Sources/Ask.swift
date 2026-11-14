@@ -144,7 +144,7 @@ struct AnswerView: View {
             if turn.finished, turn.wantsChange, turn.proposals.isEmpty, turn.failure == nil {
                 Text("No change to review.").font(.callout).foregroundStyle(.secondary)
             }
-            if !turn.sources.isEmpty || turn.decided != nil { sources }
+            if !turn.sources.isEmpty || turn.decided != nil || !turn.ledger.isEmpty { sources }
             if turn.finished, turn.failure == nil { actions }
             if let notes = turn.toRemember { remembered(notes) }
         }
@@ -187,6 +187,20 @@ struct AnswerView: View {
             if !turn.unverified.isEmpty {
                 Label("Not among what it read: " + turn.unverified.prefix(4).joined(separator: ", "), systemImage: "exclamationmark.triangle")
                     .font(.caption).foregroundStyle(.orange)
+            }
+            if !turn.ledger.isEmpty {
+                Text("From the Ledger").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
+                ForEach(turn.ledger, id: \.id) { commit in
+                    Button { workspace.go(.ledger(commit.branch)) } label: {
+                        HStack(alignment: .firstTextBaseline, spacing: 7) {
+                            Image(systemName: commit.kind.symbol).foregroundStyle(commit.kind.colour)
+                            Text(commit.message).lineLimit(2)
+                            Text(commit.author).foregroundStyle(.tertiary).lineLimit(1)
+                        }
+                        .font(.callout)
+                    }
+                    .buttonStyle(.plain).help(commit.because.map { "Because " + $0 } ?? commit.id)
+                }
             }
             if !turn.sources.isEmpty { Text("Used").font(.caption.weight(.semibold)).foregroundStyle(.secondary) }
             ForEach(turn.sources) { source in

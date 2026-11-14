@@ -12,7 +12,7 @@ struct MainWindow: View {
     private var subtitle: String {
         if let progress = workspace.progress { return progress }
         guard let stats = workspace.stats else { return "" }
-        return "\(stats.notes) notes, \(stats.files) files, \(stats.links) links"
+        return "\(stats.allFiles.formatted()) files · \(stats.notes.formatted()) notes · \(stats.links.formatted()) links"
     }
 
     var body: some View {
@@ -146,17 +146,29 @@ struct TabStrip: View {
     @Namespace private var underline
 
     var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 2) {
-                ForEach(workspace.tabs) { tab in TabButton(workspace: workspace, tab: tab, underline: underline) }
-                Button { Task { await workspace.newNote() } } label: {
-                    Image(systemName: "plus").frame(width: 26, height: 26).contentShape(Rectangle())
+        // The "+" sits outside the scrolling row, so a new tab sliding in can never be drawn under it: with six tabs
+        // open the last tab's name was under the "+" (14 November walkthrough, shot 26).
+        HStack(spacing: 0) {
+            ScrollViewReader { scroller in
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 2) {
+                        ForEach(workspace.tabs) { tab in
+                            TabButton(workspace: workspace, tab: tab, underline: underline).id(tab.id).transition(.opacity)
+                        }
+                    }
+                    .padding(.horizontal, 8).padding(.vertical, 4)
+                    .animation(.spring(response: 0.32, dampingFraction: 0.82), value: workspace.activeTab)
+                    .animation(.spring(response: 0.32, dampingFraction: 0.82), value: workspace.tabs)
                 }
-                .buttonStyle(.plain).foregroundStyle(.secondary).help("New note (⌘N)").accessibilityLabel("New note")
+                .onChange(of: workspace.activeTab) { _, active in
+                    if let active { withAnimation { scroller.scrollTo(active) } }
+                }
             }
-            .padding(.horizontal, 8).padding(.vertical, 4)
-            .animation(.spring(response: 0.32, dampingFraction: 0.82), value: workspace.activeTab)
-            .animation(.spring(response: 0.32, dampingFraction: 0.82), value: workspace.tabs)
+            Button { Task { await workspace.newNote() } } label: {
+                Image(systemName: "plus").frame(width: 26, height: 26).contentShape(Rectangle())
+            }
+            .buttonStyle(.plain).foregroundStyle(.secondary).help("New note (⌘N)").accessibilityLabel("New note")
+            .padding(.horizontal, 8)
         }
         .background(.bar)
         .overlay(alignment: .bottom) { Divider() }
@@ -226,7 +238,7 @@ struct EmptyPage: View {
                 BurrowMark(size: 96).shadow(color: Theme.gold.opacity(0.35), radius: 18)
                 Text(workspace.name).font(.system(size: 30, weight: .bold)).foregroundStyle(Night.note)
                 if let stats = workspace.stats {
-                    Text("\(stats.notes.formatted()) notes · \(stats.files.formatted()) files · \(workspace.ledger.commits.count.counted("Ledger commit"))")
+                    Text("\(stats.allFiles.formatted()) files · \(stats.notes.formatted()) notes · \(workspace.ledger.commits.count.counted("Ledger commit"))")
                         .font(.system(size: 13)).foregroundStyle(Night.dim).monospacedDigit()
                 }
                 HStack(spacing: 10) {
@@ -291,7 +303,7 @@ struct StatusBar: View {
             return out
         }
         var out: [String] = []
-        if let stats = workspace.stats { out += ["\(stats.notes.formatted()) notes", "\(stats.files.formatted()) files", "\(stats.links.formatted()) links"] }
+        if let stats = workspace.stats { out += ["\(stats.allFiles.formatted()) files", "\(stats.notes.formatted()) notes", "\(stats.links.formatted()) links"] }
         if !workspace.sessions.isEmpty { out.append(workspace.sessions.count.counted("conversation")) }
         if !workspace.ledger.commits.isEmpty { out.append(workspace.ledger.commits.count.counted("Ledger commit")) }
         let shelf = workspace.shelf.reduce(0) { $0 + $1.entry.bytes }
