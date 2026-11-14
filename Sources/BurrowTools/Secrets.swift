@@ -73,11 +73,26 @@ public enum Secrets {
             while to < chars.count, isNameChar(chars[to]) { to += 1 }
             i = to
             guard seen.insert(from).inserted, isSecretName(String(chars[from..<to])) else { continue }
-            if let value = value(after: to, nameFrom: from, in: chars) { cuts.append(value) }
+            if let value = value(after: to, nameFrom: from, in: chars) {
+                cuts.append(value)
+                i = max(i, value.upperBound)   // read on after the value, so each character is read once and cuts never overlap
+            }
         }
         guard !cuts.isEmpty else { return text }
-        var out = chars
-        for cut in cuts.sorted(by: { $0.lowerBound > $1.lowerBound }) { out.replaceSubrange(cut, with: Array(marker)) }
+        // Built front to back from the original: a cut that begins inside one already taken is joined to it.
+        var out: [Character] = []
+        out.reserveCapacity(chars.count)
+        var at = 0
+        for cut in cuts.sorted(by: { $0.lowerBound < $1.lowerBound }) {
+            if cut.lowerBound >= at {
+                out.append(contentsOf: chars[at..<cut.lowerBound])
+                out.append(contentsOf: marker)
+                at = cut.upperBound
+            } else if cut.upperBound > at {
+                at = cut.upperBound   // overlapping: the part past the last cut goes too
+            }
+        }
+        out.append(contentsOf: chars[at...])
         return String(out)
     }
 

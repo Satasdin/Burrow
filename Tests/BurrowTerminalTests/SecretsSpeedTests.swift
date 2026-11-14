@@ -79,6 +79,22 @@ final class SecretsNoBypassTests: XCTestCase {
         XCTAssertEqual(Secrets.redacted("\"client_secret\":\n  \"abcdefgh12345\""), "\"client_secret\":\n  [secret removed]")
     }
 
+    func testNestedNamesInsideAValueLeaveNothingBehind() {
+        let out = Secrets.redacted("A_TOKEN=\"outer B_KEY=inner-secret-1 tail\" C_SECRET=another-secret-2 end")
+        XCTAssertFalse(out.contains("inner-secret-1"))
+        XCTAssertFalse(out.contains("another-secret-2"))
+        XCTAssertFalse(out.contains("outer"))
+        XCTAssertTrue(out.hasSuffix(" end"))
+    }
+
+    func testManyNamesOnOneLongLineStayQuick() {
+        let line = String(repeating: "key=", count: 50_000) + " " + String(repeating: "token: \"", count: 20_000)
+        let start = Date()
+        let out = Secrets.redacted(line)
+        XCTAssertLessThan(Date().timeIntervalSince(start), 2.0)
+        XCTAssertFalse(out.isEmpty)
+    }
+
     func testWhatIsNotASecretStaysAsPrinted() {
         for line in ["max_tokens=4096", "InvalidTokenError: token expired", "Invalid token: expired", "tokenizer=bpe", "monkey=banana42",
                      "export KEY=$HOME", "port: 8080"] {
