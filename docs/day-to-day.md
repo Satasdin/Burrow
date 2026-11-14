@@ -6,7 +6,7 @@ folder linked into it as `matatu`.
 ## Once
 
 ```
-burrow link ~/Notes ~/code/matatu      # the code stays where it is, read-only
+burrow link ~/Notes ~/code/matatu      # the code stays where it is, read-only; linking it here also approves it
 burrow index ~/Notes --vault           # opens the folder as a vault and builds the index
 claude mcp add --scope user burrow -- /full/path/to/burrow mcp ~/Notes
 ```
@@ -88,6 +88,28 @@ Bridges are kept in Burrow's own folder on your Mac, never inside a vault, so a 
 download, a cloned repo, a shared folder) can't bring bridges to your other vaults with it. If `burrow bridge list` says
 it found bridges written inside a vault folder, they are ignored; if you made them with an early build, add them again
 with `burrow bridge`. Through a bridge, Work's linked code is found by search but not opened from disk.
+
+## Linked folders you haven't approved
+
+A vault's list of linked folders lives inside the vault folder, so a vault someone gives you could name any folder on
+your Mac. Burrow reads a linked folder only once you have approved it, on this Mac, for that vault. A folder you link
+yourself, with `burrow link` or **Link a Folder…** in the app, is approved as you link it, so there is nothing more to do.
+
+The first time a vault opens with a linked folder you haven't approved, the app shows the folders and asks: **Allow**
+reads them from then on, **Not now** leaves them out and asks again next time. In Terminal, any command that opens the
+vault says in one line which folders it skipped. Until you say yes, nothing in them is indexed, searched, read, checked
+by `burrow check`, or shown to a connected program, which is only told how many are waiting.
+
+```
+burrow link list ~/Notes                       # each linked folder, approved or not
+burrow link approve ~/Notes matatu             # one, by its name (or its path)
+burrow link approve ~/Notes --all              # every one on the list; the index takes them in at once
+```
+
+A vault you linked folders into with an earlier build needs this once: approvals are new (D-101), and Burrow can't tell a link
+you made from one someone else wrote into the list. Approvals are kept in Burrow's own folder, never in the vault, and
+belong to the vault where it is: a copy of the vault somewhere else, or a link that now leads to another folder, asks
+again.
 
 ## How much Burrow keeps
 
