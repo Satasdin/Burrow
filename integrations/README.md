@@ -6,6 +6,10 @@ finishes its turn), the hook runs `burrow check <vault> --json`. If the change r
 shown yet, the decisions and their reasons go back to the model with one instruction: tell the person which decision
 the change touches and whether it goes against it, and if it does, put the code back and ask before overturning it.
 
+Then one follow-up, where the program has an end-of-turn hook (OpenCode, Hermes): if the model stops again with the
+held change still in the files, it is told so plainly, once. In the first real runs gemma4:12b twice wrote "I have
+reverted the change" and had not.
+
 Each change is held once. `burrow check` records a change as shown when it checks it (a fingerprint of the decisions and
 the exact file contents), and each plugin also remembers what it already said, so the gate can't loop. A further edit
 to those files is a new change and is held again. A gate that can't run (Burrow missing, a timeout) never blocks.

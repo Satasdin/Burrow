@@ -6,7 +6,9 @@ When the model has finished and the session is about to go idle, it runs `burrow
 the vault's linked code rests on a decision kept in the Ledger that has not been shown yet, it puts the decisions, their
 reasons and one instruction into the session as a message. OpenCode then runs another step, so the model has to answer
 it: say which decision the change touches and whether it goes against it, and if it does, put the code back and ask.
-Each change is held once; after three holds in one session it stays quiet.
+If the model then stops again with the held change still in the files, it gets one more message saying so, naming the
+files (in the first real runs gemma4:12b twice wrote "I have reverted the change" and had not). Each change is held
+once; after three messages in one session it stays quiet.
 
 Install it with:
 

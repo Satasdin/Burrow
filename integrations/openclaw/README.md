@@ -7,6 +7,10 @@ decision kept in the Ledger that has not been shown yet, the decisions, their re
 that tool's result. The model reads them before its next step: say which decision the change touches and whether it
 goes against it, and if it does, put the code back and ask. Each change is held once, at most three times a run.
 
+What it can't do: check again when the model finishes. In a real run gemma4:12b read the decisions, told the person
+the change goes against the Easter Monday decision, wrote "I have reverted the change", and had not; OpenCode's and
+Hermes' gates send one more message in that case, OpenClaw gives a plugin no way to.
+
 Why after the edit and not at the end of the turn: OpenClaw has an end-of-turn hook (`before_agent_finalize`) that can
 ask for a revision, but OpenClaw drops that request once any tool with side effects has run in the turn, which every
 edit is.

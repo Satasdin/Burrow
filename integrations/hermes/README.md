@@ -13,7 +13,8 @@
 Why both: `pre_verify` only runs once the model gives a final answer, and in the first real run gemma4:12b edited,
 rewrote the file twice and never answered within ten minutes; a shell edit never reaches it at all.
 
-Each change is held once; at most three holds a session.
+If the model is about to finish again with the held change still in the files, it gets one more message saying so,
+naming the files. Each change is held once; at most three messages a session.
 
 Install it with:
 

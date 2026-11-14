@@ -415,7 +415,14 @@ final class ConnectTests: XCTestCase {
           synthetic: async (message) => { sent.push(message); } } });
         const step = process.argv[2];
         await idle({ sessionID: "s1", background: [] });
-        console.log(JSON.stringify({ id: plugin.id, step, sent }));
+        const first = sent.length;
+        if (step.startsWith("then")) {
+          // The model stops again in the same session: with the held change still there, or after putting it back.
+          if (step === "then put back") { const fs = await import("node:fs"); fs.writeFileSync(process.argv[3], process.argv[4]); }
+          await idle({ sessionID: "s1", background: [] });
+          await idle({ sessionID: "s1", background: [] });
+        }
+        console.log(JSON.stringify({ id: plugin.id, step, first, sent }));
         """.write(to: script, atomically: true, encoding: .utf8)
 
         let quiet = try run("node", [script.path, "nothing changed"])
@@ -432,6 +439,22 @@ final class ConnectTests: XCTestCase {
         try editMatcher("and more")
         let changedAgain = try run("node", [script.path, "changed again"])
         XCTAssertTrue(changedAgain.out.contains("Burrow held your reply"), "a new change is held again: \(changedAgain.out)")
+
+        // Held, then the model stops again without putting it back (gemma4:12b wrote "I have reverted" twice and had
+        // not): one follow-up naming the file, then nothing.
+        try editMatcher("third change")
+        let stillThere = try XCTUnwrap(JSONSerialization.jsonObject(with: Data(try run("node", [script.path, "then the same"]).out.utf8)) as? [String: Any])
+        let sent = try XCTUnwrap(stillThere["sent"] as? [[String: Any]])
+        XCTAssertEqual(stillThere["first"] as? Int, 1)
+        XCTAssertEqual(sent.count, 2, "\(sent)")
+        XCTAssertTrue((sent[1]["text"] as? String ?? "").contains("still in shop/payments/matcher.py"), "\(sent[1])")
+        XCTAssertTrue((sent[1]["text"] as? String ?? "").contains("you have not yet: put it back now"), "\(sent[1])")
+        // Held, then put back: nothing more.
+        let matcher = code.appendingPathComponent("payments/matcher.py")
+        let original = "def ticket_for_line(store, line):\n    return store.tickets.get(line.account_ref)\n"
+        try editMatcher("fourth change")
+        let putBack = try XCTUnwrap(JSONSerialization.jsonObject(with: Data(try run("node", [script.path, "then put back", matcher.path, original]).out.utf8)) as? [String: Any])
+        XCTAssertEqual((putBack["sent"] as? [Any])?.count, 1, "\(putBack)")
     }
 
     func testTheOpenClawGateAddsTheDecisionsToTheEditsResultOnce() async throws {
@@ -482,10 +505,13 @@ final class ConnectTests: XCTestCase {
         if step == "turn":
             out["first"] = hooks["pre_verify"](session_id="s1", attempt=0, changed_paths=["payments/matcher.py"])
             out["second"] = hooks["pre_verify"](session_id="s1", attempt=1, changed_paths=["payments/matcher.py"])
+            out["third"] = hooks["pre_verify"](session_id="s1", attempt=2, changed_paths=["payments/matcher.py"])
         else:
             out["read"] = hooks["transform_tool_result"](tool_name="read_file", result="text", session_id="s2")
             out["shell"] = hooks["transform_tool_result"](tool_name="terminal", result="$ sed -i ...", session_id="s2")
             out["end"] = hooks["pre_verify"](session_id="s2", attempt=0, changed_paths=[])
+            with open(sys.argv[2], "w") as handle:
+                handle.write(sys.argv[3])  # the model puts the code back
             out["after"] = hooks["pre_verify"](session_id="s2", attempt=1, changed_paths=[])
         print(json.dumps(out))
         """.write(to: script, atomically: true, encoding: .utf8)
@@ -496,13 +522,17 @@ final class ConnectTests: XCTestCase {
         let first = try XCTUnwrap(turn["first"] as? [String: Any])
         XCTAssertEqual(first["decision"] as? String, "block")
         XCTAssertTrue((first["reason"] as? String ?? "").contains("Easter Monday, 31 wrong tickets"))
-        XCTAssertTrue(turn["second"] is NSNull, "held once")
+        let second = try XCTUnwrap(turn["second"] as? [String: Any], "the change is still there: one follow-up")
+        XCTAssertTrue((second["reason"] as? String ?? "").contains("still in shop/payments/matcher.py"), "\(second)")
+        XCTAssertTrue(turn["third"] is NSNull, "and only one")
 
         try editMatcher("a shell edit")
-        let shell = try XCTUnwrap(JSONSerialization.jsonObject(with: Data(try run("python3", ["-I", script.path, "shell"]).out.utf8)) as? [String: Any])
+        let original = "def ticket_for_line(store, line):\n    return store.tickets.get(line.account_ref)\n"
+        let matcher = code.appendingPathComponent("payments/matcher.py").path
+        let shell = try XCTUnwrap(JSONSerialization.jsonObject(with: Data(try run("python3", ["-I", script.path, "shell", matcher, original]).out.utf8)) as? [String: Any])
         XCTAssertTrue(shell["read"] is NSNull)
         XCTAssertTrue((shell["shell"] as? String ?? "").hasPrefix("$ sed -i ...\n\nYou changed"), "\(shell["shell"] ?? "")")
         XCTAssertEqual((shell["end"] as? [String: Any])?["decision"] as? String, "block", "shown in the shell's result, still asked at the end")
-        XCTAssertTrue(shell["after"] is NSNull)
+        XCTAssertTrue(shell["after"] is NSNull, "put back: no follow-up")
     }
 }
