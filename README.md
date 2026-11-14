@@ -128,6 +128,16 @@ Excerpts are marked as project content, so a client shouldn't take instructions 
 
 A decision is kept with its reason and the files it rests on. When one of those files changes, programs are still handed the decision, marked "check again", until someone confirms it (`burrow confirm`, or **Still Right** in the app) or marks it wrong (`burrow revert`). In the app, the Ledger page opens with the Watch: the rules every program gets when it connects, what `burrow_check` would show for the code changed right now, and any text in the vault written to steer an AI. [docs/ledger.md](docs/ledger.md) has the details.
 
+## Several vaults, and how much Burrow keeps
+
+```bash
+.build/release/burrow vault new ~/Work --name Work         # a new vault
+.build/release/burrow bridge ~/notes ~/Work                 # ~/notes reads Work, one way and read-only
+.build/release/burrow config ~/notes set storage.limit 2GB  # how much Burrow's own store may hold; --global for all vaults
+```
+
+A bridge lets one vault read another: search, ask, the MCP tools and the app's Library also look in the bridged vault, each result marked with its name (`Work › notes/plan.md`). Nothing is written into it, bridges are not followed onwards, and its decisions stay private unless the bridge is made `--with-ledger`. A storage limit counts Burrow's own store, never your files: when indexing would go over it, Burrow stops adding, says what to do, and deletes nothing. `burrow stats` shows the usage. [docs/day-to-day.md](docs/day-to-day.md) has more, and D-97 and D-98 in [DECISIONS.md](DECISIONS.md) the reasons.
+
 ## Where it lives
 
 The memory lives in `.burrow` inside the project. Notes are ordinary Markdown files. The index can be deleted and rebuilt at any time.
