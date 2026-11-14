@@ -32,7 +32,8 @@ public enum BridgedLedger {
             blocks.append("\n\nFrom the Ledger of the bridged vault \(bridge.name) (read-only), decisions that match this question or rest on its files shown above:\n<ledger vault=\"\(bridge.name)\">\n"
                 + Ledger.defanged(labelled(found, bridge: bridge, ledger: ledger)) + "\n</ledger>")
         }
-        return blocks.joined()
+        // A team's shared decisions that match, after the bridges' (D-109).
+        return blocks.joined() + TeamLedger.notes(vault: vault, question: question, shown: shown)
     }
 
     /// Each sharing bridge's decisions in force, for the instructions a program gets when it connects. Empty when none.

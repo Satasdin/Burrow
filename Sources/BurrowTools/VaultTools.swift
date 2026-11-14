@@ -204,6 +204,8 @@ public final class VaultTools {
         // Before anything is found: an index built before a linked folder needed approving still holds its files (D-101).
         do { try vault.dropUnapprovedFromIndex() } catch { log("could not take unapproved linked folders out of the index: \(error)") }
         if !force, !checkNow, let lastRefresh, Date().timeIntervalSince(lastRefresh) < refreshEvery { return }
+        // A team folder changes when a teammate's work arrives (a git pull, a sync), not when this vault does (D-109).
+        for problem in await freshenTeams() { log(problem) }
         let current = fingerprint()
         if !force, current == savedFingerprint() {
             lastRefresh = Date()
@@ -335,7 +337,8 @@ public final class VaultTools {
             lastQuestion = task
             let ledgerContext = AskLedger.context(vault: vault, question: task, shown: Set(brief.retrieved.paths))
             if !ledgerContext.text.isEmpty { parts.append(ledgerContext.text) }
-            handed = ledgerContext.notes.map(\.id)
+            // A team's decisions handed in the same block count as handed over too (D-109).
+            handed = ledgerContext.notes.map(\.id) + TeamLedger.noteIDs(vault: vault, question: task, shown: Set(brief.retrieved.paths))
         }
         return ToolResult(text: parts.joined(separator: "\n\n"), sources: sources(brief.retrieved), ledger: handed,
                           summary: "\(brief.route.mode.rawValue), \(excerpts.count) excerpts" + (brief.skill.map { ", method: \($0.name)" } ?? ""))
@@ -482,7 +485,8 @@ public final class VaultTools {
             let trust = trustLine(found)
             let notes = await ledgerNotes(for: query, ranked: [])
             let bridgedNotes = ledgerNotesOn ? BridgedLedger.notes(vault: vault, question: query, shown: []) : ""
-            return ToolResult(text: "\(trust.isEmpty ? "" : trust + "\n")Nothing in the vault\(inFolder) matches \"\(query)\". \(found.how)\(notes.text)\(bridgedNotes)", ledger: notes.ids, summary: "nothing found\(inFolder)")
+            let teamIDs = ledgerNotesOn ? TeamLedger.noteIDs(vault: vault, question: query, shown: []) : []
+            return ToolResult(text: "\(trust.isEmpty ? "" : trust + "\n")Nothing in the vault\(inFolder) matches \"\(query)\". \(found.how)\(notes.text)\(bridgedNotes)", ledger: notes.ids + teamIDs, summary: "nothing found\(inFolder)")
         }
         let body = excerpts.map(ProjectContent.block).joined(separator: "\n\n")
         let trust = trustLine(found)
@@ -492,7 +496,7 @@ public final class VaultTools {
         // Decisions from a bridged vault that shares its Ledger, labelled with that vault (D-97).
         let bridgedNotes = ledgerNotesOn ? BridgedLedger.notes(vault: vault, question: query, shown: Set(excerpts.map(\.path))) : ""
         return ToolResult(text: "\(ProjectContent.notice)\n\(trust.isEmpty ? "" : trust + "\n")\(excerpts.count) excerpts for \"\(query)\"\(inFolder). \(found.how)\n\n\(body)\(notes.text)\(bridgedNotes)\(Steering.notice(steering))",
-                          sources: sources(found.retrieved), ledger: notes.ids,
+                          sources: sources(found.retrieved), ledger: notes.ids + (ledgerNotesOn ? TeamLedger.noteIDs(vault: vault, question: query, shown: Set(excerpts.map(\.path))) : []),
                           summary: "\(excerpts.count) excerpts from \(found.retrieved.paths.count) files, \(found.retrieved.characters) characters")
     }
 

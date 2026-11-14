@@ -91,7 +91,7 @@ private func bridge(_ options: Options) throws {
             return
         }
         for shelf in vault.bridgedShelves() {
-            let what = shelf.bridge.withLedger ? "notes and decisions in force" : "notes only"
+            let what = shelf.bridge.isTeam ? "team folder (burrow team list)" : shelf.bridge.withLedger ? "notes and decisions in force" : "notes only"
             let state = shelf.problem ?? "\(shelf.files.count) files"
             print("\(shelf.bridge.name)   \(shelf.bridge.path)   \(what), read-only, \(state)")
         }

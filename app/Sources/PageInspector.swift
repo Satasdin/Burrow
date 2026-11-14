@@ -58,7 +58,8 @@ struct LedgerGlance: View {
 
     var body: some View {
         let kinds = LedgerCommit.Kind.allCases.map { kind in (kind, commits.filter { $0.kind == kind }.count) }.filter { $0.1 > 0 }
-        let authors = Dictionary(grouping: commits, by: \.author).map { ($0.key, $0.value.count) }.sorted { $0.1 > $1.1 }
+        // A team decision counts for the person who kept it (D-109).
+        let authors = Dictionary(grouping: commits, by: { $0.person ?? $0.author }).map { ($0.key, $0.value.count) }.sorted { $0.1 > $1.1 }
         let stale = commits.filter { workspace.ledger.stale[$0.id] != nil }.count
         // A decision replaced by a newer one (D-94) was settled, not found wrong: it needs no look.
         let wrong = commits.filter { workspace.ledger.reverted.contains($0.id) && workspace.ledger.retiredBy[$0.id]?.kind != .decision }.count

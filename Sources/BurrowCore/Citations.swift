@@ -61,8 +61,10 @@ public final class CheckedStream: @unchecked Sendable {
 /// Checks an answer's citations: files and lines against the excerpts a model read, Ledger ids against the commits it
 /// was handed. One check for the app's Ask, `burrow chat`, `burrow ask` and `vault_ask` (D-91, D-96).
 public enum Citations {
-    /// A Ledger commit id: `20261114-065345-a355`.
-    static let ledgerID = try! NSRegularExpression(pattern: #"(?<![0-9A-Za-z])\d{8}-\d{6}-[0-9a-f]{4}(?![0-9A-Za-z])"#)
+    /// A Ledger commit id: `20261114-065345-a355`, or a team's, which ends with who kept it and their Mac's tag:
+    /// `20261114-065345-a355-wanjiru-kamau-7939` (D-109). A team id was once matched only up to its fourth group, so a
+    /// whole one was never found among those handed over and was marked in the middle.
+    static let ledgerID = try! NSRegularExpression(pattern: #"(?<![0-9A-Za-z])\d{8}-\d{6}-[0-9a-f]{4}(?:-[a-z0-9]+)*(?![0-9A-Za-z])"#)
 
     /// What a model says around a citation in brackets that carries no fact of its own: "(from notes/plan.md:12)".
     private static let filler: Set<String> = [

@@ -34,6 +34,8 @@ The Ledger, a git for what AIs understood:
 
 \(vaultUsage)
 
+\(teamUsage)
+
 Add --store DIR to keep the memory somewhere other than <project>/.burrow.
 Add --vault to index a whole vault, where every Markdown file is a note.
 """
@@ -89,6 +91,7 @@ func embedderIfIndexed(_ vault: Vault, _ ollama: Ollama) throws -> Embedder? {
 func run() async throws {
     let arguments = Array(CommandLine.arguments.dropFirst())
     if try await runTerminalCommand(arguments) { return }
+    if try await runTeamCommand(arguments) { return }
     if try await runLedgerCommand(arguments) { return }
     if try await runVaultCommand(arguments) { return }
     guard let command = arguments.first, !["help", "--help", "-h"].contains(command) else {
@@ -117,6 +120,8 @@ func run() async throws {
         FileHandle.standardError.write(Data("\n".utf8))
         print("\(report.filesSeen) files, \(report.filesChanged) changed, \(report.filesRemoved) removed, \(report.chunks) chunks, \(report.links) links, \(report.embedded) embedded in \(String(format: "%.1f", Date().timeIntervalSince(started))) s")
         KnownVaults.remember(vault)
+        // The team folders it reads are indexed into Burrow's own folder, the same way (D-109).
+        for problem in await vault.refreshTeams(embedder: report.embedded > 0 || ((try? vault.stats().vectors) ?? 0) > 0 ? ollama.embedder() : nil) { logToStandardError(problem) }
         if report.tooLarge > 0 { print("\(report.tooLarge) file\(report.tooLarge == 1 ? " was" : "s were") larger than index.maxFileSize and left out.") }
         if let stop = report.storageStop {
             fflush(stdout)

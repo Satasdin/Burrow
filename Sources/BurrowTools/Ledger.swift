@@ -52,6 +52,8 @@ public struct LedgerCommit: Codable, Sendable, Equatable {
     /// it is handed over marked UNRESOLVED until the person says which holds (D-94). For a "both hold" confirmation:
     /// the ids it settles.
     public var overlaps: [String]?
+    /// For a decision shared with a team (D-109): the person who kept it, as their Burrow signs it. Nil in a person's own Ledger.
+    public var person: String? = nil
 
     public init(id: String, branch: String, parent: String?, kind: Kind, message: String, body: String = "", author: String,
                 client: String? = nil, cites: [String: String] = [:], at: Date = Date(), reverts: String? = nil, sha: String? = nil, session: String? = nil,
@@ -121,6 +123,7 @@ extension LedgerCommit {
     /// Who wrote it, for a line a program or a person reads: "written by X in Y", and the name the model gave itself
     /// when that differs, labelled as the model's own claim (D-83).
     public var byline: String {
+        if person != nil { return teamByline }
         var text = "written by \(author)"
         if let client, client != author { text += " in \(client)" }
         if let said = modelSaid, said != author { text += "; the model called itself \"\(said)\"" }
@@ -223,7 +226,8 @@ public struct Ledger: Sendable {
     @discardableResult
     public func commit(_ kind: LedgerCommit.Kind, _ message: String, body: String = "", files: [String] = [], author: String,
                        client: String? = nil, branch: String? = nil, reverts: String? = nil, sha: String? = nil, session: String? = nil,
-                       at: Date = Date(), modelSaid: String? = nil, confirms: String? = nil, overlaps: [String]? = nil) throws -> LedgerCommit {
+                       at: Date = Date(), modelSaid: String? = nil, confirms: String? = nil, overlaps: [String]? = nil,
+                       person: String? = nil) throws -> LedgerCommit {
         let text = message.replacingOccurrences(of: "\0", with: "").trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty else { throw LedgerProblem("A commit needs a message.") }
         guard text.count <= 600 else { throw LedgerProblem("A commit message holds 600 characters; put the rest in its body.") }
@@ -240,6 +244,7 @@ public struct Ledger: Sendable {
                                  cites: hashes(files), at: at, reverts: reverts, sha: sha, session: session,
                                  modelSaid: modelSaid.map { String($0.replacingOccurrences(of: "\0", with: "").prefix(120)) }, confirms: confirms,
                                  overlaps: overlaps.flatMap { $0.isEmpty ? nil : Array($0.prefix(8)) })
+        entry.person = person.map { String($0.replacingOccurrences(of: "\0", with: "").prefix(60)) }
         try FileManager.default.createDirectory(at: place, withIntermediateDirectories: true)
         // Many programs can commit in the same second, and an id is that second and four random characters, so two can meet.
         // The commit is written whole to a file of its own, then given its name with link(2), which refuses a name that is
@@ -607,6 +612,7 @@ public struct Ledger: Sendable {
                      "author: \(json(commit.author))", "at: \(json(commit.at))"]
         if let parent = commit.parent { lines.append("parent: \(json(parent))") }
         if let client = commit.client { lines.append("client: \(json(client))") }
+        if let person = commit.person { lines.append("person: \(json(person))") }
         if let said = commit.modelSaid { lines.append("model_said: \(json(said))") }
         if let reverts = commit.reverts { lines.append("reverts: \(json(reverts))") }
         if let confirms = commit.confirms { lines.append("confirms: \(json(confirms))") }
@@ -619,7 +625,25 @@ public struct Ledger: Sendable {
         return lines.joined(separator: "\n") + "\n"
     }
 
+    /// A commit file read back, with the person who kept it when it is a team decision (D-109).
     static func parse(_ text: String) -> LedgerCommit? {
+        guard var commit = parseFields(text) else { return nil }
+        commit.person = frontMatterValue("person", in: text)
+        return commit
+    }
+
+    /// One front-matter field's text, or nil.
+    static func frontMatterValue(_ key: String, in text: String) -> String? {
+        for line in text.split(separator: "\n", omittingEmptySubsequences: false).dropFirst() {
+            if line == "---" { return nil }
+            guard line.hasPrefix(key + ":") else { continue }
+            let raw = line.dropFirst(key.count + 1).trimmingCharacters(in: .whitespaces)
+            return (try? JSONSerialization.jsonObject(with: Data(raw.utf8), options: [.fragmentsAllowed])) as? String
+        }
+        return nil
+    }
+
+    static func parseFields(_ text: String) -> LedgerCommit? {
         let lines = text.components(separatedBy: "\n")
         guard lines.first == "---", let end = lines.dropFirst().firstIndex(of: "---") else { return nil }
         var fields: [String: Any] = [:]
