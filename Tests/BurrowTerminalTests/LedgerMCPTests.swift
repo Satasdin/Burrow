@@ -107,7 +107,7 @@ final class LedgerMCPTests: XCTestCase {
         let again = MCPServer(tools: VaultTools(vault: tools.vault, embedder: nil) { _ in FakeAnswerer() }, keepsSessions: true)
         again.toolSet = .door
         _ = await again.handle(#"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"opencode","version":"1"}}}"#)
-        _ = await again.handle(#"{"jsonrpc":"2.0","id":9,"method":"tools/call","params":{"name":"burrow_commit","arguments":{"kind":"decision","because":"The test says so.","message":"Second run's decision","files":"Decisions/Retry.md"}}}"#)
+        _ = await again.handle(#"{"jsonrpc":"2.0","id":9,"method":"tools/call","params":{"name":"burrow_commit","arguments":{"kind":"decision","because":"The test says so.","message":"Second run's decision","files":"Decisions/Retry.md","alongside":"yes"}}}"#)  // both hold (D-94)
         await again.serve(readLine: { nil }, write: { _ in })
         let handoffs = tools.ledger.log().filter { $0.kind == .handoff }
         XCTAssertEqual(handoffs.count, 2, handoffs.map(\.message).joined(separator: " | "))

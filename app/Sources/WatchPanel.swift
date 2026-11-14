@@ -51,6 +51,8 @@ struct WatchPanel: View {
 
     /// Decisions resting on a file that changed are still handed over, marked to be checked, until someone says they still hold (D-82).
     private var rulesDetail: String {
+        let open = rules.filter { ledger.unresolved[$0.id] != nil }.count
+        if open > 0 { return "\(open.counted("decision")) may contradict an older one: say which holds" }
         let held = rules.filter { ledger.stale[$0.id] != nil }.count
         return held == 0 ? "Handed to every program that connects, on \(ledger.current)"
             : "\(held.counted("decision")) to check again: \(held == 1 ? "it rests" : "they rest") on files changed since"
@@ -215,6 +217,7 @@ struct RuleRow: View {
                     Text("Because " + because).font(.system(size: 12)).foregroundStyle(Night.dim).lineLimit(3)
                 }
                 if !stale.isEmpty { StillRight(workspace: workspace, commit: commit, changed: stale) }
+                Unresolved(workspace: workspace, commit: commit)
                 HStack(spacing: 6) {
                     Text(commit.author).font(.system(size: 11)).foregroundStyle(Night.faint).help(commit.byline)
                     ForEach(commit.cites.keys.sorted().prefix(3), id: \.self) { path in
@@ -248,6 +251,48 @@ struct StillRight: View {
             Button { Task { await workspace.confirm(commit.id) } } label: { Label("Still Right", systemImage: "checkmark.circle") }
                 .controlSize(.small)
                 .help("You looked at the change and this still holds. Programs stop being told to check it again, until the file changes again.")
+        }
+    }
+}
+
+/// A decision kept while an older one in force rests on the same files and may say otherwise (D-94). Programs are
+/// handed both, marked UNRESOLVED, until the person picks: the newer replaces the older (the older is marked wrong, as
+/// Mark Wrong does), or both hold (a confirmation naming them). Nothing is rewritten.
+struct Unresolved: View {
+    let workspace: Workspace
+    let commit: LedgerCommit
+
+    private var older: [LedgerCommit] {
+        (workspace.ledger.unresolved[commit.id] ?? []).compactMap { id in workspace.ledger.commits.first { $0.id == id } }
+    }
+
+    var body: some View {
+        if !older.isEmpty {
+            VStack(alignment: .leading, spacing: 7) {
+                Label("May contradict an older decision. Programs are told to ask you which holds.", systemImage: "arrow.left.arrow.right.circle")
+                    .font(.system(size: 11.5, weight: .semibold)).foregroundStyle(WatchPanel.amber)
+                ForEach(older, id: \.id) { old in
+                    HStack(alignment: .top, spacing: 8) {
+                        RoundedRectangle(cornerRadius: 1.5).fill(WatchPanel.amber.opacity(0.7)).frame(width: 3)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(old.message).font(.system(size: 12)).foregroundStyle(Night.note.opacity(0.8)).lineLimit(3)
+                                .fixedSize(horizontal: false, vertical: true)
+                            Text("\(old.author), \(old.at.formatted(date: .abbreviated, time: .shortened))").font(.system(size: 10.5)).foregroundStyle(Night.faint)
+                        }
+                    }
+                }
+                HStack(spacing: 8) {
+                    Button { Task { for old in older { await workspace.keepNewer(commit, over: old.id) } } } label: {
+                        Label("Keep newer", systemImage: "arrow.uturn.forward.circle")
+                    }
+                    .help("The newer decision holds. The older one is marked wrong, with this one named as what is right instead.")
+                    Button { Task { await workspace.keepBoth(commit.id) } } label: { Label("Keep both", systemImage: "checkmark.circle") }
+                        .help("Both hold. Programs stop being told to ask, and both stay in force.")
+                }
+                .controlSize(.small)
+            }
+            .padding(8)
+            .background(WatchPanel.amber.opacity(0.07), in: .rect(cornerRadius: 8))
         }
     }
 }

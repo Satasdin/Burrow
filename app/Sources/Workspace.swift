@@ -31,6 +31,8 @@ actor Engine {
         let staleness = ledger.staleness()
         for commit in commits { let changed = staleness(commit); if !changed.isEmpty { stale[commit.id] = changed } }
         var state = LedgerState(commits: commits, reverted: ledger.reverted(), stale: stale, current: ledger.current)
+        state.retiredBy = ledger.retirements()
+        state.unresolved = ledger.unresolved()
         state.inForce = VaultTools.inForce(ledger).map(\.id)
         state.check = VaultTools.checkReport(vault: vault, ledger: ledger)
         state.flagged = flaggedText()
@@ -54,6 +56,7 @@ actor Engine {
     }
     func revert(_ id: String, why: String) throws { try Ledger(vault: vault).revert(id, why: why, author: "person", client: "Burrow app") }
     func confirm(_ id: String) throws { try Ledger(vault: vault).confirm(id, author: "person", client: "Burrow app") }
+    func bothHold(_ id: String) throws { try Ledger(vault: vault).bothHold(id, author: "person", client: "Burrow app") }
     /// The Ledger's decisions for a question and the files read for it, as `burrow chat` gets them (D-88, D-90).
     func ledgerContext(_ question: String, shown: Set<String>) -> (notes: [LedgerCommit], text: String) {
         AskLedger.context(vault: vault, question: question, shown: shown)
@@ -532,6 +535,20 @@ final class Workspace {
             try await engine.confirm(id)
             ledger = await engine.ledger()
         } catch { warning = "Could not confirm that: \(error)" }
+    }
+
+    /// A decision kept as UNRESOLVED (D-94): the person says the newer one holds, so the older is marked wrong the usual
+    /// way, with the newer one named as what is right instead.
+    func keepNewer(_ newer: LedgerCommit, over older: String) async {
+        await markWrong(older, why: "Replaced by the newer decision \(newer.id), kept by the person: \"\(String(newer.message.prefix(200)))\"")
+    }
+
+    /// The person says the UNRESOLVED decision and the ones it may contradict all hold (D-94).
+    func keepBoth(_ id: String) async {
+        do {
+            try await engine.bothHold(id)
+            ledger = await engine.ledger()
+        } catch { warning = "Could not keep both: \(error)" }
     }
 
     func resumeText(_ branch: String?) async -> String { await engine.resumeText(branch) }
