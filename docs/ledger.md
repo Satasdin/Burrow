@@ -8,20 +8,28 @@ One Markdown file under `<vault>/.burrow/ledger/<branch>/<id>.md`, readable in O
 
 ```markdown
 ---
-id: "20261111-114400-1c48"
+id: "20261114-114537-ac9d"
 branch: "main"
-kind: "fact"
-author: "qwen3:4b"
-at: "2026-11-11T11:44:00Z"
-client: "opencode"
-cites: {"Law/general-regs-part-06-breach-notification.md":"1b0f256e67384492"}
+kind: "decision"
+author: "claude-code"
+at: "2026-11-14T08:45:37Z"
+client: "claude-code"
+model_said: "claude-haiku-4-5"
+session: "20261114-114530-ee0b"
+cites: {"matatu/matatu/payments/reconcile.py":"59d167b8dff9c50a"}
 ---
 
-Breach notice is due within 72 hours of becoming aware
+Refunds after a provider timeout go to 'refund pending' and are never sent again automatically.
+
+Rejected: Retrying up to three times: sending again after a timeout is how the double refunds happened.
+Because: Sending again after a timeout paid 38 passengers twice (KES 3,040).
 ```
 
-- **kind**: one of decision, fact, correction, plan, handoff or code.
-- **cites**: the vault files the commit rests on, with a hash of each. When a cited file changes, the commit shows **check again** until someone looks.
+- **id**: the second it was kept, on this Mac's clock (as conversation ids are), and four random characters.
+- **kind**: one of decision, fact, correction, plan, handoff, code or confirmation.
+- **author**: who Burrow knows wrote it: the model a llama.cpp server reports, else the program's logged model, else the name the program gave when it connected (`client`). The name a model types about itself is kept as `model_said` and shown as its claim, never as the author: small models copy names from earlier commits.
+- **Because and Rejected**: a decision needs its reason. Wherever a decision is handed to a program it reads message, then Because, then Rejected, and when it has to be shorter, Rejected and then the message are shortened; the reason is never cut.
+- **cites**: the vault files the commit rests on, with a hash of each. When a cited file changes, the commit is still handed to programs, marked **check again**, until someone looks: **Still Right** in the app or `burrow confirm` keeps a confirmation with the files' new hashes, and `burrow revert` marks it wrong.
 - **Never deleted**: `revert` adds a correction, and the old commit shows as **marked wrong** wherever it appears.
 - **Branches**: a linked folder is its own branch (`burrow`, `tally`); everything else is `main`.
 
@@ -34,22 +42,24 @@ burrow resume <vault> [branch]
 burrow blame  <vault> <path>
 burrow diff   <vault> --since <commit>
 burrow revert <vault> <commit> "what is right instead"
+burrow confirm <vault> <commit> ["note"]
 burrow branch <vault> [name]
 ```
 
 ## Programs that use the vault (MCP)
 
-`burrow mcp <vault>` shows four tools by default. The rest answer when called by name, and the old `vault_` names still work.
+`burrow mcp <vault>` shows five tools by default. The rest answer when called by name, and the old `vault_` names still work.
 
 | Tool | Shown by default | What it does |
 | --- | --- | --- |
-| `burrow_find` | yes | Search. Every result carries a trust line: strong, thin, or not in the vault, plus any correction on the files found |
-| `burrow_read` | yes | Read a file with line numbers |
-| `burrow_resume` | yes | The plan, where the last session stopped, corrections and latest commits |
-| `burrow_commit` | yes | Keep a decision, fact, plan or handoff, citing its files |
+| `burrow_find` | yes | Search. Every result carries a trust line: strong, thin, or not in the vault, plus any correction on the files found, and ends with the Ledger's decisions on the files found |
+| `burrow_read` | yes | Read a file with line numbers, with the decisions on that file and the files it imports or is imported by |
+| `burrow_resume` | yes | The plan, where the last session stopped, corrections and latest commits, held to 3,200 characters without cutting a reason |
+| `burrow_commit` | yes | Keep a decision (with `because`, and `rejected`), fact, plan or handoff, citing its files |
+| `burrow_check` | yes | The code changed in linked git folders since their last commit, beside the decisions resting on those files. Build output (`__pycache__`, `.pyc`, `node_modules`, `.DS_Store`) is not counted but is named on one line |
 | `burrow_log`, `burrow_blame`, `burrow_diff`, `burrow_revert` | with `--tools full` | History, who explained a file, what changed since, and marking a commit wrong |
 
-`--tools classic` shows only the `vault_` tools, for runs that must match earlier ones. When a connection closes, Burrow writes a handoff from its lookups itself, so a model that never logged anything still leaves one.
+`--tools classic` shows only the `vault_` tools, for runs that must match earlier ones. Up to five decisions and corrections in force on the current branch are put in the instructions every program gets when it connects. Each connection is its own conversation, and when it closes Burrow writes a handoff from what it did ("stopped after resuming, 1 lookup, checking its change and keeping 1 commit"), so a model that never logged anything still leaves one. A lookup is a search or a read; resuming, checking and keeping are counted as what they are.
 
 ## Claude Code
 

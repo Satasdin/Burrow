@@ -7,13 +7,19 @@ by Ollama or llama.cpp. They all reach Burrow the same way, as an MCP server:
 burrow mcp ~/Notes
 ```
 
-That one command gives the program eleven tools: search, read, links, list, folders, remember, ask, prepare, and three
-for conversations (`vault_session_list`, `vault_session_resume`, `vault_session_log`).
+That one command shows the program five tools: `burrow_find`, `burrow_read`, `burrow_resume`, `burrow_commit` and
+`burrow_check`. `--tools full` lists all 21 (the Ledger's history tools and the older `vault_` tools as well), and every
+tool answers by name whichever list is shown. When the program connects, its instructions carry the decisions in force on
+the vault's current branch, each with its reason; a decision resting on a file that changed since comes marked "check
+again". See [ledger.md](ledger.md).
 
-Each connection is kept in the vault as a session. Burrow writes down what the program searched for and which files it
-read as it happens, so another program can pick the conversation up later even if the model never saves anything. When
-the model does call `vault_session_log`, its questions and answers are kept too. A program that reconnects within 30
-minutes, as one-shot runs like `opencode run` and `claude -p` do for every message, carries on the same session.
+Each connection is kept in the vault as its own conversation. Burrow writes down what the program searched for and which
+files it read as it happens, so another program can pick the conversation up later even if the model never saves
+anything. When the model does call `vault_session_log`, its questions and answers are kept too. A new connection is a
+new conversation, even from the same program a minute later; a connection that only lists the tools leaves none (n8n
+opens one of those per model turn). Commits are signed with the name the program gives when it connects
+(`claude-code`, `opencode`, `@n8n/n8n-nodes-langchain.mcpClientTool`); a model's own name for itself is kept beside it,
+marked as its claim.
 
 To pick a conversation up anywhere, ask: *"Pick up my last conversation; it is saved in Burrow."*
 
@@ -26,14 +32,20 @@ conversations. **Connect** shows the setup line with this vault's path filled in
 Studio, **Add for Me** writes it into the program's settings, keeping the old file beside it as `.before-burrow`.
 
 The lines the app gives use the full path of the `burrow` command. Programs opened from the Dock, such as LM Studio, do
-not get the shell's PATH, so a bare `burrow` would not start there. The app carries its own copy of the command, and
-**Install Command** links it into `~/.local/bin`.
+not get the shell's PATH, so a bare `burrow` would not start there. The app carries its own copy of the command and
+points the lines at it, or at a command on the PATH that links to it; **Install Command** makes that link in
+`~/.local/bin`. `burrow --version` says which version a copy is.
 
 ## Claude Code
 
+For every project (what **Add for Me** writes):
+
 ```
-claude mcp add burrow -- burrow mcp ~/Notes
+claude mcp add --scope user burrow -- /full/path/to/burrow mcp ~/Notes
 ```
+
+For one project only, run it in that project's folder with `--scope local` (just you) or `--scope project` (written to
+the project's `.mcp.json`, shared with whoever uses the project). Claude Code then lists Burrow only there.
 
 ## OpenCode
 
