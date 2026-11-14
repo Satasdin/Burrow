@@ -57,6 +57,8 @@ public final class TerminalApp {
         // The vault can't be shared between threads, so the screen and the background jobs each open their own.
         let foreground = try Vault(project: vaultFolder, store: store, everything: true)
         backgroundVault = try Vault(project: vaultFolder, store: store, everything: true)
+        // A linked folder the person on this Mac has not approved is skipped, and out of the index (D-101).
+        try? foreground.dropUnapprovedFromIndex()
         do {
             screen = try TerminalScreen(logPath: NSTemporaryDirectory() + "burrow-tui-\(getpid()).log")
         } catch let problem as TerminalScreen.NotATerminal {
@@ -73,6 +75,7 @@ public final class TerminalApp {
         let size = screen.size
         model.resize(width: size.width, height: size.height)
         model.reload()
+        if let line = model.vault.linksAwaitingApprovalLine() { model.setStatus(line, problem: true) }
         startIndexing(embedAll: false)
         draw()
         loop()

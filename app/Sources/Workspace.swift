@@ -16,7 +16,13 @@ actor Engine {
     init(folder: URL, store: URL?) throws {
         vault = try Vault(project: folder, store: store, everything: true)
         self.store = vault.store
+        // A linked folder the person on this Mac has not approved is skipped, and out of the index (D-101).
+        try? vault.dropUnapprovedFromIndex()
     }
+
+    // Linked folders waiting for the person's approval on this Mac (D-101).
+    func linksWaiting() -> [LinkState] { vault.linkStates().filter { !$0.approved } }
+    func approveLinks() throws { try vault.approveLinks() }
 
     @discardableResult func index() async throws -> IndexReport { try await vault.refresh(embedder: nil) }
     @discardableResult func embed(onProgress: @escaping @Sendable (String) -> Void) async throws -> IndexReport {
@@ -251,6 +257,10 @@ final class Workspace {
     /// Burrow's store for this vault and for every vault, beside their limits (D-98).
     var storage: StorageReport?
     var bridgesOpen = false
+    /// Folders this vault's list links that the person on this Mac has not approved; skipped until they are (D-101).
+    var linksWaiting: [LinkState] = []
+    /// The sheet that asks, shown when the vault opens with any waiting.
+    var linksOpen = false
     var tags: [String: [String]] = [:]
     var stats: VaultStats?
     var sessions: [VaultSession] = []
@@ -317,6 +327,8 @@ final class Workspace {
         do {
             noteStorage(try await engine.index())
             await reload()
+            // Asked once, on opening: the folders this vault links that haven't been approved on this Mac (D-101).
+            if !linksWaiting.isEmpty { linksOpen = true }
             watchActivity()
             afterFirstRead?()
             afterFirstRead = nil
@@ -358,6 +370,15 @@ final class Workspace {
         await act {
             try await engine.removeBridge(name)
             await reload()
+        }
+    }
+
+    /// The person said yes to every linked folder waiting: they are read from now on, and indexed now (D-101).
+    func approveLinks() async {
+        linksOpen = false
+        await act {
+            try await engine.approveLinks()
+            await readAgain()
         }
     }
 
@@ -423,6 +444,7 @@ final class Workspace {
         defer { hasRead = true }
         let foldersNow = await engine.folders()
         linked = await engine.linked()
+        linksWaiting = await engine.linksWaiting()
         bridged = await engine.bridgedShelves()
         storage = await engine.storage()
         tree = Self.buildTree(files: newMap.files, folders: foldersNow, linked: Set(linked.map(\.name)))
@@ -1056,6 +1078,7 @@ final class Library {
         }
         if let pick = environment["BURROW_SELECT"] { workspace.librarySelection = pick }
         if environment["BURROW_SHEET"] == "bridges" { workspace.bridgesOpen = true }
+        if environment["BURROW_SHEET"] == "links" { workspace.linksOpen = true }
         if environment["BURROW_PALETTE"] != nil { workspace.paletteOpen = true }
         if let query = environment["BURROW_SEARCH"] {
             workspace.sidebarMode = .search

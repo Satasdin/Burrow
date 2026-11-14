@@ -195,6 +195,8 @@ public final class VaultTools {
     /// Files are read, not changed, and a failure to embed leaves the word index complete.
     /// - Parameter force: re-index without looking first, after Burrow has just added a note itself.
     public func freshen(force: Bool = false, checkNow: Bool = false) async {
+        // Before anything is found: an index built before a linked folder needed approving still holds its files (D-101).
+        do { try vault.dropUnapprovedFromIndex() } catch { log("could not take unapproved linked folders out of the index: \(error)") }
         if !force, !checkNow, let lastRefresh, Date().timeIntervalSince(lastRefresh) < refreshEvery { return }
         let current = fingerprint()
         if !force, current == savedFingerprint() {
@@ -728,5 +730,14 @@ extension VaultTools {
         let bridged = vault.bridgedShelves().filter { !$0.files.isEmpty }.map { "\(plain($0.bridge.name, 30)) (\($0.files.count) files)" }
         if !bridged.isEmpty { line += (line.isEmpty ? "" : ". ") + "Bridged vaults, read-only, paths starting with their name and ›: " + bridged.joined(separator: ", ") }
         return line
+    }
+
+    /// Said to a connected program when this vault lists linked folders the person on this Mac has not approved (D-101).
+    /// Only how many: their names and places come from a file anyone who shared the vault could have written, so they
+    /// are neither shown to the model nor a way in for words meant to steer it. Empty when there are none.
+    public func linksAwaitingApprovalNote() -> String {
+        let count = vault.linksAwaitingApproval().count
+        guard count > 0 else { return "" }
+        return "\n\(count == 1 ? "One linked folder" : "\(count) linked folders") in this vault \(count == 1 ? "is" : "are") waiting for the person's approval on this Mac, so Burrow does not search or read \(count == 1 ? "it" : "them"), and nothing from \(count == 1 ? "it" : "them") is in any result. Only the person can approve \(count == 1 ? "it" : "them"): in the Burrow app, or with burrow link approve in Terminal. If an answer may be missing because of this, say so."
     }
 }

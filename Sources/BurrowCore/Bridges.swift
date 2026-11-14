@@ -169,6 +169,8 @@ extension Vault {
         return database.locked {
             if let open = bridgedVaults[key] { return open }
             guard let opened = try? Vault(readingOnly: bridge.url, everything: bridge.everything) else { return nil }
+            // Its linked folders' approvals are read from the same place as this vault's (D-101).
+            opened.stateFolder = stateFolder
             bridgedVaults[key] = opened
             return opened
         }
@@ -197,7 +199,8 @@ extension Vault {
                 return BridgedShelf(bridge: bridge, files: [], linked: [], problem: "\(bridge.path) can't be read: it was moved, or it has no index.")
             }
             do {
-                let files = try other.projectMap().files.map { MapFile(path: bridge.label($0.path), isNote: $0.isNote, cluster: bridge.name, chunks: $0.chunks) }
+                let waiting = other.unapprovedLinkNames()
+                let files = try other.projectMap().files.filter { !other.isInUnapprovedLink($0.path, waiting: waiting) }.map { MapFile(path: bridge.label($0.path), isNote: $0.isNote, cluster: bridge.name, chunks: $0.chunks) }
                 return BridgedShelf(bridge: bridge, files: files, linked: other.linkedFolders(), problem: nil)
             } catch {
                 return BridgedShelf(bridge: bridge, files: [], linked: [], problem: "\(bridge.path) can't be read: \(error)")
@@ -209,13 +212,13 @@ extension Vault {
     public func searchLinesAcrossBridges(_ query: String, scope: String? = nil, limit: Int = 200) throws -> [FoundLine] {
         if let scope, let bridge = bridges().first(where: { $0.name == scope }) {
             guard let other = bridgedVault(bridge) else { return [] }
-            return ((try? other.searchLines(query, limit: limit)) ?? []).map { FoundLine(path: bridge.label($0.path), line: $0.line, text: $0.text) }
+            return other.withoutUnapprovedLinks((try? other.searchLines(query, limit: limit)) ?? []).map { FoundLine(path: bridge.label($0.path), line: $0.line, text: $0.text) }
         }
         var out = try searchLines(query, scope: scope, limit: limit)
         guard scope == nil else { return out }
         for bridge in bridges() where out.count < limit {
             guard let other = bridgedVault(bridge), let found = try? other.searchLines(query, limit: limit - out.count) else { continue }
-            out += found.map { FoundLine(path: bridge.label($0.path), line: $0.line, text: $0.text) }
+            out += other.withoutUnapprovedLinks(found).map { FoundLine(path: bridge.label($0.path), line: $0.line, text: $0.text) }
         }
         return out
     }
@@ -256,9 +259,29 @@ extension Vault {
             // Meaning search only where the other vault's vectors are the same width as the question's.
             let usable = width > 0 && other.vectorDimension() == width
             guard let found = try? await other.retrieveHere(question, mode: mode, budget: budget, embedder: usable ? embedder : nil, scope: target.scope) else { continue }
-            sources.append((target.bridge, Self.labelled(found, target.bridge)))
+            sources.append((target.bridge, Self.labelled(other.withoutUnapprovedLinks(found), target.bridge)))
         }
         return Self.merged(sources.map(\.found), budget: budget, mode: mode, seconds: Date().timeIntervalSince(started))
+    }
+
+    /// A bridged vault's finds without what its index holds from a linked folder not approved for it on this Mac
+    /// (D-101): an index built before approvals existed could still hold one, and a vault read through a bridge is
+    /// never changed, so it is left out here instead.
+    func withoutUnapprovedLinks(_ found: Retrieved) -> Retrieved {
+        let waiting = unapprovedLinkNames()
+        guard !waiting.isEmpty else { return found }
+        let kept = found.excerpts.filter { piece in
+            guard !isInUnapprovedLink(piece.path, waiting: waiting) else { return false }
+            if case let .link(from, _, _) = piece.reason { return !isInUnapprovedLink(from, waiting: waiting) }
+            return true
+        }
+        return Retrieved(mode: found.mode, excerpts: kept, seconds: found.seconds, signal: found.signal)
+    }
+
+    func withoutUnapprovedLinks(_ lines: [FoundLine]) -> [FoundLine] {
+        let waiting = unapprovedLinkNames()
+        guard !waiting.isEmpty else { return lines }
+        return lines.filter { !isInUnapprovedLink($0.path, waiting: waiting) }
     }
 
     static func labelled(_ found: Retrieved, _ bridge: Bridge) -> Retrieved {

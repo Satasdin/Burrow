@@ -194,8 +194,11 @@ public final class MCPServer {
     /// The instructions a program gets on connecting, in either era. The decisions in force come before the list of what
     /// the vault holds, so a client that shortens the instructions cuts the list, not a decision (D-81).
     private func connectingInstructions() -> String {
-        Self.instructions + tools.rulesInForce() + "\nThis vault holds: " + tools.catalogue() + "."
+        Self.instructions + tools.rulesInForce() + "\nThis vault holds: " + tools.catalogue() + "." + tools.linksAwaitingApprovalNote()
     }
+
+    /// True once a tool result has said that linked folders are waiting for the person's approval (D-101).
+    private var approvalNoteGiven = false
 
     /// One connection is one conversation. A program that connects again, even a minute later under the same
     /// name, starts a new one: in the 14 November runs six n8n executions and two `claude -p` runs a minute
@@ -270,15 +273,23 @@ public final class MCPServer {
             let result = try await tools.call(name, arguments: arguments)
             log(String(format: "%@ %@ in %.2f s: %@", name, result.isError ? "failed" : "ok", Date().timeIntervalSince(started), result.summary))
             defer { if !result.isError { afterCall?(name, arguments, result) } }
+            var text = result.text
+            // Said once, with the first result, since not every client shows its model the instructions (D-101).
+            if !approvalNoteGiven {
+                let waiting = tools.linksAwaitingApprovalNote()
+                if !waiting.isEmpty {
+                    text = waiting.trimmingCharacters(in: .whitespacesAndNewlines) + "\n\n" + text
+                    approvalNoteGiven = true
+                }
+            }
             if let stateless {
-                var text = result.text
                 if stateless.handsRules {
                     let rules = tools.rulesInForce()
                     if !rules.isEmpty { text = Self.rulesWithResult + rules + "\n\n" + text }
                 }
                 return Self.stateless(id: id, ["content": [["type": "text", "text": text]], "isError": result.isError])
             }
-            return Self.success(id: id, ["content": [["type": "text", "text": result.text]], "isError": result.isError])
+            return Self.success(id: id, ["content": [["type": "text", "text": text]], "isError": result.isError])
         } catch let problem as ToolCallProblem {
             log("\(name) refused: \(problem.description)")
             return Self.failure(id: id, Code.invalidParams, problem.description)

@@ -48,6 +48,7 @@ struct MainWindow: View {
         .tint(theme.accent)
         .safeAreaInset(edge: .bottom, spacing: 0) {
             VStack(spacing: 0) {
+                if !workspace.linksWaiting.isEmpty, !workspace.linksOpen { LinksWaitingBar(workspace: workspace) }
                 if let warning = workspace.warning {
                     HStack(spacing: 8) {
                         Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(.yellow)
@@ -60,6 +61,7 @@ struct MainWindow: View {
                 StatusBar(workspace: workspace)
             }
         }
+        .sheet(isPresented: $workspace.linksOpen) { LinkApprovalSheet(workspace: workspace) }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
             Task { await workspace.readAgain() }
         }
