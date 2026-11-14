@@ -20,6 +20,9 @@ public struct ToolResult: Sendable {
     public var text: String
     public var isError = false
     public var sources: [Source] = []
+    /// The Ledger commits this result handed over, by id, as the tool built its `<ledger>` block: never read back out of
+    /// the text, where a note or file could carry an id-shaped string the model was not given (D-92).
+    public var ledger: [String] = []
     /// One short line for a person watching the tool run.
     public var summary: String
 
@@ -309,11 +312,13 @@ public final class VaultTools {
         }
         // The Ledger's decisions for the question and the files read, as the app's Ask hands them over: `burrow chat`
         // answered "the split of the rent is not recorded" with the split kept as a decision (14 November, D-90).
+        var handed: [String] = []
         if ledgerNotesOn {
             let ledgerContext = AskLedger.context(vault: vault, question: task, shown: Set(brief.retrieved.paths))
             if !ledgerContext.text.isEmpty { parts.append(ledgerContext.text) }
+            handed = ledgerContext.notes.map(\.id)
         }
-        return ToolResult(text: parts.joined(separator: "\n\n"), sources: sources(brief.retrieved),
+        return ToolResult(text: parts.joined(separator: "\n\n"), sources: sources(brief.retrieved), ledger: handed,
                           summary: "\(brief.route.mode.rawValue), \(excerpts.count) excerpts" + (brief.skill.map { ", method: \($0.name)" } ?? ""))
     }
 
@@ -406,14 +411,16 @@ public final class VaultTools {
         let inFolder = folder.map { " in \($0)" } ?? ""
         guard !excerpts.isEmpty else {
             let trust = trustLine(found)
-            return ToolResult(text: "\(trust.isEmpty ? "" : trust + "\n")Nothing in the vault\(inFolder) matches \"\(query)\". \(found.how)\(ledgerNotes(for: query))", summary: "nothing found\(inFolder)")
+            let notes = ledgerNotes(for: query)
+            return ToolResult(text: "\(trust.isEmpty ? "" : trust + "\n")Nothing in the vault\(inFolder) matches \"\(query)\". \(found.how)\(notes.text)", ledger: notes.ids, summary: "nothing found\(inFolder)")
         }
         let body = excerpts.map(ProjectContent.block).joined(separator: "\n\n")
         let trust = trustLine(found)
         let steering = excerpts.flatMap { piece in Steering.lines(in: piece.text, firstLine: piece.startLine).map { (path: piece.path, line: $0.line) } }
         remember(steering)
-        return ToolResult(text: "\(ProjectContent.notice)\n\(trust.isEmpty ? "" : trust + "\n")\(excerpts.count) excerpts for \"\(query)\"\(inFolder). \(found.how)\n\n\(body)\(ledgerNotes(for: query, shown: Set(excerpts.map(\.path))))\(Steering.notice(steering))",
-                          sources: sources(found.retrieved),
+        let notes = ledgerNotes(for: query, shown: Set(excerpts.map(\.path)))
+        return ToolResult(text: "\(ProjectContent.notice)\n\(trust.isEmpty ? "" : trust + "\n")\(excerpts.count) excerpts for \"\(query)\"\(inFolder). \(found.how)\n\n\(body)\(notes.text)\(Steering.notice(steering))",
+                          sources: sources(found.retrieved), ledger: notes.ids,
                           summary: "\(excerpts.count) excerpts from \(found.retrieved.paths.count) files, \(found.retrieved.characters) characters")
     }
 
@@ -446,8 +453,9 @@ public final class VaultTools {
         remember(steering)
         // A read carries the Ledger's notes on this file and its import neighbours, as a search does (D-75):
         // the file a model reads is often the one it is about to change.
-        return ToolResult(text: "\(ProjectContent.notice)\n\(path) has \(all.count) lines. Showing \(start) to \(last).\(more)\n\n\(body)\(ledgerNotes(for: "", shown: [path]))\(Steering.notice(steering))",
-                          sources: [ToolResult.Source(path: path, startLine: start, endLine: last, reason: "read")],
+        let notes = ledgerNotes(for: "", shown: [path])
+        return ToolResult(text: "\(ProjectContent.notice)\n\(path) has \(all.count) lines. Showing \(start) to \(last).\(more)\n\n\(body)\(notes.text)\(Steering.notice(steering))",
+                          sources: [ToolResult.Source(path: path, startLine: start, endLine: last, reason: "read")], ledger: notes.ids,
                           summary: "\(path) lines \(start) to \(last) of \(all.count)")
     }
 
