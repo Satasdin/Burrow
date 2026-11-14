@@ -48,8 +48,10 @@ you which decision the change goes against. Files a build leaves (`__pycache__`,
 one line, not counted.
 
 A program that never calls it is still stopped: Claude Code's Stop hook and git's pre-commit hook
-(`burrow hook install git-gate ~/Notes`) run the same check, and hold a change that touches a decision until it has
-been shown once. `burrow check ~/Notes` does it by hand.
+(`burrow hook install git-gate ~/Notes`) run the same check, and hold a change that touches what a decision rests on
+until it has been shown once. A change elsewhere in the same file passes. Give a decision a check (a test, or a pattern
+no added line may match) with `burrow decision check ~/Notes <id> --set "…"`, and a change that fails it is held every
+time, not just once. `burrow check ~/Notes` does it by hand. See the Ledger guide.
 
 ## When a file a decision rests on changes
 

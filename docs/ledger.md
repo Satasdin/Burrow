@@ -81,7 +81,26 @@ This prints the settings to add to `~/.claude/settings.json`. Burrow never edits
 burrow check ~/Notes [--staged] [--json]
 ```
 
-Prints exactly what `burrow_check` gives a program, and exits 0 when no decision rests on the change, 2 when one does and this exact change has not been shown, 1 on an error. A change is fingerprinted by the decisions shown and the git blob of each changed file they rest on, and kept under `<vault>/.burrow/checks/` once shown, whether by `burrow check`, `burrow_check`, the Stop hook or the git gate. The same change then passes; a different change to those files is held again. `--staged` checks what the next commit holds (from inside a linked repository, only that repository). It lists the decisions beside the change; it does not judge whether the change keeps to them, so a harmless edit to a decided file is held once too.
+Prints exactly what `burrow_check` gives a program, and exits 0 when no decision rests on the change, 2 when one does and this exact change has not been shown, 1 on an error. A change is fingerprinted by the decisions shown and the git blob of each changed file they rest on, and kept under `<vault>/.burrow/checks/` once shown, whether by `burrow check`, `burrow_check`, the Stop hook or the git gate. The same change then passes; a different change to those files is held again. `--staged` checks what the next commit holds (from inside a linked repository, only that repository). 
+Each decision gets a verdict (D-107), in a "Burrow's verdict:" block and in `--json` (`verdict`, `verdicts`):
+
+- **unaffected**: the change left the functions, classes and blocks the decision rests on as they were (it changed something else in the file). Exit 0, nothing held.
+- **affected**: it changed one of them. Held once, as above (exit 2).
+- **unprovable**: Burrow can't tell (the decision names no code and none was kept with it, or a file doesn't parse, or its language isn't one Burrow outlines). Held once (exit 2).
+- **breaks**: the decision's check failed, or could not run (stopped at its time limit, not found). Exit 3, every time: seeing it does not let it through. Fix the change, or let that exact change through yourself with `burrow decision override ~/Notes <id>` in your own terminal.
+
+What a decision rests on is kept with it when it is kept: the code it names (`reconcile_statement`, `matchByPhone`, a name in backticks), or else what the session changed in its files. Then what those call, in its files and the changed files one import away. Python, Swift, JavaScript/TypeScript, Go, Rust, Java, Kotlin, C-family and C# are outlined.
+
+A decision's check is a test command, or `forbid: <pattern>` that no added line in its files may match:
+
+```
+burrow commit ~/Notes "reconcile_statement matches by reference only" --kind decision --files matatu/matatu/payments/reconcile.py \
+  --because "…" --check "python3 -m pytest -q tests/test_decisions.py"
+burrow decision check ~/Notes <id> --set "forbid: \.phone\s*==" [--timeout 60]
+burrow decision check ~/Notes <id> [--confirm | --clear]
+```
+
+Only you set, confirm or take away a check, in your own terminal (it shows what will run and asks you to type yes) or with **Confirm Check** under the decision in the app's Ledger. A check a program proposes (`burrow_commit`'s `check`, or `burrow` run through a pipe) is kept as proposed and never run. A confirmed check lives in Burrow's own folder on this Mac, never in the vault. A command runs without a shell, in the linked folder, stopped after its time limit; it is run once when you confirm it, so you know whether it passes on the code as it is.
 
 ## git
 
@@ -97,7 +116,7 @@ This writes `.git/hooks/post-commit`, but never over an existing hook. Each comm
 burrow hook install git-gate ~/Notes
 ```
 
-This writes `.git/hooks/pre-commit` (never over an existing one, and only in a repository linked into the vault). It runs `burrow check --staged`: a commit whose change touches a decision is refused once, with the decisions and their reasons printed. Seeing them is the acknowledgement, so the same commit goes through on the next try; nothing else to type. A different change to those files is held again. A Burrow error never blocks a commit, and `git commit --no-verify` skips the hook as it skips any.
+This writes `.git/hooks/pre-commit` (never over an existing one, and only in a repository linked into the vault). It runs `burrow check --staged`: a commit whose change touches what a decision rests on is refused once, with the decisions and their reasons printed. Seeing them is the acknowledgement, so the same commit goes through on the next try; nothing else to type. A commit that breaks a decision (its check fails) is refused every time. A pre-commit hook installed before D-107 lets a breaking commit through: delete it and install it again. A different change to those files is held again. A Burrow error never blocks a commit, and `git commit --no-verify` skips the hook as it skips any.
 
 ## Safety
 

@@ -1,0 +1,8 @@
+Decision 20261112-214056-002e: reconcile_statement matches a statement line to a ticket by its account reference and nothing else. A line whose reference matches no ticket is added to suspense with reason "unknown reference", count
+Run this whenever burrow check finds a change touching it (no shell, stopped after 120 seconds):
+  python3 -m unittest discover -s /private/tmp/claude-501/-Users-p3wrky-Developer-burrow/c1b54dff-2b1c-4c65-9097-270e29021224/scratchpad/work/fx-claude-verdict-break/hidden-tests -k test_phone_and_amount_alone_do_not_make_a_match
+  in /tmp/claude-501/-Users-p3wrky-Developer-burrow/c1b54dff-2b1c-4c65-9097-270e29021224/scratchpad/work/fx-claude-verdict-break/code/matatu
+If it fails, the change is held as breaking the decision, and seeing it does not let it through.
+Type yes to allow, anything else to stop: yes
+check confirmed: python3 -m unittest discover -s /private/tmp/claude-501/-Users-p3wrky-Developer-burrow/c1b54dff-2b1c-4c65-9097-270e29021224/scratchpad/work/fx-claude-verdict-break/hidden-tests -k test_phone_and_amount_alone_do_not_make_a_match. burrow check runs it whenever a change touches this decision.
+    It passes on the code as it is now (0.2 s).
