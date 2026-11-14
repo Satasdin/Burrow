@@ -5,7 +5,7 @@ import Foundation
 /// first" (D-93), but whether it breaks it, touched what it rests on, left that alone, or can't be told.
 public struct DecisionVerdict: Sendable {
     public enum Kind: String, Sendable {
-        /// The check the person set for the decision failed.
+        /// The check the person set for the decision failed, or could not run: Burrow can't say the change keeps to it.
         case breaks
         /// The change touched the functions, classes or blocks the decision rests on.
         case affected
@@ -51,7 +51,12 @@ public struct DecisionVerdict: Sendable {
         var text: String
         switch kind {
         case .breaks:
-            if case let .ran(check, run) = check {
+            if case let .ran(check, run) = check, run.status == .couldNotRun {
+                let why = run.output.components(separatedBy: "\n").first ?? ""
+                text = overridden
+                    ? "\(decision): its check could not run (\(check.shown): \(why)), but the person let this exact change through."
+                    : "\(decision): your change is held as breaking it, because the check set for this decision could not run (\(check.shown): \(why)), so Burrow can't say your change keeps to it. Fix what stops the check running, or ask the person; only they can let this change through."
+            } else if case let .ran(check, run) = check {
                 let status = run.exitStatus.map { ", exit \($0)" } ?? ""
                 text = overridden
                     ? "\(decision): its check failed (\(check.shown)\(status)), but the person let this exact change through."
@@ -72,7 +77,6 @@ public struct DecisionVerdict: Sendable {
         case let .proposed(check): text += " A check was proposed for it (\(check.shown)) but the person has not confirmed it, so it was not run."
         case let .ran(check, run):
             if run.status == .passed { text += " Its check passed (\(check.shown))." }
-            if run.status == .couldNotRun { text += " Its check could not run (\(check.shown)): \(run.output.components(separatedBy: "\n").first ?? "")." }
         }
         if !movedSinceKept.isEmpty, kind != .breaks {
             text += " Already changed in an earlier commit since the decision was kept: \(Self.list(movedSinceKept))."
@@ -229,12 +233,16 @@ public enum Verdicts {
                     }
                     let run = DecisionChecks.run(check, in: folder, added: added)
                     verdict.check = .ran(check, run)
-                    if run.status == .failed {
+                    // A check that could not run (stopped at its time limit, not found, would not start) fails closed:
+                    // held as breaking, which only fixing it or the person's override clears.
+                    if run.status != .passed {
                         verdict.kind = .breaks
                         verdict.overridden = DecisionChecks.overridden(rule.id, fingerprint: fingerprint, vault: vault)
                     }
                 } else {
                     verdict.check = .ran(check, CheckRun(status: .couldNotRun, exitStatus: nil, output: "none of its files is in a linked folder", seconds: 0))
+                    verdict.kind = .breaks
+                    verdict.overridden = DecisionChecks.overridden(rule.id, fingerprint: fingerprint, vault: vault)
                 }
             } else if let check = proposed[rule.id] {
                 verdict.check = .proposed(check)

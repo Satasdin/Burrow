@@ -146,12 +146,13 @@ public enum Outline {
             return out
         }
 
-        /// The body as hashed: comment-only and blank lines gone, trailing spaces gone.
-        static func normalised(_ lines: ArraySlice<Substring>) -> [String] {
-            lines.compactMap { line in
-                let trimmed = line.trimmingCharacters(in: .whitespaces)
-                if trimmed.isEmpty || trimmed.hasPrefix("#") { return nil }
-                var kept = String(line)
+        /// The body as hashed: the original text of each statement, string contents and all, with only the comment-only
+        /// and blank lines between statements left out, and spaces at the end of a statement. Lines inside a statement
+        /// (a string, a bracket spanning lines) are kept exactly, so a change inside a string is a change (D-107).
+        static func normalised(_ logical: ArraySlice<Logical>, _ lines: [Substring]) -> [String] {
+            logical.compactMap { line in
+                if line.empty { return nil }
+                var kept = lines[line.first...line.last].joined(separator: "\n")
                 while kept.last == " " || kept.last == "\t" { kept.removeLast() }
                 return kept
             }
@@ -185,7 +186,7 @@ public enum Outline {
                     let body = physical.joined(separator: "\n")
                     let qualified = parent.isEmpty ? name : parent + "." + name
                     symbols.append(OutlineSymbol(name: name, qualified: qualified, startLine: logical[first].first + 1, endLine: logical[lastBody].last + 1,
-                                                 hash: Outline.hash(normalised(physical)), calls: Outline.calls(in: body).subtracting([name]),
+                                                 hash: Outline.hash(normalised(logical[first...lastBody], lines)), calls: Outline.calls(in: body).subtracting([name]),
                                                  uses: Outline.identifiers(in: body)))
                     if parent.isEmpty { for index in first...lastBody { covered.insert(index) } }
                     scan(from: position + 1, to: lastBody + 1, parent: qualified)
@@ -197,16 +198,18 @@ public enum Outline {
             // Module level: what each top-level statement binds, and the code that binds nothing.
             var bindings: [String: String] = [:]
             var code: [String] = []
-            var sawStatement = false
             // Indented ones too: an import under `try:` or `if TYPE_CHECKING:` binds a name all the same.
             for (index, line) in logical.enumerated() where !covered.contains(index) && !line.empty {
-                let statement = line.text.components(separatedBy: "\n").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.hasPrefix("#") }.joined(separator: " ")
-                defer { sawStatement = true }
-                // The module's docstring says what the file is for; it runs nothing.
-                if !sawStatement, line.indent == 0, statement.hasPrefix("\"") || statement.hasPrefix("'") { continue }
+                // Parsed from the statement with its lines trimmed and joined, but compared as written: an assignment's value
+                // and code that binds nothing keep their string contents exactly (D-107). A module docstring counts as code
+                // too: it can be read, so a change to it is not assumed harmless.
+                let statement = line.text.components(separatedBy: "\n").map { $0.trimmingCharacters(in: .whitespaces) }.joined(separator: " ")
+                var written = line.text
+                while written.last == " " || written.last == "\t" { written.removeLast() }
                 let bound = binds(statement)
-                if bound.isEmpty { code.append(statement) }
-                for (name, value) in bound { bindings[name] = (bindings[name].map { $0 + " | " } ?? "") + value }
+                if bound.isEmpty { code.append(written) }
+                let assigned = !statement.hasPrefix("import ") && !statement.hasPrefix("from ")
+                for (name, value) in bound { bindings[name] = (bindings[name].map { $0 + " | " } ?? "") + (assigned ? written : value) }
             }
             return FileOutline(symbols: symbols, bindings: bindings, moduleCode: code.joined(separator: "\n"))
         }
@@ -258,9 +261,11 @@ public enum Outline {
         static let method = try! NSRegularExpression(pattern: #"^\s*"# + modifiers + #"(?:get\s+|set\s+|[A-Za-z_<>\[\],.?]+\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*(?:<[^>]*>)?\s*\([^;]*\)\s*(?::[^{]+)?(?:throws\s+[^{]+)?\{\s*$"#)
         static let notMethods: Set<String> = ["if", "for", "while", "switch", "catch", "return", "guard", "else", "do", "with", "when", "match", "repeat", "foreach", "using", "lock", "synchronized", "sizeof", "typeof", "function"]
 
-        /// Each line's brace depth at its start and end, with strings and comments skipped. Nil when they never close.
-        static func depths(_ lines: [Substring]) -> [(start: Int, end: Int, code: String)]? {
-            var out: [(Int, Int, String)] = []
+        /// Each line's brace depth at its start and end, counted with strings and comments skipped; `code` is the line so
+        /// stripped (for finding declarations and calls), `kept` the line with only its comments taken out, strings whole
+        /// (what is hashed, D-107). Nil when they never close.
+        static func depths(_ lines: [Substring]) -> [(start: Int, end: Int, code: String, kept: String)]? {
+            var out: [(Int, Int, String, String)] = []
             var depth = 0
             var block = false  // inside /* */
             var template = false  // inside a JS template literal or a Swift """ string
@@ -268,6 +273,8 @@ public enum Outline {
                 let start = depth
                 let chars = Array(line)
                 var code = ""
+                var kept = ""
+                let startsInString = template
                 var position = 0
                 while position < chars.count {
                     let character = chars[position]
@@ -277,30 +284,37 @@ public enum Outline {
                         continue
                     }
                     if template {
-                        if character == "\\" { position += 2; continue }
+                        if character == "\\" { kept.append(character); if let next { kept.append(next) }; position += 2; continue }
                         if character == "`" { template = false }
-                        if character == "\"", next == "\"", position + 2 < chars.count, chars[position + 2] == "\"" { template = false; position += 3; continue }
+                        if character == "\"", next == "\"", position + 2 < chars.count, chars[position + 2] == "\"" { template = false; kept += "\"\"\""; position += 3; continue }
+                        kept.append(character)
                         position += 1
                         continue
                     }
                     if character == "/", next == "/" { break }
-                    if character == "#", position == 0 || chars[..<position].allSatisfy({ $0 == " " || $0 == "\t" }), next != "[" , next != "{" { break }
                     if character == "/", next == "*" { block = true; position += 2; continue }
-                    if character == "`" { template = true; position += 1; continue }
-                    if character == "\"", next == "\"", position + 2 < chars.count, chars[position + 2] == "\"" { template = true; position += 3; continue }
+                    if character == "`" { template = true; kept.append(character); position += 1; continue }
+                    if character == "\"", next == "\"", position + 2 < chars.count, chars[position + 2] == "\"" { template = true; kept += "\"\"\""; position += 3; continue }
                     if character == "\"" || character == "'" {
                         // A Rust lifetime ('a) or a char: a quote with no partner on the line is left as it is.
                         var end = position + 1
                         while end < chars.count, chars[end] != character { end += chars[end] == "\\" ? 2 : 1 }
-                        if end < chars.count { code += "\"\""; position = end + 1; continue }
+                        if end < chars.count { code += "\"\""; kept += String(chars[position...end]); position = end + 1; continue }
+                        kept.append(character)
                         position += 1
                         continue
                     }
                     if character == "{" { depth += 1 } else if character == "}" { depth -= 1; if depth < 0 { return nil } }
                     code.append(character)
+                    kept.append(character)
                     position += 1
                 }
-                out.append((start, depth, code))
+                // Spaces are trimmed only where they are not inside a string that runs across lines.
+                if !startsInString { kept = String(kept.drop(while: { $0 == " " || $0 == "\t" })) }
+                if !template { while kept.last == " " || kept.last == "\t" { kept.removeLast() } }
+                // A blank line inside such a string is content: kept as a mark, so adding one is a change.
+                if kept.isEmpty, startsInString || template { kept = "\u{1}" }
+                out.append((start, depth, code, kept))
             }
             guard depth == 0, !block, !template else { return nil }
             return out
@@ -346,10 +360,7 @@ public enum Outline {
                 while first > 0, lines[first - 1].trimmingCharacters(in: .whitespaces).hasPrefix("@") || lines[first - 1].trimmingCharacters(in: .whitespaces).hasPrefix("#[") { first -= 1 }
                 let shortName = plain.split(separator: ".").last.map(String.init) ?? plain
                 let qualified = (holders.map(\.name) + [shortName]).joined(separator: ".")
-                let normal = depth[first...close].compactMap { line -> String? in
-                    let code = line.code.trimmingCharacters(in: .whitespaces)
-                    return code.isEmpty ? nil : code
-                }
+                let normal = depth[first...close].map(\.kept).filter { !$0.isEmpty }
                 let joined = depth[first...close].map(\.code).joined(separator: "\n")
                 symbols.append(OutlineSymbol(name: shortName, qualified: qualified, startLine: first + 1, endLine: close + 1,
                                              hash: Outline.hash(normal), calls: Outline.calls(in: joined).subtracting(["if", "for", "while", "switch", "catch", "return", "guard"]),
@@ -357,7 +368,7 @@ public enum Outline {
                 if holders.isEmpty { for line in first...close { covered.insert(line) } }
                 holders.append((shortName, base))
             }
-            let code = lines.indices.filter { !covered.contains($0) }.map { depth[$0].code.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
+            let code = lines.indices.filter { !covered.contains($0) }.map { depth[$0].kept }.filter { !$0.isEmpty }
             return FileOutline(symbols: symbols, bindings: [:], moduleCode: code.joined(separator: "\n"))
         }
     }

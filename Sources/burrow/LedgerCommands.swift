@@ -75,7 +75,7 @@ func runLedgerCommand(_ arguments: [String]) async throws -> Bool {
             let count = outcome.report.rules.count
             if outcome.breaks {
                 let ids = outcome.verdicts.filter(\.breaks).map(\.decision)
-                logToStandardError("breaks: the check set for \(ids.joined(separator: ", ")) failed. Seeing it does not let it through: fix the change. Only you can override it, in your own terminal: burrow decision override \(Printable.shellWord(vault.root.path)) \(ids[0])")
+                logToStandardError("breaks: the check set for \(ids.joined(separator: ", ")) failed or could not run. Seeing it does not let it through: fix the change. Only you can override it, in your own terminal: burrow decision override \(Printable.shellWord(vault.root.path)) \(ids[0])")
             } else if outcome.holds {
                 logToStandardError("held: this change rests on \(count) decision\(count == 1 ? "" : "s") kept in the Ledger and had not been shown. It has been now, so the same change passes next time.")
             } else if outcome.fingerprint != nil, outcome.verdict == "unaffected" {

@@ -51,7 +51,13 @@ actor Engine {
         state.check = VaultTools.checkReport(vault: vault, ledger: ledger)
         state.flagged = flaggedText()
         let confirmed = DecisionChecks.confirmed(vault), proposed = DecisionChecks.proposed(vault)
-        for id in Set(confirmed.keys).union(proposed.keys) { state.checks[id] = DecisionCheckState(confirmed: confirmed[id], proposed: proposed[id]) }
+        let folders = vault.linkedFolders()
+        for id in Set(confirmed.keys).union(proposed.keys) {
+            // Where it would run: the linked folder of the decision's first cited file, as the terminal's question says.
+            let cited = commits.first { $0.id == id }?.cites.keys.sorted() ?? []
+            let folder = cited.lazy.compactMap { path in folders.first { path.hasPrefix($0.name + "/") }?.path }.first
+            state.checks[id] = DecisionCheckState(confirmed: confirmed[id], proposed: proposed[id], folder: folder)
+        }
         return state
     }
 

@@ -24,11 +24,21 @@ public struct DecisionCheck: Codable, Sendable, Equatable {
 
     /// `forbid: <regex>` is a forbidden pattern; anything else is a command, split into words the way a shell would split
     /// them (quotes and backslashes), with nothing expanded: no variables, no globs, no `~`, no pipes.
-    public static func parse(_ spec: String, timeout: Int = defaultTimeout, by: String, at: Date = Date()) throws -> DecisionCheck {
+    public static func parse(_ spec: String, timeout: Int = defaultTimeout, by given: String, at: Date = Date()) throws -> DecisionCheck {
+        // Who proposed it is a program's own name: shown, so kept to plain visible characters.
+        var visible = String.UnicodeScalarView()
+        visible.append(contentsOf: given.unicodeScalars.filter { $0 == " " || !unseen($0) })
+        let by = String(String(visible).prefix(120))
         let written = spec.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !written.isEmpty else { throw LedgerProblem("A check needs a command to run, or forbid: and a pattern.") }
         guard !written.unicodeScalars.contains(where: { $0 == "\0" || $0 == "\n" || $0 == "\r" }) else {
             throw LedgerProblem("A check is one line: a command, or forbid: and a pattern.")
+        }
+        // What the person is shown must be exactly what runs, so nothing that can't be seen, or that changes how the
+        // rest is shown, is allowed: control characters, bidi marks, zero-width and other format characters, and any
+        // space other than a plain space or tab.
+        guard !written.unicodeScalars.contains(where: unseen) else {
+            throw LedgerProblem("A check can't hold control characters, invisible characters or unusual spaces: what you are shown has to be exactly what runs.")
         }
         guard (1...3_600).contains(timeout) else { throw LedgerProblem("A check's time limit is 1 to 3,600 seconds.") }
         if written.lowercased().hasPrefix("forbid:") {
@@ -42,6 +52,31 @@ public struct DecisionCheck: Codable, Sendable, Equatable {
         guard !words.isEmpty else { throw LedgerProblem("A check needs a command to run.") }
         guard written.count <= 2_000 else { throw LedgerProblem("A check's command holds 2,000 characters.") }
         return DecisionCheck(kind: .command, argv: words, pattern: nil, timeout: timeout, written: written, by: by, at: at)
+    }
+
+    /// True for a character a person can't see, or that changes how what follows is shown (D-107).
+    public static func unseen(_ scalar: Unicode.Scalar) -> Bool {
+        if scalar == " " { return false }
+        if scalar == "\t" { return false }
+        if Printable.isControl(scalar) { return true }
+        switch scalar.properties.generalCategory {
+        case .format, .control, .surrogate, .privateUse, .unassigned, .lineSeparator, .paragraphSeparator, .spaceSeparator, .nonspacingMark, .enclosingMark: return true
+        default: break
+        }
+        // Variation selectors, the Hangul fillers and the braille blank look like nothing.
+        switch scalar.value {
+        case 0xFE00...0xFE0F, 0xE0100...0xE01EF, 0x115F, 0x1160, 0x3164, 0xFFA0, 0x2800: return true
+        default: return scalar.properties.isWhitespace || scalar.properties.isDefaultIgnorableCodePoint
+        }
+    }
+
+    /// This check if it is exactly what its own words say and nothing hides in it, else nil. A check read from a file
+    /// (a vault someone shared can carry any JSON) is taken only when its words parse back to the same thing (D-107).
+    public func validated() -> DecisionCheck? {
+        guard let again = try? Self.parse(written, timeout: timeout, by: "check", at: at),
+              again.kind == kind, again.argv == argv, again.pattern == pattern,
+              !by.unicodeScalars.contains(where: Self.unseen), by.count <= 120 else { return nil }
+        return self
     }
 
     /// Words as a shell splits them, with nothing expanded.
@@ -144,17 +179,19 @@ public enum DecisionChecks {
 
     /// Checks proposed and not confirmed, by decision id. A file that can't be read proposes nothing.
     public static func proposed(_ vault: Vault) -> [String: DecisionCheck] {
-        guard let data = try? Data(contentsOf: proposalsFile(vault)) else { return [:] }
-        return (try? coder().1.decode([String: DecisionCheck].self, from: data)) ?? [:]
+        guard let data = try? Data(contentsOf: proposalsFile(vault)),
+              let all = try? coder().1.decode([String: DecisionCheck].self, from: data) else { return [:] }
+        return all.compactMapValues { $0.validated() }
     }
 
     /// Checks the person confirmed for this vault on this Mac: the only ones that run.
     public static func confirmed(_ vault: Vault) -> [String: DecisionCheck] {
-        ((try? loadConfirmed(vault))?.vaults[vaultKey(vault)]) ?? [:]
+        (((try? loadConfirmed(vault))?.vaults[vaultKey(vault)]) ?? [:]).compactMapValues { $0.validated() }
     }
 
     /// Keeps a check as proposed: shown beside the decision, never run. A confirmed check is left as it is.
     public static func propose(_ check: DecisionCheck, for decision: String, vault: Vault) throws {
+        guard check.validated() != nil else { throw LedgerProblem("That check can't be kept: its words don't say exactly what it runs.") }
         var all = proposed(vault)
         all[decision] = check
         try FileManager.default.createDirectory(at: vault.store, withIntermediateDirectories: true)
@@ -163,6 +200,7 @@ public enum DecisionChecks {
 
     /// The person's yes: the check runs from now on. Call only after the person was shown `check.shown` and said yes.
     public static func confirm(_ check: DecisionCheck, for decision: String, vault: Vault, by person: String = "you") throws {
+        guard check.validated() != nil else { throw LedgerProblem("That check can't be confirmed: its words don't say exactly what it runs.") }
         var saved = try loadConfirmed(vault)
         saved.vaults[vaultKey(vault), default: [:]][decision] = check.confirmed(by: person)
         try saveConfirmed(saved, vault)

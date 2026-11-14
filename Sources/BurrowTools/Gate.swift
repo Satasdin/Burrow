@@ -85,7 +85,7 @@ public enum Gate {
     public static let stopNote = "Burrow held your reply: this change rests on a decision kept in the Ledger, and it had not been checked against it. In your reply, tell the person which decision this change touches and whether it goes against it, in plain words."
 
     /// What the Stop hook adds when the change breaks a decision (D-107).
-    public static let breakNote = "Burrow held your reply: your change breaks a decision kept in the Ledger. The check the person set for it failed (its output is above). Change your work so the check passes, or undo that part. If the person asked for this knowing the decision, stop and tell them which decision it breaks; only they can let it through, in their own terminal."
+    public static let breakNote = "Burrow held your reply: your change breaks a decision kept in the Ledger: the check the person set for it failed or could not run (its output is above). Change your work so the check passes, or undo that part. If the person asked for this knowing the decision, stop and tell them which decision it breaks; only they can let it through, in their own terminal."
 
     /// How many times the Stop hook holds the same breaking change before it lets Claude stop and tell the person.
     public static let breakHolds = 3
@@ -149,7 +149,7 @@ public enum Gate {
         status=$?
         if [ "$status" -eq 3 ]; then
           printf '%s\\n\\n' "$out" 1>&2
-          echo "burrow: commit refused. This change breaks a decision: the check set for it failed (above). Seeing it does not let it through: fix the change. Only you can override it, in your own terminal: \(burrow) decision override \(vault) <decision id>" 1>&2
+          echo "burrow: commit refused. This change breaks a decision: the check set for it failed or could not run (above). Seeing it does not let it through: fix the change. Only you can override it, in your own terminal: \(burrow) decision override \(vault) <decision id>" 1>&2
           exit 1
         fi
         if [ "$status" -eq 2 ]; then
