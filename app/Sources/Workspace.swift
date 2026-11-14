@@ -22,7 +22,8 @@ actor Engine {
 
     // Linked folders waiting for the person's approval on this Mac (D-101).
     func linksWaiting() -> [LinkState] { vault.linkStates().filter { !$0.approved } }
-    func approveLinks() throws { try vault.approveLinks() }
+    /// Approves exactly the folders the sheet showed, by their real paths; a list changed since approves nothing (D-104).
+    func approveLinks(_ shown: [LinkState]) throws { try vault.approve(shown) }
 
     @discardableResult func index() async throws -> IndexReport { try await vault.refresh(embedder: nil) }
     @discardableResult func embed(onProgress: @escaping @Sendable (String) -> Void) async throws -> IndexReport {
@@ -373,11 +374,13 @@ final class Workspace {
         }
     }
 
-    /// The person said yes to every linked folder waiting: they are read from now on, and indexed now (D-101).
+    /// The person said yes to every linked folder the sheet showed them, less any Burrow never follows: they are read
+    /// from now on, and indexed now (D-101, D-104).
     func approveLinks() async {
         linksOpen = false
+        let shown = linksWaiting.filter { $0.refusal == nil }
         await act {
-            try await engine.approveLinks()
+            try await engine.approveLinks(shown)
             await readAgain()
         }
     }

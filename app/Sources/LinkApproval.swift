@@ -3,7 +3,7 @@ import SwiftUI
 
 /// Asked once when a vault opens with linked folders the person on this Mac has not approved (D-101). A vault's list of
 /// linked folders is a file in its folder, so a vault someone else gave you could point it anywhere on this Mac. Until
-/// the person says yes here, or with `burrow link approve`, those folders are not read by anything.
+/// the person says yes here, or with `burrow link approve` in their own terminal (D-104), those folders are not read by anything.
 struct LinkApprovalSheet: View {
     static let symbol = "link"
     let workspace: Workspace
@@ -19,15 +19,20 @@ struct LinkApprovalSheet: View {
             ForEach(workspace.linksWaiting) { state in
                 HStack(spacing: 10) {
                     Image(systemName: "folder").foregroundStyle(Night.document).frame(width: 20)
+                    // The name and paths come from the vault's own list, which whoever shared it could have written:
+                    // shown cleaned of control characters and bidi overrides, and the real path, which is what is
+                    // approved and read, first (D-104).
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(state.folder.name).font(.body.weight(.semibold))
-                        Text((state.folder.path as NSString).abbreviatingWithTildeInPath).font(.caption).foregroundStyle(.secondary)
+                        Text(Printable.clean(state.folder.name)).font(.body.weight(.semibold))
+                        Text((Printable.clean(state.realPath) as NSString).abbreviatingWithTildeInPath).font(.caption).foregroundStyle(.secondary)
                             .lineLimit(1).truncationMode(.middle)
                         if state.leadsElsewhere {
-                            Text("which is " + (state.realPath as NSString).abbreviatingWithTildeInPath).font(.caption).foregroundStyle(.secondary)
+                            Text("listed as " + (Printable.clean(state.folder.path) as NSString).abbreviatingWithTildeInPath).font(.caption).foregroundStyle(.secondary)
                                 .lineLimit(1).truncationMode(.middle)
                         }
-                        if !state.exists {
+                        if let why = state.refusal {
+                            Text("Burrow never reads this one: \(why).").font(.caption).foregroundStyle(Night.stale)
+                        } else if !state.exists {
                             Text("Not found on this Mac").font(.caption).foregroundStyle(Night.stale)
                         }
                     }
@@ -35,7 +40,7 @@ struct LinkApprovalSheet: View {
                 }
                 .padding(10)
                 .background(Color.primary.opacity(0.05), in: .rect(cornerRadius: 8))
-                .help(state.realPath)
+                .help(Printable.clean(state.realPath))
             }
             Text("Allowed, \(workspace.linksWaiting.count == 1 ? "it is" : "they are") read where \(workspace.linksWaiting.count == 1 ? "it is" : "they are") and never changed, by search, Ask and the programs you connect. Not now leaves \(workspace.linksWaiting.count == 1 ? "it" : "them") out of all of these, and asks again the next time this vault opens.")
                 .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
@@ -43,6 +48,7 @@ struct LinkApprovalSheet: View {
                 Button("Not now") { workspace.linksOpen = false }.keyboardShortcut(.cancelAction)
                 Spacer()
                 Button("Allow") { Task { await workspace.approveLinks() } }.buttonStyle(.borderedProminent)
+                    .disabled(workspace.linksWaiting.allSatisfy { $0.refusal != nil })
                     .help("Approve \(workspace.linksWaiting.count == 1 ? "this folder" : "these folders") for \(workspace.name) on this Mac.")
             }
         }

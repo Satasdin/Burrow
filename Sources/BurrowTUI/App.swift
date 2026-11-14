@@ -75,7 +75,7 @@ public final class TerminalApp {
         let size = screen.size
         model.resize(width: size.width, height: size.height)
         model.reload()
-        if let line = model.vault.linksAwaitingApprovalLine() { model.setStatus(line, problem: true) }
+        if let line = model.vault.linksAwaitingApprovalLine(detailed: true) { model.setStatus(line, problem: true) }
         startIndexing(embedAll: false)
         draw()
         loop()
