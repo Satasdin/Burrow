@@ -52,12 +52,18 @@ enum Connections {
 
     /// The `burrow` command to write into settings files. Always a full path: programs opened from the Dock
     /// (LM Studio, Claude Desktop) do not get the shell's PATH, so a bare `burrow` would not start.
+    /// The copy inside this app comes first, since it is the same version as the app. A command on the PATH is used
+    /// only when it is a link to that copy (a steadier path to write into settings) or when the app holds none: on
+    /// 14 November `~/.local/bin/burrow` was an older, separate file, and the setup line pointed programs at it.
     static var command: String {
         let candidates = ["/opt/homebrew/bin/burrow", "/usr/local/bin/burrow", home.appendingPathComponent(".local/bin/burrow").path]
-        if let found = candidates.first(where: { FileManager.default.isExecutableFile(atPath: $0) }) { return found }
-        let bundled = Bundle.main.bundleURL.appendingPathComponent("Contents/Resources/bin/burrow").path
-        if FileManager.default.isExecutableFile(atPath: bundled) { return bundled }
-        return "burrow"
+        let installed = candidates.filter { FileManager.default.isExecutableFile(atPath: $0) }
+        let bundled = Bundle.main.bundleURL.appendingPathComponent("Contents/Resources/bin/burrow")
+        if FileManager.default.isExecutableFile(atPath: bundled.path) {
+            let real = bundled.resolvingSymlinksInPath().path
+            return installed.first { URL(fileURLWithPath: $0).resolvingSymlinksInPath().path == real } ?? bundled.path
+        }
+        return installed.first ?? "burrow"
     }
 
     static var commandIsInstalled: Bool { command != "burrow" }

@@ -174,7 +174,7 @@ struct FlowMap: View {
     private static let portX: CGFloat = 214
 
     static func today(_ workspace: Workspace, _ program: Program) -> [TrailStep] {
-        workspace.sessions(for: program).flatMap { $0.trail ?? [] }.filter { Calendar.current.isDateInToday($0.at) }
+        workspace.sessions(for: program).flatMap(\.lookups).filter { Calendar.current.isDateInToday($0.at) }
     }
     static func active(_ workspace: Workspace, _ program: Program) -> Bool {
         workspace.sessions(for: program).contains { Date().timeIntervalSince($0.updated) < 30 * 60 }

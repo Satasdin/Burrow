@@ -9,7 +9,7 @@ struct LibraryPage: View {
     let kind: LibraryKind
 
     private var groups: [(folder: String, files: [MapFile])] {
-        let files = workspace.map.files.filter { kind.holds($0.path) }
+        let files = workspace.map.files.filter { kind.holds($0) }
         let byFolder = Dictionary(grouping: files) { file -> String in
             let parts = file.path.split(separator: "/")
             return parts.count > 1 ? String(parts[0]) : ""
@@ -27,7 +27,14 @@ struct LibraryPage: View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 26, pinnedViews: []) {
                 header
-                if groups.isEmpty {
+                if groups.isEmpty, !workspace.hasRead {
+                    // The first open of a large vault takes a while; "Nothing here yet" then read as an empty vault (14 November).
+                    VStack(spacing: 12) {
+                        ProgressView().controlSize(.large)
+                        Text(workspace.progress ?? "Reading your vault").foregroundStyle(Night.dim)
+                    }
+                    .frame(maxWidth: .infinity).padding(.top, 80)
+                } else if groups.isEmpty {
                     ContentUnavailableView(kind == .all ? "Nothing here yet" : "No \(kind.title.lowercased()) yet", systemImage: kind.symbol,
                                            description: Text("Drop files into the vault folder, or link a folder you already have."))
                         .foregroundStyle(Night.dim).frame(maxWidth: .infinity).padding(.top, 60)

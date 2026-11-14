@@ -49,15 +49,18 @@ struct WatchPanel: View {
         .onChange(of: workspace.watchPeek) { _, peek in open = peek.flatMap(Part.init(rawValue:)) }
     }
 
-    /// Decisions on this branch left out because a file they rest on changed: they come back once checked and kept again.
+    /// Decisions resting on a file that changed are still handed over, marked to be checked, until someone says they still hold (D-82).
     private var rulesDetail: String {
-        let held = ledger.commits.filter { $0.branch == ledger.current && $0.kind == .decision && !ledger.reverted.contains($0.id) && ledger.stale[$0.id] != nil }.count
+        let held = rules.filter { ledger.stale[$0.id] != nil }.count
         return held == 0 ? "Handed to every program that connects, on \(ledger.current)"
-            : "\(held.counted("decision")) left out: \(held == 1 ? "it rests" : "they rest") on files changed since"
+            : "\(held.counted("decision")) to check again: \(held == 1 ? "it rests" : "they rest") on files changed since"
     }
 
     private var checkDetail: String {
-        guard let check, !check.changed.isEmpty else { return "The linked code matches its last git commit" }
+        guard let check, !check.changed.isEmpty else {
+            if let built = check?.buildOutput, !built.isEmpty { return "Only build output changed (\(built.count.counted("file")))" }
+            return "The linked code matches its last git commit"
+        }
         return check.rules.isEmpty ? "No decision rests on them" : "\(check.rules.count.counted("decision")) to check them against"
     }
 
@@ -96,7 +99,7 @@ struct WatchPanel: View {
         VStack(alignment: .leading, spacing: 10) {
             header("What a program reads first", "These are put in the instructions every program gets when it connects through burrow mcp, as notes by the models named, not orders.", Self.mint)
             if rules.isEmpty {
-                Text("No decision is in force on \(ledger.current) yet. Decisions marked wrong, or resting on files changed since, are left out.")
+                Text("No decision is in force on \(ledger.current) yet. Decisions marked wrong are left out.")
                     .font(.system(size: 12.5)).foregroundStyle(Night.dim)
             }
             ForEach(Array(rules.prefix(5).enumerated()), id: \.element.id) { index, commit in
@@ -138,9 +141,14 @@ struct WatchPanel: View {
                     }
                 }
                 if !check.diffs.isEmpty { DiffView(text: check.diffs.joined(separator: "\n")) }
-            } else {
+            } else if check?.buildOutput.isEmpty ?? true {
                 Label("Nothing has changed in the linked code since its last git commit", systemImage: "checkmark.circle")
                     .font(.system(size: 12.5)).foregroundStyle(Self.mint)
+            }
+            // Set aside, never hidden (D-87).
+            if let built = check?.buildOutput, !built.isEmpty {
+                Text("Also changed, looks like build output: " + built.prefix(4).map(\.fileName).joined(separator: ", ") + (built.count > 4 ? " and \(built.count - 4) more" : ""))
+                    .font(.system(size: 11.5)).foregroundStyle(Night.faint).lineLimit(2).help(built.joined(separator: "\n"))
             }
         }
         .padding(16).skyCard(tint: Night.conversation)
@@ -194,22 +202,21 @@ struct RuleRow: View {
     let commit: LedgerCommit
     let number: Int
 
-    private var because: String? {
-        commit.body.components(separatedBy: "\n").first { $0.hasPrefix("Because:") }.map { String($0.dropFirst(8)).trimmingCharacters(in: .whitespaces) }
-    }
+    private var stale: [String] { workspace.ledger.stale[commit.id] ?? [] }
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             Text("\(number)").font(.system(size: 12, weight: .bold, design: .rounded)).foregroundStyle(.black)
-                .frame(width: 22, height: 22).background(commit.kind.colour, in: .circle)
+                .frame(width: 22, height: 22).background(stale.isEmpty ? commit.kind.colour : WatchPanel.amber, in: .circle)
             VStack(alignment: .leading, spacing: 5) {
                 Text(commit.message).font(.system(size: 13, weight: .medium)).foregroundStyle(Night.note).lineLimit(4)
                     .fixedSize(horizontal: false, vertical: true).textSelection(.enabled)
-                if let because {
-                    Text("Because " + because).font(.system(size: 12)).foregroundStyle(Night.dim).lineLimit(2)
+                if let because = commit.because {
+                    Text("Because " + because).font(.system(size: 12)).foregroundStyle(Night.dim).lineLimit(3)
                 }
+                if !stale.isEmpty { StillRight(workspace: workspace, commit: commit, changed: stale) }
                 HStack(spacing: 6) {
-                    Text(commit.author).font(.system(size: 11)).foregroundStyle(Night.faint)
+                    Text(commit.author).font(.system(size: 11)).foregroundStyle(Night.faint).help(commit.byline)
                     ForEach(commit.cites.keys.sorted().prefix(3), id: \.self) { path in
                         Button { workspace.go(.file(path), newTab: true) } label: {
                             Text(path.fileName).font(.system(size: 10.5, design: .monospaced)).foregroundStyle(Night.note.opacity(0.8))
@@ -224,6 +231,24 @@ struct RuleRow: View {
         .padding(10)
         .background(Color.white.opacity(0.035), in: .rect(cornerRadius: 10))
         .contextMenu { Button("Show in Ledger") { workspace.go(.ledger(commit.branch)) } }
+    }
+}
+
+/// A decision resting on a file that changed: programs are still handed it, marked "check again", until a person looks
+/// and says it still holds (D-82). One click keeps a confirmation in the Ledger; nothing is rewritten.
+struct StillRight: View {
+    let workspace: Workspace
+    let commit: LedgerCommit
+    let changed: [String]
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Label("\(changed.map(\.fileName).prefix(2).joined(separator: ", ")) changed since", systemImage: "exclamationmark.arrow.circlepath")
+                .font(.system(size: 11.5, weight: .medium)).foregroundStyle(WatchPanel.amber).lineLimit(1)
+            Button { Task { await workspace.confirm(commit.id) } } label: { Label("Still Right", systemImage: "checkmark.circle") }
+                .controlSize(.small)
+                .help("You looked at the change and this still holds. Programs stop being told to check it again, until the file changes again.")
+        }
     }
 }
 

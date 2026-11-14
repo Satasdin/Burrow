@@ -77,7 +77,7 @@ struct SessionCard: View {
                 Spacer()
                 Text(record.updated.formatted(date: .omitted, time: .shortened)).font(.system(size: 11.5)).foregroundStyle(Night.faint).monospacedDigit()
             }
-            if let question = record.question {
+            if let question = workspace.title(of: record) {
                 Text(question).font(.system(size: 13)).foregroundStyle(Night.note.opacity(0.9)).lineLimit(2)
             }
             if !files.isEmpty {
@@ -94,7 +94,7 @@ struct SessionCard: View {
                 }
             }
             HStack(spacing: 14) {
-                stat("magnifyingglass", record.lookups.counted("lookup"))
+                stat("magnifyingglass", record.lookupCount.counted("lookup"))
                 stat("doc.on.doc", files.count.counted("file"))
                 if !record.turns.isEmpty { stat("text.bubble", record.turns.count.counted("turn")) }
                 if record.resumedFrom != nil { stat("arrow.turn.down.right", "carried on") }
@@ -144,7 +144,7 @@ struct SessionPage: View {
                         Image(systemName: record.program.symbol).font(.system(size: 20)).foregroundStyle(record.program.colour)
                         VStack(alignment: .leading, spacing: 2) {
                             Text(record.program.name).font(.system(size: 24, weight: .bold)).tracking(-0.3)
-                            Text("\(record.started.formatted(date: .abbreviated, time: .shortened)) · \(record.lookups.counted("lookup")) · \(Set(record.filesInPlay.map { $0.components(separatedBy: ":").first ?? $0 }).count.counted("file")) read\(record.models.isEmpty ? "" : " · " + record.models.joined(separator: ", "))")
+                            Text("\(record.started.formatted(date: .abbreviated, time: .shortened)) · \(record.lookupCount.counted("lookup")) · \(Set(record.filesInPlay.map { $0.components(separatedBy: ":").first ?? $0 }).count.counted("file")) read\(record.models.isEmpty ? "" : " · " + record.models.joined(separator: ", "))")
                                 .foregroundStyle(Night.dim).font(.system(size: 12.5)).monospacedDigit()
                         }
                     }

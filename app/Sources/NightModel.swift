@@ -57,6 +57,14 @@ enum LibraryKind: String, CaseIterable, Hashable {
 
     func holds(_ path: String) -> Bool { self == .all || Self.of(path) == self }
 
+    /// A file's kind on the Library's shelves. A Markdown file inside a linked code folder (its README) belongs with that
+    /// code, so "Notes" counts the vault's own notes, the number the title bar and `burrow stats` give (14 November).
+    static func of(_ file: MapFile) -> LibraryKind {
+        let kind = of(file.path)
+        return kind == .notes && !file.isNote ? .code : kind
+    }
+    func holds(_ file: MapFile) -> Bool { self == .all || Self.of(file) == self }
+
     /// The colour that answers "what kind of thing is this". Code has none: it is the plain case.
     static func colour(of path: String) -> Color? {
         switch of(path) {
@@ -168,9 +176,17 @@ typealias VaultSession = BurrowTools.SessionRecord
 
 extension VaultSession {
     var program: Program { Program(client: client) }
-    /// Every lookup that touched the vault, from the trail Burrow keeps itself.
-    var lookups: Int { (trail ?? []).count }
-    var question: String? { turns.first?.question ?? trail?.first(where: { !$0.asked.isEmpty })?.asked }
+    /// Searches and reads, from the trail Burrow keeps itself. Resumes, checks and commits are not lookups (D-85), so this
+    /// is the number the conversation's own handoff gives.
+    var lookupCount: Int { lookups.count }
+}
+
+extension Workspace {
+    /// A conversation's name: what the person asked for when a program said so, else its first logged question, else the
+    /// decision it kept, else its first search (D-86).
+    func title(of record: VaultSession) -> String? {
+        record.title(kept: ledger.commits.filter { $0.session == record.id && $0.kind == .decision }.map(\.message))
+    }
 }
 
 extension Workspace {
@@ -198,7 +214,7 @@ extension Workspace {
             .map { ($0.element, $0.offset < Theme.clusters.count ? Theme.clusters[$0.offset] : Theme.otherCluster) }, uniquingKeysWith: { a, _ in a })
     }
 
-    func count(_ kind: LibraryKind) -> Int { map.files.filter { kind.holds($0.path) }.count }
+    func count(_ kind: LibraryKind) -> Int { map.files.filter { kind.holds($0) }.count }
 
     func sessions(reading path: String) -> [VaultSession] {
         sessions.filter { $0.filesInPlay.contains { $0 == path || $0.hasPrefix(path + ":") } }
@@ -270,6 +286,12 @@ enum NoteText {
         let body = rows.prefix(lines).map(plain).joined(separator: "\n")
         return (title, body)
     }
+}
+
+extension VaultStats {
+    /// Every file in the vault, notes included: the number `burrow index`, `burrow stats` and the Library's "All" give.
+    /// `files` alone counts only the files that are not notes, which read as a second, smaller total (14 November).
+    var allFiles: Int { files + notes }
 }
 
 extension Int {

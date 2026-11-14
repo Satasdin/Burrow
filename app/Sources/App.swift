@@ -184,9 +184,17 @@ struct Welcome: View {
                 Button("Open or Create a Vault…") { pickVault(library) }
                     .buttonStyle(.borderedProminent).controlSize(.extraLarge).padding(.top, 10)
                 if !library.recents.isEmpty {
-                    VStack(spacing: 8) {
+                    // Many vaults are a folder called "vault" or "Notes", so each is named with the folders above it,
+                    // and the full path is a line below: "vault" six times told them apart for nobody (14 November).
+                    VStack(spacing: 10) {
                         ForEach(library.recents, id: \.self) { path in
-                            Button(path.fileName) { library.open(URL(fileURLWithPath: path)) }.buttonStyle(.link)
+                            Button { library.open(URL(fileURLWithPath: path)) } label: {
+                                VStack(spacing: 1) {
+                                    Text(Library.shortName(path, among: library.recents)).font(.body.weight(.medium))
+                                    Text((path as NSString).abbreviatingWithTildeInPath).font(.caption).foregroundStyle(.white.opacity(0.45))
+                                }
+                            }
+                            .buttonStyle(.link).help(path)
                         }
                     }
                     .padding(.top, 10)

@@ -26,7 +26,8 @@ extension Model {
         var state = LedgerViewState()
         state.all = ledger.log(limit: 1_000)
         state.reverted = ledger.reverted()
-        for commit in state.all { let changed = ledger.changed(commit); if !changed.isEmpty { state.stale[commit.id] = changed } }
+        let stale = ledger.staleness()
+        for commit in state.all { let changed = stale(commit); if !changed.isEmpty { state.stale[commit.id] = changed } }
         state.branches = Array(Set(state.all.map(\.branch))).sorted()
         if let old = ledgerView.branch, let index = state.branches.firstIndex(of: old) { state.branchIndex = index + 1 }
         state.selected = min(ledgerView.selected, max(0, state.commits.count - 1))
@@ -141,7 +142,8 @@ enum LedgerScreen {
             for paragraph in commit.body.components(separatedBy: "\n") { line(paragraph, .quiet) }
         }
         y += 1
-        line("Written by \(commit.author)\(commit.client.map { " in \($0)" } ?? "")\(commit.sha.map { " · git \($0.prefix(10))" } ?? "")", .quiet)
+        let byline = commit.byline
+        line(byline.prefix(1).uppercased() + byline.dropFirst() + (commit.sha.map { " · git \($0.prefix(10))" } ?? ""), .quiet)
         if !commit.cites.isEmpty, y < area.bottom - 1 {
             y += 1
             line("Rests on", Style(ink: .note, bold: true))

@@ -2,11 +2,15 @@
 
 Private project memory for local language models. Burrow keeps a software project's code linked, along with the decisions, rejected fixes and past bugs the code can't show, and hands a local Ollama model only the parts it needs. Nothing leaves the Mac.
 
-Burrow is a private vault for everything: notes in Markdown, with code folders linked in read-only, and any local Ollama model can read it. There is a Mac app, a terminal version and an MCP server, all on the same engine. Pick a folder as your vault, and an Obsidian vault works as it is. Build the app with `app/build.sh`, then open `app/build/Burrow.app`. It needs macOS 26 or later.
+Burrow is a private vault for everything: notes in Markdown, with code folders linked in read-only, and any local Ollama model can read it. There is a Mac app, a terminal version and an MCP server, all on the same engine. Pick a folder as your vault, and an Obsidian vault works as it is.
+
+Beside the files, Burrow keeps the **Ledger**: what AI sessions decided and why, what they were corrected on, and where each one stopped, so the next program, cloud or local, starts from it. Programs connected over MCP get the decisions in force when they connect, `burrow_resume` to pick up where the last session stopped, and `burrow_check` to see their code change beside the decisions it touches. The app's **Watch** panel shows the same three things to you. [docs/day-to-day.md](docs/day-to-day.md) walks through a normal day.
+
+Which Mac: the terminal version and the MCP server run on Apple silicon with macOS 14 or later. The desktop app needs macOS 26 or later; build it with `app/build.sh`, then open `app/build/Burrow.app`.
 
 ## Install
 
-On Apple silicon with macOS 14 or later, from the [landing page](https://satasdin.github.io/CAMR/) or with:
+The terminal version, from the [landing page](https://satasdin.github.io/CAMR/) or with:
 
 ```bash
 curl -fsSL https://github.com/Satasdin/CAMR/releases/latest/download/install.sh | sh
@@ -69,7 +73,7 @@ Burrow does more than find excerpts. On every question it decides whether the va
 
 ## In the terminal
 
-A vault is a folder of Markdown notes, with code folders linked in read-only. The first command below is once per code folder and the second builds the index with meaning search.
+A vault is a folder of Markdown notes, with code folders linked in read-only. The first command below is once per code folder and the second opens the folder as a vault and builds its index with meaning search; it is also how to open a vault from the terminal without the app.
 
 ```bash
 .build/release/burrow link ~/notes ~/code/my-project
@@ -99,7 +103,7 @@ By default the chat searches the vault before the model is asked, and labels tha
 
 ## Connect an MCP client
 
-`burrow mcp <vault-folder>` is an MCP server on stdin and stdout, with seven tools: `vault_search`, `vault_read`, `vault_links`, `vault_list`, `vault_folders`, `vault_remember` and `vault_ask`. Only `vault_remember` writes, and it only adds a note. Point a client at the built binary, using full paths:
+`burrow mcp <vault-folder>` is an MCP server on stdin and stdout. A program is shown five tools: `burrow_find` (search), `burrow_read`, `burrow_resume` (where earlier sessions stopped), `burrow_commit` (keep a decision with its reason, a fact, a plan or a handoff) and `burrow_check` (your code change beside the decisions it touches). `--tools full` lists all 21, including `burrow_log`, `burrow_blame`, `burrow_diff`, `burrow_revert` and the older `vault_` tools; `--tools classic` lists only the 12 `vault_` tools, for runs that must match earlier ones. Every tool answers by name whichever list is shown. Only `burrow_commit`, `burrow_revert` and `vault_remember` write, and they only add. When a program connects it is handed the decisions in force, with their reasons; each connection is kept as its own conversation, and when it closes Burrow writes a handoff. Point a client at the built binary, using full paths ([docs/connect.md](docs/connect.md) has the line for each program):
 
 ```json
 {
@@ -113,6 +117,16 @@ By default the chat searches the vault before the model is asked, and labels tha
 ```
 
 Excerpts are marked as project content, so a client shouldn't take instructions from them. Search uses meaning when the vault has vectors and falls back to words if Ollama is off. Logs go to stderr.
+
+## The Ledger and the Watch
+
+```bash
+.build/release/burrow log ~/notes                 # what earlier sessions decided, newest first
+.build/release/burrow resume ~/notes              # what the next program is handed
+.build/release/burrow confirm ~/notes <commit>    # a file it rests on changed, and it still holds
+```
+
+A decision is kept with its reason and the files it rests on. When one of those files changes, programs are still handed the decision, marked "check again", until someone confirms it (`burrow confirm`, or **Still Right** in the app) or marks it wrong (`burrow revert`). In the app, the Ledger page opens with the Watch: the rules every program gets when it connects, what `burrow_check` would show for the code changed right now, and any text in the vault written to steer an AI. [docs/ledger.md](docs/ledger.md) has the details.
 
 ## Where it lives
 

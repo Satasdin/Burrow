@@ -52,6 +52,29 @@ private func makeLedger() -> (Ledger, FakeFiles, URL) {
         #expect(ledger.resume().contains("CHECK AGAIN"))
     }
 
+    @Test func aStatementShortensWhatWasTurnedDownThenTheMessageButNeverTheReason() {
+        let because = "Finance meeting, 3 June: conductors pay for whole groups from one phone, so 31 tickets went to the wrong passengers."
+        let commit = LedgerCommit(id: "x", branch: "main", parent: nil, kind: .decision, message: String(repeating: "Match by reference only. ", count: 20),
+                                  body: "Rejected: " + String(repeating: "Phone and amount. ", count: 30) + "\nBecause: " + because, author: "a")
+        for most in [2_000, 900, 600, 400, 200, 50] {
+            let text = commit.stated(within: most)
+            #expect(text.contains("Because: " + because), "\(most): \(text)")
+        }
+        #expect(commit.stated(within: 900).contains("Rejected: Phone and amount."))
+        #expect(commit.stated(within: 900).count <= 900)
+        #expect(!commit.stated(within: 400).contains("Phone and amount"))
+        #expect(commit.stated.trimmingCharacters(in: .whitespaces).hasSuffix("Phone and amount."))
+    }
+
+    @Test func aCommitsIdReadsInThisMacsTimeLikeAConversationsID() {
+        let date = Date(timeIntervalSince1970: 1_763_100_000)
+        let format = DateFormatter()
+        format.locale = Locale(identifier: "en_US_POSIX")
+        format.dateFormat = "yyyyMMdd-HHmmss"
+        #expect(Ledger.newID(date).hasPrefix(format.string(from: date)))
+        #expect(String(Ledger.newID(date).prefix(15)) == String(SessionRecord.newID(date).prefix(15)))
+    }
+
     @Test func revertKeepsTheOldCommitAndAddsACorrection() throws {
         let (ledger, _, _) = makeLedger()
         let wrong = try ledger.commit(.fact, "The shelf has no limit", files: ["Sources/Shelf.swift"], author: "qwen3:4b")
@@ -124,7 +147,7 @@ private func makeLedger() -> (Ledger, FakeFiles, URL) {
         let kept = try ledger.commit(.decision, "Match by the reference only, ignoring case and punctuation", files: ["Sources/Shelf.swift"],
                                      author: "claude-opus-5-5", client: "claude-code", session: "s4")
         let made = try #require(try ledger.handoff(from: record))
-        #expect(made.message == "claude-code stopped after keeping 1 commit. Last: kept decision \(kept.id)")
+        #expect(made.message == "claude-code stopped after resuming and keeping 1 commit. Last: kept decision \(kept.id)")
         #expect(made.body.contains("Kept decision \(kept.id): Match by the reference only"))
         #expect(made.cites.keys.sorted() == ["Sources/Shelf.swift"])
     }
@@ -175,7 +198,7 @@ private func makeLedger() -> (Ledger, FakeFiles, URL) {
         #expect(ledger.all().count == 3)
     }
 
-    @Test func notesMatchByWordsAndSkipWrongOrStaleOnes() throws {
+    @Test func notesMatchByWordsSkipWrongOnesAndKeepStaleOnes() throws {
         let (ledger, files, _) = makeLedger()
         let good = try ledger.commit(.fact, "The shelf limit is twelve gigabytes", files: ["Sources/Shelf.swift"], author: "a")
         let wrong = try ledger.commit(.fact, "The shelf limit is unlimited gigabytes", author: "b")
@@ -185,7 +208,9 @@ private func makeLedger() -> (Ledger, FakeFiles, URL) {
         #expect(!ledger.notes(for: "shelf limit gigabytes").contains { $0.id == wrong.id })
         #expect(ledger.notes(for: "the").isEmpty)
         files.texts["Sources/Shelf.swift"] = "changed"
-        #expect(!ledger.notes(for: "shelf limit gigabytes").contains { $0.id == good.id })
+        // A changed file no longer drops the note: it is handed over, marked CHECK AGAIN where it is shown (D-82).
+        #expect(ledger.notes(for: "shelf limit gigabytes").contains { $0.id == good.id })
+        #expect(ledger.changed(good) == ["Sources/Shelf.swift"])
     }
 
     @Test func anInventedBranchFallsBackToTheCurrentOne() throws {
