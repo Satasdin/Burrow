@@ -79,8 +79,11 @@ extension Vault {
 
     private var linkedFile: URL { store.appendingPathComponent("folders.json") }
 
+    /// None for a vault read through a bridge (D-100): its list is a file inside its folder, which whoever can write to that
+    /// folder (a colleague in a shared Team vault) could point at any folder on this Mac. Its linked code is still found
+    /// by search, from the index its owner built, but no file outside its own folder is opened through the bridge.
     public func linkedFolders() -> [LinkedFolder] {
-        guard let data = try? Data(contentsOf: linkedFile) else { return [] }
+        guard !readOnly, let data = try? Data(contentsOf: linkedFile) else { return [] }
         return (try? JSONDecoder().decode([LinkedFolder].self, from: data)) ?? []
     }
 

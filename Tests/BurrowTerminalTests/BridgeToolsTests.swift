@@ -9,6 +9,8 @@ final class BridgeToolsTests: XCTestCase {
     private var top: URL!
     private var home: Vault!
     private var tools: VaultTools!
+    /// Burrow's own folder for these tests: where bridges are kept (D-100).
+    private var state: URL { top.appendingPathComponent("state") }
 
     override func setUp() async throws {
         top = FileManager.default.temporaryDirectory.appendingPathComponent("bridge-tools-" + UUID().uuidString)
@@ -21,10 +23,12 @@ final class BridgeToolsTests: XCTestCase {
             try text.write(to: url, atomically: true, encoding: .utf8)
         }
         let work = try Vault(project: top.appendingPathComponent("Work"), everything: true)
+        work.stateFolder = state
         try await work.refresh()
         _ = try Ledger(vault: work).commit(.decision, "Launch Matatu Pay in February, not December", body: "Because: the pilot needs January.",
                                            files: ["Projects/Launch.md"], author: "person")
         home = try Vault(project: top.appendingPathComponent("Home"), everything: true)
+        home.stateFolder = state
         try await home.refresh()
         tools = VaultTools(vault: home, embedder: nil) { _ in FakeAnswerer() }
     }
@@ -61,6 +65,113 @@ final class BridgeToolsTests: XCTestCase {
         XCTAssertTrue(tools.rulesInForce().contains("Launch Matatu Pay in February"))
         try home.addBridge(to: top.appendingPathComponent("Work"), withLedger: false)
         XCTAssertFalse(tools.rulesInForce().contains("Launch Matatu Pay"))
+    }
+
+    // MARK: Only the person on this Mac makes a bridge (D-100)
+
+    /// A bridges file a shared or downloaded vault could carry, pointing at Work and asking for its decisions too.
+    private func plantBridgesFile() throws {
+        let planted = [Bridge(name: "Work", path: top.appendingPathComponent("Work").path, withLedger: true)]
+        try JSONEncoder().encode(planted).write(to: top.appendingPathComponent("Home/.burrow/bridges.json"))
+    }
+
+    func testAPlantedBridgesFileGivesAConnectedProgramNothing() async throws {
+        try plantBridgesFile()
+        let found = try await tools.call("burrow_find", arguments: ["query": "When does Matatu Pay launch? Who leads QA?"])
+        XCTAssertFalse(found.text.contains("Work ›"), found.text)
+        XCTAssertFalse(found.text.contains("Amina"), found.text)
+        XCTAssertFalse(found.text.contains("Launch Matatu Pay in February"), "the planted --with-ledger hands over no decisions")
+        for asked in ["Work › Projects/Launch.md", "Work > Projects/Launch.md", "Work/Projects/Launch.md", "Work › Launch"] {
+            let read = try await tools.call("burrow_read", arguments: ["path": asked])
+            XCTAssertFalse(read.text.contains("Amina"), "\(asked): \(read.text)")
+        }
+        let scoped = try await tools.call("burrow_find", arguments: ["query": "launch", "folder": "Work"])
+        XCTAssertFalse(scoped.text.contains("Amina"), scoped.text)
+        let folders = try await tools.call("vault_folders", arguments: [:])
+        XCTAssertFalse(folders.text.contains("bridged vault"), folders.text)
+        XCTAssertFalse(tools.catalogue().contains("Bridged vaults"))
+        XCTAssertFalse(tools.rulesInForce().contains("Launch Matatu Pay"))
+        // Ask: the local model is shown nothing from Work.
+        let answerer = FakeAnswerer()
+        let asking = VaultTools(vault: home, embedder: nil) { _ in answerer }
+        _ = try await asking.call("vault_ask", arguments: ["question": "When does Matatu Pay launch, and who leads QA?"])
+        XCTAssertFalse(answerer.prompts.contains { $0.user.contains("Amina") || $0.system.contains("Amina") }, "\(answerer.prompts)")
+        XCTAssertFalse(answerer.prompts.contains { $0.system.contains("Launch Matatu Pay in February") })
+    }
+
+    /// The real `burrow` binary, with Burrow's own folder set to this test's.
+    @discardableResult
+    private func burrow(_ arguments: [String], input: String? = nil) throws -> (status: Int32, output: String) {
+        let binary = Bundle(for: Self.self).bundleURL.deletingLastPathComponent().appendingPathComponent("burrow")
+        XCTAssertTrue(FileManager.default.isExecutableFile(atPath: binary.path), "build burrow first: \(binary.path)")
+        let process = Process()
+        process.executableURL = binary
+        process.arguments = arguments
+        var environment = ProcessInfo.processInfo.environment
+        environment["BURROW_STATE_DIR"] = state.path
+        process.environment = environment
+        let feed = Pipe(), output = Pipe()
+        process.standardInput = feed
+        process.standardOutput = output
+        // An MCP server's log goes to stderr; a command's failure is wanted with its output.
+        process.standardError = input == nil ? output : FileHandle.nullDevice
+        try process.run()
+        let watchdog = DispatchWorkItem { if process.isRunning { process.terminate() } }
+        DispatchQueue.global().asyncAfter(deadline: .now() + 60, execute: watchdog)
+        if let input { feed.fileHandleForWriting.write(Data(input.utf8)) }
+        try feed.fileHandleForWriting.close()
+        let data = output.fileHandleForReading.readDataToEndOfFile()
+        process.waitUntilExit()
+        watchdog.cancel()
+        return (process.terminationStatus, String(decoding: data, as: UTF8.self))
+    }
+
+    /// `burrow mcp` on Home: what burrow_find and burrow_read hand a connected program.
+    private func overMCP() throws -> (find: String, read: String) {
+        let lines = [
+            DualEraMCPTests.modern(1, "tools/call", #""name":"burrow_find","arguments":{"query":"When does Matatu Pay launch? Who leads QA?"}"#),
+            DualEraMCPTests.modern(2, "tools/call", #""name":"burrow_read","arguments":{"path":"Work › Projects/Launch.md"}"#),
+        ]
+        let replies = try burrow(["mcp", top.appendingPathComponent("Home").path, "--vault"], input: lines.joined(separator: "\n") + "\n").output
+        var texts: [Int: String] = [:]
+        for line in replies.split(separator: "\n") {
+            guard let reply = try? JSONSerialization.jsonObject(with: Data(line.utf8)) as? [String: Any], let id = reply["id"] as? Int else { continue }
+            texts[id] = (((reply["result"] as? [String: Any])?["content"] as? [[String: Any]])?.first?["text"] as? String) ?? "\(reply)"
+        }
+        return (try XCTUnwrap(texts[1], replies), try XCTUnwrap(texts[2], replies))
+    }
+
+    func testTheCommandLineAndMCPServerFollowOnlyBridgesThePersonMade() throws {
+        try plantBridgesFile()
+        let home = top.appendingPathComponent("Home").path, work = top.appendingPathComponent("Work").path
+        var mcp = try overMCP()
+        XCTAssertFalse(mcp.find.contains("Work ›"), mcp.find)
+        XCTAssertFalse(mcp.find.contains("Amina"), mcp.find)
+        XCTAssertFalse(mcp.read.contains("Amina"), mcp.read)
+        let find = try burrow(["find", home, "When does Matatu Pay launch?", "--vault"])
+        XCTAssertFalse(find.output.contains("Work ›"), find.output)
+        // bridge list says once that the file is ignored, and lists nothing from it.
+        let first = try burrow(["bridge", "list", home])
+        XCTAssertTrue(first.output.contains("Found bridges written inside this vault folder"), first.output)
+        XCTAssertTrue(first.output.contains("has no bridges"), first.output)
+        let second = try burrow(["bridge", "list", home])
+        XCTAssertFalse(second.output.contains("Found bridges"), second.output)
+        // A bridge made with the command line works...
+        XCTAssertEqual(try burrow(["bridge", home, work]).status, 0)
+        let listed = try burrow(["bridge", "list", home]).output
+        XCTAssertTrue(listed.hasPrefix("Work   ") && listed.contains("notes only"), listed)
+        mcp = try overMCP()
+        XCTAssertTrue(mcp.find.contains("Work › Projects/Launch.md"), mcp.find)
+        XCTAssertTrue(mcp.read.contains("Amina leads QA"), mcp.read)
+        XCTAssertTrue(try burrow(["find", home, "When does Matatu Pay launch?", "--vault"]).output.contains("Work › Projects/Launch.md"))
+        // ...and unbridge takes it away.
+        XCTAssertEqual(try burrow(["unbridge", home, "Work"]).status, 0)
+        mcp = try overMCP()
+        XCTAssertFalse(mcp.find.contains("Amina"), mcp.find)
+        XCTAssertFalse(mcp.read.contains("Amina"), mcp.read)
+        // Kept in Burrow's own folder, never in either vault.
+        XCTAssertTrue(FileManager.default.fileExists(atPath: state.appendingPathComponent("bridges.json").path))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: top.appendingPathComponent("Work/.burrow/bridges.json").path))
     }
 
     func testUnbridgedIsGone() async throws {

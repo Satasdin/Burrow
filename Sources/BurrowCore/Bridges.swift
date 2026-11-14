@@ -1,7 +1,7 @@
 import Foundation
 
-/// One vault reading another, one way, read-only (D-97). Kept in this vault's own store, so another vault can neither
-/// add a bridge into it nor see that one exists.
+/// One vault reading another, one way, read-only (D-97). Kept in Burrow's own folder on this Mac, keyed by the reading
+/// vault's real path, never in a vault folder (D-100): a vault that came from someone else can't bring bridges with it.
 public struct Bridge: Sendable, Hashable, Codable, Identifiable {
     public var id: String { name }
     /// How this vault calls the other one. Every path through the bridge starts with it: `Work › notes/plan.md`.
@@ -41,20 +41,75 @@ public struct BridgedShelf: Sendable {
     public let problem: String?
 }
 
-extension Vault {
-    private var bridgesFile: URL { store.appendingPathComponent("bridges.json") }
+/// Every vault's bridges, in one file in Burrow's own folder (D-100). Only `burrow bridge`, `burrow unbridge` and the
+/// app's Bridges sheet write it, so only the person on this Mac makes a bridge.
+struct BridgeStore: Codable {
+    /// Bridges by the reading vault's folder, symlinks resolved.
+    var vaults: [String: [Bridge]] = [:]
+    /// Vaults already told that a bridges file inside their folder is ignored, so each is told once.
+    var noticed: [String] = []
 
-    /// This vault's bridges. A vault read through a bridge has none: bridges are never followed onwards (D-97).
+    static func file(in folder: URL) -> URL { folder.appendingPathComponent("bridges.json") }
+
+    /// An empty list when there is no file yet. Throws when there is one that can't be read, so a save never writes
+    /// over it.
+    static func load(in folder: URL) throws -> BridgeStore {
+        let url = file(in: folder)
+        guard FileManager.default.fileExists(atPath: url.path) else { return BridgeStore() }
+        do {
+            return try JSONDecoder().decode(BridgeStore.self, from: Data(contentsOf: url))
+        } catch {
+            throw NoteProblem(description: "Burrow's list of bridges (\(url.path)) can't be read, so it was left as it is: \(error.localizedDescription)")
+        }
+    }
+
+    func save(in folder: URL) throws {
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes]
+        try encoder.encode(self).write(to: Self.file(in: folder), options: .atomic)
+    }
+}
+
+extension Vault {
+    /// This vault's place in Burrow's list of bridges: its folder with symlinks resolved, so two vaults with the same
+    /// name in different places never share bridges, and a vault opened through a symlink is the same vault.
+    var bridgeKey: String { root.standardizedFileURL.resolvingSymlinksInPath().path }
+
+    /// This vault's bridges, from Burrow's own folder only (D-100). A `bridges.json` inside the vault folder is never
+    /// read: a shared, downloaded or cloned vault could carry one pointing at the person's other vaults. A vault read
+    /// through a bridge has none: bridges are never followed onwards (D-97).
     public func bridges() -> [Bridge] {
-        guard !readOnly, let data = try? Data(contentsOf: bridgesFile) else { return [] }
-        return (try? JSONDecoder().decode([Bridge].self, from: data)) ?? []
+        guard !readOnly, let saved = try? BridgeStore.load(in: stateFolder) else { return [] }
+        return saved.vaults[bridgeKey] ?? []
     }
 
     private func saveBridges(_ all: [Bridge]) throws {
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes]
-        try encoder.encode(all).write(to: bridgesFile, options: .atomic)
+        var saved = try BridgeStore.load(in: stateFolder)
+        saved.vaults[bridgeKey] = all.isEmpty ? nil : all
+        try saved.save(in: stateFolder)
         database.locked { bridgedVaults = [:] }
+    }
+
+    /// A bridges file inside this vault's folder: where bridges were kept before D-100, or where someone else put one.
+    /// Burrow never follows it.
+    public var bridgesFileInVault: URL? {
+        let inside = store.appendingPathComponent("bridges.json")
+        return FileManager.default.fileExists(atPath: inside.path) ? inside : nil
+    }
+
+    /// Said once per vault, by `burrow bridge list`, when its folder holds a bridges file. Nothing is imported from it:
+    /// the person adds the bridges they made again, with `burrow bridge`.
+    public func takeBridgesInVaultNotice() -> String? {
+        guard !readOnly, let inside = bridgesFileInVault else { return nil }
+        let saved = try? BridgeStore.load(in: stateFolder)
+        if saved?.noticed.contains(bridgeKey) == true { return nil }
+        // Remembered only when the list could be read: an unreadable list is never written over.
+        if var known = saved {
+            known.noticed.append(bridgeKey)
+            try? known.save(in: stateFolder)
+        }
+        return "Found bridges written inside this vault folder (\(inside.path)). They are ignored: Burrow keeps bridges in its own folder on this Mac, so a vault from someone else can't bring any with it. If you made them, add them again with: burrow bridge \(root.path) <other-vault>"
     }
 
     /// Lets this vault read another. The other vault is only read: nothing is written into its folder, ever.
