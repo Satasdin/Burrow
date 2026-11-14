@@ -44,9 +44,9 @@ final class DualEraMCPTests: XCTestCase {
         return try XCTUnwrap(content?.first?["text"] as? String, line ?? "no reply")
     }
 
-    // MARK: The older era, unchanged
+    // MARK: The older era, unchanged but for the first tool result (D-103)
 
-    func testTheOldEraLooksExactlyAsItDid() async throws {
+    func testTheOldEraLooksAsItDid() async throws {
         try keepDecision()
         let initialize = try json(await server.handle(#"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"opencode","version":"1"}}}"#))
         let result = try XCTUnwrap(initialize["result"] as? [String: Any])
@@ -58,12 +58,17 @@ final class DualEraMCPTests: XCTestCase {
 
         let list = try json(await server.handle(#"{"jsonrpc":"2.0","id":2,"method":"tools/list"}"#))
         XCTAssertEqual(Set((list["result"] as! [String: Any]).keys), ["tools"])
-        let call = await server.handle(#"{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"burrow_find","arguments":{"query":"retry a failed charge"}}}"#)
+        // A search whose own Ledger notes don't show the decision, so it comes once, before the result (D-103).
+        let call = await server.handle(#"{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"burrow_find","arguments":{"query":"a week by the sea"}}}"#)
         let callResult = try XCTUnwrap(try json(call)["result"] as? [String: Any])
         XCTAssertEqual(Set(callResult.keys), ["content", "isError"])
-        // The rules came with initialize, so a tool result in this era never repeats them.
-        XCTAssertFalse(try text(call).contains(MCPServer.rulesWithResult))
+        // The rules came with initialize, and the first tool result carries them once more (D-103): OpenClaw and Hermes
+        // Agent never pass the instructions to their model. Before D-103 this asserted the opposite.
+        XCTAssertTrue(try text(call).hasPrefix(MCPServer.rulesWithResult))
+        XCTAssertTrue(try text(call).contains(Self.reason))
         XCTAssertFalse(call!.contains("resultType"), call!)
+        let again = await server.handle(#"{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"burrow_find","arguments":{"query":"retry a failed charge"}}}"#)
+        XCTAssertFalse(try text(again).contains(MCPServer.rulesWithResult))
     }
 
     func testTheOldEraStillWantsInitializeAndDoesNotKnowDiscover() async throws {
@@ -94,9 +99,10 @@ final class DualEraMCPTests: XCTestCase {
         XCTAssertTrue(instructions.hasPrefix(MCPServer.instructions), instructions)
         XCTAssertTrue(instructions.contains(Self.decision + " Because: " + Self.reason), instructions)
         XCTAssertTrue(instructions.contains("This vault holds: "), instructions)
-        // Told at discover, so the first tool result does not say them again.
-        let found = try text(await server.handle(Self.modern(2, "tools/call", #""name":"burrow_find","arguments":{"query":"retry a failed charge"}"#)))
-        XCTAssertFalse(found.contains(MCPServer.rulesWithResult), found)
+        // Told at discover, and the first tool result still carries them once (D-103): a program may ask server/discover
+        // and still not show the instructions to its model. Before D-103 this asserted the opposite.
+        let found = try text(await server.handle(Self.modern(2, "tools/call", #""name":"burrow_find","arguments":{"query":"a week by the sea"}"#)))
+        XCTAssertTrue(found.hasPrefix(MCPServer.rulesWithResult), found)
     }
 
     func testToolsAnswerWithoutInitializeAndSayTheyAreComplete() async throws {
@@ -130,14 +136,15 @@ final class DualEraMCPTests: XCTestCase {
 
     func testTheFirstToolResultCarriesTheRulesOnceForEachProgram() async throws {
         try keepDecision()
-        let first = try text(await server.handle(Self.modern(1, "tools/call", #""name":"burrow_find","arguments":{"query":"retry a failed charge"}"#)))
+        // A search whose own Ledger notes don't show the decision: one that does is not given it twice (D-103).
+        let first = try text(await server.handle(Self.modern(1, "tools/call", #""name":"burrow_find","arguments":{"query":"a week by the sea"}"#)))
         XCTAssertTrue(first.hasPrefix(MCPServer.rulesWithResult), first)
         XCTAssertTrue(first.contains(Self.decision + " Because: " + Self.reason), first)
-        XCTAssertTrue(first.contains("Retry"), first)
+        XCTAssertTrue(first.contains("Lamu"), first)
         let second = try text(await server.handle(Self.modern(2, "tools/call", #""name":"burrow_find","arguments":{"query":"retry a failed charge"}"#)))
         XCTAssertFalse(second.contains(MCPServer.rulesWithResult), second)
         // Another program on the same process has not had them.
-        let other = try text(await server.handle(Self.modern(3, "tools/call", #""name":"burrow_resume","arguments":{}"#, client: "another")))
+        let other = try text(await server.handle(Self.modern(3, "tools/call", #""name":"burrow_read","arguments":{"path":"Trips/Lamu.md"}"#, client: "another")))
         XCTAssertTrue(other.hasPrefix(MCPServer.rulesWithResult), other)
     }
 
@@ -159,8 +166,11 @@ final class DualEraMCPTests: XCTestCase {
         _ = await server.handle(#"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"opencode","version":"1"}}}"#)
         let old = await server.handle(#"{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"burrow_resume","arguments":{}}}"#)
         XCTAssertFalse(old!.contains("resultType"))
+        // burrow_resume already shows the decision, so it is not put before it a second time (D-103).
+        let kept = try XCTUnwrap(tools.ledger.log().first)
+        XCTAssertEqual(try text(old).components(separatedBy: kept.id).count - 1, 1)
         let new = await server.handle(Self.modern(3, "tools/call", #""name":"burrow_resume","arguments":{}"#))
-        XCTAssertTrue(try text(new).hasPrefix(MCPServer.rulesWithResult))
+        XCTAssertEqual(try text(new).components(separatedBy: kept.id).count - 1, 1)
         XCTAssertEqual((try json(new)["result"] as? [String: Any])?["resultType"] as? String, "complete")
     }
 
@@ -187,8 +197,8 @@ final class DualEraMCPTests: XCTestCase {
         DispatchQueue.global().asyncAfter(deadline: .now() + 60, execute: watchdog)
         let lines = [
             Self.modern(1, "tools/list"),
-            Self.modern(2, "tools/call", #""name":"burrow_find","arguments":{"query":"rent split"}"#),
-            Self.modern(3, "tools/call", #""name":"burrow_find","arguments":{"query":"rent split"}"#),
+            Self.modern(2, "tools/call", #""name":"burrow_find","arguments":{"query":"a week by the sea"}"#),
+            Self.modern(3, "tools/call", #""name":"burrow_find","arguments":{"query":"a week by the sea"}"#),
             Self.modern(4, "server/discover", client: "probe"),
         ]
         input.fileHandleForWriting.write(Data((lines.joined(separator: "\n") + "\n").utf8))
