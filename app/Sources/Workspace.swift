@@ -7,7 +7,7 @@ import AppKit
 
 /// Owns the vault, so its database is only ever touched from one place.
 actor Engine {
-    private let vault: Vault
+    let vault: Vault
     private let ollama = Ollama()
 
     /// Where Burrow keeps its own files for this vault: the index, conversations and the Ledger.
@@ -50,6 +50,7 @@ actor Engine {
         state.inForce = VaultTools.inForce(ledger).map(\.id)
         state.check = VaultTools.checkReport(vault: vault, ledger: ledger)
         state.flagged = flaggedText()
+        addTeams(to: &state)
         return state
     }
 
@@ -65,10 +66,18 @@ actor Engine {
         }
         return out
     }
-    func commit(_ kind: LedgerCommit.Kind, _ message: String, files: [String], branch: String?, session: String?) throws -> LedgerCommit {
-        try Ledger(vault: vault).commit(kind, message, files: files, author: "person", client: "Burrow app", branch: branch, session: session)
+    func commit(_ kind: LedgerCommit.Kind, _ message: String, files: [String], branch: String?, session: String?, team: String? = nil) throws -> LedgerCommit {
+        if let team { return try shareWithTeam(team, kind, message, files: files, session: session) }
+        return try Ledger(vault: vault).commit(kind, message, files: files, author: "person", client: "Burrow app", branch: branch, session: session)
     }
-    func revert(_ id: String, why: String) throws { try Ledger(vault: vault).revert(id, why: why, author: "person", client: "Burrow app") }
+    func revert(_ id: String, why: String) throws {
+        // A teammate's decision is marked wrong by a correction in the person's own team folder (D-109).
+        if Ledger(vault: vault).find(id) == nil, let team = TeamLedger.holding(id, vault: vault) {
+            try TeamLedger.revert(vault: vault, team: team, id: id, why: why, author: "person", client: "Burrow app")
+            return
+        }
+        try Ledger(vault: vault).revert(id, why: why, author: "person", client: "Burrow app")
+    }
     func confirm(_ id: String) throws { try Ledger(vault: vault).confirm(id, author: "person", client: "Burrow app") }
     func bothHold(_ id: String) throws { try Ledger(vault: vault).bothHold(id, author: "person", client: "Burrow app") }
     /// The Ledger's decisions for a question and the files read for it, as `burrow chat` gets them (D-88, D-90).
@@ -577,9 +586,9 @@ final class Workspace {
     // MARK: Documents
 
     /// Keeps something in the Ledger from the app, then reads the Ledger again.
-    func keep(_ kind: LedgerCommit.Kind, _ message: String, files: [String], branch: String? = nil, session: String? = nil) async {
+    func keep(_ kind: LedgerCommit.Kind, _ message: String, files: [String], branch: String? = nil, session: String? = nil, team: String? = nil) async {
         do {
-            _ = try await engine.commit(kind, message, files: files, branch: branch, session: session)
+            _ = try await engine.commit(kind, message, files: files, branch: branch, session: session, team: team)
             ledger = await engine.ledger()
         } catch { warning = "Could not keep that: \(error)" }
     }
@@ -920,7 +929,7 @@ final class Workspace {
                 // The same notes, block and rule `burrow chat` is given, from one place (D-90).
                 let ledger = await engine.ledgerContext(words, shown: Set(found.paths))
                 turn.ledger = ledger.notes
-                if !ledger.notes.isEmpty {
+                if !ledger.text.isEmpty {
                     prompt = ledger.text + "\n\n" + prompt
                     // A question the engine sent without the vault still has the person's own decisions to answer from.
                     if prepared?.brief.route.mode == Mode.none { system = Asking.rules(for: words) }

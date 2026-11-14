@@ -62,7 +62,8 @@ struct Scanner {
         guard FileManager.default.fileExists(atPath: root.appendingPathComponent(".git").path) else { return nil }
         let git = Process()
         git.executableURL = URL(fileURLWithPath: "/usr/bin/git")
-        git.arguments = ["-C", root.path, "ls-files", "-co", "--exclude-standard", "-z"]
+        // A folder can come from someone else (a synced team folder, D-109) with its own .git/config: no fsmonitor command it names is run.
+        git.arguments = ["-c", "core.fsmonitor=false", "-C", root.path, "ls-files", "-co", "--exclude-standard", "-z"]
         let pipe = Pipe()
         git.standardOutput = pipe
         git.standardError = Pipe()

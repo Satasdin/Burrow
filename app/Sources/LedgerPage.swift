@@ -20,6 +20,10 @@ struct LedgerState: Sendable {
     var check: CheckReport?
     /// Text in the vault written to steer AI assistants (D-80).
     var flagged: [FlaggedLine] = []
+    /// Team decisions (D-109): commit id → the team whose shared Ledger holds it. Their branch is shown as the team.
+    var team: [String: String] = [:]
+    /// The teams this vault reads, for "Share with the team" where a decision is kept.
+    var teams: [String] = []
 
     var branches: [String] { Array(Set(commits.map(\.branch))).sorted() }
     func commits(on branch: String?) -> [LedgerCommit] { branch.map { name in commits.filter { $0.branch == name } } ?? commits }
@@ -225,7 +229,7 @@ struct CommitRow: View {
                     Label(commit.kind.title, systemImage: commit.kind.symbol).font(.system(size: 11.5, weight: .bold)).textCase(.uppercase).tracking(0.6)
                         .foregroundStyle(commit.kind.colour)
                         .padding(.horizontal, 8).padding(.vertical, 3).background(commit.kind.colour.opacity(0.14), in: .capsule)
-                    Label(commit.branch, systemImage: "arrow.triangle.branch").font(.system(size: 11.5)).foregroundStyle(Night.dim)
+                    Label(commit.branch, systemImage: workspace.ledger.team[commit.id] == nil ? "arrow.triangle.branch" : "person.2").font(.system(size: 11.5)).foregroundStyle(Night.dim)
                     Text(commit.at.formatted(date: .omitted, time: .shortened)).font(.system(size: 11.5)).foregroundStyle(Night.faint).monospacedDigit()
                     if let by = workspace.ledger.retiredBy[commit.id], by.kind == .decision { tag("Replaced", Night.stale).help("Replaced by decision \(by.id)") }
                     else if wrong { tag("Marked wrong", Night.stale) }
@@ -281,12 +285,20 @@ struct CommitRow: View {
 
     private var author: some View {
         let who = commit.author
-        return HStack(spacing: 6) {
+        // A team decision is signed with the person who kept it and the program they used (D-109).
+        if let person = commit.person {
+            return AnyView(HStack(spacing: 6) {
+                AuthorBadge(name: person)
+                Text(commit.teamByline.replacingOccurrences(of: "kept by ", with: "")).font(.system(size: 11.5, weight: .medium)).foregroundStyle(Night.note.opacity(0.85)).lineLimit(1)
+            }
+            .help(commit.teamByline.prefix(1).uppercased() + commit.teamByline.dropFirst()))
+        }
+        return AnyView(HStack(spacing: 6) {
             AuthorBadge(name: who)
             Text("\(who)\(commit.client.map { $0 == who ? "" : " · \($0)" } ?? "")\(commit.modelSaid.map { $0 == who ? "" : " · model said \($0)" } ?? "")\(commit.sha.map { " · \($0.prefix(7))" } ?? "")")
                 .font(.system(size: 11.5)).foregroundStyle(Night.faint).lineLimit(1)
         }
-        .help(commit.byline.prefix(1).uppercased() + commit.byline.dropFirst())
+        .help(commit.byline.prefix(1).uppercased() + commit.byline.dropFirst()))
     }
 
     private func reason(_ title: String, _ text: String, _ symbol: String, _ colour: Color) -> some View {

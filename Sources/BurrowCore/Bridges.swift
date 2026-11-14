@@ -11,13 +11,18 @@ public struct Bridge: Sendable, Hashable, Codable, Identifiable {
     public var withLedger: Bool
     /// False for a project indexed without `--vault`, whose notes live in its store.
     public var everything: Bool
+    /// For a team folder (D-109): where Burrow keeps its own index of it on this Mac. Nil for a bridge to a vault.
+    public var store: String?
     public var url: URL { URL(fileURLWithPath: path) }
+    /// True for a team folder joined with `burrow team join`, shown through the same doors as a bridge (D-109).
+    public var isTeam: Bool { store != nil }
 
-    public init(name: String, path: String, withLedger: Bool = false, everything: Bool = true) {
+    public init(name: String, path: String, withLedger: Bool = false, everything: Bool = true, store: String? = nil) {
         self.name = name
         self.path = path
         self.withLedger = withLedger
         self.everything = everything
+        self.store = store
     }
 
     /// Between a bridge's name and the path inside the other vault.
@@ -79,7 +84,11 @@ extension Vault {
     /// This vault's bridges, from Burrow's own folder only (D-100). A `bridges.json` inside the vault folder is never
     /// read: a shared, downloaded or cloned vault could carry one pointing at the person's other vaults. A vault read
     /// through a bridge has none: bridges are never followed onwards (D-97).
-    public func bridges() -> [Bridge] {
+    /// The vault's teams come after its bridges, read the same way (D-109).
+    public func bridges() -> [Bridge] { storedBridges() + teamBridges() }
+
+    /// The bridges the person made with `burrow bridge`, without the teams.
+    func storedBridges() -> [Bridge] {
         guard !readOnly, let saved = try? BridgeStore.load(in: stateFolder) else { return [] }
         return saved.vaults[bridgeKey] ?? []
     }
@@ -127,22 +136,23 @@ extension Vault {
         guard FileManager.default.fileExists(atPath: otherStore.appendingPathComponent("index.sqlite").path) else {
             throw NoteProblem(description: "\(there) is not a Burrow vault yet. Make it one first: burrow vault new \(there)")
         }
-        var all = bridges()
+        var all = storedBridges()
+        let teamNames = Set(teams().map(\.name))
         let everything = !FileManager.default.fileExists(atPath: otherStore.appendingPathComponent("notes").path)
         let asked = name.map(Bridge.cleanName)
         if let asked, asked.isEmpty { throw NoteProblem(description: "A bridge's name needs some letters.") }
         if let index = all.firstIndex(where: { $0.path == there }) {
             let chosen = asked ?? all[index].name
-            if all.contains(where: { $0.name == chosen && $0.path != there }) { throw NoteProblem(description: "There is already a bridge called \(chosen).") }
+            if all.contains(where: { $0.name == chosen && $0.path != there }) || teamNames.contains(chosen) { throw NoteProblem(description: "There is already a bridge called \(chosen).") }
             all[index] = Bridge(name: chosen, path: there, withLedger: withLedger, everything: everything)
             try saveBridges(all)
             return all[index]
         }
         let base = asked ?? Bridge.cleanName(BurrowConfig.forVault(store: otherStore).value("vault.name") ?? URL(fileURLWithPath: there).lastPathComponent)
         var chosen = base.isEmpty ? "Bridged" : base
-        if asked != nil, all.contains(where: { $0.name == chosen }) { throw NoteProblem(description: "There is already a bridge called \(chosen).") }
+        if asked != nil, all.contains(where: { $0.name == chosen }) || teamNames.contains(chosen) { throw NoteProblem(description: "There is already a bridge called \(chosen).") }
         var attempt = 2
-        while all.contains(where: { $0.name == chosen }) {
+        while all.contains(where: { $0.name == chosen }) || teamNames.contains(chosen) {
             chosen = "\(base) \(attempt)"
             attempt += 1
         }
@@ -155,7 +165,10 @@ extension Vault {
     /// Takes a bridge away. The other vault is not touched.
     @discardableResult
     public func removeBridge(_ name: String) throws -> Bridge {
-        let all = bridges()
+        if let team = teams().first(where: { $0.name.lowercased() == name.lowercased() }) {
+            throw NoteProblem(description: "\(team.name) is a team, not a bridge. Leave it with: burrow team leave \(root.path) \(team.name)")
+        }
+        let all = storedBridges()
         guard let gone = all.first(where: { $0.name == name || $0.name.lowercased() == name.lowercased() }) else {
             throw NoteProblem(description: "There is no bridge called \(name).\(all.isEmpty ? "" : " Bridges: " + all.map(\.name).joined(separator: ", "))")
         }
@@ -168,7 +181,7 @@ extension Vault {
         let key = bridge.name + "\u{0}" + bridge.path
         return database.locked {
             if let open = bridgedVaults[key] { return open }
-            guard let opened = try? Vault(readingOnly: bridge.url, everything: bridge.everything) else { return nil }
+            guard let opened = try? Vault(readingOnly: bridge.url, store: bridge.store.map { URL(fileURLWithPath: $0) }, everything: bridge.everything) else { return nil }
             // Its linked folders' approvals are read from the same place as this vault's (D-101).
             opened.stateFolder = stateFolder
             bridgedVaults[key] = opened

@@ -42,19 +42,21 @@ public enum AskLedger {
     /// The block for a question, with a line saying whose decisions these are, or empty when none match.
     public static func context(vault: Vault, question: String, shown: Set<String>) -> (notes: [LedgerCommit], text: String) {
         let found = notes(vault: vault, question: question, shown: shown)
-        guard !found.isEmpty else { return ([], "") }
+        // A team's shared decisions that match come after the person's own, signed with who kept them (D-109).
+        let team = TeamLedger.notes(vault: vault, question: question, shown: shown).trimmingCharacters(in: .newlines)
+        guard !found.isEmpty else { return ([], team) }
         // The label written out in full: told only "by its label", qwen3:4b named the decision in one run of three.
         let text = "Decisions the person kept in Burrow's Ledger that match this question or rest on the files read."
             + " If your answer uses one, name it by its label, like (\(label(found[0].id))), and give its reason:\n"
             + block(found, stale: Ledger(vault: vault).staleness())
-        return (found, text)
+        return (found, team.isEmpty ? text : text + "\n\n" + team)
     }
 
     /// The same notes, block and rule, for the engine's own ask paths: `burrow ask` and `vault_ask` (D-96). Nil when no
     /// note matches, so the engine's words go to the model exactly as before.
     public static func handed(vault: Vault, question: String, shown: Set<String>) -> HandedNotes? {
         let found = context(vault: vault, question: question, shown: shown)
-        guard !found.notes.isEmpty else { return nil }
+        guard !found.notes.isEmpty || !found.text.isEmpty else { return nil }
         return HandedNotes(text: found.text, rule: rule, ids: found.notes.map(\.id))
     }
 

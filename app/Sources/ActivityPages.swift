@@ -189,6 +189,8 @@ struct SessionActions: View {
     @State private var words = ""
     @State private var kind = LedgerCommit.Kind.decision
     @State private var copied = false
+    /// Keep it in the team's shared Ledger instead of this vault's (D-109).
+    @State private var toTeam = false
 
     private var files: [String] {
         record.filesInPlay.map { $0.components(separatedBy: ":").first ?? $0 }.reduce(into: [String]()) { if !$0.contains($1) { $0.append($1) } }
@@ -212,9 +214,13 @@ struct SessionActions: View {
                     }
                     .labelsHidden().frame(width: 110)
                     TextField("What to keep, in a sentence", text: $words).textFieldStyle(.roundedBorder)
+                    if let team = workspace.ledger.teams.first {
+                        Toggle("Share with \(team)", isOn: $toTeam).toggleStyle(.checkbox)
+                            .help("Keep it in \(team)'s shared Ledger, signed with your name, so your teammates' programs are handed it too")
+                    }
                     Button("Keep") {
-                        let message = words, chosen = kind
-                        Task { await workspace.keep(chosen, message, files: Array(files.prefix(12)), session: record.id) }
+                        let message = words, chosen = kind, team = toTeam ? workspace.ledger.teams.first : nil
+                        Task { await workspace.keep(chosen, message, files: Array(files.prefix(12)), session: record.id, team: team) }
                         words = ""
                         keeping = false
                     }
