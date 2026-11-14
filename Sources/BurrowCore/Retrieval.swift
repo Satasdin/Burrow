@@ -89,9 +89,10 @@ extension Vault {
         var score: [Int: Double] = [:]
     }
 
-    /// Finds what to show the model. The vault walks; the model only reads the result.
+    /// Finds what to show the model in this vault alone, never through a bridge. `retrieve` (Bridges.swift) adds the
+    /// bridged vaults' own finds to this (D-97).
     /// - Parameter scope: a folder to stay inside, such as one linked project. Nothing outside it is read.
-    public func retrieve(_ question: String, mode: Mode, budget: Budget = Budget(), embedder: Embedder? = nil, scope: String? = nil) async throws -> Retrieved {
+    func retrieveHere(_ question: String, mode: Mode, budget: Budget = Budget(), embedder: Embedder? = nil, scope: String? = nil) async throws -> Retrieved {
         let started = Date()
         guard mode != .none else { return Retrieved(mode: mode, excerpts: [], seconds: 0) }
         let queryVector = try await questionVector(question, embedder: embedder)

@@ -93,18 +93,19 @@ struct Scanner {
     }
 
     /// Reads one file. Returns nil for anything too large, not UTF-8, or binary.
-    static func read(_ path: String, in root: URL) -> Found? {
+    /// - Parameter largest: a smaller cap set by `index.maxFileSize` (D-98), for every kind of file.
+    static func read(_ path: String, in root: URL, largest: Int? = nil) -> Found? {
         let url = root.appendingPathComponent(path)
         // A shortcut inside the folder must not be a way to read something outside it.
         let home = root.resolvingSymlinksInPath().path + "/"
         guard url.resolvingSymlinksInPath().path.hasPrefix(home) else { return nil }
         if Extractor.handles(path) {
-            guard let data = try? Data(contentsOf: url), data.count <= Extractor.largest else { return nil }
+            guard let data = try? Data(contentsOf: url), data.count <= min(Extractor.largest, largest ?? .max) else { return nil }
             let hash = digest(data)
             guard let text = Extractor.markdown(of: data, path: path, hash: hash) else { return nil }
             return Found(path: path, text: text, hash: hash)
         }
-        let limit = dataExtensions.contains(url.pathExtension.lowercased()) ? largestDataFile : largestFile
+        let limit = min(dataExtensions.contains(url.pathExtension.lowercased()) ? largestDataFile : largestFile, largest ?? .max)
         guard let data = try? Data(contentsOf: url), data.count <= limit, !data.contains(0),
               let text = String(data: data, encoding: .utf8) else { return nil }
         return Found(path: path, text: text, hash: digest(data))

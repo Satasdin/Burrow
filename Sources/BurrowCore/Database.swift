@@ -46,6 +46,15 @@ final class Database {
         try execute("PRAGMA journal_mode=WAL; PRAGMA synchronous=NORMAL; PRAGMA foreign_keys=ON;")
     }
 
+    /// Opens an index only to read it: another vault seen through a bridge (D-97). SQLite refuses every write on it.
+    init(readingOnly path: String) throws {
+        guard FileManager.default.fileExists(atPath: path) else { throw DatabaseError(description: "no index at \(path)") }
+        guard sqlite3_open_v2(path, &handle, SQLITE_OPEN_READONLY, nil) == SQLITE_OK else {
+            throw DatabaseError(description: "cannot open \(path) to read")
+        }
+        sqlite3_busy_timeout(handle, 8000)
+    }
+
     deinit {
         prepared.values.forEach { sqlite3_finalize($0) }
         sqlite3_close(handle)
