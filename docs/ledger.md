@@ -71,6 +71,15 @@ This prints the settings to add to `~/.claude/settings.json`. Burrow never edits
 
 - **Session start**: Claude Code is handed the Ledger head for the folder it was opened in.
 - **Before compaction and at session end**: Burrow keeps the plan (from Claude Code's task list) and a handoff built from what you typed and the files edited. Facts and decisions are kept only when you asked for them, through `burrow_commit`.
+- **When Claude stops** (`Stop`, `burrow hook claude <vault> --gate`): if the code changed in linked folders rests on a decision, directly or one import step away, and that exact change has not been shown, Burrow holds the reply (`{"decision":"block","reason":…}`) with `burrow_check`'s words and asks Claude to tell you which decision the change touches and whether it goes against it. It holds once: a change already shown passes, and while Claude Code is continuing because of a stop hook (`stop_hook_active`) it never holds again. The `--gate` entry writes no handoff, so one is not kept at the end of every turn.
+
+## The gate: `burrow check`
+
+```
+burrow check ~/Notes [--staged] [--json]
+```
+
+Prints exactly what `burrow_check` gives a program, and exits 0 when no decision rests on the change, 2 when one does and this exact change has not been shown, 1 on an error. A change is fingerprinted by the decisions shown and the git blob of each changed file they rest on, and kept under `<vault>/.burrow/checks/` once shown, whether by `burrow check`, `burrow_check`, the Stop hook or the git gate. The same change then passes; a different change to those files is held again. `--staged` checks what the next commit holds (from inside a linked repository, only that repository). It lists the decisions beside the change; it does not judge whether the change keeps to them, so a harmless edit to a decided file is held once too.
 
 ## git
 
@@ -81,6 +90,12 @@ burrow hook install git ~/Notes
 ```
 
 This writes `.git/hooks/post-commit`, but never over an existing hook. Each commit is then linked into the Ledger by its sha and the files it changed, so `burrow blame` can show which AI session led to a change. The hook never blocks a commit.
+
+```
+burrow hook install git-gate ~/Notes
+```
+
+This writes `.git/hooks/pre-commit` (never over an existing one, and only in a repository linked into the vault). It runs `burrow check --staged`: a commit whose change touches a decision is refused once, with the decisions and their reasons printed. Seeing them is the acknowledgement, so the same commit goes through on the next try; nothing else to type. A different change to those files is held again. A Burrow error never blocks a commit, and `git commit --no-verify` skips the hook as it skips any.
 
 ## Safety
 
