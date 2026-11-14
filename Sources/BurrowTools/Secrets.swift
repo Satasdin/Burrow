@@ -36,9 +36,9 @@ public enum Secrets {
         (#"\bhf_[A-Za-z0-9]{30,}"#, marker),                                                        // Hugging Face
         (#"\bnpm_[A-Za-z0-9]{36}"#, marker),                                                        // npm
         (#"\beyJ[A-Za-z0-9_-]{8,}\.eyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}"#, marker),              // a JWT
-        // A command-line flag that takes a secret: --password hunter2, --api-key=..., --token "...". Only a flag that starts
-        // its own word: "part-two-secret" is a name, not -secret.
-        (#"(?i)(?<![A-Za-z0-9_.-])(--?(?:password|passwd|token|api[-_]?key|secret|client[-_]?secret|access[-_]?key|auth[-_]?token)(?:\s+|=))"# + notMarker
+        // A command-line flag that takes a secret: --password hunter2, --api-key=..., --token "...". A flag starts its own
+        // word and may have words before the secret's (--db-password, --vault-token); "part-two-secret" is a name, not -secret.
+        (#"(?i)(?<![A-Za-z0-9_.])(--?(?:[A-Za-z0-9]+[-_])*(?:password|passwd|token|api[-_]?key|secret|client[-_]?secret|access[-_]?key|auth[-_]?token)(?:\s+|=))"# + notMarker
             + #"("[^"]*"|'[^']*'|[^\s"'-][^\s"']*)"#, "$1" + marker),
     ].map { (try! NSRegularExpression(pattern: $0.0), $0.1) }
 

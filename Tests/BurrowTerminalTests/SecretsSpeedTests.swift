@@ -111,6 +111,9 @@ final class SecretsNoBypassTests: XCTestCase {
     func testAFlagMatchesOnlyWhenItStartsItsOwnWord() {
         XCTAssertEqual(Secrets.redacted("mysql --password hunter2 -h db"), "mysql --password [secret removed] -h db")
         XCTAssertEqual(Secrets.redacted("ran part-two-secret\nnext step"), "ran part-two-secret\nnext step")
+        XCTAssertEqual(Secrets.redacted("run --db-password hunter2 now"), "run --db-password [secret removed] now")
+        XCTAssertEqual(Secrets.redacted("vault login --vault-token=s.abcdef123"), "vault login --vault-token=[secret removed]")
+        XCTAssertEqual(Secrets.redacted("-token abcdef"), "-token [secret removed]")
     }
 
     func testWhatIsNotASecretStaysAsPrinted() {
