@@ -72,7 +72,17 @@ struct PendingSharesCard: View {
                         if !share.files.isEmpty {
                             Text("Rests on " + share.files.joined(separator: ", ")).font(.system(size: 11.5)).foregroundStyle(Night.faint)
                         }
-                        if let reverts = share.reverts { Text("Replaces team decision \(reverts)").font(.system(size: 11.5)).foregroundStyle(Night.stale) }
+                        if let reverts = share.reverts {
+                            // The decision it would retire, in full, so the person sees exactly what they agree to (D-112).
+                            let old = workspace.ledger.commits.first { $0.id == reverts }
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(share.kind == .correction ? "Marks this team decision wrong:" : "Replaces this team decision:")
+                                    .font(.system(size: 11.5, weight: .semibold)).foregroundStyle(Night.stale)
+                                Text(old.map { $0.message + ($0.body.isEmpty ? "" : "\n" + $0.body) } ?? "\(reverts), no longer in the team's Ledger")
+                                    .font(.system(size: 12.5)).foregroundStyle(Night.note.opacity(0.8)).textSelection(.enabled)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                        }
                         HStack {
                             Button("Share with \(share.team)") { Task { await workspace.approveShare(share.id) } }
                             Button("Drop") { Task { await workspace.discardShare(share.id) } }

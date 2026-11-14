@@ -193,7 +193,7 @@ final class TeamSecurityTests: XCTestCase {
         let dropped = try BurrowBinary.piped(["team", "discard", vault.root.path, "--all"], state: state)
         XCTAssertTrue(dropped.out.contains("nothing reached Team"), dropped.out)
         XCTAssertTrue(TeamPending.list(vault).isEmpty)
-        let typed = try BurrowBinary.inTerminal(["commit", vault.root.path, "Fares are rounded.", "--kind", "decision", "--team"], state: state)
+        let typed = try BurrowBinary.inTerminal(["commit", vault.root.path, "Fares are rounded.", "--kind", "decision", "--team"], state: state, answer: "yes")
         XCTAssertEqual(typed.status, 0, typed.out)
         XCTAssertEqual(TeamLedger.commits(team).count, 2)
     }

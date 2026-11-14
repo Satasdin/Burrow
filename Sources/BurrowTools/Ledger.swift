@@ -142,6 +142,9 @@ public struct Ledger: Sendable {
     private let modified: @Sendable (String) -> Date?
     /// Makes a commit's id from its time. Tests replace it to force two commits onto one id.
     var makeID: @Sendable (Date) -> String = Ledger.newID
+    /// Finds a branch's newest commit in place of the tip file and reading the whole Ledger. A team's Ledger sets it, so
+    /// writing never reads a teammate's files the plain way (D-112).
+    var parentOf: (@Sendable (String) -> String?)? = nil
 
     public static let defaultBranch = "main"
 
@@ -242,8 +245,8 @@ public struct Ledger: Sendable {
         // The branch's newest commit is kept in a small tip file, so a commit does not read the whole Ledger to find its
         // parent: with 1,600 commits a commit had slowed from 15 ms to 168 ms (D-78). Without a tip, or with one that
         // names a commit that is not there, the Ledger is read as before.
-        let tip = (try? String(contentsOf: place.appendingPathComponent(".tip"), encoding: .utf8))?.trimmingCharacters(in: .whitespacesAndNewlines)
-        let parent = tip.flatMap { FileManager.default.fileExists(atPath: place.appendingPathComponent($0 + ".md").path) ? $0 : nil }
+        let tip = parentOf == nil ? (try? String(contentsOf: place.appendingPathComponent(".tip"), encoding: .utf8))?.trimmingCharacters(in: .whitespacesAndNewlines) : nil
+        let parent = parentOf.map { $0(name) } ?? tip.flatMap { FileManager.default.fileExists(atPath: place.appendingPathComponent($0 + ".md").path) ? $0 : nil }
             ?? log(branch: name, limit: 1).first?.id
         var entry = LedgerCommit(id: makeID(at), branch: name, parent: parent, kind: kind, message: text,
                                  body: String(body.replacingOccurrences(of: "\0", with: "").prefix(8_000)), author: author, client: client,

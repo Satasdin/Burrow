@@ -126,8 +126,16 @@ burrow team leave ~/Notes Team   # stop reading it; nothing in the team folder i
   burrow team discard ~/Notes share-3a2f92    # drop it; nothing reaches the team
   ```
 
-  The app's Ledger page lists them too, with **Share with Team** and **Drop**. `burrow commit … --team` typed in your
-  own Terminal is shared at once; run by a program through a pipe, it waits like any other share.
+  The app's Ledger page lists them too, with **Share with Team** and **Drop**. `burrow commit … --team` and
+  `burrow team revert` typed in your own Terminal show you the whole text, then ask you to type yes; run by a program
+  through a pipe, they wait like any other share. Every one of these questions (join, share, approve, revert) shows
+  exactly what you are agreeing to, word for word, before you type yes.
+
+  Be clear about what the typed yes is: a speed bump, not a lock. It stops a program being talked into sharing or
+  approving by something it read, and stops it happening by accident. A program on your Mac that has a shell and is
+  set on it could make a terminal of its own and type yes, just as it could read your files directly without Burrow.
+  What really keeps your connected programs out is that Burrow's MCP tools never approve and never share: a program's
+  share only ever waits for you. Burrow does not ask for Touch ID.
 - **Whose name is on it**: the name on a team decision is what the file says, and nothing signs it
   cryptographically. Burrow goes by the folder the file sits in, which only that person's Burrow writes to, so every
   team decision says it: "kept by Wanjiru Kamau with Claude Code, written in wanjiru-kamau-dd82's files (names are not
@@ -148,7 +156,8 @@ burrow team leave ~/Notes Team   # stop reading it; nothing in the team folder i
   more. A list of linked folders, bridges or settings inside it is never followed, a link inside it that points out of
   it is not read, a check written with a team decision is shown as proposed and never run, and a decision written to
   steer an AI is never handed to a program. Joining only works in your own Terminal window, so a program can't join a
-  folder for you.
+  folder for you. Burrow reads the team's Ledger without following links, never opens a pipe or a device there, and
+  skips any file over 64 KB; `burrow team log` names each file it left out and why.
 
 **Your own several Macs** work the same way: make a private git repository or a synced folder, and join it from your
 vault on each Mac with the same `--as` name. Each Mac writes into its own folder there, so two Macs never clash.

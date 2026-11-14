@@ -56,7 +56,23 @@ public enum TeamLedger {
         var ledger = ledger(team)
         let suffix = member.folder
         ledger.makeID = { Ledger.newID($0) + "-" + suffix }
+        // The parent is this person's newest commit as the safe reader finds it: never the tip file or a plain read of
+        // the whole team Ledger, which would open a teammate's files the ordinary way (D-112).
+        ledger.parentOf = { folder in commits(team).first { $0.branch == folder }?.id }
         return ledger
+    }
+
+    /// The largest file a team Ledger is read from. A commit is a few hundred characters; anything far larger is not one.
+    public static let largestFile = 64 * 1024
+
+    /// Whether the team's Ledger folder, and each folder above it inside the team folder, is a real folder and not a link.
+    static func ledgerFolderIsReal(_ team: Team) -> Bool {
+        let burrow = team.url.appendingPathComponent(".burrow")
+        for path in [burrow.path, team.ledgerFolder.path] {
+            guard let kind = SafeRead.kind(path) else { return true }   // not made yet: nothing to read
+            guard kind == .typeDirectory else { return false }
+        }
+        return true
     }
 
     // MARK: Reading, with the owner taken from the folder (D-111)
@@ -79,18 +95,40 @@ public enum TeamLedger {
     /// Every commit in a team's Ledger that its folder vouches for, newest first. Left out: a file in a folder not shaped
     /// like one Burrow makes, a file whose name is not its id, a commit whose branch is not its folder or whose id does not
     /// end with its folder, and a commit naming no person. The person's name is cleaned of control and bidi characters.
-    public static func commits(_ team: Team) -> [LedgerCommit] {
+    public static func commits(_ team: Team) -> [LedgerCommit] { scan(team).commits }
+
+    /// The commits, and a line for each file left out because of what it is rather than what it says (D-112): a link,
+    /// a pipe or a device, a file over 64 KB, or a folder that is a link. Nothing is followed and nothing blocks: each
+    /// entry is looked at without following links, and a file is opened once, without blocking, and checked as opened.
+    public static func scan(_ team: Team) -> (commits: [LedgerCommit], skipped: [String]) {
         let files = FileManager.default
         let top = team.ledgerFolder
         var out: [LedgerCommit] = []
-        for folder in (try? files.contentsOfDirectory(atPath: top.path)) ?? [] where isFolderName(folder) {
+        var skipped: [String] = []
+        guard ledgerFolderIsReal(team) else { return ([], [".burrow/ledger is a link or not a folder, so the team's Ledger is not read"]) }
+        let topReal = top.resolvingSymlinksInPath().path + "/"
+        for folder in ((try? files.contentsOfDirectory(atPath: top.path)) ?? []).sorted() where isFolderName(folder) {
             let place = top.appendingPathComponent(folder, isDirectory: true)
-            var isFolder: ObjCBool = false
-            guard files.fileExists(atPath: place.path, isDirectory: &isFolder), isFolder.boolValue,
-                  place.resolvingSymlinksInPath().path.hasPrefix(top.resolvingSymlinksInPath().path + "/") else { continue }
-            for name in (try? files.contentsOfDirectory(atPath: place.path)) ?? [] where name.hasSuffix(".md") {
-                guard let text = try? String(contentsOf: place.appendingPathComponent(name), encoding: .utf8),
-                      var commit = Ledger.parse(text) else { continue }
+            guard SafeRead.isRealFolder(place.path), place.resolvingSymlinksInPath().path.hasPrefix(topReal) else {
+                skipped.append("\(folder): \(SafeRead.kind(place.path) == .typeSymbolicLink ? "a link to a folder, never followed" : "not a folder")")
+                continue
+            }
+            let placeReal = place.resolvingSymlinksInPath().path + "/"
+            for name in ((try? files.contentsOfDirectory(atPath: place.path)) ?? []).sorted() where name.hasSuffix(".md") {
+                let path = place.appendingPathComponent(name).path
+                // The file must be in its person's folder: no link out of it, however it is named.
+                guard URL(fileURLWithPath: path).resolvingSymlinksInPath().path.hasPrefix(placeReal) || SafeRead.kind(path) == .typeSymbolicLink else {
+                    skipped.append("\(folder)/\(name): outside its person's folder")
+                    continue
+                }
+                let text: String
+                switch SafeRead.text(path, cap: largestFile) {
+                case let .success(read): text = read
+                case let .failure(refusal):
+                    skipped.append("\(folder)/\(name): \(refusal)")
+                    continue
+                }
+                guard var commit = Ledger.parse(text) else { continue }
                 let id = commit.id
                 guard commit.branch == folder, name == id + ".md", id.hasSuffix("-" + folder),
                       idStart.firstMatch(in: id, range: NSRange(location: 0, length: (id as NSString).length)) != nil,
@@ -102,7 +140,7 @@ public enum TeamLedger {
                 out.append(commit)
             }
         }
-        return out.sorted { $0.at == $1.at ? $0.id > $1.id : $0.at > $1.at }
+        return (out.sorted { $0.at == $1.at ? $0.id > $1.id : $0.at > $1.at }, skipped)
     }
 
     /// A team commit by id (or the start of one), among those its folder vouches for.
@@ -152,6 +190,16 @@ public enum TeamLedger {
             throw LedgerProblem("Burrow doesn't know your name for the team yet. Set it once in your own terminal: burrow team join \(vault.root.path) \(team.path) --as \"Your Name\"")
         }
         guard [.decision, .fact, .correction, .plan].contains(kind) else { throw LedgerProblem("Only a decision, fact, plan or correction can be shared with the team.") }
+        // Written only into real folders: a link planted where this person's folder will be is never written through.
+        let mine = team.ledgerFolder.appendingPathComponent(member.folder)
+        guard ledgerFolderIsReal(team), SafeRead.kind(mine.path).map({ $0 == .typeDirectory }) ?? true else {
+            throw LedgerProblem("\(mine.path) is a link or not a folder, so nothing was written there. Someone with access to the team folder put it there; look before you share again.")
+        }
+        // A tip file in this person's folder that is not a small regular file is not theirs: it goes (D-112).
+        let tip = mine.appendingPathComponent(".tip").path
+        if let kind = SafeRead.kind(tip), kind != .typeRegular || ((try? FileManager.default.attributesOfItem(atPath: tip))?[.size] as? Int ?? 0) > 256 {
+            unlink(tip)
+        }
         if let reverts, find(reverts, in: team)?.id != reverts { throw LedgerProblem("There is no team commit \(reverts) in \(team.name) to replace.") }
         let shared = files.map { teamPath($0, team: team) }
         return try writer(team, member: member).commit(kind, Secrets.redacted(message), body: Secrets.redacted(body), files: shared, author: author,
@@ -192,7 +240,7 @@ public enum TeamLedger {
     /// it is shown as proposed and never run on this Mac (D-109).
     public static func carriesCheck(_ commit: LedgerCommit, team: Team) -> Bool {
         let file = team.ledgerFolder.appendingPathComponent(commit.branch).appendingPathComponent(commit.id + ".md")
-        guard let text = try? String(contentsOf: file, encoding: .utf8) else { return false }
+        guard case let .success(text) = SafeRead.text(file.path, cap: largestFile) else { return false }
         for line in text.split(separator: "\n", omittingEmptySubsequences: false).dropFirst() {
             if line == "---" { break }
             if let colon = line.firstIndex(of: ":"), line[..<colon].lowercased().contains("check") { return true }
