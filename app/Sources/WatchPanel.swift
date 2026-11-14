@@ -56,7 +56,10 @@ struct WatchPanel: View {
     }
 
     private var checkDetail: String {
-        guard let check, !check.changed.isEmpty else { return "The linked code matches its last git commit" }
+        guard let check, !check.changed.isEmpty else {
+            if let built = check?.buildOutput, !built.isEmpty { return "Only build output changed (\(built.count.counted("file")))" }
+            return "The linked code matches its last git commit"
+        }
         return check.rules.isEmpty ? "No decision rests on them" : "\(check.rules.count.counted("decision")) to check them against"
     }
 
@@ -137,9 +140,14 @@ struct WatchPanel: View {
                     }
                 }
                 if !check.diffs.isEmpty { DiffView(text: check.diffs.joined(separator: "\n")) }
-            } else {
+            } else if check?.buildOutput.isEmpty ?? true {
                 Label("Nothing has changed in the linked code since its last git commit", systemImage: "checkmark.circle")
                     .font(.system(size: 12.5)).foregroundStyle(Self.mint)
+            }
+            // Set aside, never hidden (D-87).
+            if let built = check?.buildOutput, !built.isEmpty {
+                Text("Also changed, looks like build output: " + built.prefix(4).map(\.fileName).joined(separator: ", ") + (built.count > 4 ? " and \(built.count - 4) more" : ""))
+                    .font(.system(size: 11.5)).foregroundStyle(Night.faint).lineLimit(2).help(built.joined(separator: "\n"))
             }
         }
         .padding(16).skyCard(tint: Night.conversation)

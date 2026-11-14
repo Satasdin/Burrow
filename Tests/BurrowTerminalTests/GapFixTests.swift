@@ -145,10 +145,38 @@ final class GapFixTests: XCTestCase {
         }
         let checked = try await call("burrow_check", "{}")
         XCTAssertTrue(checked.hasPrefix("You changed 1 file:"), checked)
-        XCTAssertFalse(checked.contains("__pycache__"), checked)
+        // Set aside, not hidden: named on one line after the real changes.
+        XCTAssertTrue(checked.contains("Also changed, looks like build output (not counted)"), checked)
+        XCTAssertTrue(checked.contains("shop/payments/__pycache__/reconcile.cpython-314.pyc"), checked)
         XCTAssertTrue(checked.contains("matched by its account reference only"), checked)
         XCTAssertTrue(Vault.isBuildOutput("matatu/__pycache__/x.pyc"))
         XCTAssertFalse(Vault.isBuildOutput("matatu/payments/reconcile.py"))
+    }
+
+    // D-87, after a security review: a hidden folder, a vendored library or an .env-style file is a real change.
+    func testAChangeInAHiddenFolderOrAVendoredLibraryIsStillReported() async throws {
+        for (path, text) in [(".config/settings.toml", "phone_fallback = true\n"), (".husky/pre-commit", "exit 0\n"), (".env.local", "KEY=1\n"),
+                             ("vendor/libpay.dylib", "binary")] {
+            let url = code.appendingPathComponent(path)
+            try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+            try text.write(to: url, atomically: true, encoding: .utf8)
+        }
+        let checked = try await call("burrow_check", "{}")
+        XCTAssertTrue(checked.hasPrefix("You changed 4 files:"), checked)
+        for path in ["shop/.config/settings.toml", "shop/.husky/pre-commit", "shop/.env.local", "shop/vendor/libpay.dylib"] {
+            XCTAssertTrue(checked.contains(path), checked)
+        }
+        XCTAssertFalse(checked.contains("Nothing has changed"), checked)
+    }
+
+    func testOnlyBuildOutputChangedIsNeverReportedAsNothing() async throws {
+        let url = code.appendingPathComponent("payments/__pycache__/matcher.cpython-314.pyc")
+        try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try "x".write(to: url, atomically: true, encoding: .utf8)
+        let checked = try await call("burrow_check", "{}")
+        XCTAssertFalse(checked.contains("Nothing has changed"), checked)
+        XCTAssertTrue(checked.contains("Only files that look like build output changed"), checked)
+        XCTAssertTrue(checked.contains("shop/payments/__pycache__/matcher.cpython-314.pyc"), checked)
     }
 
     // D-82: 14 November walkthrough, one hand-edited comment in reconcile.py dropped the decision from what programs got.

@@ -17,6 +17,8 @@ public struct CheckReport: Sendable {
     public var changed: [String]
     public var diffs: [String]
     public var rules: [LedgerCommit]
+    /// Changed paths set aside as build output (D-87): not counted, but always named.
+    public var buildOutput: [String] = []
 }
 
 extension VaultTools {
@@ -192,17 +194,26 @@ extension VaultTools {
     private func checkChanges() -> ToolResult {
         let report = Self.checkReport(vault: vault, ledger: ledger)
         let changed = report.changed, diffs = report.diffs, rules = report.rules
-        guard !changed.isEmpty else { return ToolResult(text: "Nothing has changed in the linked code since its last git commit.", summary: "no changes") }
+        let built = Self.buildOutputLine(report.buildOutput)
+        guard !changed.isEmpty else {
+            // Never "nothing has changed" while something did, even if it all looks like build output.
+            guard report.buildOutput.isEmpty else {
+                return ToolResult(text: "Only files that look like build output changed in the linked code since its last git commit:" + built
+                                  + "\nNo decision is checked against build output. If you wrote any of these by hand, say so to the person.",
+                                  summary: "\(report.buildOutput.count) build output only")
+            }
+            return ToolResult(text: "Nothing has changed in the linked code since its last git commit.", summary: "no changes")
+        }
         // File names come from the repository and can say anything: control characters go, and the list is shown as content.
         let names = changed.prefix(20).map { String($0.unicodeScalars.filter { !CharacterSet.controlCharacters.contains($0) }) }
         let list = ProjectContent.block(path: "changed files", lines: "", kind: "code", why: nil, body: names.joined(separator: "\n"))
         guard !rules.isEmpty else {
-            return ToolResult(text: "You changed \(changed.count) file\(changed.count == 1 ? "" : "s"):\n\(list)\nNo decision in the Ledger rests on these files or the files they import.", summary: "\(changed.count) changed, no decisions")
+            return ToolResult(text: "You changed \(changed.count) file\(changed.count == 1 ? "" : "s"):\n\(list)\(built)\nNo decision in the Ledger rests on these files or the files they import.", summary: "\(changed.count) changed, no decisions")
         }
         let lines = rules.map { "- \($0.id) [\($0.kind.rawValue)] \($0.stated(within: 1_300)) (\($0.byline), rests on \($0.cites.keys.sorted().prefix(3).joined(separator: ", ")))" }
         var diff = diffs.joined(separator: "\n")
         if diff.count > 6_000 { diff = String(diff.prefix(6_000)) + "\n[diff cut at 6,000 characters]" }
-        let text = "You changed \(changed.count) file\(changed.count == 1 ? "" : "s"):\n\(list)\n\nDecisions earlier sessions kept on these files or the files they import:\n<ledger>\n"
+        let text = "You changed \(changed.count) file\(changed.count == 1 ? "" : "s"):\n\(list)\(built)\n\nDecisions earlier sessions kept on these files or the files they import:\n<ledger>\n"
             + Ledger.defanged(lines.joined(separator: "\n")) + "\n</ledger>\n\nYour change:\n"
             + ProjectContent.block(path: "git diff", lines: "", kind: "code", why: nil, body: diff)
             + "\n\nFor each decision, check whether your change keeps to it. If it does not, undo that part, or tell the person plainly which decision it goes against and why."
@@ -214,6 +225,7 @@ extension VaultTools {
     /// on those files or the files they import or are imported by.
     public static func checkReport(vault: Vault, ledger: Ledger) -> CheckReport {
         var changed: [String] = []
+        var built: [String] = []
         var diffs: [String] = []
         let indexed = Set(((try? vault.projectMap().files) ?? []).map(\.path))
         for folder in vault.linkedFolders() {
@@ -222,7 +234,10 @@ extension VaultTools {
             let fresh = git(folder.url, ["ls-files", "--others", "--exclude-standard", "-z"]) ?? ""
             // What a build or a test run leaves (__pycache__/*.pyc, node_modules, .DS_Store) is not a change anyone made, by
             // the index's own rule: in the 14 November walkthrough one edited file showed as "You changed 15 files" (D-87).
-            let relative = (tracked + fresh).split(separator: "\0").map(String.init).filter { !Vault.isBuildOutput($0) }
+            // They are set aside, not hidden: the reply still names them on one line.
+            let all = (tracked + fresh).split(separator: "\0").map(String.init)
+            built += all.filter(Vault.isBuildOutput).map { folder.name + "/" + $0 }
+            let relative = all.filter { !Vault.isBuildOutput($0) }
             changed += relative.map { folder.name + "/" + $0 }.filter { !changed.contains($0) }
             // The diff shows only files the vault itself holds, so a change to a file Burrow does not index (a secret,
             // a binary) is named but never shown; no external diff tool or text converter runs.
@@ -231,7 +246,7 @@ extension VaultTools {
                 diffs.append(diff)
             }
         }
-        guard !changed.isEmpty else { return CheckReport(changed: [], diffs: [], rules: []) }
+        guard !changed.isEmpty else { return CheckReport(changed: [], diffs: [], rules: [], buildOutput: built) }
         var near: Set<String> = []
         for file in changed { for neighbour in (try? vault.neighbours(of: file)) ?? [] where neighbour.kind != .about { near.insert(neighbour.path) } }
         let wrong = ledger.reverted()
@@ -239,7 +254,15 @@ extension VaultTools {
             [.decision, .correction].contains(commit.kind) && !wrong.contains(commit.id)
                 && (!Set(changed).isDisjoint(with: commit.cites.keys) || !near.isDisjoint(with: commit.cites.keys))
         }.prefix(6)
-        return CheckReport(changed: changed, diffs: diffs, rules: Array(rules))
+        return CheckReport(changed: changed, diffs: diffs, rules: Array(rules), buildOutput: built)
+    }
+
+    /// One line naming what was set aside as build output, so nothing changed is invisible (D-87). Empty when nothing was.
+    static func buildOutputLine(_ paths: [String]) -> String {
+        guard !paths.isEmpty else { return "" }
+        let names = paths.prefix(5).map { String($0.unicodeScalars.filter { !CharacterSet.controlCharacters.contains($0) }) }
+        let more = paths.count > 5 ? " and \(paths.count - 5) more" : ""
+        return "\nAlso changed, looks like build output (not counted): " + ProjectContent.block(path: "build output", lines: "", kind: "code", why: nil, body: names.joined(separator: "\n") + more)
     }
 
     /// The decisions and corrections a program is handed when it connects (D-76), as commits rather than text, for the app.

@@ -24,17 +24,22 @@ struct Scanner {
         let hash: String
     }
 
-    /// Files a build or an editor makes, which nobody wrote: compiled Python, object files, Finder's folder settings.
-    static let builtExtensions: Set<String> = ["pyc", "pyo", "o", "obj", "class", "so", "dylib", "a", "d", "swiftmodule", "swiftdeps", "tsbuildinfo"]
+    /// Folders only a tool fills: caches, installed packages and build output. Narrower than what the index skips: a
+    /// hidden folder such as `.config` or `.husky`, or a vendored library, can hold a real change (D-87).
+    static let buildFolders: Set<String> = [
+        "__pycache__", "node_modules", ".build", "DerivedData", ".mypy_cache", ".pytest_cache", ".ruff_cache", ".tox", ".next", ".gradle",
+    ]
+    /// Files nobody writes by hand: compiled Python and Finder's or Explorer's folder settings.
+    static let builtExtensions: Set<String> = ["pyc", "pyo"]
     static let builtNames: Set<String> = [".DS_Store", "Thumbs.db"]
 
-    /// True for a file inside a folder the index skips (`__pycache__`, `node_modules`, `.build`, hidden folders) or a
-    /// file a build makes. `burrow_check` uses the same rule, so a run of the tests is not counted as changing 15 files
-    /// when one was written by hand (D-87).
+    /// True for a file a build, a test run or the Finder made: inside `__pycache__`, `node_modules`, `.build` and the
+    /// like, or a `.pyc` or `.DS_Store`. `burrow_check` uses this so a test run is not counted as changing 15 files when
+    /// one was written by hand, and still names what it set aside (D-87).
     static func isBuildOutput(_ path: String) -> Bool {
         let parts = path.split(separator: "/").map(String.init)
         guard let name = parts.last else { return false }
-        if parts.dropLast().contains(where: { skippedFolders.contains($0) || ($0.hasPrefix(".") && $0 != ".github") }) { return true }
+        if parts.dropLast().contains(where: buildFolders.contains) { return true }
         return builtNames.contains(name) || builtExtensions.contains((name as NSString).pathExtension.lowercased())
     }
 
