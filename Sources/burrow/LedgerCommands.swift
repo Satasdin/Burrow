@@ -4,7 +4,7 @@ import Foundation
 
 let ledgerUsage = """
   burrow commit <vault> "message" [--kind decision|fact|correction|plan|handoff] [--files a,b] [--branch B] [--author NAME]
-                [--because WHY] [--rejected WHAT] [--supersedes <commit>] [--alongside]
+                [--because WHY] [--rejected WHAT] [--supersedes <commit>] [--alongside] [--check "command" | --check "forbid: pattern"]
   burrow log    <vault> [--branch B] [--file PATH] [--limit N]      what AIs understood, newest first
   burrow resume <vault> [branch]                                    where the work stopped, for any model to carry on
   burrow blame  <vault> <path>                                      which sessions explained or changed a file
@@ -12,7 +12,8 @@ let ledgerUsage = """
   burrow revert <vault> <commit> "what is right"                    marks a commit wrong; nothing is deleted
   burrow confirm <vault> <commit> ["note"]                         says a commit still holds after a file it cites changed
   burrow branch <vault> [name]                                      show the branches, or switch to one
-  burrow check  <vault> [--staged] [--json]                         the decisions your change rests on, beside it; exit 2 until shown once
+  burrow check  <vault> [--staged] [--json]                         the decisions your change rests on, with a verdict on each: exit 0 untouched,
+                                                                    2 touched and not shown yet, 3 breaks one (its check failed)
   burrow recall <vault> [fold|session] [--full] [--find WORDS]     what earlier stretches of a Claude Code session said, word for word
   burrow hook claude <vault> [--gate]                               for Claude Code's SessionStart, PreCompact, SessionEnd and Stop hooks
   burrow hook git <vault>                                           for git's post-commit hook, run inside the repository
@@ -24,7 +25,8 @@ func runLedgerCommand(_ arguments: [String]) async throws -> Bool {
     guard let command = arguments.first, ["commit", "log", "resume", "blame", "diff", "revert", "confirm", "branch", "hook", "check", "recall"].contains(command) else { return false }
     var words = Array(arguments.dropFirst())
     var values: [String: String] = [:]
-    let takesValue: Set<String> = ["--kind", "--files", "--branch", "--author", "--file", "--limit", "--since", "--store", "--because", "--rejected", "--supersedes", "--find"]
+    let takesValue: Set<String> = ["--kind", "--files", "--branch", "--author", "--file", "--limit", "--since", "--store", "--because", "--rejected", "--supersedes", "--find",
+                                   "--check", "--check-timeout"]
     var index = 0
     var positional: [String] = []
     while index < words.count {
@@ -71,8 +73,13 @@ func runLedgerCommand(_ arguments: [String]) async throws -> Bool {
             print(outcome.text)
             fflush(stdout)
             let count = outcome.report.rules.count
-            if outcome.holds {
+            if outcome.breaks {
+                let ids = outcome.verdicts.filter(\.breaks).map(\.decision)
+                logToStandardError("breaks: the check set for \(ids.joined(separator: ", ")) failed. Seeing it does not let it through: fix the change. Only you can override it, in your own terminal: burrow decision override \(Printable.shellWord(vault.root.path)) \(ids[0])")
+            } else if outcome.holds {
                 logToStandardError("held: this change rests on \(count) decision\(count == 1 ? "" : "s") kept in the Ledger and had not been shown. It has been now, so the same change passes next time.")
+            } else if outcome.fingerprint != nil, outcome.verdict == "unaffected" {
+                logToStandardError("passes: the change leaves the parts these decisions rest on as they were.")
             } else if outcome.fingerprint != nil {
                 logToStandardError("this exact change was shown before, so it passes.")
             }
@@ -108,9 +115,22 @@ func runLedgerCommand(_ arguments: [String]) async throws -> Bool {
         if kind == .decision, replaced == nil, values["--alongside"] == nil {
             overlaps = VaultTools.overlapping(vault: vault, ledger: ledger, text: message + " " + body.joined(separator: " "), files: files, branch: values["--branch"])
         }
+        // A check is parsed before anything is kept, so a bad one keeps nothing (D-107).
+        var check: DecisionCheck?
+        if let spec = values["--check"] {
+            guard kind == .decision else { throw Failure("only a decision carries a check") }
+            do { check = try DecisionCheck.parse(spec, timeout: Int(values["--check-timeout"] ?? "") ?? DecisionCheck.defaultTimeout, by: inPersonsTerminal() ? "you" : "terminal (no person)") }
+            catch let problem as LedgerProblem { throw Failure(problem.description) }
+        }
+        // What the decision rests on, kept with it (D-107).
+        let anchors = kind == .decision ? Verdicts.anchors(vault: vault, text: message + " " + body.joined(separator: " "), files: files) : [:]
         let made = try ledger.commit(kind, message, body: body.joined(separator: "\n"), files: files, author: author, client: "terminal", branch: values["--branch"],
-                                     reverts: replaced?.id, overlaps: overlaps.map(\.id))
+                                     reverts: replaced?.id, overlaps: overlaps.map(\.id), anchors: anchors)
         print("[\(made.branch) \(made.id)] \(made.kind.rawValue): \(made.message)")
+        if !anchors.isEmpty {
+            print("    rests on: " + anchors.sorted { $0.key < $1.key }.map { path, names in names.keys.sorted().joined(separator: ", ") + " (\(path))" }.joined(separator: "; "))
+        }
+        if let check { print(try keepCheck(check, for: made, vault: vault)) }
         if let replaced { print("    replaces \(replaced.id), now retired") }
         for old in overlaps {
             print("    UNRESOLVED: may contradict \(old.id): \(old.message.prefix(160))")
@@ -291,7 +311,7 @@ private func installHook(_ kind: String, vault folder: String, store: String? = 
         try FileManager.default.createDirectory(at: hook.deletingLastPathComponent(), withIntermediateDirectories: true)
         try Gate.preCommitScript(burrow: burrow, vault: quoted).write(to: hook, atomically: true, encoding: .utf8)
         try FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: hook.path)
-        print("Wrote \(hook.path). A commit that touches a decision in the Ledger is refused once, with the decisions shown; the same change commits on the next try.")
+        print("Wrote \(hook.path). A commit that touches what a decision in the Ledger rests on is refused once, with the decisions shown, and the same change commits on the next try; one that fails a decision's check is refused every time (D-107).")
     default:
         throw Failure("hook install takes claude, git or git-gate")
     }

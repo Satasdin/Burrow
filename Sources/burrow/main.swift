@@ -31,6 +31,7 @@ burrow: private project memory for local models
 
 The Ledger, a git for what AIs understood:
 \(ledgerUsage)
+\(decisionUsage)
 
 \(vaultUsage)
 
@@ -90,6 +91,7 @@ func run() async throws {
     let arguments = Array(CommandLine.arguments.dropFirst())
     if try await runTerminalCommand(arguments) { return }
     if try await runLedgerCommand(arguments) { return }
+    if try await runDecisionCommand(arguments) { return }
     if try await runVaultCommand(arguments) { return }
     guard let command = arguments.first, !["help", "--help", "-h"].contains(command) else {
         print(usage)

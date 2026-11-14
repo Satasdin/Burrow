@@ -52,10 +52,14 @@ public struct LedgerCommit: Codable, Sendable, Equatable {
     /// it is handed over marked UNRESOLVED until the person says which holds (D-94). For a "both hold" confirmation:
     /// the ids it settles.
     public var overlaps: [String]?
+    /// For a decision: the functions, classes and blocks in its cited files it is about, with a hash of each one's body
+    /// when it was kept (D-107): vault path → symbol → hash. `burrow check` places a change against these. Optional and
+    /// additive: a commit without it reads as before.
+    public var anchors: [String: [String: String]]?
 
     public init(id: String, branch: String, parent: String?, kind: Kind, message: String, body: String = "", author: String,
                 client: String? = nil, cites: [String: String] = [:], at: Date = Date(), reverts: String? = nil, sha: String? = nil, session: String? = nil,
-                modelSaid: String? = nil, confirms: String? = nil, overlaps: [String]? = nil) {
+                modelSaid: String? = nil, confirms: String? = nil, overlaps: [String]? = nil, anchors: [String: [String: String]]? = nil) {
         self.id = id
         self.branch = branch
         self.parent = parent
@@ -72,6 +76,7 @@ public struct LedgerCommit: Codable, Sendable, Equatable {
         self.modelSaid = modelSaid
         self.confirms = confirms
         self.overlaps = overlaps
+        self.anchors = anchors
     }
 }
 
@@ -223,7 +228,8 @@ public struct Ledger: Sendable {
     @discardableResult
     public func commit(_ kind: LedgerCommit.Kind, _ message: String, body: String = "", files: [String] = [], author: String,
                        client: String? = nil, branch: String? = nil, reverts: String? = nil, sha: String? = nil, session: String? = nil,
-                       at: Date = Date(), modelSaid: String? = nil, confirms: String? = nil, overlaps: [String]? = nil) throws -> LedgerCommit {
+                       at: Date = Date(), modelSaid: String? = nil, confirms: String? = nil, overlaps: [String]? = nil,
+                       anchors: [String: [String: String]]? = nil) throws -> LedgerCommit {
         let text = message.replacingOccurrences(of: "\0", with: "").trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty else { throw LedgerProblem("A commit needs a message.") }
         guard text.count <= 600 else { throw LedgerProblem("A commit message holds 600 characters; put the rest in its body.") }
@@ -239,7 +245,8 @@ public struct Ledger: Sendable {
                                  body: String(body.replacingOccurrences(of: "\0", with: "").prefix(8_000)), author: author, client: client,
                                  cites: hashes(files), at: at, reverts: reverts, sha: sha, session: session,
                                  modelSaid: modelSaid.map { String($0.replacingOccurrences(of: "\0", with: "").prefix(120)) }, confirms: confirms,
-                                 overlaps: overlaps.flatMap { $0.isEmpty ? nil : Array($0.prefix(8)) })
+                                 overlaps: overlaps.flatMap { $0.isEmpty ? nil : Array($0.prefix(8)) },
+                                 anchors: anchors.flatMap { $0.isEmpty ? nil : $0 })
         try FileManager.default.createDirectory(at: place, withIntermediateDirectories: true)
         // Many programs can commit in the same second, and an id is that second and four random characters, so two can meet.
         // The commit is written whole to a file of its own, then given its name with link(2), which refuses a name that is
@@ -611,6 +618,7 @@ public struct Ledger: Sendable {
         if let reverts = commit.reverts { lines.append("reverts: \(json(reverts))") }
         if let confirms = commit.confirms { lines.append("confirms: \(json(confirms))") }
         if let overlaps = commit.overlaps, !overlaps.isEmpty { lines.append("overlaps: \(json(overlaps))") }
+        if let anchors = commit.anchors, !anchors.isEmpty { lines.append("anchors: \(json(anchors))") }
         if let sha = commit.sha { lines.append("sha: \(json(sha))") }
         if let session = commit.session { lines.append("session: \(json(session))") }
         if !commit.cites.isEmpty { lines.append("cites: \(json(commit.cites))") }
@@ -640,7 +648,8 @@ public struct Ledger: Sendable {
                             author: author, client: fields["client"] as? String, cites: fields["cites"] as? [String: String] ?? [:],
                             at: at, reverts: fields["reverts"] as? String, sha: fields["sha"] as? String, session: fields["session"] as? String,
                             modelSaid: fields["model_said"] as? String, confirms: fields["confirms"] as? String,
-                            overlaps: (fields["overlaps"] as? [Any])?.compactMap { $0 as? String })
+                            overlaps: (fields["overlaps"] as? [Any])?.compactMap { $0 as? String },
+                            anchors: fields["anchors"] as? [String: [String: String]])
     }
 
     public static func when(_ date: Date) -> String {

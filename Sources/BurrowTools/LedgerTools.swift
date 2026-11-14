@@ -24,6 +24,11 @@ public struct CheckReport: Sendable {
     public var resting: [String] = []
     /// Each resting file's git blob id, as it is in the working tree (or the index, for a staged check), or "deleted".
     public var hashes: [String: String] = [:]
+    /// Each changed file's import neighbours (D-75), so a verdict can tell which changed files rest on which decision.
+    public var near: [String: Set<String>] = [:]
+    /// Each decision judged (D-107): filled by `burrow check`, the hooks and burrow_check, which run the person's checks;
+    /// empty for a view that only lists.
+    public var verdicts: [DecisionVerdict] = []
 }
 
 extension VaultTools {
@@ -64,6 +69,7 @@ extension VaultTools {
                 ToolParameter("alongside", .string, "yes when this decision and an earlier one on the same files both hold, so neither replaces the other."),
                 ToolParameter("branch", .string, "The task or project branch. Leave it out for the current one."),
                 ToolParameter("model", .string, "Your own model name. It is kept beside the commit as what you said you are; the commit is signed with the name of the program you run in."),
+                ToolParameter("check", .string, "For a decision: a command that tests it (for example python3 -m pytest -q tests/test_rule.py), or forbid: and a pattern no added line may match. It is kept as proposed and never run until the person confirms it."),
             ],
             readOnly: false),
         ToolDefinition(
@@ -198,15 +204,25 @@ extension VaultTools {
                         return .failure(Self.overlapRefusal(overlaps))
                     }
                 }
+                // A check from a program is only ever proposed: parsed now, so a bad one keeps nothing (D-107).
+                var check: DecisionCheck?
+                if let spec = given.text("check")?.trimmingCharacters(in: .whitespacesAndNewlines), !spec.isEmpty {
+                    guard kind == .decision else { return .failure("Only a decision carries a check. Leave check out, or keep this as a decision.") }
+                    check = try DecisionCheck.parse(spec, by: connectionClient ?? who)
+                }
+                // What the decision rests on, kept with it, so a later change can be placed against it (D-107).
+                let anchors = kind == .decision ? Verdicts.anchors(vault: vault, text: given.text("message")! + " " + reasons.joined(separator: " "), files: files) : [:]
                 let made = try ledger.commit(kind, given.text("message")!, body: reasons.joined(separator: "\n"), files: files, author: who, client: connectionClient,
                                              branch: given.text("branch"), reverts: replaced?.id, session: connection?.id, modelSaid: said,
-                                             overlaps: overlaps.map(\.id))
+                                             overlaps: overlaps.map(\.id), anchors: anchors)
+                if let check { try DecisionChecks.propose(check, for: made.id, vault: vault) }
                 keptHere.insert(made.id)
                 let stale = ledger.changed(made)
                 let unread = stale.isEmpty ? "" : " These cited paths could not be read, so the commit already shows as stale: \(stale.joined(separator: ", "))."
                 let retired = replaced.map { " It replaces \($0.id), which is retired: no program is handed it as in force from now on." } ?? ""
                 let open = overlaps.isEmpty ? "" : " It may contradict \(overlaps.map(\.id).joined(separator: ", ")), still in force: both are handed over marked UNRESOLVED until the person says which holds. Tell the person and ask."
-                return remembered(name, given, ToolResult(text: "Kept as \(made.kind.rawValue) \(made.id) on \(made.branch).\(retired)\(open)\(unread)",
+                let proposal = check.map { " The check \($0.shown) is kept as proposed: it is not run until the person confirms it in their own terminal or the Burrow app." } ?? ""
+                return remembered(name, given, ToolResult(text: "Kept as \(made.kind.rawValue) \(made.id) on \(made.branch).\(retired)\(open)\(unread)\(proposal)",
                                                          summary: "kept \(made.kind.rawValue) \(made.id)"))
             case "burrow_check":
                 return remembered(name, given, check())
@@ -256,7 +272,9 @@ extension VaultTools {
     /// undoing a decision in clip 08; nothing put the decision next to the change. Stale decisions are kept here on purpose:
     /// the change itself is what makes them stale.
     func check() -> ToolResult {
-        let report = Self.checkReport(vault: vault, ledger: ledger)
+        var report = Self.checkReport(vault: vault, ledger: ledger)
+        // Each decision judged, the person's checks run (D-107), so the model hears the verdict too.
+        report.verdicts = Verdicts.judge(vault: vault, report: report, staged: false, fingerprint: Gate.fingerprint(report))
         let found = Self.checkText(report)
         // What a program was shown here counts as shown for the Stop hook and the git gate too (D-93).
         Gate.record(report, vault: vault, by: "burrow_check" + (connectionClient.map { " in \($0)" } ?? ""))
@@ -288,10 +306,22 @@ extension VaultTools {
         var diff = diffs.joined(separator: "\n")
         if diff.count > 6_000 { diff = String(diff.prefix(6_000)) + "\n[diff cut at 6,000 characters]" }
         let text = "You changed \(changed.count) file\(changed.count == 1 ? "" : "s"):\n\(list)\(built)\n\nDecisions earlier sessions kept on these files or the files they import:\n<ledger>\n"
-            + Ledger.defanged(lines.joined(separator: "\n")) + "\n</ledger>\n\nYour change:\n"
+            + Ledger.defanged(lines.joined(separator: "\n")) + "\n</ledger>\n" + verdictLines(report.verdicts) + "\nYour change:\n"
             + ProjectContent.block(path: "git diff", lines: "", kind: "code", why: nil, body: diff)
             + "\n\nFor each decision, check whether your change keeps to it. If it does not, undo that part, or tell the person plainly which decision it goes against and why."
         return ToolResult(text: text, summary: "\(changed.count) changed, \(rules.count) decisions to check")
+    }
+
+    /// Burrow's verdict on each decision (D-107), in plain words, with a failed check's output. Empty when not judged.
+    static func verdictLines(_ verdicts: [DecisionVerdict]) -> String {
+        guard !verdicts.isEmpty else { return "" }
+        var text = "\nBurrow's verdict:\n" + verdicts.map { "- " + $0.line }.joined(separator: "\n") + "\n"
+        for verdict in verdicts where verdict.kind == .breaks {
+            guard case let .ran(check, run) = verdict.check else { continue }
+            text += ProjectContent.block(path: "check output", lines: "", kind: check.kind == .forbid ? "added lines" : "command output",
+                                         why: "\(verdict.decision): \(check.shown)", body: run.output) + "\n"
+        }
+        return text
     }
 
     /// What burrow_check compares, for the app as well as the tool: the files changed in linked git folders since their
@@ -345,7 +375,7 @@ extension VaultTools {
             guard let place = located[file] else { continue }
             hashes[file] = blob(place.path, in: place.folder, staged: staged)
         }
-        return CheckReport(changed: changed, diffs: diffs, rules: rules, buildOutput: built, resting: resting, hashes: hashes)
+        return CheckReport(changed: changed, diffs: diffs, rules: rules, buildOutput: built, resting: resting, hashes: hashes, near: near)
     }
 
     /// A file's git blob id in the working tree, or in the index when `staged`; "deleted" when it is not there.
