@@ -26,6 +26,8 @@ final class VaultOfEverythingTests: XCTestCase {
 
     private func opened() async throws -> Vault {
         let vault = try Vault(project: vaultFolder, everything: true)
+        // Approvals go to this test's own folder, never the person's (D-101).
+        vault.stateFolder = top.appendingPathComponent("state")
         try vault.linkFolder(codeFolder)
         try await vault.refresh()
         return vault

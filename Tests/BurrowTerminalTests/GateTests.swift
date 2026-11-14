@@ -31,6 +31,8 @@ final class GateTests: XCTestCase {
             _ = VaultTools.git(code, arguments)
         }
         vault = try Vault(project: top.appendingPathComponent("vault"), everything: true)
+        // Approvals go to this test's own folder, never the person's (D-101).
+        vault.stateFolder = top.appendingPathComponent("state")
         try vault.linkFolder(code)
         try await vault.refresh(embedder: nil)
     }
@@ -207,6 +209,10 @@ final class GateTests: XCTestCase {
         process.executableURL = try executable ?? binary()
         process.arguments = arguments
         process.currentDirectoryURL = folder ?? code
+        // Burrow's own folder for this test, where the linked folder's approval is (D-101).
+        var environment = ProcessInfo.processInfo.environment
+        environment["BURROW_STATE_DIR"] = top.appendingPathComponent("state").path
+        process.environment = environment
         let out = Pipe(), err = Pipe(), stdin = Pipe()
         process.standardOutput = out
         process.standardError = err

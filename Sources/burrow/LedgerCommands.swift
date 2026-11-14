@@ -41,7 +41,7 @@ func runLedgerCommand(_ arguments: [String]) async throws -> Bool {
             guard words.count >= 3 else { throw Failure("hook install needs claude, git or git-gate, and the vault") }
             try installHook(words[1], vault: words[2], store: values["--store"])
         } else {
-            let vault = try openVault(words[1], store: values["--store"])
+            let vault = try openVault(words[1], store: values["--store"], sayLinks: false)
             try runHook(words[0], vault: vault, gateOnly: switches.contains("--gate"))
         }
         return true

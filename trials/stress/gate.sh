@@ -19,6 +19,8 @@ fixture() {
   rm -rf "$D"; mkdir -p "$D"
   rsync -a --delete "$HOME/BurrowStress/base/" "$D/"
   printf '[{"name":"matatu","path":"%s"}]' "$D/code/matatu" > "$D/Notes/.burrow/folders.json"
+  # A list written by hand is followed only once approved on this Mac (D-101).
+  "$B" link approve "$D/Notes" --all > /dev/null 2>&1
   rm -rf "$D/Notes/.burrow/checks"
   "$B" index "$D/Notes" --vault > /dev/null 2>&1
 }

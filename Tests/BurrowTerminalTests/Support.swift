@@ -59,6 +59,8 @@ final class VaultFixture {
 
     func opened(embedder: Embedder? = nil) async throws -> Vault {
         let vault = try Vault(project: vaultFolder, everything: true)
+        // Approvals go to this test's own folder, never the person's (D-101).
+        vault.stateFolder = top.appendingPathComponent("state")
         try vault.linkFolder(codeFolder)
         try await vault.refresh(embedder: embedder)
         return vault

@@ -31,6 +31,8 @@ final class GapFixTests: XCTestCase {
             _ = VaultTools.git(code, arguments)
         }
         vault = try Vault(project: top.appendingPathComponent("vault"), everything: true)
+        // Approvals go to this test's own folder, never the person's (D-101).
+        vault.stateFolder = top.appendingPathComponent("state")
         try vault.linkFolder(code)
         try await vault.refresh(embedder: nil)
         tools = VaultTools(vault: vault, embedder: nil) { _ in FakeAnswerer() }

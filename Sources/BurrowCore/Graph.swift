@@ -75,42 +75,7 @@ extension Vault {
         return ProjectMap(files: files, links: links)
     }
 
-    // MARK: Linked folders
-
-    private var linkedFile: URL { store.appendingPathComponent("folders.json") }
-
-    /// None for a vault read through a bridge (D-100): its list is a file inside its folder, which whoever can write to that
-    /// folder (a colleague in a shared Team vault) could point at any folder on this Mac. Its linked code is still found
-    /// by search, from the index its owner built, but no file outside its own folder is opened through the bridge.
-    public func linkedFolders() -> [LinkedFolder] {
-        guard !readOnly, let data = try? Data(contentsOf: linkedFile) else { return [] }
-        return (try? JSONDecoder().decode([LinkedFolder].self, from: data)) ?? []
-    }
-
-    /// Adds a folder to the vault under a name of its own. Burrow reads it and never changes it.
-    @discardableResult
-    public func linkFolder(_ url: URL) throws -> LinkedFolder {
-        var folders = linkedFolders()
-        let path = url.standardizedFileURL.path
-        if let existing = folders.first(where: { $0.path == path }) { return existing }
-        guard path != root.path, !path.hasPrefix(root.path + "/") else { throw NoteProblem(description: "That folder is already inside this vault.") }
-        let base = url.lastPathComponent
-        var name = base
-        var attempt = 2
-        let taken = Set(folders.map(\.name))
-        while taken.contains(name) || FileManager.default.fileExists(atPath: root.appendingPathComponent(name).path) {
-            name = "\(base) \(attempt)"
-            attempt += 1
-        }
-        let folder = LinkedFolder(name: name, path: path)
-        folders.append(folder)
-        try JSONEncoder().encode(folders).write(to: linkedFile, options: .atomic)
-        return folder
-    }
-
-    public func unlinkFolder(_ name: String) throws {
-        try JSONEncoder().encode(linkedFolders().filter { $0.name != name }).write(to: linkedFile, options: .atomic)
-    }
+    // Linked folders, and whether the person on this Mac has approved each one (D-101): LinkApprovals.swift.
 
     // MARK: Reading
 

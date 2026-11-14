@@ -80,6 +80,8 @@ final class LedgerRelevanceTests: XCTestCase {
         }
         embedder = ConceptEmbedder()
         vault = try Vault(project: top.appendingPathComponent("vault"), everything: true)
+        // Approvals go to this test's own folder, never the person's (D-101).
+        vault.stateFolder = top.appendingPathComponent("state")
         try vault.linkFolder(top.appendingPathComponent("pay"))
         try await vault.refresh(embedder: embedder)
 

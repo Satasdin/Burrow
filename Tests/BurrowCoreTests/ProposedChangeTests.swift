@@ -15,6 +15,8 @@ final class ProposedChangeTests: XCTestCase {
             try text.write(to: url, atomically: true, encoding: .utf8)
         }
         vault = try Vault(project: top.appendingPathComponent("vault"), everything: true)
+        // Approvals go to this test's own folder, never the person's (D-101).
+        vault.stateFolder = top.appendingPathComponent("state")
         try vault.linkFolder(top.appendingPathComponent("shop"))
     }
 

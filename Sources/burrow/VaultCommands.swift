@@ -36,7 +36,9 @@ private func folderExists(_ path: String) -> Bool {
 private func existingVault(_ path: String?, _ what: String) throws -> Vault {
     guard let path else { throw Failure("\(what) needs a vault folder. Run burrow help for every command.") }
     guard folderExists(path) else { throw Failure("\(path) is not a folder") }
-    return try Vault(project: URL(fileURLWithPath: path), everything: true)
+    let vault = try Vault(project: URL(fileURLWithPath: path), everything: true)
+    meetLinks(vault)
+    return vault
 }
 
 private func newVault(_ options: Options) async throws {
@@ -70,6 +72,8 @@ private func newVault(_ options: Options) async throws {
         }
     }
     KnownVaults.remember(vault)
+    // A folder from someone else can already hold a list of linked folders; none of them was read (D-101).
+    meetLinks(vault)
     let name = vault.config.value("vault.name").map { " called \($0)" } ?? ""
     print("\(made ? "made" : "opened") \(url.path) as a vault\(name): \(report.filesSeen) files indexed \(how).")
     print("Next: put notes in it, link a code folder (burrow link \(url.path) <folder>), or bridge it from another vault (burrow bridge <vault> \(url.path)).")

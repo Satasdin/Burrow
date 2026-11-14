@@ -235,7 +235,7 @@ public final class Vault {
         return report
     }
 
-    private func remove(_ path: String) throws {
+    func remove(_ path: String) throws {
         let ids = try database.rows("SELECT c.id FROM chunks c JOIN files f ON f.id = c.file_id WHERE f.path = ?", [.text(path)])
         for row in ids { try database.run("DELETE FROM chunks_fts WHERE rowid = ?", [row[0]]) }
         try database.run("DELETE FROM files WHERE path = ?", [.text(path)])
