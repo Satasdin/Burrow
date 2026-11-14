@@ -46,6 +46,7 @@ struct WatchPanel: View {
         .onAppear {
             if let peek = ProcessInfo.processInfo.environment["BURROW_WATCH"] { open = Part(rawValue: peek) }
         }
+        .onChange(of: workspace.watchPeek) { _, peek in open = peek.flatMap(Part.init(rawValue:)) }
     }
 
     /// Decisions on this branch left out because a file they rest on changed: they come back once checked and kept again.

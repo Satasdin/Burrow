@@ -124,7 +124,8 @@ struct Palette: View {
         .shadow(color: .black.opacity(0.4), radius: 20, y: 12)
         .environment(\.colorScheme, .dark)
         .animation(.spring(response: 0.25, dampingFraction: 0.85), value: selected)
-        .onAppear { focused = true }
+        .onAppear { focused = true; text = workspace.paletteQuery }
+        .onChange(of: workspace.paletteQuery) { _, typed in text = typed }
         .onChange(of: text) { _, _ in selected = 0 }
         .onKeyPress(.downArrow) { selected = min(selected + 1, max(0, list.count - 1)); return .handled }
         .onKeyPress(.upArrow) { selected = max(selected - 1, 0); return .handled }

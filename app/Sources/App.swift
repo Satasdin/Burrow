@@ -68,6 +68,24 @@ final class Delegate: NSObject, NSApplicationDelegate {
         if ProcessInfo.processInfo.environment["BURROW_SNAPSHOT"] == nil { NSApp.activate(ignoringOtherApps: true) }
         snapshotIfAsked()
         recordIfAsked()
+        placeIfAsked()
+    }
+
+    /// For the demo film: BURROW_WINDOW="x,y,w,h" (points, from the screen's top left) pins the window, so a screen
+    /// recording can be cropped to exactly the app and nothing else on the screen.
+    private func placeIfAsked() {
+        guard let spec = ProcessInfo.processInfo.environment["BURROW_WINDOW"] else { return }
+        let n = spec.split(separator: ",").compactMap { Double($0) }
+        guard n.count == 4 else { return }
+        for delay in [0.3, 1.0, 2.0] {
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                guard let window = NSApp.windows.first(where: \.isVisible), let screen = window.screen ?? NSScreen.main else { return }
+                let top = screen.frame.maxY
+                window.setFrame(NSRect(x: n[0], y: top - n[1] - n[3], width: n[2], height: n[3]), display: true)
+                window.makeKeyAndOrderFront(nil)
+                NSApp.activate(ignoringOtherApps: true)
+            }
+        }
     }
 
     /// For a demonstration video without screen recording: BURROW_RECORD=folder saves the window as numbered frames,
@@ -76,13 +94,23 @@ final class Delegate: NSObject, NSApplicationDelegate {
         guard let folder = ProcessInfo.processInfo.environment["BURROW_RECORD"] else { return }
         try? FileManager.default.createDirectory(atPath: folder, withIntermediateDirectories: true)
         var frame = 0
-        Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
-            guard let view = NSApp.windows.first(where: \.isVisible)?.contentView?.superview,
-                  let picture = view.bitmapImageRepForCachingDisplay(in: view.bounds) else { return }
+        // BURROW_RECORD_FPS sets the rate (default 10); the film records at 30.
+        let fps = Double(ProcessInfo.processInfo.environment["BURROW_RECORD_FPS"] ?? "") ?? 10
+        let writer = DispatchQueue(label: "burrow.record", qos: .utility)
+        Timer.scheduledTimer(withTimeInterval: 1 / fps, repeats: true) { _ in
+            guard let view = NSApp.windows.first(where: \.isVisible)?.contentView?.superview else { return }
+            // 1920 px wide, whatever the screen's scale: the film's resolution, and fast enough to keep up at 30 a second.
+            let width = 1920, height = Int((view.bounds.height / view.bounds.width * 1920).rounded())
+            guard let picture = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: width, pixelsHigh: height, bitsPerSample: 8,
+                                                 samplesPerPixel: 4, hasAlpha: true, isPlanar: false, colorSpaceName: .deviceRGB,
+                                                 bytesPerRow: 0, bitsPerPixel: 0) else { return }
+            picture.size = view.bounds.size
             view.cacheDisplay(in: view.bounds, to: picture)
-            guard let data = picture.representation(using: .jpeg, properties: [.compressionFactor: 0.85]) else { return }
             frame += 1
-            try? data.write(to: URL(fileURLWithPath: folder).appendingPathComponent(String(format: "f%05d.jpg", frame)))
+            let name = URL(fileURLWithPath: folder).appendingPathComponent(String(format: "f%05d.jpg", frame))
+            writer.async {
+                if let data = picture.representation(using: .jpeg, properties: [.compressionFactor: 0.9]) { try? data.write(to: name) }
+            }
         }
     }
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }

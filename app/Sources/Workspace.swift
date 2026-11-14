@@ -247,6 +247,10 @@ final class Workspace {
     var sidebarMode = SidebarMode.files
     var isReading = false   // reading view rather than editing
     var paletteOpen = false
+    /// Which part of the Ledger's Watch panel a recorded tour opens (BURROW_TOUR watch=…).
+    var watchPeek: String?
+    /// Text a recorded tour types into Quick Open.
+    var paletteQuery = ""
     var graphFilter = GraphFilter()
     var progress: String?
     var warning: String?
@@ -890,7 +894,40 @@ final class Library {
     }
 
     /// For checking layouts without a person at the screen.
+    /// For the demo film: BURROW_TOUR="0:ledger;4:watch=check;9:graph;…" walks the app through pages on a clock while
+    /// BURROW_RECORD saves frames, so every app shot is the real app on a real vault, driven the same way each take.
+    private static func runTour(_ workspace: Workspace, _ tour: String) {
+        for step in tour.split(separator: ";") {
+            let parts = step.split(separator: ":", maxSplits: 1).map(String.init)
+            guard parts.count == 2, let at = Double(parts[0]) else { continue }
+            let action = parts[1].split(separator: "=", maxSplits: 1).map(String.init)
+            DispatchQueue.main.asyncAfter(deadline: .now() + at) {
+                let value = action.count > 1 ? action[1] : ""
+                switch action[0] {
+                case "library": workspace.go(.library(.all))
+                case "graph": workspace.go(.graph)
+                case "ask": workspace.go(.ask)
+                case "question": workspace.go(.ask); workspace.ask(value)
+                case "ledger": workspace.go(.ledger(nil))
+                case "watch": workspace.go(.ledger(nil)); workspace.watchPeek = value
+                case "conversations": workspace.go(.conversations(nil))
+                case "session": if let first = workspace.sessions.first { workspace.go(.session(first.id)) }
+                case "programs": workspace.go(.programs)
+                case "shelf": workspace.go(.shelf)
+                case "file": workspace.go(.file(value))
+                case "select": workspace.librarySelection = value
+                case "palette": workspace.paletteOpen = true
+                case "type": workspace.paletteQuery = value
+                case "close": workspace.paletteOpen = false
+                case "quit": NSApp.terminate(nil)
+                default: break
+                }
+            }
+        }
+    }
+
     private static func applyCheckHooks(_ workspace: Workspace, _ environment: [String: String]) {
+        if let tour = environment["BURROW_TOUR"] { runTour(workspace, tour) }
         if let path = environment["BURROW_OPEN"] { workspace.go(.file(path)) }
         if environment["BURROW_READING"] != nil { workspace.isReading = true }
         if let theme = environment["BURROW_THEME"] { UserDefaults.standard.set(theme, forKey: SkyTheme.key) }
