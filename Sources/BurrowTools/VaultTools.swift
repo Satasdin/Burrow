@@ -663,7 +663,8 @@ extension VaultTools {
             return String(String(kept).split(separator: " ").joined(separator: " ").prefix(longest))
         }
         var line = ""
-        for (folder, names) in groups.sorted(by: { $0.value.count > $1.value.count }) {
+        // Biggest folders first; equal sizes by name, so the list (and the instructions a program gets) reads the same every time.
+        for (folder, names) in groups.sorted(by: { $0.value.count != $1.value.count ? $0.value.count > $1.value.count : $0.key < $1.key }) {
             // Spread across the folder, so a folder of "part 1, part 2, ..." shows its range and not its first three.
             let sorted = names.sorted()
             let picks = sorted.count <= 3 ? sorted : [sorted[0], sorted[sorted.count / 2], sorted[sorted.count - 1]]
