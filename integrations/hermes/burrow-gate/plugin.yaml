@@ -1,0 +1,5 @@
+name: burrow-gate
+version: "1.0.0"
+description: After an edit or a shell command, and before the model finishes a turn in which it edited files, shows it the decisions kept in Burrow's Ledger that the change rests on, once per change.
+kind: standalone
+provides_hooks: [pre_verify, transform_tool_result]
