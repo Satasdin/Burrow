@@ -91,7 +91,7 @@ struct ToolArguments {
 /// The tools themselves, on one vault. The vault isn't safe to use from two threads, so give each thread its own or call these one at a time.
 public final class VaultTools {
     public let vault: Vault
-    private let embedder: Embedder?
+    let embedder: Embedder?
     private let answerer: (String) -> Answerer
     private let defaultModel: String
     /// Set for a chat that is limited to one folder. It overrides any folder a model asks for.
@@ -118,6 +118,8 @@ public final class VaultTools {
     public var trustLinesOn = true
     /// Matching Ledger notes at the end of every search. Off only for an evaluation's baseline arm.
     public var ledgerNotesOn = true
+    /// This connection's last search, which a read's Ledger notes are matched against (D-99).
+    var lastQuestion: String?
     public var searchCharacters: Int
     private let refreshEvery: TimeInterval
     private var lastRefresh: Date?
@@ -244,7 +246,7 @@ public final class VaultTools {
     /// Every folder a tool can be limited to.
     public func folderNames() throws -> [String] { try knownFolders().sorted() }
 
-    private var hasVectors: Bool { embedder != nil && ((try? vault.stats().vectors) ?? 0) > 0 }
+    var hasVectors: Bool { embedder != nil && ((try? vault.stats().vectors) ?? 0) > 0 }
 
     // MARK: Finding
 
@@ -321,6 +323,7 @@ public final class VaultTools {
         // answered "the split of the rent is not recorded" with the split kept as a decision (14 November, D-90).
         var handed: [String] = []
         if ledgerNotesOn {
+            lastQuestion = task
             let ledgerContext = AskLedger.context(vault: vault, question: task, shown: Set(brief.retrieved.paths))
             if !ledgerContext.text.isEmpty { parts.append(ledgerContext.text) }
             handed = ledgerContext.notes.map(\.id)
@@ -418,14 +421,14 @@ public final class VaultTools {
         let inFolder = folder.map { " in \($0)" } ?? ""
         guard !excerpts.isEmpty else {
             let trust = trustLine(found)
-            let notes = ledgerNotes(for: query)
+            let notes = await ledgerNotes(for: query, ranked: [])
             return ToolResult(text: "\(trust.isEmpty ? "" : trust + "\n")Nothing in the vault\(inFolder) matches \"\(query)\". \(found.how)\(notes.text)", ledger: notes.ids, summary: "nothing found\(inFolder)")
         }
         let body = excerpts.map(ProjectContent.block).joined(separator: "\n\n")
         let trust = trustLine(found)
         let steering = excerpts.flatMap { piece in Steering.lines(in: piece.text, firstLine: piece.startLine).map { (path: piece.path, line: $0.line) } }
         remember(steering)
-        let notes = ledgerNotes(for: query, shown: Set(excerpts.map(\.path)))
+        let notes = await ledgerNotes(for: query, ranked: found.retrieved.paths)
         return ToolResult(text: "\(ProjectContent.notice)\n\(trust.isEmpty ? "" : trust + "\n")\(excerpts.count) excerpts for \"\(query)\"\(inFolder). \(found.how)\n\n\(body)\(notes.text)\(Steering.notice(steering))",
                           sources: sources(found.retrieved), ledger: notes.ids,
                           summary: "\(excerpts.count) excerpts from \(found.retrieved.paths.count) files, \(found.retrieved.characters) characters")
@@ -460,7 +463,7 @@ public final class VaultTools {
         remember(steering)
         // A read carries the Ledger's notes on this file and its import neighbours, as a search does (D-75):
         // the file a model reads is often the one it is about to change.
-        let notes = ledgerNotes(for: "", shown: [path])
+        let notes = await ledgerNotes(for: "", ranked: [path], read: path)
         return ToolResult(text: "\(ProjectContent.notice)\n\(path) has \(all.count) lines. Showing \(start) to \(last).\(more)\n\n\(body)\(notes.text)\(Steering.notice(steering))",
                           sources: [ToolResult.Source(path: path, startLine: start, endLine: last, reason: "read")], ledger: notes.ids,
                           summary: "\(path) lines \(start) to \(last) of \(all.count)")
