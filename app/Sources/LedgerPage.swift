@@ -24,6 +24,10 @@ struct LedgerState: Sendable {
     var team: [String: String] = [:]
     /// The teams this vault reads, for "Share with the team" where a decision is kept.
     var teams: [String] = []
+    /// Team decisions: commit id → the person-and-Mac folder its file is in, which is what vouches for it (D-111).
+    var teamFolder: [String: String] = [:]
+    /// Shares programs asked for, waiting for the person (D-111).
+    var pending: [PendingShare] = []
 
     var branches: [String] { Array(Set(commits.map(\.branch))).sorted() }
     func commits(on branch: String?) -> [LedgerCommit] { branch.map { name in commits.filter { $0.branch == name } } ?? commits }
@@ -106,6 +110,7 @@ struct LedgerPage: View {
                 }
                 branchChips
                 WatchPanel(workspace: workspace)
+                PendingSharesCard(workspace: workspace)
                 if let resume { resumeCard(resume) }
                 if commits.isEmpty {
                     ContentUnavailableView("Nothing kept yet", systemImage: "books.vertical",
@@ -286,12 +291,18 @@ struct CommitRow: View {
     private var author: some View {
         let who = commit.author
         // A team decision is signed with the person who kept it and the program they used (D-109).
-        if let person = commit.person {
+        // The byline is worked out from the folder the file is in, not the branch shown (the team's name) (D-111).
+        if let person = commit.person, let folder = workspace.ledger.teamFolder[commit.id] {
+            var signed = commit
+            signed.branch = folder
+            let line = signed.teamByline
+            let matches = line.hasPrefix("kept by ")
             return AnyView(HStack(spacing: 6) {
-                AuthorBadge(name: person)
-                Text(commit.teamByline.replacingOccurrences(of: "kept by ", with: "")).font(.system(size: 11.5, weight: .medium)).foregroundStyle(Night.note.opacity(0.85)).lineLimit(1)
+                AuthorBadge(name: matches ? person : folder)
+                Text(matches ? "\(person) · \(folder)'s files" : "\(folder)'s files · claims \(person)")
+                    .font(.system(size: 11.5, weight: .medium)).foregroundStyle(matches ? Night.note.opacity(0.85) : Night.stale).lineLimit(1)
             }
-            .help(commit.teamByline.prefix(1).uppercased() + commit.teamByline.dropFirst()))
+            .help(line.prefix(1).uppercased() + line.dropFirst()))
         }
         return AnyView(HStack(spacing: 6) {
             AuthorBadge(name: who)

@@ -63,7 +63,7 @@ extension VaultTools {
                 ToolParameter("supersedes", .string, "For a decision that replaces an earlier one (the person changed their mind): the earlier decision's id. It is then retired and shown as replaced by this one."),
                 ToolParameter("alongside", .string, "yes when this decision and an earlier one on the same files both hold, so neither replaces the other."),
                 ToolParameter("branch", .string, "The task or project branch. Leave it out for the current one."),
-                ToolParameter("share", .string, "team, only when the person asks to share this with their team: it goes to the team's shared Ledger, signed with their name and this program, and every teammate's programs are handed it. Leave it out to keep it in their own Ledger."),
+                ToolParameter("share", .string, "team (or the team's exact name), only when the person asks to share this with their team. It then waits for the person to approve it before it goes to the team's shared Ledger, signed with their name and this program. Leave it out to keep it in their own Ledger."),
                 ToolParameter("model", .string, "Your own model name. It is kept beside the commit as what you said you are; the commit is signed with the name of the program you run in."),
             ],
             readOnly: false),

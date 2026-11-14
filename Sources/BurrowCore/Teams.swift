@@ -27,7 +27,11 @@ public struct TeamMember: Sendable, Equatable {
     public let name: String
     public let machine: String
     /// The person's name as plain lowercase letters and digits, for a folder and an id.
-    public var slug: String {
+    public var slug: String { Self.slug(of: name) }
+
+    /// A name as plain lowercase letters and digits joined by dashes, at most 24 characters: "Wanjiru Kamau" is
+    /// "wanjiru-kamau". A team decision's folder starts with it, so a name can be compared with the folder it sits in.
+    public static func slug(of name: String) -> String {
         let kept = name.lowercased().unicodeScalars.map { scalar -> Character in
             ("a"..."z").contains(Character(scalar)) || ("0"..."9").contains(Character(scalar)) ? Character(scalar) : "-"
         }
@@ -89,6 +93,20 @@ extension Vault {
         if let found = all.first(where: { $0.name == asked || $0.name.lowercased() == asked.lowercased() }) { return found }
         if ["", "team", "yes", "true"].contains(asked.lowercased()), all.count == 1 { return all[0] }
         throw NoteProblem(description: "Say which team: \(all.map(\.name).joined(separator: ", ")).")
+    }
+
+    /// The team a program names when it shares (D-109, D-111): exactly "team" when this vault has joined one team, or a
+    /// joined team's exact name, case aside. Nothing looser: "yes", "true" or a near name is refused, so a share is only
+    /// ever made on purpose.
+    public func team(strictly given: String) throws -> Team {
+        let all = teams()
+        let asked = given.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        guard !all.isEmpty else {
+            throw NoteProblem(description: "This vault has not joined a team. The person joins one in their own terminal: burrow team join <vault> <team-folder>")
+        }
+        if let found = all.first(where: { $0.name.lowercased() == asked }) { return found }
+        if asked == "team", all.count == 1 { return all[0] }
+        throw NoteProblem(description: "share takes \(all.count == 1 ? "team or " : "")the exact name of a team this vault has joined: \(all.map(\.name).joined(separator: ", ")).")
     }
 
     /// The name a person is known by when none was given: git's user.name in the team folder, else this Mac's full name.

@@ -51,9 +51,18 @@ final class TeamTests: XCTestCase {
         return Person(vault: vault, tools: tools, state: state)
     }
 
+    /// A program asks to share the refund rule; it waits until the person approves it (D-111), which this does for them.
+    @discardableResult
     private func shareRefundRule(_ by: Person) async throws -> ToolResult {
-        try await by.tools.call("burrow_commit", arguments: ["kind": "decision", "message": refundRule, "because": refundWhy,
-                                                             "files": "Team › Plans/Refunds.md", "share": "team"])
+        let asked = try await by.tools.call("burrow_commit", arguments: ["kind": "decision", "message": refundRule, "because": refundWhy,
+                                                                         "files": "Team › Plans/Refunds.md", "share": "team"])
+        try approveAll(by)
+        return asked
+    }
+
+    /// The person approves every share waiting on their Mac, as the app's Share button does.
+    private func approveAll(_ who: Person) throws {
+        for share in TeamPending.list(who.vault) { try TeamPending.approve(share, vault: who.vault) }
     }
 
     // MARK: Sharing
@@ -63,7 +72,7 @@ final class TeamTests: XCTestCase {
         let otieno = try await person("Otieno", joining: teamFolder, as: "Otieno Ouma", client: "opencode")
         let kept = try await shareRefundRule(wanjiru)
         XCTAssertFalse(kept.isError, kept.text)
-        XCTAssertTrue(kept.text.contains("kept by Wanjiru Kamau with Claude Code"), kept.text)
+        XCTAssertTrue(kept.text.contains("waiting for Wanjiru Kamau's approval before it goes to Team"), kept.text)
         XCTAssertTrue(Ledger(vault: wanjiru.vault).all().isEmpty, "a shared decision is not also kept in the person's own Ledger")
 
         // On disk: in Wanjiru's own folder of the team Ledger, signed with her name, the program and its file's hash.
@@ -174,7 +183,8 @@ final class TeamTests: XCTestCase {
         let replaced = try await otieno.tools.call("burrow_commit", arguments: ["kind": "decision", "message": "Refunds after a timeout are retried once, after 10 minutes.",
                                                                             "because": "Finance asked on 14 November.", "share": "team", "supersedes": again.id])
         XCTAssertFalse(replaced.isError, replaced.text)
-        XCTAssertTrue(replaced.text.contains("It replaces \(again.id)"), replaced.text)
+        XCTAssertTrue(TeamLedger.inForce(team).contains { $0.id == again.id }, "nothing changes until the person approves")
+        try approveAll(otieno)
         XCTAssertFalse(TeamLedger.inForce(team).contains { $0.id == again.id })
     }
 
@@ -185,8 +195,8 @@ final class TeamTests: XCTestCase {
         XCTAssertTrue(result.text.contains("has not joined a team"), result.text)
         XCTAssertTrue(Ledger(vault: alone.vault).all().isEmpty)
         XCTAssertFalse(FileManager.default.fileExists(atPath: teamFolder.appendingPathComponent(".burrow").path))
-        // "share": "no" keeps it in the vault's own Ledger, as before.
-        let own = try await alone.tools.call("burrow_commit", arguments: ["kind": "decision", "message": refundRule, "because": refundWhy, "share": "no"])
+        // Leaving share out keeps it in the vault's own Ledger, as before.
+        let own = try await alone.tools.call("burrow_commit", arguments: ["kind": "decision", "message": refundRule, "because": refundWhy])
         XCTAssertFalse(own.isError, own.text)
         XCTAssertEqual(Ledger(vault: alone.vault).all().count, 1)
     }
@@ -334,9 +344,9 @@ final class TeamTests: XCTestCase {
         XCTAssertEqual(wanjiru.vault.teams().map(\.name), ["Team"])
         XCTAssertEqual(wanjiru.vault.teamMember?.name, "Wanjiru Kamau")
 
-        // Keeping a team decision from the terminal, then reading it back.
-        let commit = try BurrowBinary.piped(["commit", wanjiru.vault.root.path, refundRule, "--kind", "decision", "--because", refundWhy, "--team"], state: wanjiru.state)
-        XCTAssertEqual(commit.status, 0, commit.err)
+        // Keeping a team decision typed in the terminal, then reading it back.
+        let commit = try BurrowBinary.inTerminal(["commit", wanjiru.vault.root.path, refundRule, "--kind", "decision", "--because", refundWhy, "--team"], state: wanjiru.state)
+        XCTAssertEqual(commit.status, 0, commit.out)
         XCTAssertTrue(commit.out.contains("kept by Wanjiru Kamau in the terminal"), commit.out)
         let log = try BurrowBinary.piped(["team", "log", wanjiru.vault.root.path], state: wanjiru.state)
         XCTAssertTrue(log.out.contains(refundRule), log.out)
@@ -365,6 +375,7 @@ final class TeamTests: XCTestCase {
         let his = try await otieno.tools.call("burrow_commit", arguments: ["kind": "decision", "message": "Launch day support runs from the Nairobi office.",
                                                                        "because": "Two of us are in Nairobi.", "share": "team"])
         XCTAssertFalse(his.isError, his.text)
+        try approveAll(otieno)
         XCTAssertTrue(git(cloneA, ["add", "-A"]) && git(cloneA, ["commit", "-q", "-m", "refund rule"]) && git(cloneA, ["push", "-q", "origin", "main"]))
         XCTAssertTrue(git(cloneB, ["add", "-A"]) && git(cloneB, ["commit", "-q", "-m", "support rule"]))
         XCTAssertTrue(git(cloneB, ["pull", "-q", "--no-rebase", "--no-edit", "origin", "main"]), "the merge has no conflict")
@@ -389,7 +400,8 @@ final class TeamTests: XCTestCase {
         var shared = made
         shared.person = "Wanjiru Kamau"
         XCTAssertEqual(Ledger.parse(Ledger.markdown(shared))?.person, "Wanjiru Kamau")
-        XCTAssertEqual(shared.byline, "kept by Wanjiru Kamau with Claude Code")
+        shared.branch = "wanjiru-kamau-1234"
+        XCTAssertEqual(shared.byline, "kept by Wanjiru Kamau with Claude Code, written in wanjiru-kamau-1234's files (names are not verified)")
         // An answer citing a team decision it was handed passes the citation check whole; one it wasn't is marked whole.
         let id = "20261114-231835-100f-wanjiru-kamau-f8a6"
         XCTAssertEqual(Citations.ledgerIDs(in: "as kept (Team › Ledger \(id)) and 20261114-065345-a355."), [id, "20261114-065345-a355"])

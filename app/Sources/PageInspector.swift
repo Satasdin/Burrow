@@ -59,7 +59,12 @@ struct LedgerGlance: View {
     var body: some View {
         let kinds = LedgerCommit.Kind.allCases.map { kind in (kind, commits.filter { $0.kind == kind }.count) }.filter { $0.1 > 0 }
         // A team decision counts for the person who kept it (D-109).
-        let authors = Dictionary(grouping: commits, by: { $0.person ?? $0.author }).map { ($0.key, $0.value.count) }.sorted { $0.1 > $1.1 }
+        // A team decision counts for its folder's person only when its name is that folder's; otherwise for the folder (D-111).
+        let folders = workspace.ledger.teamFolder
+        let authors = Dictionary(grouping: commits, by: { commit -> String in
+            guard let person = commit.person, let folder = folders[commit.id] else { return commit.author }
+            return TeamLedger.nameMatchesFolder(person, folder) ? person : folder + "'s files"
+        }).map { ($0.key, $0.value.count) }.sorted { $0.1 > $1.1 }
         let stale = commits.filter { workspace.ledger.stale[$0.id] != nil }.count
         // A decision replaced by a newer one (D-94) was settled, not found wrong: it needs no look.
         let wrong = commits.filter { workspace.ledger.reverted.contains($0.id) && workspace.ledger.retiredBy[$0.id]?.kind != .decision }.count

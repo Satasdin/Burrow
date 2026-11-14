@@ -110,9 +110,29 @@ burrow team leave ~/Notes Team   # stop reading it; nothing in the team folder i
   `burrow_find` and `burrow_read`, and the app, marked `Team › Plans/refunds.md`. Your own vault stays yours: your
   teammates' Burrows never read it.
 - **Sharing a decision**: tell your program to share it with the team (it calls `burrow_commit` with `share: team`),
-  add `--team` to `burrow commit`, or tick **Share with Team** where you keep a decision in the app. It goes into the
-  team folder, not your own Ledger, signed with your name and the program: "kept by Wanjiru Kamau with Claude Code".
-  Your name comes from `--as`, else git's `user.name` in the team folder, else your Mac's full name, and is set once.
+  add `--team` to `burrow commit` in your own Terminal, or tick **Share with Team** where you keep a decision in the
+  app. It goes into the team folder, not your own Ledger, signed with your name and the program: "kept by Wanjiru
+  Kamau with Claude Code". Your name comes from `--as`, else git's `user.name` in the team folder, else your Mac's full
+  name, and is set once.
+- **A program's share waits for you**: what a program asks to share is not sent anywhere yet. It waits on your Mac,
+  with any secret taken out, until you read it and say yes, so a model (or a note trying to steer one) can't publish
+  your private text to your teammates. The program is told it is waiting for you.
+
+  ```
+  burrow team pending ~/Notes                 # every word that would go, and the files it rests on
+  burrow team approve ~/Notes share-3a2f92    # or --all; in your own Terminal, type yes
+  burrow team discard ~/Notes share-3a2f92    # drop it; nothing reaches the team
+  ```
+
+  The app's Ledger page lists them too, with **Share with Team** and **Drop**. `burrow commit … --team` typed in your
+  own Terminal is shared at once; run by a program through a pipe, it waits like any other share.
+- **Whose name is on it**: the name on a team decision is what the file says, and nothing signs it
+  cryptographically. Burrow goes by the folder the file sits in, which only that person's Burrow writes to, so every
+  team decision says it: "kept by Wanjiru Kamau with Claude Code, written in wanjiru-kamau-dd82's files (names are not
+  verified)". A file in Mallory's folder that claims to be Wanjiru's is shown as Mallory's folder's, saying the name
+  doesn't match, and a file that claims another folder than its own is not read at all. Anyone who can write to the
+  team folder could still put a file into any folder there, as with any shared folder; in a git team, `git log` says
+  who pushed each file.
 - **What your programs are told**: when a program connects, your own decisions come first, then the team's, eight in
   all at most (three to five from the team). A search hands over team decisions that match it, the same way.
 - **Two people at once**: each person and Mac writes their own files in their own folder inside the team folder
@@ -120,7 +140,8 @@ burrow team leave ~/Notes Team   # stop reading it; nothing in the team folder i
   synced folder never makes a "conflicted copy".
 - **Disagreeing**: you never delete a teammate's decision. Mark it wrong with `burrow team revert ~/Notes <id> "what is
   right"`, or keep a new one that supersedes it; their file stays as it was, and everyone's programs stop being
-  handed it.
+  handed it. A correction in the team folder only ever retires the team's own decisions: nothing a teammate writes
+  can mark one of your own decisions, or another team's, wrong or replaced.
 - **What the team folder can't do**: it is your teammates' writing, so Burrow treats it as text to read and nothing
   more. A list of linked folders, bridges or settings inside it is never followed, a link inside it that points out of
   it is not read, a check written with a team decision is shown as proposed and never run, and a decision written to
