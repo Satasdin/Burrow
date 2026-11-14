@@ -239,11 +239,12 @@ struct LibraryInspector: View {
                         Text(path.title).font(.system(size: 17, weight: .semibold)).lineLimit(3)
                         Text(path.folderPath.isEmpty ? "In the vault" : path.folderPath).foregroundStyle(Night.dim).font(.system(size: 12))
                     }
-                    HStack {
-                        Button("Open") { workspace.go(.file(path)) }
-                        Button("Show in Finder") { NSWorkspace.shared.activateFileViewerSelecting([workspace.fileURL(path)]) }
+                    // Drawn by hand like the page's chips: a system bezel here took the window's light look under
+                    // this panel's dark text and showed as white pills with white words.
+                    HStack(spacing: 8) {
+                        InspectorButton(title: "Open", systemImage: "doc.text") { workspace.go(.file(path)) }
+                        InspectorButton(title: "Show in Finder", systemImage: "folder") { NSWorkspace.shared.activateFileViewerSelecting([workspace.fileURL(path)]) }
                     }
-                    .controlSize(.small)
                     if LibraryKind.of(path) == .documents || LibraryKind.of(path) == .images { ReadInFacts(workspace: workspace, path: path) }
                     if (path as NSString).pathExtension.lowercased() == "pdf" { PageStrip(url: workspace.fileURL(path)) }
                     ReadBy(workspace: workspace, path: path)
@@ -385,5 +386,28 @@ struct Chip: View {
             .overlay { Capsule().strokeBorder(selected ? Color.white.opacity(0.25) : Night.line) }
         }
         .buttonStyle(.plain)
+    }
+}
+
+/// A small button for the dark inspector, drawn the same way in any window appearance.
+struct InspectorButton: View {
+    let title: String
+    let systemImage: String
+    let action: () -> Void
+    @State private var hovering = false
+
+    var body: some View {
+        Button(action: action) {
+            Label(title, systemImage: systemImage)
+                .font(.system(size: 12, weight: .medium))
+                .foregroundStyle(Night.note)
+                .padding(.horizontal, 10).padding(.vertical, 5)
+                .background(Color.white.opacity(hovering ? 0.12 : 0.07), in: .capsule)
+                .overlay { Capsule().strokeBorder(Night.line) }
+                .contentShape(.capsule)
+        }
+        .buttonStyle(.plain)
+        .onHover { hovering = $0 }
+        .accessibilityLabel(title)
     }
 }
