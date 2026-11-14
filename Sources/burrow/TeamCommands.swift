@@ -10,8 +10,12 @@ Sharing with a team, or with your own other Macs (D-109):
   burrow team log   <vault> [--limit N]                           what the team shared, newest first, with who kept each
   burrow team revert <vault> <commit> "what is right"             marks a team decision wrong; their file is never touched
   burrow team leave <vault> <name>                                stop reading a team; nothing in its folder is touched
+  burrow team pending <vault>                                     what your programs asked to share, waiting for you (D-111)
+  burrow team approve <vault> <share> | --all                     share them, in your own terminal, typing yes
+  burrow team discard <vault> <share> | --all                     drop them; nothing reaches the team
   burrow commit <vault> "message" --team[=Name] [--kind K] [--because WHY] [--rejected WHAT] [--files a,b] [--supersedes <commit>]
-                                                                  keep it in the team's shared Ledger instead of your own
+                                                                  keep it in the team's shared Ledger instead of your own; typed in
+                                                                  your own terminal it is shared at once, run by a program it waits
 """
 
 /// `team …`, and `commit … --team`. Returns false for any other command.
@@ -31,6 +35,9 @@ func runTeamCommand(_ arguments: [String]) async throws -> Bool {
     case "log": try log(positional, values)
     case "leave": try leave(positional)
     case "revert": try revert(positional)
+    case "pending": try pending(positional)
+    case "approve": try approve(positional, all: values["--all"] != nil)
+    case "discard": try discard(positional, all: values["--all"] != nil)
     default: throw Failure(teamUsage)
     }
     return true
@@ -136,13 +143,13 @@ private func log(_ positional: [String], _ values: [String: String]) throws {
         return
     }
     var retired: [String: [String: LedgerCommit]] = [:]
-    for team in vault.teams() { retired[team.name] = TeamLedger.ledger(team).retirements() }
+    for team in vault.teams() { retired[team.name] = TeamLedger.retirements(TeamLedger.commits(team)) }
     // Everything in it was written on other Macs: printed clean of anything that could rewrite the terminal (D-104).
     for (team, commit) in all {
         var line = "\(team.name) \(commit.id) [\(commit.kind.rawValue)] \(commit.stated(within: 400)) (\(commit.byline), \(Ledger.when(commit.at)))"
         if let by = retired[team.name]?[commit.id] { line += " " + Ledger.retiredNote(by) }
         if TeamLedger.carriesCheck(commit, team: team) { line += " [carries a check: proposed, not run]" }
-        if !Steering.lines(in: commit.stated + " " + (commit.person ?? "")).isEmpty { line += " [written to steer an AI: never handed to a program]" }
+        if TeamLedger.isSteering(commit) { line += " [written to steer an AI: never handed to a program]" }
         print(Printable.clean(line))
     }
 }
@@ -188,8 +195,21 @@ private func teamCommit(_ words: [String]) throws {
     let body = [rejected.isEmpty ? nil : "Rejected: " + String(rejected.prefix(600)), because.isEmpty ? nil : "Because: " + String(because.prefix(600))].compactMap { $0 }
     var replaced: LedgerCommit?
     if let id = values["--supersedes"] {
-        guard let old = TeamLedger.ledger(team).find(id) else { throw Failure("there is no team commit \(id) to supersede") }
+        guard let old = TeamLedger.find(id, in: team) else { throw Failure("there is no team commit \(id) to supersede") }
         replaced = old
+    }
+    // Typed by the person in their own terminal, it is shared at once. Run through a pipe, as a connected program runs it,
+    // it waits for the person like a program's burrow_commit with share (D-111).
+    guard inPersonsTerminal() else {
+        do {
+            let waiting = try TeamPending.add(vault: vault, team: team, kind: kind, message: positional[1], body: body.joined(separator: "\n"), files: files,
+                                              author: values["--author"] ?? "person", client: "terminal", session: nil, modelSaid: nil, reverts: replaced?.id)
+            print("Not shared yet: waiting for \(vault.teamMember?.name ?? "the person")'s approval before it goes to \(team.name), as \(waiting.id).")
+            print("    Run from a pipe or a program, a team share waits. Approve it in your own terminal: burrow team approve \(vault.root.path) \(waiting.id)")
+        } catch let problem as LedgerProblem {
+            throw Failure(problem.description)
+        }
+        return
     }
     do {
         let made = try TeamLedger.commit(vault: vault, team: team, kind: kind, message: positional[1], body: body.joined(separator: "\n"), files: files,
@@ -201,4 +221,58 @@ private func teamCommit(_ words: [String]) throws {
     } catch let problem as LedgerProblem {
         throw Failure(problem.description)
     }
+}
+
+// MARK: Shares waiting for the person (D-111)
+
+private func pending(_ positional: [String]) throws {
+    let vault = try teamVault(positional.first, "team pending")
+    let waiting = TeamPending.list(vault)
+    guard !waiting.isEmpty else {
+        print("Nothing is waiting to be shared from \(vault.root.path).")
+        return
+    }
+    print("\(waiting.count) share\(waiting.count == 1 ? "" : "s") waiting for you. Each goes to the team only when you approve it here, in your own terminal, or in the app:")
+    for share in waiting { print(""); for line in TeamPending.shown(share) { print(line) } }
+    print("\nApprove with: burrow team approve \(vault.root.path) <share> (or --all); drop with: burrow team discard \(vault.root.path) <share>")
+}
+
+private func chosenShares(_ positional: [String], all: Bool, _ what: String) throws -> (Vault, [PendingShare]) {
+    let vault = try teamVault(positional.first, "team \(what)")
+    let waiting = TeamPending.list(vault)
+    if all { return (vault, waiting) }
+    guard positional.count >= 2 else { throw Failure("team \(what) needs your vault and a share, or --all: burrow team \(what) <vault> <share>") }
+    guard let share = TeamPending.find(positional[1], vault) else { throw Failure("there is no share \(positional[1]) waiting; burrow team pending lists them") }
+    return (vault, [share])
+}
+
+/// Publishing what a program asked to share is the person's step only: in their own terminal, after reading every word
+/// that would go to the team and typing yes (D-104, D-111).
+private func approve(_ positional: [String], all: Bool) throws {
+    guard inPersonsTerminal() else {
+        throw Failure("only you can approve a team share: approve it in the Burrow app, or run this in your own terminal. It can't be done through a pipe or by a program you've connected to Burrow.")
+    }
+    let (vault, shares) = try chosenShares(positional, all: all, "approve")
+    guard !shares.isEmpty else { print("Nothing is waiting to be shared."); return }
+    var lines = ["Share \(shares.count == 1 ? "this" : "these \(shares.count)") with your team, signed \"\(Printable.clean(vault.teamMember?.name ?? "you"))\"? Every teammate's programs will be handed \(shares.count == 1 ? "it" : "them"):"]
+    for share in shares { lines.append(""); lines += TeamPending.shown(share) }
+    try askThePerson(lines)
+    for share in shares {
+        do {
+            let made = try TeamPending.approve(share, vault: vault)
+            print("shared \(share.id) with \(share.team) as \(made.id), \(made.byline)")
+        } catch let problem as LedgerProblem {
+            logToStandardError("\(share.id) was not shared: \(problem.description)")
+        }
+    }
+    print("Your teammates' programs get it once the team folder carries it: commit and push it, or let the folder sync.")
+}
+
+private func discard(_ positional: [String], all: Bool) throws {
+    let (vault, shares) = try chosenShares(positional, all: all, "discard")
+    for share in shares {
+        do { try TeamPending.remove(share.id, vault) } catch let problem as LedgerProblem { throw Failure(problem.description) }
+        print("dropped \(share.id); nothing reached \(share.team).")
+    }
+    if shares.isEmpty { print("Nothing is waiting to be shared.") }
 }

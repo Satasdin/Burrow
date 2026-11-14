@@ -636,6 +636,21 @@ final class Workspace {
         } catch { warning = "Could not confirm that check: \(error)" }
     }
 
+    /// The person shares, or drops, what a program asked to share with the team (D-111).
+    func approveShare(_ id: String) async {
+        do {
+            try await engine.approveShare(id)
+            ledger = await engine.ledger()
+        } catch { warning = "Could not share that: \(error)" }
+    }
+
+    func discardShare(_ id: String) async {
+        do {
+            try await engine.discardShare(id)
+            ledger = await engine.ledger()
+        } catch { warning = "Could not drop that: \(error)" }
+    }
+
     /// The person says the UNRESOLVED decision and the ones it may contradict all hold (D-94).
     func keepBoth(_ id: String) async {
         do {
@@ -1075,7 +1090,7 @@ final class Library {
                 case "graph": workspace.go(.graph)
                 case "ask": workspace.go(.ask)
                 case "question": workspace.go(.ask); workspace.ask(value)
-                case "ledger": workspace.go(.ledger(nil))
+                case "ledger": workspace.go(.ledger(value.isEmpty ? nil : value))
                 case "watch": workspace.go(.ledger(nil)); workspace.watchPeek = value
                 case "conversations": workspace.go(.conversations(nil))
                 case "session": if let first = workspace.sessions.first { workspace.go(.session(first.id)) }
