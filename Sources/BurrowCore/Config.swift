@@ -5,10 +5,35 @@ public enum BurrowPlaces {
     /// `~/Library/Application Support/Burrow`, or `BURROW_STATE_DIR` when it is set (tests and demonstrations use it,
     /// so they never touch the person's own settings).
     public static var stateFolder: URL {
-        if let folder = ProcessInfo.processInfo.environment["BURROW_STATE_DIR"], !folder.isEmpty {
-            return URL(fileURLWithPath: folder)
+        let folder: URL
+        if let set = ProcessInfo.processInfo.environment["BURROW_STATE_DIR"], !set.isEmpty {
+            folder = URL(fileURLWithPath: set)
+        } else {
+            folder = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("Burrow")
         }
-        return FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("Burrow")
+        makePrivate(folder)
+        return folder
+    }
+
+    /// The state folder holds approvals, bridges, team shares waiting for the person and session folds, so only the
+    /// person's own account may open it: made 0700 when Burrow creates it, and tightened to 0700 if it was made looser
+    /// (an earlier Burrow created it at 0755). Done once per folder per process (D-113).
+    private static let privateLock = NSLock()
+    nonisolated(unsafe) private static var madePrivate = Set<String>()
+
+    static func makePrivate(_ folder: URL) {
+        privateLock.lock(); defer { privateLock.unlock() }
+        guard madePrivate.insert(folder.path).inserted else { return }
+        let files = FileManager.default
+        var isFolder: ObjCBool = false
+        if files.fileExists(atPath: folder.path, isDirectory: &isFolder) {
+            // Never through a link: a state folder that is a symlink is left as it is, not chmod'ed where it points.
+            guard isFolder.boolValue, (try? files.attributesOfItem(atPath: folder.path)[.type] as? FileAttributeType) != .typeSymbolicLink,
+                  let mode = (try? files.attributesOfItem(atPath: folder.path))?[.posixPermissions] as? Int, mode & 0o077 != 0 else { return }
+            try? files.setAttributes([.posixPermissions: 0o700], ofItemAtPath: folder.path)
+        } else {
+            try? files.createDirectory(at: folder, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])
+        }
     }
 }
 
