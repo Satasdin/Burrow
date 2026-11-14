@@ -1,0 +1,487 @@
+import BurrowCore
+import Foundation
+
+/// `burrow connect <program> <vault>` (D-108): the setup each program needs to use a vault well, worked out in one place.
+/// Three parts, for every program that has them: Burrow as an MCP server; Burrow's tools always in the model's view (a
+/// program that hides MCP tools behind a search step left gemma4:12b finding Burrow 2 times in 9); and Burrow's gate,
+/// a hook inside the program that runs `burrow check` when the model edits or finishes and hands it the decisions its
+/// change rests on, so a model that skips `burrow_check` still meets them.
+///
+/// Only `apply` writes. `plan` reads what is there and works out each file as it would be; `describe` says it in plain
+/// words with every change to an existing setting shown; `apply` writes, keeping each file it changes beside it as
+/// `.before-burrow` (the first time only, so it stays the file as it was before Burrow). The command asks the person
+/// before `apply` (Sources/burrow/ConnectCommand.swift).
+public enum Connect {
+    public enum Program: String, CaseIterable, Sendable {
+        case claudeCode = "claude-code", openCode = "opencode", openClaw = "openclaw", hermes = "hermes", n8n = "n8n"
+
+        public init?(word: String) {
+            switch word.lowercased() {
+            case "claude", "claude-code", "claudecode": self = .claudeCode
+            case "opencode": self = .openCode
+            case "openclaw": self = .openClaw
+            case "hermes", "hermes-agent": self = .hermes
+            case "n8n": self = .n8n
+            default: return nil
+            }
+        }
+
+        public var name: String {
+            switch self {
+            case .claudeCode: return "Claude Code"
+            case .openCode: return "OpenCode"
+            case .openClaw: return "OpenClaw"
+            case .hermes: return "Hermes Agent"
+            case .n8n: return "n8n"
+            }
+        }
+    }
+
+    /// Where things are and what the server is started with.
+    public struct Setup: Sendable {
+        /// The absolute path of the `burrow` binary the configs start.
+        public var burrow: String
+        /// The vault, as an absolute real path.
+        public var vault: String
+        public var home: URL
+        /// Where OpenCode's settings live (`$XDG_CONFIG_HOME`, else `~/.config`).
+        public var configHome: URL
+        /// Hermes' own folder (`$HERMES_HOME`, else `~/.hermes`).
+        public var hermesHome: URL
+        /// Burrow's own folder when it is not the usual one (`BURROW_STATE_DIR`): carried to the server and the gate, so
+        /// both see the same linked-folder approvals the person gave.
+        public var stateDir: String?
+
+        public init(burrow: String, vault: String, home: URL, configHome: URL? = nil, hermesHome: URL? = nil, stateDir: String? = nil) {
+            self.burrow = burrow
+            self.vault = vault
+            self.home = home
+            self.configHome = configHome ?? home.appendingPathComponent(".config")
+            self.hermesHome = hermesHome ?? home.appendingPathComponent(".hermes")
+            self.stateDir = stateDir
+        }
+    }
+
+    /// One file as it would be after connecting.
+    public struct Change: Sendable {
+        public enum Kind: Sendable { case settings, gate }
+        public let path: URL
+        /// Nil when there is no file there yet.
+        public let before: String?
+        public let after: String
+        public let kind: Kind
+        /// What changes, in plain lines; empty for a new file.
+        public let shown: [String]
+        public var changes: Bool { before != after }
+    }
+
+    public struct Plan: Sendable {
+        public let program: Program
+        public let changes: [Change]
+        /// Set when Burrow can't write this safely (a settings file it can't read, a setting it would have to overwrite):
+        /// what to do by hand. Nothing is written then.
+        public let refusal: String?
+        /// What each part does, in plain words.
+        public let notes: [String]
+        /// For a program whose settings are not files (n8n): what to set, to copy.
+        public let manual: String?
+
+        public var pending: [Change] { changes.filter(\.changes) }
+    }
+
+    public static let gateName = "burrow-gate"
+
+    // MARK: Planning
+
+    public static func plan(_ program: Program, _ setup: Setup) -> Plan {
+        do {
+            switch program {
+            case .claudeCode: return try claudeCode(setup)
+            case .openCode: return try openCode(setup)
+            case .openClaw: return try openClaw(setup)
+            case .hermes: return try hermes(setup)
+            case .n8n: return n8n(setup)
+            }
+        } catch let refused as Refused {
+            return Plan(program: program, changes: [], refusal: refused.why, notes: [], manual: nil)
+        } catch {
+            return Plan(program: program, changes: [], refusal: "\(error)", notes: [], manual: nil)
+        }
+    }
+
+    struct Refused: Error { let why: String }
+
+    private static func serverEnvironment(_ setup: Setup) -> [String: String]? {
+        setup.stateDir.map { ["BURROW_STATE_DIR": $0] }
+    }
+
+    private static func gateSettings(_ setup: Setup) -> [String: Any] {
+        var settings: [String: Any] = ["burrow": setup.burrow, "vault": setup.vault]
+        if let state = setup.stateDir { settings["stateDir"] = state }
+        return settings
+    }
+
+    private static func claudeCode(_ setup: Setup) throws -> Plan {
+        let state = setup.home.appendingPathComponent(".claude.json")
+        var server: [String: Any] = ["type": "stdio", "command": setup.burrow, "args": ["mcp", setup.vault], "alwaysLoad": true]
+        if let env = serverEnvironment(setup) { server["env"] = env }
+        let servers = try mergedJSON(state, program: "Claude Code") { root in
+            var all = root["mcpServers"] as? [String: Any] ?? [:]
+            all["burrow"] = server
+            root["mcpServers"] = all
+        }
+        let settingsFile = setup.home.appendingPathComponent(".claude/settings.json")
+        let command = Printable.shellWord(setup.burrow) + " hook claude " + Printable.shellWord(setup.vault)
+        let prefix = setup.stateDir.map { "BURROW_STATE_DIR=" + Printable.shellWord($0) + " " } ?? ""
+        let hooks = try mergedJSON(settingsFile, program: "Claude Code") { root in
+            var all = root["hooks"] as? [String: Any] ?? [:]
+            for (event, line, timeout) in [("SessionStart", command, 10), ("PreCompact", command, 10), ("SessionEnd", command, 10),
+                                           ("Stop", command + " --gate", 30)] {
+                var entries = all[event] as? [[String: Any]] ?? []
+                let full = prefix + line
+                let present = entries.contains { entry in
+                    (entry["hooks"] as? [[String: Any]] ?? []).contains { ($0["command"] as? String) == full }
+                }
+                if !present { entries.append(["hooks": [["type": "command", "command": full, "timeout": timeout]]]) }
+                all[event] = entries
+            }
+            root["hooks"] = all
+        }
+        return Plan(program: .claudeCode, changes: [servers, hooks], refusal: nil, notes: [
+            "Burrow as an MCP server for every project (user scope, in ~/.claude.json), as `claude mcp add --scope user` would add it.",
+            "Burrow's tools always in view: \"alwaysLoad\": true keeps them out of Claude Code's tool search.",
+            "The gate: Claude Code's Stop hook runs `burrow hook claude <vault> --gate`; a reply whose change rests on a decision not yet shown is held with the decisions (D-93). Session start, compaction and session end keep a handoff in the Ledger.",
+            "Close Claude Code before writing: it keeps ~/.claude.json open and can write over a change made while it runs.",
+        ], manual: nil)
+    }
+
+    private static func openCode(_ setup: Setup) throws -> Plan {
+        let folder = setup.configHome.appendingPathComponent("opencode")
+        let jsonc = folder.appendingPathComponent("opencode.jsonc")
+        let file = folder.appendingPathComponent("opencode.json")
+        if FileManager.default.fileExists(atPath: jsonc.path), !FileManager.default.fileExists(atPath: file.path) {
+            throw Refused(why: "\(tilde(jsonc.path, setup)) has comments, so Burrow left it alone. Add the lines below to it yourself.")
+        }
+        var server: [String: Any] = ["type": "local", "command": [setup.burrow, "mcp", setup.vault], "enabled": true, "codemode": false]
+        if let env = serverEnvironment(setup) { server["environment"] = env }
+        let settings = try mergedJSON(file, program: "OpenCode", empty: ["$schema": "https://opencode.ai/config.json"]) { root in
+            var mcp = root["mcp"] as? [String: Any] ?? [:]
+            if var servers = mcp["servers"] as? [String: Any] {
+                // OpenCode 2's own shape: servers under mcp.servers.
+                servers["burrow"] = server
+                mcp["servers"] = servers
+            } else {
+                mcp["burrow"] = server
+            }
+            root["mcp"] = mcp
+        }
+        let plugin = folder.appendingPathComponent("plugins/\(gateName)")
+        return Plan(program: .openCode, changes: [
+            settings,
+            gateFile(plugin.appendingPathComponent("index.js"), ConnectPlugins.openCode),
+            gateFile(plugin.appendingPathComponent("burrow-gate.json"), json(gateSettings(setup))),
+        ], refusal: nil, notes: [
+            "Burrow as an MCP server for every project, in OpenCode's own settings.",
+            "Burrow's tools always in view: \"codemode\": false lists them to the model directly, not behind OpenCode's `execute` tool.",
+            "The gate: a plugin OpenCode loads from its plugins folder. When the model finishes, it runs `burrow check`; a change that rests on a decision not yet shown goes back to the model with the decisions, as a message it must answer, once per change.",
+        ], manual: nil)
+    }
+
+    private static func openClaw(_ setup: Setup) throws -> Plan {
+        let folder = setup.home.appendingPathComponent(".openclaw")
+        let file = folder.appendingPathComponent("openclaw.json")
+        let plugin = folder.appendingPathComponent(gateName)
+        var server: [String: Any] = ["command": setup.burrow, "args": ["mcp", setup.vault]]
+        if let env = serverEnvironment(setup) { server["env"] = env }
+        let settings = try mergedJSON(file, program: "OpenClaw") { root in
+            var mcp = root["mcp"] as? [String: Any] ?? [:]
+            var servers = mcp["servers"] as? [String: Any] ?? [:]
+            servers["burrow"] = server
+            mcp["servers"] = servers
+            root["mcp"] = mcp
+            var tools = root["tools"] as? [String: Any] ?? [:]
+            tools["toolSearch"] = false
+            root["tools"] = tools
+            var plugins = root["plugins"] as? [String: Any] ?? [:]
+            var load = plugins["load"] as? [String: Any] ?? [:]
+            var paths = load["paths"] as? [String] ?? []
+            if !paths.contains(plugin.path) { paths.append(plugin.path) }
+            load["paths"] = paths
+            plugins["load"] = load
+            var entries = plugins["entries"] as? [String: Any] ?? [:]
+            var entry = entries[gateName] as? [String: Any] ?? [:]
+            entry["enabled"] = true
+            entry["config"] = gateSettings(setup)
+            entries[gateName] = entry
+            plugins["entries"] = entries
+            root["plugins"] = plugins
+        }
+        return Plan(program: .openClaw, changes: [
+            settings,
+            gateFile(plugin.appendingPathComponent("package.json"), ConnectPlugins.openClawPackage),
+            gateFile(plugin.appendingPathComponent("openclaw.plugin.json"), ConnectPlugins.openClawManifest),
+            gateFile(plugin.appendingPathComponent("index.mjs"), ConnectPlugins.openClaw),
+        ], refusal: nil, notes: [
+            "Burrow as an MCP server (mcp.servers.burrow).",
+            "Burrow's tools always in view: OpenClaw has no setting for one server, so tool search is switched off for all (tools.toolSearch: false). With it on, gemma4:12b found Burrow 0 times in 3.",
+            "The gate: a plugin loaded from ~/.openclaw/burrow-gate. After the model edits a file or runs a command, it runs `burrow check`; a change that rests on a decision not yet shown gets the decisions added to that tool's result, once per change. (OpenClaw ignores an end-of-turn hold once a tool has changed something, so the gate sits after the edit.)",
+        ], manual: nil)
+    }
+
+    private static func hermes(_ setup: Setup) throws -> Plan {
+        let file = setup.hermesHome.appendingPathComponent("config.yaml")
+        let before = try? String(contentsOf: file, encoding: .utf8)
+        var server = ["  burrow:", "    command: " + yamlString(setup.burrow), "    args: [\"mcp\", " + yamlString(setup.vault) + "]"]
+        if let state = setup.stateDir { server += ["    env:", "      BURROW_STATE_DIR: " + yamlString(state)] }
+        var text = before ?? "# Hermes Agent settings\n"
+        var shown: [String] = []
+        text = try YAMLBlocks.ensure(text, top: "mcp_servers", child: "burrow", lines: server, shown: &shown, file: tilde(file.path, setup))
+        text = try YAMLBlocks.ensure(text, top: "tools", child: "tool_search", lines: ["  tool_search:", "    enabled: \"off\""], shown: &shown, file: tilde(file.path, setup))
+        text = try YAMLBlocks.ensureListItem(text, top: "plugins", child: "enabled", item: gateName, shown: &shown, file: tilde(file.path, setup))
+        let settings = Change(path: file, before: before, after: text, kind: .settings, shown: before == nil ? [] : shown)
+        let plugin = setup.hermesHome.appendingPathComponent("plugins/\(gateName)")
+        return Plan(program: .hermes, changes: [
+            settings,
+            gateFile(plugin.appendingPathComponent("plugin.yaml"), ConnectPlugins.hermesManifest),
+            gateFile(plugin.appendingPathComponent("__init__.py"), ConnectPlugins.hermes),
+            gateFile(plugin.appendingPathComponent("config.json"), json(gateSettings(setup))),
+        ], refusal: nil, notes: [
+            "Burrow as an MCP server (mcp_servers.burrow).",
+            "Burrow's tools always in view: Hermes has no setting for one server, so tool search is switched off for all (tools.tool_search.enabled: \"off\"). With it on, gemma4:12b answered through Burrow 2 times in 6.",
+            "The gate: a plugin Hermes loads once it is listed in plugins.enabled. After an edit or a shell command it runs `burrow check`, and a change that rests on a decision not yet shown gets the decisions added to that tool's result; when the model then finishes, they go back to it once more as a message it must answer, and Hermes runs another step.",
+        ], manual: nil)
+    }
+
+    private static func n8n(_ setup: Setup) -> Plan {
+        let command = ([setup.burrow, "mcp", setup.vault]).map(Printable.shellWord).joined(separator: " ")
+        let state = setup.stateDir.map { "BURROW_STATE_DIR=" + Printable.shellWord($0) + " " } ?? ""
+        let manual = """
+        1. Bridge Burrow to HTTP (n8n's MCP Client Tool speaks HTTP; Burrow speaks stdio). supergateway is a separate npm
+           program, not part of Burrow:
+             \(state)npx -y supergateway@4.2.2 --stdio "\(command)" --outputTransport streamableHttp --stateful --host 127.0.0.1 --port 8790
+        2. In the workflow, connect an MCP Client Tool node to the AI Agent's Tool port:
+             Endpoint: http://127.0.0.1:8790/mcp
+             Server Transport: HTTP Streamable
+             Authentication: None
+             Tools to Include: All
+        3. n8n has no hook that can hold an agent's reply. A workflow that changes code can add an Execute Command node
+           after the agent: \(Printable.shellWord(setup.burrow)) check \(Printable.shellWord(setup.vault)) --json
+           and branch on its exit code (2: the change rests on a decision not yet shown; 3: it breaks one), sending the
+           "text" field back to the agent or to a person.
+        """
+        return Plan(program: .n8n, changes: [], refusal: nil, notes: [
+            "n8n keeps its workflows and settings in its own database, so there is no file for Burrow to write. Set these in the editor.",
+            "Burrow's tools always in view: n8n has no tool search; \"Tools to Include: All\" lists every Burrow tool to the agent.",
+        ], manual: manual)
+    }
+
+    // MARK: Files
+
+    private static func gateFile(_ path: URL, _ text: String) -> Change {
+        let before = try? String(contentsOf: path, encoding: .utf8)
+        return Change(path: path, before: before, after: text, kind: .gate, shown: [])
+    }
+
+    static func json(_ value: Any) -> String {
+        guard JSONSerialization.isValidJSONObject(value) else { return "" }
+        let data = (try? JSONSerialization.data(withJSONObject: value, options: [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes])) ?? Data()
+        return String(decoding: data, as: UTF8.self) + "\n"
+    }
+
+    /// A JSON settings file with `change` applied, and each setting that changes named. A file that is not plain JSON
+    /// (comments, JSON5, a typo) is never rewritten: that would drop what the person wrote.
+    private static func mergedJSON(_ file: URL, program: String, empty: [String: Any] = [:], _ change: (inout [String: Any]) -> Void) throws -> Change {
+        let before = try? String(contentsOf: file, encoding: .utf8)
+        var root = empty
+        if let before, !before.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            guard let parsed = try? JSONSerialization.jsonObject(with: Data(before.utf8)) as? [String: Any] else {
+                throw Refused(why: "\(file.path) is not plain JSON (it may have comments), so Burrow left it alone. Run without --write and add the settings it prints by hand.")
+            }
+            root = parsed
+        }
+        let old = root
+        change(&root)
+        let unchanged = before.map { _ in NSDictionary(dictionary: old).isEqual(to: root) } ?? false
+        let after = unchanged ? before! : json(root)
+        return Change(path: file, before: before, after: after, kind: .settings, shown: before == nil ? [] : JSONChanges.lines(old, root))
+    }
+
+    private static func yamlString(_ text: String) -> String {
+        "\"" + text.replacingOccurrences(of: "\\", with: "\\\\").replacingOccurrences(of: "\"", with: "\\\"") + "\""
+    }
+
+    static func tilde(_ path: String, _ setup: Setup) -> String {
+        let home = setup.home.standardizedFileURL.path
+        return path.hasPrefix(home + "/") ? "~" + path.dropFirst(home.count) : path
+    }
+
+    // MARK: Saying and writing
+
+    /// The plan in plain words: what each part does, then each file, with every change to an existing setting shown.
+    public static func describe(_ plan: Plan, _ setup: Setup) -> String {
+        var out = ["burrow connect \(plan.program.rawValue): \(plan.program.name) and the vault \(Printable.clean(setup.vault))", ""]
+        out += plan.notes.map { "- " + $0 }
+        if let manual = plan.manual { out += ["", manual] }
+        if let refusal = plan.refusal { out += ["", "Burrow can't write this for you: " + refusal]; return out.joined(separator: "\n") }
+        if plan.changes.isEmpty { return out.joined(separator: "\n") }
+        out.append("")
+        for change in plan.changes {
+            let path = tilde(change.path.path, setup)
+            if !change.changes { out.append("\(path): already set up, unchanged"); continue }
+            switch (change.kind, change.before) {
+            case (.gate, nil):
+                out.append("\(path): new file, the gate (\(change.after.split(separator: "\n", omittingEmptySubsequences: false).count - 1) lines)")
+            case (.gate, _):
+                out.append("\(path): replaced with this version of the gate (the old one is kept as .before-burrow)")
+            case (.settings, nil):
+                out.append("\(path): new file")
+                out += change.after.split(separator: "\n", omittingEmptySubsequences: false).dropLast().map { "    " + $0 }
+            case (.settings, _):
+                out.append("\(path): these settings change (the old file is kept as .before-burrow)")
+                out += change.shown.map { "    " + $0 }
+            }
+        }
+        return out.joined(separator: "\n")
+    }
+
+    /// Writes every file that changes. An existing file is kept beside it as `.before-burrow` first, unless a copy from an
+    /// earlier run is already there. Returns what was done.
+    @discardableResult
+    public static func apply(_ plan: Plan, _ setup: Setup) throws -> [String] {
+        if let refusal = plan.refusal { throw Refused(why: refusal) }
+        var said: [String] = []
+        let files = FileManager.default
+        for change in plan.pending {
+            try files.createDirectory(at: change.path.deletingLastPathComponent(), withIntermediateDirectories: true)
+            // The file as it was before Burrow first changed it: a later run never replaces that copy.
+            let copy = change.path.appendingPathExtension("before-burrow")
+            if change.before != nil, !files.fileExists(atPath: copy.path) { try files.copyItem(at: change.path, to: copy) }
+            try Data(change.after.utf8).write(to: change.path, options: .atomic)
+            said.append("wrote " + tilde(change.path.path, setup))
+        }
+        return said
+    }
+}
+
+/// Every setting that differs between two JSON objects, as "+ a.b = value" (added), "~ a.b: old → new" (changed) and
+/// "- a.b" (removed), so a merged settings file is shown before it is written.
+enum JSONChanges {
+    static func lines(_ old: [String: Any], _ new: [String: Any], at path: String = "") -> [String] {
+        var out: [String] = []
+        for key in Set(old.keys).union(new.keys).sorted() {
+            let name = path.isEmpty ? key : path + "." + key
+            switch (old[key], new[key]) {
+            case let (nil, value?): out.append("+ \(name) = \(short(value))")
+            case (_?, nil): out.append("- \(name)")
+            case let (before?, after?):
+                if let a = before as? [String: Any], let b = after as? [String: Any] { out += lines(a, b, at: name) }
+                else if !NSArray(array: [before]).isEqual(to: [after]) { out.append("~ \(name): \(short(before)) → \(short(after))") }
+            default: break
+            }
+        }
+        return out
+    }
+
+    static func short(_ value: Any) -> String {
+        if let text = value as? String { return "\"" + text + "\"" }
+        if let number = value as? NSNumber, CFGetTypeID(number) == CFBooleanGetTypeID() { return number.boolValue ? "true" : "false" }
+        guard JSONSerialization.isValidJSONObject([value]),
+              let data = try? JSONSerialization.data(withJSONObject: [value], options: [.sortedKeys, .withoutEscapingSlashes]) else { return "\(value)" }
+        let text = String(decoding: data, as: UTF8.self)
+        return String(text.dropFirst().dropLast())
+    }
+}
+
+/// Just enough YAML editing for Hermes' settings: add a block under a top-level key, or an item to a list, by inserting
+/// lines and leaving every other line as it was. Anything it can't place for certain (a flow-style map, a key already
+/// set to something else) is refused with what to add by hand, never guessed.
+enum YAMLBlocks {
+    private static func indent(_ line: Substring) -> Int { line.prefix(while: { $0 == " " }).count }
+    private static func isContent(_ line: Substring) -> Bool {
+        let body = line.drop(while: { $0 == " " })
+        return !body.isEmpty && !body.hasPrefix("#")
+    }
+
+    /// The range of lines inside top-level `key:` (after its own line), or nil when the key is not there. Throws when the
+    /// key is there with a value on its own line (`key: {}`, `key: value`).
+    private static func block(_ lines: [Substring], _ key: String, file: String) throws -> (header: Int, end: Int)? {
+        guard let header = lines.firstIndex(where: { $0.hasPrefix(key + ":") && indent($0) == 0 }) else { return nil }
+        let rest = lines[header].dropFirst(key.count + 1).split(separator: "#", maxSplits: 1, omittingEmptySubsequences: false).first ?? ""
+        guard rest.trimmingCharacters(in: .whitespaces).isEmpty else {
+            throw Connect.Refused(why: "\(file) sets \(key) on one line (\(lines[header].trimmingCharacters(in: .whitespaces))), so Burrow left it alone. Add the lines below to it yourself.")
+        }
+        var end = header + 1
+        var lastContent = header
+        while end < lines.count, !(isContent(lines[end]) && indent(lines[end]) == 0) {
+            if isContent(lines[end]) { lastContent = end }
+            end += 1
+        }
+        return (header, lastContent + 1)
+    }
+
+    /// Makes `top.child` hold exactly `lines` (written two spaces in). Already so: unchanged. Set to anything else: refused.
+    static func ensure(_ text: String, top: String, child: String, lines wanted: [String], shown: inout [String], file: String) throws -> String {
+        var lines = text.split(separator: "\n", omittingEmptySubsequences: false)
+        if text.hasSuffix("\n") { lines.removeLast() }
+        func joined(_ all: [Substring]) -> String { all.joined(separator: "\n") + "\n" }
+        guard let found = try block(lines, top, file: file) else {
+            lines += [""] + [Substring(top + ":")] + wanted.map { Substring($0) }
+            shown += ["+ " + top + ":"] + wanted.map { "+ " + $0 }
+            return joined(lines)
+        }
+        let inside = Array(lines[(found.header + 1)..<found.end])
+        if let start = inside.firstIndex(where: { isContent($0) && $0.drop(while: { $0 == " " }).hasPrefix(child + ":") }) {
+            var stop = start + 1
+            let own = indent(inside[start])
+            while stop < inside.count, !(isContent(inside[stop]) && indent(inside[stop]) <= own) { stop += 1 }
+            // Quotes don't change a YAML scalar here: off, "off" and 'off' are the same setting.
+            func plain(_ line: Substring) -> String { line.trimmingCharacters(in: .whitespaces).filter { $0 != "\"" && $0 != "'" } }
+            if inside[start..<stop].filter(isContent).map(plain) == wanted.map({ plain(Substring($0)) }) { return text }
+            throw Connect.Refused(why: "\(file) already sets \(top).\(child) to something else, so Burrow left it alone. Set it to this yourself:\n" +
+                                  ([top + ":"] + wanted).map { "    " + $0 }.joined(separator: "\n"))
+        }
+        lines.insert(contentsOf: wanted.map { Substring($0) }, at: found.end)
+        shown += ["+ (under \(top):)"] + wanted.map { "+ " + $0 }
+        return joined(lines)
+    }
+
+    /// Makes the list `top.child` contain `item`, in a block list or a one-line `[a, b]` list.
+    static func ensureListItem(_ text: String, top: String, child: String, item: String, shown: inout [String], file: String) throws -> String {
+        var lines = text.split(separator: "\n", omittingEmptySubsequences: false)
+        if text.hasSuffix("\n") { lines.removeLast() }
+        func joined(_ all: [Substring]) -> String { all.joined(separator: "\n") + "\n" }
+        guard let found = try block(lines, top, file: file) else {
+            return try ensure(text, top: top, child: child, lines: ["  \(child):", "    - \(item)"], shown: &shown, file: file)
+        }
+        guard let at = ((found.header + 1)..<found.end).first(where: { isContent(lines[$0]) && lines[$0].drop(while: { $0 == " " }).hasPrefix(child + ":") }) else {
+            return try ensure(text, top: top, child: child, lines: ["  \(child):", "    - \(item)"], shown: &shown, file: file)
+        }
+        let own = indent(lines[at])
+        let value = lines[at].drop(while: { $0 == " " }).dropFirst(child.count + 1).trimmingCharacters(in: .whitespaces)
+        if value.hasPrefix("[") && value.hasSuffix("]") {
+            let items = value.dropFirst().dropLast().split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces).trimmingCharacters(in: CharacterSet(charactersIn: "\"'")) }
+            if items.contains(item) { return text }
+            let kept = value.dropFirst().dropLast().trimmingCharacters(in: .whitespaces)
+            lines[at] = Substring(String(repeating: " ", count: own) + child + ": [" + (kept.isEmpty ? "" : kept + ", ") + item + "]")
+            shown.append("~ \(top).\(child): \(value) → \(lines[at].drop(while: { $0 == " " }).dropFirst(child.count + 2))")
+            return joined(lines)
+        }
+        guard value.isEmpty else {
+            throw Connect.Refused(why: "\(file) sets \(top).\(child) in a way Burrow can't add to, so Burrow left it alone. Add \(item) to that list yourself.")
+        }
+        var end = at + 1
+        var itemIndent = own + 2
+        while end < lines.count, !(isContent(lines[end]) && indent(lines[end]) <= own && !lines[end].drop(while: { $0 == " " }).hasPrefix("- ")) {
+            let body = lines[end].drop(while: { $0 == " " })
+            if body.hasPrefix("- ") {
+                itemIndent = indent(lines[end])
+                if body.dropFirst(2).trimmingCharacters(in: .whitespaces).trimmingCharacters(in: CharacterSet(charactersIn: "\"'")) == item { return text }
+            }
+            end += 1
+        }
+        while end > at + 1, !isContent(lines[end - 1]) { end -= 1 }
+        lines.insert(Substring(String(repeating: " ", count: itemIndent) + "- " + item), at: end)
+        shown.append("+ (in \(top).\(child):) - \(item)")
+        return joined(lines)
+    }
+}

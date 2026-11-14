@@ -34,6 +34,9 @@ The Ledger, a git for what AIs understood:
 
 \(vaultUsage)
 
+Connecting a program:
+\(connectUsage)
+
 Add --store DIR to keep the memory somewhere other than <project>/.burrow.
 Add --vault to index a whole vault, where every Markdown file is a note.
 """
@@ -91,6 +94,7 @@ func run() async throws {
     if try await runTerminalCommand(arguments) { return }
     if try await runLedgerCommand(arguments) { return }
     if try await runVaultCommand(arguments) { return }
+    if try runConnectCommand(arguments) { return }
     guard let command = arguments.first, !["help", "--help", "-h"].contains(command) else {
         print(usage)
         return
