@@ -109,6 +109,9 @@ public final class VaultTools {
     /// Decisions in force this connection was already shown when a decision it kept may contradict them (D-94). A second
     /// attempt that overlaps only these goes through, marked UNRESOLVED.
     var overlapWarned: Set<String> = []
+    /// The Ledger commits this connection kept itself. Its burrow_commit result already confirmed each, so they are not
+    /// handed back to it as decisions in force with its first tool result (D-103).
+    public internal(set) var keptHere: Set<String> = []
     var hiddenSession: String? { connectionIsNew ? connection?.id : nil }
     /// The program on the other end, as it named itself.
     public var connectionClient: String?

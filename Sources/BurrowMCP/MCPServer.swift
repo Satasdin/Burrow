@@ -49,9 +49,11 @@ public final class MCPServer {
     private let tools: VaultTools
     private let log: (String) -> Void
     private var initialized = false
-    /// The programs, by the name they gave, that have been handed the decisions in force: in the `initialize` reply, in a
-    /// `server/discover` reply, or once with their first tool result (D-95).
-    private var rulesHandedTo: Set<String> = []
+    /// The connections whose first tool result has gone out, carrying the decisions in force once (D-95, D-103). The
+    /// `initialize` era has one connection per process; in the stateless era each program, by the name it gives, is one.
+    private var firstResultSent: Set<String> = []
+    /// The Ledger commits each connection kept itself, which its first tool result does not hand back to it (D-103).
+    private var keptOn: [String: Set<String>] = [:]
 
     /// When on, each connection becomes a saved session: what the program looked up is written to the vault as it happens.
     public var keepsSessions = false
@@ -78,11 +80,14 @@ public final class MCPServer {
         case toolCall(id: Any, name: String, arguments: [String: Any], stateless: Stateless?)
     }
 
-    /// What a tool call of the stateless era carries to the moment it runs: the program it says it is, and whether the
-    /// decisions in force go with its result because that program has not had them yet (D-95).
+    /// What a tool call of the stateless era carries to the moment it runs: the program it says it is (D-95).
     struct Stateless {
         let client: String?
-        let handsRules: Bool
+    }
+
+    /// The connection a call belongs to: the process in the `initialize` era, each named program in the stateless one.
+    private static func connectionKey(_ stateless: Stateless?) -> String {
+        stateless.map { "stateless:" + ($0.client ?? "unknown") } ?? "initialize"
     }
 
     /// Handles one line and waits for its reply. Replies come back in order.
@@ -170,7 +175,6 @@ public final class MCPServer {
             // The program's own name signs what it keeps, whether or not its sessions are saved (D-83).
             tools.connectionClient = client
             startConversation(client: client)
-            rulesHandedTo.insert(client)
             return .reply(Self.success(id: id, [
                 "protocolVersion": chosen,
                 "capabilities": ["tools": ["listChanged": false]],
@@ -229,7 +233,6 @@ public final class MCPServer {
         switch method {
         case "server/discover":
             log("client \(client ?? "unknown") asked server/discover with protocol \(requested)")
-            rulesHandedTo.insert(client ?? "unknown")
             return .reply(Self.stateless(id: id, [
                 "supportedVersions": Self.statelessVersions,
                 "capabilities": ["tools": [String: Any]()],
@@ -245,18 +248,29 @@ public final class MCPServer {
             guard let name = fields["name"] as? String else { return .reply(Self.failure(id: id, Code.invalidParams, "tools/call needs name")) }
             guard VaultTools.allDefinitions.contains(where: { $0.name == name }) else { return .reply(Self.failure(id: id, Code.invalidParams, "Unknown tool: \(name)")) }
             if let raw = fields["arguments"], !(raw is [String: Any]) && !(raw is NSNull) { return .reply(Self.failure(id: id, Code.invalidParams, "arguments must be an object")) }
-            // A stateless program may never ask server/discover, and would then never see the decisions in force, so its
-            // first tool result carries them, once.
-            let handsRules = rulesHandedTo.insert(client ?? "unknown").inserted
             return .toolCall(id: id, name: name, arguments: fields["arguments"] as? [String: Any] ?? [:],
-                             stateless: Stateless(client: client, handsRules: handsRules))
+                             stateless: Stateless(client: client))
         default:
             return .reply(Self.failure(id: id, Code.methodNotFound, "Method not found: \(method)"))
         }
     }
 
-    /// Said before the decisions in force when they come with a tool result rather than with the instructions (D-95).
-    static let rulesWithResult = "Burrow's instructions were not asked for (server/discover), so the decisions in force come once, here, before the result."
+    /// Said before the decisions in force when they come with a connection's first tool result (D-95, D-103).
+    static let rulesWithResult = "Burrow hands over the decisions in force once, here, with this connection's first result, since not every program shows its instructions to the model."
+
+    /// The decisions in force, once, before the first tool result a connection gets, in either era and whether or not the
+    /// program was given the instructions: OpenClaw and Hermes Agent pass none of them to their model (0 of 458 requests on
+    /// 14 November), so a decision reached it only through a tool that happened to show it (D-103). Left out: a decision
+    /// this result already shows (burrow_resume's latest commits, a search's Ledger notes, burrow_check), and one this
+    /// connection kept itself, which its burrow_commit result confirmed. Later results never repeat them.
+    private func handingRules(to text: String, on connection: String) -> String {
+        guard firstResultSent.insert(connection).inserted else { return text }
+        let kept = keptOn[connection] ?? []
+        let rules = tools.rulesInForce(leavingOut: { kept.contains($0) || text.contains($0) })
+        guard !rules.isEmpty else { return text }
+        log("decisions in force handed with the first result on this connection")
+        return Self.rulesWithResult + rules + "\n\n" + text
+    }
 
     private func perform(id: Any, name: String, arguments: [String: Any], stateless: Stateless? = nil) async -> String {
         let started = Date()
@@ -266,19 +280,18 @@ public final class MCPServer {
             if let client = stateless.client { tools.connectionClient = client }
             startConversation(client: tools.connectionClient ?? "unknown")
         }
+        let connection = Self.connectionKey(stateless)
+        let keptBefore = tools.keptHere
         do {
             let result = try await tools.call(name, arguments: arguments)
             log(String(format: "%@ %@ in %.2f s: %@", name, result.isError ? "failed" : "ok", Date().timeIntervalSince(started), result.summary))
             defer { if !result.isError { afterCall?(name, arguments, result) } }
-            if let stateless {
-                var text = result.text
-                if stateless.handsRules {
-                    let rules = tools.rulesInForce()
-                    if !rules.isEmpty { text = Self.rulesWithResult + rules + "\n\n" + text }
-                }
+            keptOn[connection, default: []].formUnion(tools.keptHere.subtracting(keptBefore))
+            let text = handingRules(to: result.text, on: connection)
+            if stateless != nil {
                 return Self.stateless(id: id, ["content": [["type": "text", "text": text]], "isError": result.isError])
             }
-            return Self.success(id: id, ["content": [["type": "text", "text": result.text]], "isError": result.isError])
+            return Self.success(id: id, ["content": [["type": "text", "text": text]], "isError": result.isError])
         } catch let problem as ToolCallProblem {
             log("\(name) refused: \(problem.description)")
             return Self.failure(id: id, Code.invalidParams, problem.description)
