@@ -79,6 +79,8 @@ private func newVault(_ options: Options) async throws {
 private func bridge(_ options: Options) throws {
     if options.positional.first == "list" {
         let vault = try existingVault(options.positional.dropFirst().first, "bridge list")
+        // Bridges live only in Burrow's own folder (D-100); one written inside the vault folder is pointed out once, never followed.
+        if let notice = vault.takeBridgesInVaultNotice() { print(notice) }
         let all = vault.bridges()
         guard !all.isEmpty else {
             print("\(vault.root.path) has no bridges. Add one with: burrow bridge \(vault.root.path) <other-vault>")

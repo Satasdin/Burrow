@@ -84,6 +84,11 @@ Library, search and Ask also look in Work. Everything from it is marked with its
 one step: if Work bridges to a Team vault, `~/Notes` still can't see Team. Work's decisions stay private unless you add
 `--with-ledger`. In the app, the Library shows Work as its own section, and **Bridges** at its top adds or removes one.
 
+Bridges are kept in Burrow's own folder on your Mac, never inside a vault, so a vault folder someone gives you (a
+download, a cloned repo, a shared folder) can't bring bridges to your other vaults with it. If `burrow bridge list` says
+it found bridges written inside a vault folder, they are ignored; if you made them with an early build, add them again
+with `burrow bridge`. Through a bridge, Work's linked code is found by search but not opened from disk.
+
 ## How much Burrow keeps
 
 Burrow's own store (the index, meaning search, conversations, the Ledger) lives in `.burrow`. Your own files are never
