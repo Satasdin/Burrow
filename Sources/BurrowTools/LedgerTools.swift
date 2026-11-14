@@ -19,6 +19,10 @@ public struct CheckReport: Sendable {
     public var rules: [LedgerCommit]
     /// Changed paths set aside as build output (D-87): not counted, but always named.
     public var buildOutput: [String] = []
+    /// The changed files the decisions shown rest on, directly or one import step away (D-93): what the gate fingerprints.
+    public var resting: [String] = []
+    /// Each resting file's git blob id, as it is in the working tree (or the index, for a staged check), or "deleted".
+    public var hashes: [String: String] = [:]
 }
 
 extension VaultTools {
@@ -186,13 +190,17 @@ extension VaultTools {
     /// undoing a decision in clip 08; nothing put the decision next to the change. Stale decisions are kept here on purpose:
     /// the change itself is what makes them stale.
     func check() -> ToolResult {
-        let found = checkChanges()
+        let report = Self.checkReport(vault: vault, ledger: ledger)
+        let found = Self.checkText(report)
+        // What a program was shown here counts as shown for the Stop hook and the git gate too (D-93).
+        Gate.record(report, vault: vault, by: "burrow_check" + (connectionClient.map { " in \($0)" } ?? ""))
         let reminder = Steering.reminder(flagged)
         return reminder.isEmpty ? found : ToolResult(text: found.text + reminder, summary: found.summary)
     }
 
-    private func checkChanges() -> ToolResult {
-        let report = Self.checkReport(vault: vault, ledger: ledger)
+    /// The words burrow_check, `burrow check`, the Stop hook and the git gate all show for a report, so each says the
+    /// same thing (D-93).
+    public static func checkText(_ report: CheckReport) -> ToolResult {
         let changed = report.changed, diffs = report.diffs, rules = report.rules
         let built = Self.buildOutputLine(report.buildOutput)
         guard !changed.isEmpty else {
@@ -223,38 +231,68 @@ extension VaultTools {
     /// What burrow_check compares, for the app as well as the tool: the files changed in linked git folders since their
     /// last commit, their diffs (only for files the vault indexes), and the decisions and corrections in force that rest
     /// on those files or the files they import or are imported by.
-    public static func checkReport(vault: Vault, ledger: Ledger) -> CheckReport {
+    /// `staged` compares what is staged for the next git commit instead of the working tree (the git gate, D-93), and
+    /// `only` keeps to one linked folder by name.
+    public static func checkReport(vault: Vault, ledger: Ledger, staged: Bool = false, only: String? = nil) -> CheckReport {
         var changed: [String] = []
         var built: [String] = []
         var diffs: [String] = []
+        var located: [String: (folder: URL, path: String)] = [:]
         let indexed = Set(((try? vault.projectMap().files) ?? []).map(\.path))
-        for folder in vault.linkedFolders() {
+        for folder in vault.linkedFolders() where only == nil || folder.name == only {
             guard FileManager.default.fileExists(atPath: folder.url.appendingPathComponent(".git").path) else { continue }
-            let tracked = git(folder.url, ["diff", "HEAD", "--name-only", "-z"]) ?? ""
-            let fresh = git(folder.url, ["ls-files", "--others", "--exclude-standard", "-z"]) ?? ""
+            let tracked = git(folder.url, staged ? ["diff", "--cached", "--name-only", "-z"] : ["diff", "HEAD", "--name-only", "-z"]) ?? ""
+            // A new file reaches a commit only once it is staged, and then the staged diff names it.
+            let fresh = staged ? "" : git(folder.url, ["ls-files", "--others", "--exclude-standard", "-z"]) ?? ""
             // What a build or a test run leaves (__pycache__/*.pyc, node_modules, .DS_Store) is not a change anyone made, by
             // the index's own rule: in the 14 November walkthrough one edited file showed as "You changed 15 files" (D-87).
             // They are set aside, not hidden: the reply still names them on one line.
             let all = (tracked + fresh).split(separator: "\0").map(String.init)
             built += all.filter(Vault.isBuildOutput).map { folder.name + "/" + $0 }
             let relative = all.filter { !Vault.isBuildOutput($0) }
+            for path in relative where located[folder.name + "/" + path] == nil { located[folder.name + "/" + path] = (folder.url, path) }
             changed += relative.map { folder.name + "/" + $0 }.filter { !changed.contains($0) }
             // The diff shows only files the vault itself holds, so a change to a file Burrow does not index (a secret,
             // a binary) is named but never shown; no external diff tool or text converter runs.
             let held = relative.filter { indexed.contains(folder.name + "/" + $0) }
-            if !held.isEmpty, let diff = git(folder.url, ["diff", "HEAD", "--no-color", "--no-ext-diff", "--no-textconv", "-U2", "--"] + held), !diff.isEmpty {
+            let against = staged ? ["diff", "--cached"] : ["diff", "HEAD"]
+            if !held.isEmpty, let diff = git(folder.url, against + ["--no-color", "--no-ext-diff", "--no-textconv", "-U2", "--"] + held), !diff.isEmpty {
                 diffs.append(diff)
             }
         }
         guard !changed.isEmpty else { return CheckReport(changed: [], diffs: [], rules: [], buildOutput: built) }
-        var near: Set<String> = []
-        for file in changed { for neighbour in (try? vault.neighbours(of: file)) ?? [] where neighbour.kind != .about { near.insert(neighbour.path) } }
+        var near: [String: Set<String>] = [:]
+        for file in changed {
+            near[file] = Set(((try? vault.neighbours(of: file)) ?? []).filter { $0.kind != .about }.map(\.path))
+        }
+        let anyNear = near.values.reduce(into: Set<String>()) { $0.formUnion($1) }
         let wrong = ledger.reverted()
-        let rules = ledger.log(limit: 300).filter { commit in
+        let rules = Array(ledger.log(limit: 300).filter { commit in
             [.decision, .correction].contains(commit.kind) && !wrong.contains(commit.id)
-                && (!Set(changed).isDisjoint(with: commit.cites.keys) || !near.isDisjoint(with: commit.cites.keys))
-        }.prefix(6)
-        return CheckReport(changed: changed, diffs: diffs, rules: Array(rules), buildOutput: built)
+                && (!Set(changed).isDisjoint(with: commit.cites.keys) || !anyNear.isDisjoint(with: commit.cites.keys))
+        }.prefix(6))
+        // Which changed files those rest on, and what each holds now, so the gate can tell this exact change from another.
+        let cited = Set(rules.flatMap { $0.cites.keys })
+        let resting = changed.filter { cited.contains($0) || !near[$0, default: []].isDisjoint(with: cited) }
+        var hashes: [String: String] = [:]
+        for file in resting {
+            guard let place = located[file] else { continue }
+            hashes[file] = blob(place.path, in: place.folder, staged: staged)
+        }
+        return CheckReport(changed: changed, diffs: diffs, rules: rules, buildOutput: built, resting: resting, hashes: hashes)
+    }
+
+    /// A file's git blob id in the working tree, or in the index when `staged`; "deleted" when it is not there.
+    static func blob(_ path: String, in folder: URL, staged: Bool) -> String {
+        if staged {
+            // "100644 <blob> 0\t<path>" for a file the next commit holds; nothing for one it removes.
+            let line = git(folder, ["ls-files", "-s", "-z", "--", path]) ?? ""
+            let fields = line.split(separator: " ")
+            return fields.count >= 2 ? String(fields[1]) : "deleted"
+        }
+        guard FileManager.default.fileExists(atPath: folder.appendingPathComponent(path).path) else { return "deleted" }
+        let id = (git(folder, ["hash-object", "--", path]) ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        return id.isEmpty ? "unreadable" : id
     }
 
     /// One line naming what was set aside as build output, so nothing changed is invisible (D-87). Empty when nothing was.

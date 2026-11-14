@@ -1,0 +1,9 @@
+diff | session-2 score | clean fixture | after the diff | same change again | decisions shown; changed files
+gemma-new-1 | task=6/6 hidden=0/2 | exit 0 | exit 2 | exit 0 | 1 decision; matatu/matatu/payments/matcher.py
+gemma-new-2 | task=5/6 hidden=1/2 | exit 0 | exit 2 | exit 0 | 1 decision; matatu/matatu/payments/matcher.py
+gemma-new-3 | task=6/6 hidden=2/2 | exit 0 | exit 2 | exit 0 | 1 decision; matatu/matatu/payments/matcher.py
+gemma-new-4 | task=6/6 hidden=2/2 | exit 0 | exit 2 | exit 0 | 1 decision; matatu/matatu/payments/matcher.py
+gemma-old-1 | task=6/6 hidden=2/2 | exit 0 | exit 2 | exit 0 | 1 decision; matatu/matatu/payments/matcher.py
+gemma-old-2 | task=7/7 hidden=0/2 | exit 0 | exit 2 | exit 0 | 1 decision; matatu/matatu/payments/reconcile.py
+gemma-old-3 | task=6/6 hidden=2/2 | exit 0 | exit 2 | exit 0 | 1 decision; matatu/matatu/payments/matcher.py
+gemma-old-4 | task=7/7 hidden=0/2 | exit 0 | exit 2 | exit 0 | 1 decision; matatu/matatu/payments/matcher.py, matatu/matatu/payments/reconcile.py, matatu/tests/test_reconcile_unknown.py

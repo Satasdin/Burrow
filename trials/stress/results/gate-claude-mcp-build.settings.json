@@ -1,0 +1,48 @@
+{
+  "hooks" : {
+    "PreCompact" : [
+      {
+        "hooks" : [
+          {
+            "command" : "'/Users/p3wrky/Developer/burrow/.claude/worktrees/agent-a7390c826ea6cb1d6/.build/out/Products/Debug/burrow' hook claude '/tmp/claude-501/-Users-p3wrky-Developer-burrow/194f3ce6-bca4-4b00-a331-521f0694f63d/scratchpad/fx-claude-mcp-build/Notes'",
+            "timeout" : 10,
+            "type" : "command"
+          }
+        ]
+      }
+    ],
+    "SessionEnd" : [
+      {
+        "hooks" : [
+          {
+            "command" : "'/Users/p3wrky/Developer/burrow/.claude/worktrees/agent-a7390c826ea6cb1d6/.build/out/Products/Debug/burrow' hook claude '/tmp/claude-501/-Users-p3wrky-Developer-burrow/194f3ce6-bca4-4b00-a331-521f0694f63d/scratchpad/fx-claude-mcp-build/Notes'",
+            "timeout" : 10,
+            "type" : "command"
+          }
+        ]
+      }
+    ],
+    "SessionStart" : [
+      {
+        "hooks" : [
+          {
+            "command" : "'/Users/p3wrky/Developer/burrow/.claude/worktrees/agent-a7390c826ea6cb1d6/.build/out/Products/Debug/burrow' hook claude '/tmp/claude-501/-Users-p3wrky-Developer-burrow/194f3ce6-bca4-4b00-a331-521f0694f63d/scratchpad/fx-claude-mcp-build/Notes'",
+            "timeout" : 10,
+            "type" : "command"
+          }
+        ]
+      }
+    ],
+    "Stop" : [
+      {
+        "hooks" : [
+          {
+            "command" : "'/Users/p3wrky/Developer/burrow/.claude/worktrees/agent-a7390c826ea6cb1d6/.build/out/Products/Debug/burrow' hook claude '/tmp/claude-501/-Users-p3wrky-Developer-burrow/194f3ce6-bca4-4b00-a331-521f0694f63d/scratchpad/fx-claude-mcp-build/Notes' --gate",
+            "timeout" : 30,
+            "type" : "command"
+          }
+        ]
+      }
+    ]
+  }
+}

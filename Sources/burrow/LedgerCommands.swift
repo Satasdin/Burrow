@@ -11,14 +11,15 @@ let ledgerUsage = """
   burrow revert <vault> <commit> "what is right"                    marks a commit wrong; nothing is deleted
   burrow confirm <vault> <commit> ["note"]                         says a commit still holds after a file it cites changed
   burrow branch <vault> [name]                                      show the branches, or switch to one
-  burrow hook claude <vault>                                        for Claude Code's SessionStart, PreCompact and SessionEnd hooks
+  burrow check  <vault> [--staged] [--json]                         the decisions your change rests on, beside it; exit 2 until shown once
+  burrow hook claude <vault> [--gate]                               for Claude Code's SessionStart, PreCompact, SessionEnd and Stop hooks
   burrow hook git <vault>                                           for git's post-commit hook, run inside the repository
-  burrow hook install claude|git <vault>                            prints the Claude Code settings, or writes .git/hooks/post-commit
+  burrow hook install claude|git|git-gate <vault>                   prints the Claude Code settings, or writes .git/hooks/post-commit or pre-commit
 """
 
 /// The Ledger's commands. Returns false when the command is not one of them.
 func runLedgerCommand(_ arguments: [String]) async throws -> Bool {
-    guard let command = arguments.first, ["commit", "log", "resume", "blame", "diff", "revert", "confirm", "branch", "hook"].contains(command) else { return false }
+    guard let command = arguments.first, ["commit", "log", "resume", "blame", "diff", "revert", "confirm", "branch", "hook", "check"].contains(command) else { return false }
     var words = Array(arguments.dropFirst())
     var values: [String: String] = [:]
     let takesValue: Set<String> = ["--kind", "--files", "--branch", "--author", "--file", "--limit", "--since", "--store"]
@@ -27,18 +28,45 @@ func runLedgerCommand(_ arguments: [String]) async throws -> Bool {
     while index < words.count {
         if takesValue.contains(words[index]), index + 1 < words.count { values[words[index]] = words[index + 1]; index += 2 } else { positional.append(words[index]); index += 1 }
     }
-    words = positional
+    // Switches without a value: only `check` and `hook` take any.
+    let switches = Set(positional.filter { ["--staged", "--json", "--gate"].contains($0) })
+    words = positional.filter { !switches.contains($0) }
 
     if command == "hook" {
         guard words.count >= 2 else { throw Failure(ledgerUsage) }
         if words[0] == "install" {
-            guard words.count >= 3 else { throw Failure("hook install needs claude or git, and the vault") }
-            try installHook(words[1], vault: words[2])
+            guard words.count >= 3 else { throw Failure("hook install needs claude, git or git-gate, and the vault") }
+            try installHook(words[1], vault: words[2], store: values["--store"])
         } else {
             let vault = try openVault(words[1], store: values["--store"])
-            try runHook(words[0], vault: vault)
+            try runHook(words[0], vault: vault, gateOnly: switches.contains("--gate"))
         }
         return true
+    }
+
+    if command == "check" {
+        guard let folder = words.first else { throw Failure("check needs the vault") }
+        let vault = try openVault(folder, store: values["--store"])
+        let staged = switches.contains("--staged")
+        // Staged, from inside a linked repository (git's pre-commit hook), it keeps to that repository's next commit.
+        let here = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
+        let only = staged ? Hooks.place(for: here, vaultRoot: vault.root, linked: vault.linkedFolders()).flatMap { $0.prefix.isEmpty ? nil : $0.prefix } : nil
+        let outcome = Gate.check(vault: vault, staged: staged, only: only, by: staged ? "burrow check --staged" : "burrow check")
+        if switches.contains("--json") {
+            print(try jsonLine(Gate.json(outcome)))
+        } else {
+            // Standard output is burrow_check's own words; what they mean for the gate goes to standard error.
+            print(outcome.text)
+            fflush(stdout)
+            let count = outcome.report.rules.count
+            if outcome.holds {
+                logToStandardError("held: this change rests on \(count) decision\(count == 1 ? "" : "s") kept in the Ledger and had not been shown. It has been now, so the same change passes next time.")
+            } else if outcome.fingerprint != nil {
+                logToStandardError("this exact change was shown before, so it passes.")
+            }
+        }
+        fflush(stdout)
+        exit(outcome.exitCode)
     }
 
     guard let folder = words.first else { throw Failure(ledgerUsage) }
@@ -106,12 +134,20 @@ private func describe(_ commit: LedgerCommit, stale: [String], wrong: Set<String
 }
 
 /// A hook must never get in the way: any failure is written to standard error and the hook still exits cleanly.
-private func runHook(_ kind: String, vault: Vault) throws {
+private func runHook(_ kind: String, vault: Vault, gateOnly: Bool = false) throws {
     let ledger = Ledger(vault: vault)
     switch kind {
     case "claude":
         let input = FileHandle.standardInput.readDataToEndOfFile()
         let event = (try? JSONSerialization.jsonObject(with: input)) as? [String: Any] ?? [:]
+        // Stop: the gate first (D-93), over every linked folder, wherever Claude Code runs. When it holds the reply the
+        // work goes on, so no handoff is written yet. With --gate (the Stop entry `hook install claude` prints) that is
+        // all it does, so a handoff is not written at the end of every turn.
+        if event["hook_event_name"] as? String == "Stop", let block = Gate.stop(event: event, vault: vault) {
+            print(block)
+            return
+        }
+        if gateOnly { return }
         let directory = URL(fileURLWithPath: event["cwd"] as? String ?? FileManager.default.currentDirectoryPath)
         guard let place = Hooks.place(for: directory, vaultRoot: vault.root, linked: vault.linkedFolders()) else {
             logToStandardError("hook: \(directory.path) is not in the vault or a linked folder; nothing kept")
@@ -163,7 +199,7 @@ private func git(_ arguments: [String], in directory: URL) -> String {
 
 /// Claude Code's settings are the person's own file, so Burrow prints what to add rather than editing it.
 /// The git hook is written only into the repository this is run in, and an existing hook is never replaced.
-private func installHook(_ kind: String, vault folder: String) throws {
+private func installHook(_ kind: String, vault folder: String, store: String? = nil) throws {
     func shellQuoted(_ text: String) -> String { "'" + text.replacingOccurrences(of: "'", with: "'\\''") + "'" }
     let quoted = shellQuoted(URL(fileURLWithPath: folder).standardizedFileURL.resolvingSymlinksInPath().path)
     // The running executable itself, resolved to a real absolute path, so the hook never runs whatever `burrow` a PATH finds.
@@ -173,7 +209,9 @@ private func installHook(_ kind: String, vault folder: String) throws {
     case "claude":
         let command = "\(burrow) hook claude \(quoted)"
         let entry: [String: Any] = ["hooks": [["type": "command", "command": command, "timeout": 10]]]
-        let settings: [String: Any] = ["hooks": ["SessionStart": [entry], "PreCompact": [entry], "SessionEnd": [entry]]]
+        // Stop runs the gate only (D-93): a handoff at the end of every turn would bury the Ledger.
+        let stop: [String: Any] = ["hooks": [["type": "command", "command": command + " --gate", "timeout": 30]]]
+        let settings: [String: Any] = ["hooks": ["SessionStart": [entry], "PreCompact": [entry], "SessionEnd": [entry], "Stop": [stop]]]
         let data = try JSONSerialization.data(withJSONObject: settings, options: [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes])
         print("Add this to ~/.claude/settings.json (or the project's .claude/settings.json), merged with any hooks already there:\n")
         print(String(data: data, encoding: .utf8) ?? "")
@@ -188,7 +226,26 @@ private func installHook(_ kind: String, vault folder: String) throws {
             .write(to: hook, atomically: true, encoding: .utf8)
         try FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: hook.path)
         print("Wrote \(hook.path).")
+    case "git-gate":
+        let here = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
+        let top = git(["rev-parse", "--show-toplevel"], in: here)
+        guard !top.isEmpty else { throw Failure("run this inside a git repository") }
+        // Only a repository linked into this vault: elsewhere the check would see nothing, and the gate would be a pretence.
+        let vault = try openVault(folder, store: store)
+        guard Hooks.place(for: URL(fileURLWithPath: top), vaultRoot: vault.root, linked: vault.linkedFolders()).map({ !$0.prefix.isEmpty }) == true else {
+            throw Failure("\(top) is not a folder linked into \(folder). Link it first: burrow link \(folder) \(top)")
+        }
+        // git's own answer, so a worktree or core.hooksPath is respected.
+        let path = git(["rev-parse", "--git-path", "hooks/pre-commit"], in: URL(fileURLWithPath: top))
+        let hook = URL(fileURLWithPath: path.hasPrefix("/") ? path : top + "/" + path)
+        guard !FileManager.default.fileExists(atPath: hook.path) else {
+            throw Failure("\(hook.path) already exists. Add this to it; exit status 2 means a decision was not shown yet: \(burrow) check \(quoted) --staged")
+        }
+        try FileManager.default.createDirectory(at: hook.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try Gate.preCommitScript(burrow: burrow, vault: quoted).write(to: hook, atomically: true, encoding: .utf8)
+        try FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: hook.path)
+        print("Wrote \(hook.path). A commit that touches a decision in the Ledger is refused once, with the decisions shown; the same change commits on the next try.")
     default:
-        throw Failure("hook install takes claude or git")
+        throw Failure("hook install takes claude, git or git-gate")
     }
 }

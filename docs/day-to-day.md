@@ -47,6 +47,10 @@ decisions resting on those files beside the diff. The program then keeps to each
 you which decision the change goes against. Files a build leaves (`__pycache__`, `.pyc`, `node_modules`) are named on
 one line, not counted.
 
+A program that never calls it is still stopped: Claude Code's Stop hook and git's pre-commit hook
+(`burrow hook install git-gate ~/Notes`) run the same check, and hold a change that touches a decision until it has
+been shown once. `burrow check ~/Notes` does it by hand.
+
 ## When a file a decision rests on changes
 
 The decision is not dropped. Programs are still handed it, marked **check again**, and the app's **Watch** panel shows
