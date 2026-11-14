@@ -50,6 +50,19 @@ public struct Fold: Codable, Sendable, Equatable {
     /// The program whose session this is, by the name it gives over MCP ("claude-code"): only that program, in that
     /// session, is given the original messages back (D-105). Nil in folds made before it was kept: Claude Code's.
     public var client: String?
+    /// The Ledger branch the session worked on, as the hook saw it (D-110). Nil in folds made before it was kept: the
+    /// session's own handoff in the Ledger then says which branch it was.
+    public var branch: String? = nil
+    /// The step the session's task list had in progress when the stretch ended (D-110).
+    public var current: String? = nil
+    /// The newest line printed as an error in the stretch, exactly as printed: the one being worked on when it stopped
+    /// (D-110). `errors` is ordered for a hand-back (named errors first), so its first is the oldest, not the newest.
+    public var lastError: String? = nil
+    /// The end of the newest request and of the last thing said, when they were longer than their quotes (D-110): a
+    /// request often ends with what to do now and where to stop ("do steps 1 and 2 … someone else will do 3 and 4"),
+    /// and a closing message with what is left, both past the quote's cut.
+    public var askedEnd: String? = nil
+    public var concludedEnd: String? = nil
 
     /// The program a fold belongs to.
     public var writer: String { client ?? "claude-code" }
@@ -63,7 +76,7 @@ extension Fold {
     /// Secrets in what it keeps (keys, tokens, passwords, private keys) are replaced with a marker before anything is
     /// clipped, and once more over every field at the end (D-105).
     public static func make(transcript text: String, after cursor: String?, session: String, number: Int, event: String,
-                            path: String, at: Date = Date(), client: String = "claude-code") -> Fold? {
+                            path: String, at: Date = Date(), client: String = "claude-code", branch: String? = nil) -> Fold? {
         var entries: [[String: Any]] = []
         for line in text.split(separator: "\n", omittingEmptySubsequences: true) {
             guard let entry = try? JSONSerialization.jsonObject(with: Data(line.utf8)) as? [String: Any],
@@ -80,8 +93,11 @@ extension Fold {
         // Kept to the second, as it is written, so a fold read back is the fold that was made.
         let second = Date(timeIntervalSince1970: at.timeIntervalSince1970.rounded(.down))
         var fold = Fold(id: "\(session.prefix(8))-\(number)", session: session, number: number, event: event, at: second,
-                        transcript: path, from: first, to: last, messages: said.count, characters: 0, client: client)
+                        transcript: path, from: first, to: last, messages: said.count, characters: 0, client: client, branch: branch)
         var asked: [Quote] = [], sentences: [Quote] = [], errors: [String] = [], places: [String] = [], ran: [String] = []
+        // Claude Code 2.1's task list (TaskCreate, then TaskUpdate by the number its result gives), kept like TodoWrite's
+        // (D-110): the call's id to its subject until the result names its number, then the number to subject and status.
+        var creating: [String: String] = [:], tasks: [(number: String, subject: String, status: String)] = []
         // A file read back is not an error, even when its code says RuntimeError: in the first real run a fold kept
         // `raise RuntimeError(...)` from reading legacy_check.py as if it had been printed (D-102). Only what a command or
         // another tool printed is searched for error lines.
@@ -99,19 +115,29 @@ extension Fold {
             if entry["type"] as? String == "user" {
                 if let words = message["content"] as? String {
                     fold.characters += words.count
-                    if typed(words) { asked.append(Quote(ref: ref, text: clip(Secrets.redacted(Secrets.cutForRedaction(words, 1000)), 800))) }
+                    if typed(words) { asked.append(Quote(ref: ref, text: clip(Secrets.redacted(Secrets.cutForRedaction(words, 1000)), 800))); fold.askedEnd = end(of: words, past: 800) }
                 }
                 let results = parts.filter { $0["type"] as? String == "tool_result" }
                 for part in parts where part["type"] as? String == "text" && results.isEmpty {
                     let words = part["text"] as? String ?? ""
                     fold.characters += words.count
-                    if typed(words) { asked.append(Quote(ref: ref, text: clip(Secrets.redacted(Secrets.cutForRedaction(words, 1000)), 800))) }
+                    if typed(words) { asked.append(Quote(ref: ref, text: clip(Secrets.redacted(Secrets.cutForRedaction(words, 1000)), 800))); fold.askedEnd = end(of: words, past: 800) }
                 }
                 for result in results {
                     let words = resultText(result["content"])
                     fold.characters += words.count
+                    if let id = result["tool_use_id"] as? String, let subject = creating.removeValue(forKey: id),
+                       let number = taskNumber.firstMatch(in: words, range: NSRange(words.startIndex..., in: words))
+                        .flatMap({ Range($0.range(at: 1), in: words) }).map({ String(words[$0]) }) {
+                        tasks.append((number, subject, "pending"))
+                    }
                     if let id = result["tool_use_id"] as? String, readsFiles.contains(id) { continue }
-                    for line in errorLines(words, failed: result["is_error"] as? Bool == true) where !errors.contains(line) { errors.append(line) }
+                    let found = errorLines(words, failed: result["is_error"] as? Bool == true)
+                    for line in found where !errors.contains(line) { errors.append(line) }
+                    // The newest error printed is the one being worked on (D-110). Within one output, the exception's own
+                    // line ("AssertionError: 999 != 1000") before a runner's "FAIL: test_x" header or "FAILED" verdict.
+                    if let newest = found.first(where: isException) ?? found.first(where: isNamedError)
+                        ?? (result["is_error"] as? Bool == true ? found.first : nil) { fold.lastError = newest }
                 }
             } else {
                 for part in parts {
@@ -124,6 +150,7 @@ extension Fold {
                         for sentence in decisive(words) where !sentences.contains(where: { $0.text == sentence }) { sentences.append(Quote(ref: ref, text: sentence)) }
                         for place in placesIn(words) where !places.contains(place) { places.append(place) }
                         fold.concluded = Quote(ref: ref, text: clip(words, 700))
+                        fold.concludedEnd = end(of: written, past: 700, keeping: 900)
                     case "tool_use":
                         let input = part["input"] as? [String: Any] ?? [:]
                         fold.characters += (try? JSONSerialization.data(withJSONObject: input))?.count ?? 0
@@ -141,6 +168,16 @@ extension Fold {
                             let todos = input["todos"] as? [[String: Any]] ?? []
                             fold.open = todos.filter { $0["status"] as? String != "completed" }.compactMap { $0["content"] as? String }
                             fold.done = todos.filter { $0["status"] as? String == "completed" }.compactMap { $0["content"] as? String }
+                            fold.current = todos.first { $0["status"] as? String == "in_progress" }?["content"] as? String
+                            tasks = []
+                        case "TaskCreate":
+                            if let id = part["id"] as? String, let subject = (input["subject"] ?? input["description"]) as? String { creating[id] = subject }
+                        case "TaskUpdate":
+                            let number = (input["taskId"] as? String) ?? (input["taskId"] as? Int).map(String.init) ?? ""
+                            if let at = tasks.firstIndex(where: { $0.number == number }) {
+                                if let status = input["status"] as? String { tasks[at].status = status }
+                                if let subject = input["subject"] as? String { tasks[at].subject = subject }
+                            }
                         default: break
                         }
                     default: break
@@ -157,8 +194,30 @@ extension Fold {
         fold.errors = Array((named + mentioned).prefix(10))
         fold.places = Array(places.prefix(12))
         fold.ran = Array(ran.suffix(8))
+        if !tasks.isEmpty {
+            let kept = tasks.filter { $0.status != "deleted" }
+            fold.open = kept.filter { $0.status != "completed" }.map(\.subject)
+            fold.done = kept.filter { $0.status == "completed" }.map(\.subject)
+            fold.current = kept.first { $0.status == "in_progress" }?.subject
+        }
         return fold.redacted()
     }
+
+    /// The last `keeping` characters of `text` (at most what lies past the quote), secrets taken out of the whole text
+    /// first, when it is longer than `past`; nil otherwise, and nil for a text too long to take secrets out of whole,
+    /// where a cut could split one (D-106).
+    static func end(of text: String, past: Int, keeping: Int = 360) -> String? {
+        let flat = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard flat.count > past, Secrets.cutForRedaction(flat, past).count == flat.count else { return nil }
+        let clean = Secrets.redacted(flat)
+        return clean.count > past ? String(clean.suffix(min(keeping, clean.count - past + 40))) : nil
+    }
+
+    private static let exceptionLine = try!NSRegularExpression(pattern: #"^[A-Za-z_][\w.]*(Error|Exception)\b"#)
+    static func isException(_ line: String) -> Bool { exceptionLine.firstMatch(in: line, range: NSRange(line.startIndex..., in: line)) != nil }
+
+    /// "Task #3 created successfully: …", Claude Code's reply to TaskCreate.
+    private static let taskNumber = try! NSRegularExpression(pattern: #"Task #(\d+)"#)
 
     /// The fold with secrets taken out of every field it keeps (D-105). Running it twice changes nothing.
     public func redacted() -> Fold {
@@ -167,6 +226,10 @@ extension Fold {
         out.asked = asked.map(clean)
         out.said = said.map(clean)
         out.concluded = concluded.map(clean)
+        out.current = current.map(Secrets.redacted)
+        out.lastError = lastError.map(Secrets.redacted)
+        out.askedEnd = askedEnd.map(Secrets.redacted)
+        out.concludedEnd = concludedEnd.map(Secrets.redacted)
         for field in [\Fold.errors, \.places, \.edited, \.read, \.ran, \.open, \.done] { out[keyPath: field] = self[keyPath: field].map(Secrets.redacted) }
         return out
     }
@@ -360,10 +423,10 @@ public struct FoldStore: Sendable {
     /// Folds what the transcript said since this session's last fold, and keeps it. Nil when nothing new was said.
     @discardableResult
     public func fold(transcript text: String, path: String, session: String, event: String, at: Date = Date(),
-                     client: String = "claude-code") throws -> Fold? {
+                     client: String = "claude-code", branch: String? = nil) throws -> Fold? {
         var kept = folds(session: session)
         guard let made = Fold.make(transcript: text, after: kept.last?.to, session: session, number: (kept.last?.number ?? 0) + 1,
-                                   event: event, path: path, at: at, client: client) else { return nil }
+                                   event: event, path: path, at: at, client: client, branch: branch) else { return nil }
         kept.append(made)
         // Only this account reads them, as with Claude Code's own transcripts.
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])

@@ -48,7 +48,7 @@ extension VaultTools {
             readOnly: true),
         ToolDefinition(
             name: "burrow_resume",
-            description: "Pick up where earlier sessions stopped: the plan, where the last session ended, corrections, and the latest decisions, from the Ledger. Call it at the start of any task that may have been worked on before, and after your context was compacted.",
+            description: "Pick up where earlier sessions stopped: the plan, where the last session ended and what it was in the middle of (its open request, the exact error it hit, the reasons given), corrections, and the latest decisions, from the Ledger. Call it at the start of any task that may have been worked on before, when asked to carry on, and after your context was compacted.",
             parameters: [ToolParameter("branch", .string, "The task or project branch. Leave it out for the current one.")],
             readOnly: true),
         ToolDefinition(
@@ -164,7 +164,10 @@ extension VaultTools {
             case "burrow_find": return try await call("vault_search", arguments: arguments)
             case "burrow_read": return try await call("vault_read", arguments: arguments)
             case "burrow_resume":
-                let text = ledger.resume(branch: given.text("branch"))
+                // With what the last Claude Code session on the branch was in the middle of, from its folds (D-110). Asked
+                // for no branch, the newest session on any branch, labelled with its own, when none is on the current one.
+                let ledger = self.ledger, folds = FoldStore(vault: vault), named = given.text("branch") != nil
+                let text = ledger.resume(branch: given.text("branch"), midway: { Midway.latest(store: folds, ledger: ledger, branch: $0, elsewhere: !named) })
                 return remembered(name, given, ToolResult(text: text, summary: "resumed \(given.text("branch") ?? ledger.current)"))
             case "burrow_commit":
                 guard let kind = LedgerCommit.Kind(rawValue: given.text("kind")!) else { return .failure("Unknown kind.") }
