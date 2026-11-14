@@ -311,21 +311,11 @@ extension VaultTools {
 
     /// The trust line every search starts with: how much the vault holds for this, and any correction on what it found.
     /// The thresholds are the engine's own (D-52), so the line and the engine's choice agree.
-    /// Ledger notes that match the question, fenced as data, for the end of a search result. Empty when none match.
-    /// `ids` are the commits in that block, the only ones a citation in the answer may name (D-92).
-    func ledgerNotes(for question: String, shown files: Set<String> = []) -> (text: String, ids: [String]) {
-        guard ledgerNotesOn else { return ("", []) }
-        let notes = Self.ledgerNotes(vault: vault, ledger: ledger, question: question, shown: files)
-        guard !notes.isEmpty else { return ("", []) }
-        // Labelled with their ids, as the app's Ask and `burrow chat` hand them over, so an answer can name one (D-90).
-        let text = "\n\nNotes earlier sessions left in the Ledger that match this question, rest on these files, or rest on a file these import or are imported by. Check them against the excerpts above before relying on them:\n"
-            + AskLedger.block(notes, stale: ledger.staleness())
-        return (text, notes.map(\.id))
-    }
-
     /// The Ledger notes for a question and the files shown for it, one import step out both ways (D-75). The app's Ask
-    /// uses this too, so a question asked in the app hears the same decisions a connected program would (D-88).
-    public static func ledgerNotes(vault: Vault, ledger: Ledger, question: String, shown files: Set<String>, limit: Int = 3) -> [LedgerCommit] {
+    /// uses this too, so a question asked in the app hears the same decisions a connected program would (D-88). Chosen by
+    /// relevance to the question's words and the files, newest only among equals (D-99); the files come as a set here, so
+    /// all count as ranked first.
+    public static func ledgerNotes(vault: Vault, ledger: Ledger, question: String, shown files: Set<String>, limit: Int = LedgerRelevance.limit) -> [LedgerCommit] {
         var near: Set<String> = []
         for file in files { for neighbour in (try? vault.neighbours(of: file)) ?? [] where neighbour.kind != .about { near.insert(neighbour.path) } }
         return ledger.notes(for: question, shown: files, near: near.subtracting(files), limit: limit)

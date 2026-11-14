@@ -354,26 +354,20 @@ public struct Ledger: Sendable {
 
     /// Commits whose words match a question, best first: checked facts, decisions and corrections an earlier session
     /// left, so a later model finds them while searching. Wrong and stale commits are left out; so are handoffs and plans.
-    /// Notes for a search: those that rest on a file the search returned (D-69), then those that share words with the
-    /// question. Stale and reverted notes are left out.
+    /// Notes for a search: those that rest on a file the search returned (D-69), or that match the question on their
+    /// own. Reverted notes are left out.
     /// `near` holds files one import away from those shown: a decision on `reconcile.py` also governs the `matcher.py`
     /// it imports, which is where a model may make the change (clip 08, 12 November; D-75). They rank below files shown.
     /// A note whose cited file changed since is still handed over, marked to be checked (D-82): an edit to a cited file
     /// used to drop it, so one comment line changed what every later program was told.
-    public func notes(for question: String, shown files: Set<String> = [], near: Set<String> = [], limit: Int = 3) -> [LedgerCommit] {
-        let words = Self.words(question)
-        guard !words.isEmpty || !files.isEmpty || !near.isEmpty else { return [] }
-        let wrong = reverted()
-        let scored = all().compactMap { commit -> (LedgerCommit, Int)? in
-            guard [.fact, .decision, .correction].contains(commit.kind), !wrong.contains(commit.id) else { return nil }
-            // A note on a file in front of the model comes with it, however the question was worded.
-            if !files.isDisjoint(with: commit.cites.keys) { return (commit, 1_000) }
-            if !near.isDisjoint(with: commit.cites.keys) { return (commit, 500) }
-            let shared = words.intersection(Self.words(commit.message + " " + commit.body)).count
-            // At least two shared words, or one when the question is that short, so a lone common word does not match.
-            return !words.isEmpty && shared >= min(2, words.count) ? (commit, shared) : nil
-        }
-        return scored.sorted { $0.1 == $1.1 ? $0.0.at > $1.0.at : $0.1 > $1.1 }.prefix(limit).map(\.0)
+    /// Since D-99 the notes are chosen by relevance to the question and the files, newest only among equals: see
+    /// LedgerRelevance. Here, without a search's order or vectors, every file shown counts as ranked first, a file near
+    /// one as second-hand, and meaning is shared words.
+    public func notes(for question: String, shown files: Set<String> = [], near: Set<String> = [], limit: Int = LedgerRelevance.limit) -> [LedgerCommit] {
+        guard !Self.words(question).isEmpty || !files.isEmpty || !near.isEmpty else { return [] }
+        let request = LedgerRelevance.Request(question: question, ranked: files.sorted(), near: Dictionary(uniqueKeysWithValues: near.map { ($0, 0) }))
+        let everything = all()
+        return LedgerRelevance.choose(from: everything, wrong: Set(everything.compactMap(\.reverts)), for: request, limit: limit)
     }
 
     static let stopWords: Set<String> = ["the", "and", "for", "that", "this", "with", "from", "what", "which", "when", "how", "does",

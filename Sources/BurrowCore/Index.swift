@@ -179,7 +179,8 @@ extension Vault {
     }
 
     /// The question as a vector. The same question asked twice is not sent to the embedding model twice.
-    func questionVector(_ question: String, embedder: Embedder?) async throws -> [Float]? {
+    /// Public so the Ledger notes chosen for a search are matched on the same vector, embedded once (D-99).
+    public func questionVector(_ question: String, embedder: Embedder?) async throws -> [Float]? {
         guard let embedder else { return nil }
         if let known = database.locked({ questionVectors[question] }) { return known }
         guard let vector = try await embedder.embed([question]).first else { return nil }
