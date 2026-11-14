@@ -94,6 +94,12 @@ public enum Connect {
     // MARK: Planning
 
     public static func plan(_ program: Program, _ setup: Setup) -> Plan {
+        // A path with control or invisible characters can't be shown as it is, nor quoted as the same path once cleaned,
+        // so it is never written into a program's settings or printed as a command (as linked folders, D-104).
+        let paths = [("vault", setup.vault), ("burrow binary", setup.burrow), ("BURROW_STATE_DIR", setup.stateDir ?? "")]
+        if let (name, _) = paths.first(where: { Printable.hasControl($0.1) }) {
+            return Plan(program: program, changes: [], refusal: "the \(name)'s path has control or invisible characters, so Burrow won't put it in a program's settings or print it as a command. Rename the folder and run this again.", notes: [], manual: nil)
+        }
         do {
             switch program {
             case .claudeCode: return try claudeCode(setup)
@@ -253,12 +259,14 @@ public enum Connect {
     }
 
     private static func n8n(_ setup: Setup) -> Plan {
+        // supergateway runs --stdio through a shell: each part is a shell word inside it, and the whole is one more shell
+        // word on the line pasted, so a path with $(…), backticks or quotes stays a path at both levels.
         let command = ([setup.burrow, "mcp", setup.vault]).map(Printable.shellWord).joined(separator: " ")
         let state = setup.stateDir.map { "BURROW_STATE_DIR=" + Printable.shellWord($0) + " " } ?? ""
         let manual = """
         1. Bridge Burrow to HTTP (n8n's MCP Client Tool speaks HTTP; Burrow speaks stdio). supergateway is a separate npm
            program, not part of Burrow:
-             \(state)npx -y supergateway@4.2.2 --stdio "\(command)" --outputTransport streamableHttp --stateful --host 127.0.0.1 --port 8790
+             \(state)npx -y supergateway@4.2.2 --stdio \(Printable.shellWord(command)) --outputTransport streamableHttp --stateful --host 127.0.0.1 --port 8790
         2. In the workflow, connect an MCP Client Tool node to the AI Agent's Tool port:
              Endpoint: http://127.0.0.1:8790/mcp
              Server Transport: HTTP Streamable

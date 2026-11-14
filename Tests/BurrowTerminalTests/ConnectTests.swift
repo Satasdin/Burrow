@@ -199,6 +199,73 @@ final class ConnectTests: XCTestCase {
         XCTAssertTrue(plan.manual!.contains("check '\(Vault.realPath(vaultFolder.path))' --json") || plan.manual!.contains("check \(Vault.realPath(vaultFolder.path)) --json"))
     }
 
+    /// A vault path holding `"`, `$(…)` and a backtick stays one path in every printed command: the n8n line pasted
+    /// into a shell gives `--stdio` one argument, and that argument run by a shell (as supergateway runs it) gives the
+    /// binary, `mcp` and the exact path, and nothing runs. Found by a security review of the first version, which wrapped
+    /// the shell-quoted parts in double quotes.
+    func testPrintedCommandsKeepAHostilePathAsOneArgument() throws {
+        let hostile = top.appendingPathComponent("a\"$(touch PWNED)\"b`touch PWNED2`")
+        try FileManager.default.createDirectory(at: hostile, withIntermediateDirectories: true)
+        let sandbox = top.appendingPathComponent("sandbox")
+        try FileManager.default.createDirectory(at: sandbox, withIntermediateDirectories: true)
+        let setup = Connect.Setup(burrow: burrowPath, vault: Vault.realPath(hostile.path), home: home, stateDir: state.path + "/$(touch PWNED3)")
+        let manual = try XCTUnwrap(Connect.plan(.n8n, setup).manual)
+        let line = try XCTUnwrap(manual.split(separator: "\n").first { $0.contains("supergateway@") })
+            .trimmingCharacters(in: .whitespaces)
+        func sh(_ script: String) throws -> [String] {
+            let process = Process()
+            process.executableURL = URL(fileURLWithPath: "/bin/sh")
+            process.arguments = ["-c", script]
+            process.currentDirectoryURL = sandbox
+            let out = Pipe()
+            process.standardOutput = out
+            try process.run()
+            let data = out.fileHandleForReading.readDataToEndOfFile()
+            process.waitUntilExit()
+            return String(decoding: data, as: UTF8.self).split(separator: "\n", omittingEmptySubsequences: false).dropLast().map(String.init)
+        }
+        // The pasted line, with npx replaced by something that prints each argument and the variable it was given.
+        let pasted = line.replacingOccurrences(of: "npx -y supergateway@4.2.2", with: "sh -c 'printf \"%s\\n\" \"$BURROW_STATE_DIR\" \"$@\"' sh")
+        let arguments = try sh(pasted)
+        XCTAssertEqual(arguments.first, state.path + "/$(touch PWNED3)", line)
+        let stdio = try XCTUnwrap(arguments.firstIndex(of: "--stdio"), "\(arguments)")
+        // supergateway hands that one argument to a shell.
+        let words = try sh("set -- " + arguments[stdio + 1] + "; for a in \"$@\"; do printf '%s\\n' \"$a\"; done")
+        XCTAssertEqual(words, [burrowPath, "mcp", Vault.realPath(hostile.path)])
+        let check = try XCTUnwrap(manual.split(separator: "\n").first { $0.contains(" check ") })
+        let checkLine = String(check.split(separator: ":", maxSplits: 1)[1]).trimmingCharacters(in: .whitespaces)
+        XCTAssertEqual(try sh("set -- " + checkLine + "; for a in \"$@\"; do printf '%s\\n' \"$a\"; done"),
+                       [burrowPath, "check", Vault.realPath(hostile.path), "--json"])
+        // Claude Code runs its hook commands with a shell too.
+        let plan = Connect.plan(.claudeCode, setup)
+        let hooks = try XCTUnwrap(JSONSerialization.jsonObject(with: Data(plan.changes[1].after.utf8)) as? [String: Any])
+        let stop = try XCTUnwrap(((value(hooks, "hooks.Stop") as? [[String: Any]])?.first?["hooks"] as? [[String: Any]])?.first?["command"] as? String)
+        let printer = "sh -c 'printf \"%s\\n\" \"$BURROW_STATE_DIR\" \"$@\"' sh"
+        XCTAssertEqual(try sh(stop.replacingOccurrences(of: burrowPath, with: printer)),
+                       [state.path + "/$(touch PWNED3)", "hook", "claude", Vault.realPath(hostile.path), "--gate"], stop)
+        let created = try FileManager.default.contentsOfDirectory(atPath: sandbox.path) + FileManager.default.contentsOfDirectory(atPath: top.path)
+        XCTAssertFalse(created.contains { $0.hasPrefix("PWNED") }, "nothing ran: \(created)")
+    }
+
+    func testAPathWithControlCharactersIsRefusedNotCleaned() throws {
+        for setup in [Connect.Setup(burrow: burrowPath, vault: "/tmp/Notes\u{1b}]0;x\u{07}", home: home),
+                      Connect.Setup(burrow: burrowPath, vault: "/tmp/Notes\u{202e}txt", home: home),
+                      Connect.Setup(burrow: burrowPath, vault: "/tmp/Notes", home: home, stateDir: "/tmp/state\nrm -rf ~")] {
+            for program in Connect.Program.allCases {
+                let plan = Connect.plan(program, setup)
+                XCTAssertNotNil(plan.refusal, "\(program) \(setup.vault)")
+                XCTAssertNil(plan.manual)
+                XCTAssertTrue(plan.changes.isEmpty)
+                XCTAssertFalse(Connect.describe(plan, setup).unicodeScalars.contains { Printable.hasControl(String($0)) && $0 != "\n" })
+            }
+        }
+        let folder = top.appendingPathComponent("Notes\u{202e}txt")
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        let refused = try BurrowBinary.piped(["connect", "n8n", folder.path, "--home", home.path], state: state)
+        XCTAssertEqual(refused.status, 1)
+        XCTAssertTrue(refused.err.contains("control or invisible characters"), refused.err)
+    }
+
     // MARK: the command
 
     func testTheCommandPrintsAndOnlyThePersonWrites() throws {

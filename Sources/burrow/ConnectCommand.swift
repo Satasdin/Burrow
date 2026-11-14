@@ -50,7 +50,7 @@ func runConnectCommand(_ arguments: [String]) throws -> Bool {
     let plan = Connect.plan(program, setup)
     print(Connect.describe(plan, setup))
     fflush(stdout)
-    if let refusal = plan.refusal, write { throw Failure("nothing was written: " + refusal) }
+    if let refusal = plan.refusal { throw Failure((write ? "nothing was written: " : "") + refusal) }
     guard write else {
         if !plan.pending.isEmpty {
             print("\nNothing was written. To write this, run it again with --write in your own terminal; you'll be asked first.")
