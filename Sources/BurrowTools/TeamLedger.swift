@@ -122,7 +122,7 @@ public enum TeamLedger {
                     continue
                 }
                 let text: String
-                switch SafeRead.text(path, cap: largestFile) {
+                switch SafeRead.text(path, cap: largestFile, within: placeReal) {
                 case let .success(read): text = read
                 case let .failure(refusal):
                     skipped.append("\(folder)/\(name): \(refusal)")
@@ -240,7 +240,8 @@ public enum TeamLedger {
     /// it is shown as proposed and never run on this Mac (D-109).
     public static func carriesCheck(_ commit: LedgerCommit, team: Team) -> Bool {
         let file = team.ledgerFolder.appendingPathComponent(commit.branch).appendingPathComponent(commit.id + ".md")
-        guard case let .success(text) = SafeRead.text(file.path, cap: largestFile) else { return false }
+        let folder = team.ledgerFolder.appendingPathComponent(commit.branch).resolvingSymlinksInPath().path
+        guard case let .success(text) = SafeRead.text(file.path, cap: largestFile, within: folder) else { return false }
         for line in text.split(separator: "\n", omittingEmptySubsequences: false).dropFirst() {
             if line == "---" { break }
             if let colon = line.firstIndex(of: ":"), line[..<colon].lowercased().contains("check") { return true }

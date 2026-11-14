@@ -104,13 +104,13 @@ struct Scanner {
         // Opened once, at the real path that was checked, without blocking: a pipe or a device is never read, and the
         // cap is checked before reading, so a folder from someone else can't hang or flood the index (D-112).
         if Extractor.handles(path) {
-            guard case let .success(data) = SafeRead.data(real, cap: min(Extractor.largest, largest ?? .max)) else { return nil }
+            guard case let .success(data) = SafeRead.data(real, cap: min(Extractor.largest, largest ?? .max), within: home) else { return nil }
             let hash = digest(data)
             guard let text = Extractor.markdown(of: data, path: path, hash: hash) else { return nil }
             return Found(path: path, text: text, hash: hash)
         }
         let limit = min(dataExtensions.contains(url.pathExtension.lowercased()) ? largestDataFile : largestFile, largest ?? .max)
-        guard case let .success(data) = SafeRead.data(real, cap: limit), !data.contains(0),
+        guard case let .success(data) = SafeRead.data(real, cap: limit, within: home), !data.contains(0),
               let text = String(data: data, encoding: .utf8) else { return nil }
         return Found(path: path, text: text, hash: digest(data))
     }
