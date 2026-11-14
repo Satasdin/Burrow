@@ -24,6 +24,47 @@ marked as its claim.
 
 To pick a conversation up anywhere, ask: *"Pick up my last conversation; it is saved in Burrow."*
 
+## One command: burrow connect
+
+```
+burrow connect <program> ~/Notes            # shows the setup, writes nothing
+burrow connect <program> ~/Notes --write    # writes it, in your own terminal, after you type yes
+```
+
+Programs: `claude-code`, `opencode`, `openclaw`, `hermes`, `n8n`. It sets up three things, each the way that program
+allows:
+
+1. **Burrow as an MCP server**, started with the full path of this `burrow`, on this vault.
+2. **Burrow's tools always in view.** OpenClaw and Hermes hide MCP tools behind a search step by default, OpenCode 2
+   behind its `execute` tool, Claude Code behind its tool search once there are many. With a small local model that
+   step is where Burrow gets lost: gemma4:12b found Burrow 2 times in 9 with it on, and almost every time with it off.
+3. **Burrow's gate inside the program.** A small model can read a decision and still break it, and rarely calls
+   `burrow_check`. The gate is a hook the model can't skip: when the model edits or finishes, it runs
+   `burrow check <vault> --json`, and a change that rests on a decision not yet shown goes back to the model with the
+   decisions and their reasons, to answer before it is done. Once per change, so it can't loop. The plugins are in
+   [integrations/](../integrations).
+
+It never edits a file without showing the change first: a new file is printed whole, a changed settings file as the
+settings that change (`+` added, `~` changed). `--write` keeps each file it changes beside it as `.before-burrow`, and
+only writes when run in a terminal by you: through a pipe, or from a program's own shell tool, it refuses. A settings
+file it can't read safely (JSON with comments, a YAML setting already set to something else) is left alone, and it says
+what to add by hand. If you use `BURROW_STATE_DIR`, it is carried into the settings so the server and the gate see the
+same approved folders. `--home <dir>` puts everything under another folder, for trying it out.
+
+What it did in real runs (gemma4:12b, the Matatu task of adding a phone-and-amount fallback the Ledger had turned
+down, D-108): with these settings Burrow's tools were listed to the model by name in every run of OpenClaw, Hermes and
+OpenCode. The gate fired every time the model edited (10 of 10) and every time the model then told the person which
+decision the change went against. Hermes put the code back 2 of 2, OpenCode 3 of 6, OpenClaw 0 of 2. Details:
+`burrow-film/v4/runs/gates-d108/RUN.md`.
+
+| Program | Settings it changes | Tools in view | The gate |
+| --- | --- | --- | --- |
+| Claude Code | `~/.claude.json` (`mcpServers.burrow`), `~/.claude/settings.json` (hooks) | `"alwaysLoad": true` on Burrow's server | the Stop hook, `burrow hook claude <vault> --gate` (D-93) |
+| OpenCode | `~/.config/opencode/opencode.json`, `plugins/burrow-gate/` | `"codemode": false` on Burrow's server | plugin, when the session goes idle |
+| OpenClaw | `~/.openclaw/openclaw.json`, `~/.openclaw/burrow-gate/` | `tools.toolSearch: false` (no per-server setting) | plugin, after each edit or command |
+| Hermes Agent | `~/.hermes/config.yaml`, `~/.hermes/plugins/burrow-gate/` | `tools.tool_search.enabled: "off"` (no per-server setting) | plugin, after each edit or command, and before the final answer of a turn that edited files |
+| n8n | nothing (n8n keeps settings in its database) | n8n has no tool search | none: n8n can't hold an agent's reply; it prints a check step to add |
+
 ## From the app
 
 The Programs page (⌘4) shows each program as a line running into the vault. It reads each program's own settings and
@@ -48,9 +89,21 @@ claude mcp add --scope user burrow -- /full/path/to/burrow mcp ~/Notes
 For one project only, run it in that project's folder with `--scope local` (just you) or `--scope project` (written to
 the project's `.mcp.json`, shared with whoever uses the project). Claude Code then lists Burrow only there.
 
+With `burrow connect claude-code ~/Notes --write` the server is added with `"alwaysLoad": true`, so Claude Code never
+defers Burrow's tools behind its tool search, and the hooks are added beside any you have: session start, compaction
+and session end keep a handoff in the Ledger, and Stop runs the gate (D-93). Close Claude Code first: it keeps
+`~/.claude.json` open and can write over a change made while it runs.
+
 ## OpenCode
 
-In `opencode.json` (in the project, or `~/.config/opencode/opencode.json`):
+`burrow connect opencode ~/Notes --write` does all of this for you: Burrow's server with `"codemode": false`, and the
+gate plugin in `~/.config/opencode/plugins/burrow-gate/`. OpenCode 2 puts every MCP server's tools behind one `execute`
+tool ("Code Mode") unless the server says `"codemode": false`; with it, `burrow_find` and the others are listed to the
+model by name. The gate runs when the model is done and the session is about to go idle: a change that rests on a
+decision not yet shown goes back into the session as a message, and OpenCode runs another step so the model answers it.
+See [integrations/opencode](../integrations/opencode).
+
+By hand, in `opencode.json` (in the project, or `~/.config/opencode/opencode.json`):
 
 ```json
 {
@@ -83,6 +136,53 @@ To use a local server as OpenCode's model, add it as a provider:
                 "models": { "qwen2.5-coder-7b-instruct": { "tools": true } } }
 }
 ```
+
+## OpenClaw
+
+```
+burrow connect openclaw ~/Notes --write
+```
+
+This adds Burrow to `~/.openclaw/openclaw.json` as `mcp.servers.burrow`, turns tool search off (`tools.toolSearch:
+false`), and installs the gate plugin in `~/.openclaw/burrow-gate/`, listed under `plugins.load.paths` and enabled under
+`plugins.entries.burrow-gate`. OpenClaw has no setting to keep one server's tools in view, so tool search goes off for
+all of them; with it on, gemma4:12b called `tool_search` with arguments it got wrong and never found Burrow (0 of 3).
+
+The gate sits after the edit, not at the end of the turn: after `edit`, `write`, `apply_patch` or `exec`, it runs
+`burrow check`, and a change that rests on a decision not yet shown gets the decisions added to that tool's result, so
+the model reads them before its next step. (OpenClaw's end-of-turn hook can ask for a revision, but OpenClaw drops that
+request once any tool has changed something.) See [integrations/openclaw](../integrations/openclaw).
+
+OpenClaw never shows Burrow's connect-time instructions to the model; the decisions in force come with the first tool
+result instead (D-103).
+
+## Hermes Agent
+
+```
+burrow connect hermes ~/Notes --write
+```
+
+This adds three blocks to `~/.hermes/config.yaml` (or `$HERMES_HOME/config.yaml`), leaving every other line as it was:
+`mcp_servers.burrow`, `tools.tool_search.enabled: "off"`, and `burrow-gate` in `plugins.enabled`; and installs the gate
+plugin in `~/.hermes/plugins/burrow-gate/`. Hermes has no setting to keep one server's tools in view either, so tool
+search goes off for all; with it on, gemma4:12b answered through Burrow 2 times in 6. If one of these is already set to
+something else, nothing is written and it says what to set.
+
+The gate checks after each edit (`write_file`, `patch`) and shell command, adding the decisions to that tool's result
+when the change rests on one not yet shown, and then uses Hermes' `pre_verify` hook: when the model has edited files
+and is about to answer, the decisions go back to it as a message it must answer, and Hermes runs another step. See [integrations/hermes](../integrations/hermes).
+
+Two things to know about Hermes with a local model: it refuses a model whose window is under 64,000 tokens (set
+`model.ollama_num_ctx: 65536`), and turn its app connections off (`tools.connectors: false`): in one run the model
+called `manage_connections` itself and Hermes created an anonymous account with its maker.
+
+## n8n
+
+`burrow connect n8n ~/Notes` prints what to set; n8n keeps workflows in its own database, so there is nothing to write.
+n8n's MCP Client Tool speaks HTTP and Burrow speaks stdio, so a bridge (supergateway, a separate npm program) serves
+`burrow mcp` on `http://127.0.0.1:8790/mcp`; the node then uses that endpoint, HTTP Streamable, no authentication, and
+"Tools to Include: All". n8n has no tool search. It also has no hook that can hold an agent's reply: a workflow that
+changes code can add an Execute Command step running `burrow check <vault> --json` and branch on exit 2 or 3.
 
 ## LM Studio
 
