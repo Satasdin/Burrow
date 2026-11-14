@@ -58,7 +58,8 @@ public final class MCPServer {
     /// Called after each tool call that worked, once its reply is written. Burrow's cache warming listens here (D-60);
     /// it must return at once and can't change the reply.
     public var afterCall: ((_ name: String, _ arguments: [String: Any], _ result: ToolResult) -> Void)?
-    /// The tools a client is shown. Every tool still answers when called by name, so old setups keep working.
+    /// The tools a client is shown, and the only ones it may call: a tool it is not shown is refused by name (D-105), but
+    /// for vault_search and vault_read, the older names of the shown burrow_find and burrow_read.
     /// `burrow mcp` shows the four-tool door by default; a server made in code keeps the classic list unless told otherwise.
     public var toolSet = ToolSet.classic
     /// When on, SIGINT and SIGTERM end the connection the way closed input does, so what runs at the end still runs.
@@ -184,6 +185,7 @@ public final class MCPServer {
             guard initialized else { return .reply(Self.failure(id: id, Code.notInitialized, "Send initialize first")) }
             guard let name = fields["name"] as? String else { return .reply(Self.failure(id: id, Code.invalidParams, "tools/call needs name")) }
             guard VaultTools.allDefinitions.contains(where: { $0.name == name }) else { return .reply(Self.failure(id: id, Code.invalidParams, "Unknown tool: \(name)")) }
+            guard VaultTools.callable(name, in: toolSet) else { return .reply(Self.failure(id: id, Code.invalidParams, VaultTools.notOffered(name, in: toolSet))) }
             if let raw = fields["arguments"], !(raw is [String: Any]) && !(raw is NSNull) { return .reply(Self.failure(id: id, Code.invalidParams, "arguments must be an object")) }
             return .toolCall(id: id, name: name, arguments: fields["arguments"] as? [String: Any] ?? [:], stateless: nil)
         default:
@@ -247,6 +249,7 @@ public final class MCPServer {
         case "tools/call":
             guard let name = fields["name"] as? String else { return .reply(Self.failure(id: id, Code.invalidParams, "tools/call needs name")) }
             guard VaultTools.allDefinitions.contains(where: { $0.name == name }) else { return .reply(Self.failure(id: id, Code.invalidParams, "Unknown tool: \(name)")) }
+            guard VaultTools.callable(name, in: toolSet) else { return .reply(Self.failure(id: id, Code.invalidParams, VaultTools.notOffered(name, in: toolSet))) }
             if let raw = fields["arguments"], !(raw is [String: Any]) && !(raw is NSNull) { return .reply(Self.failure(id: id, Code.invalidParams, "arguments must be an object")) }
             // A stateless program may never ask server/discover, and would then never see the decisions in force, so its
             // first tool result carries them, once.

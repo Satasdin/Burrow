@@ -1,8 +1,9 @@
 import BurrowCore
 import Foundation
 
-/// Which tools a connected model is shown. Small models choose badly among many, so by default they see four:
-/// find, read, resume and commit. The rest still answer when called by name.
+/// Which tools a connected model is shown. Small models choose badly among many, so by default they see five: find, read,
+/// resume, commit and check. A tool a connection is not shown is refused when called by name (D-105); only the older
+/// names of the shown search and read, vault_search and vault_read, still answer.
 public enum ToolSet: String, Sendable, CaseIterable {
     /// burrow_find, burrow_read, burrow_resume, burrow_commit.
     case door
@@ -110,8 +111,26 @@ extension VaultTools {
 
     static let doorNames: Set<String> = ["burrow_find", "burrow_read", "burrow_resume", "burrow_commit", "burrow_check"]
 
-    /// Every tool a call may name, whatever is listed.
+    /// Every tool Burrow has, whatever a connection is shown.
     public static var allDefinitions: [ToolDefinition] { ledgerDefinitions + definitions }
+
+    /// The older name of a tool that is the same tool under another name: burrow_find runs vault_search, burrow_read runs
+    /// vault_read. Calling it reaches nothing the shown tool does not, so "the old vault_ names still work" holds (D-105).
+    static let olderNames: [String: String] = ["vault_search": "burrow_find", "vault_read": "burrow_read"]
+
+    /// Whether a connection shown `set` may call `name`. A tool it is not shown is refused, so `--tools full` is the only
+    /// way to reach burrow_recall, burrow_revert, the vault_session_ tools and the rest; before D-105 every tool answered
+    /// by name whatever was shown (D-65), which let any program read raw Claude Code session text back.
+    public static func callable(_ name: String, in set: ToolSet) -> Bool {
+        let shown = Set(listed(set).map(\.name))
+        return shown.contains(name) || olderNames[name].map(shown.contains) == true
+    }
+
+    /// What a program is told when it calls a tool its connection is not shown.
+    public static func notOffered(_ name: String, in set: ToolSet) -> String {
+        let shown = listed(set).map(\.name)
+        return "\(name) is not one of the tools this connection is offered (\(shown.joined(separator: ", "))). The person can start Burrow with `burrow mcp <vault> --tools full` to offer every tool."
+    }
 
     /// The tools a client is shown.
     public static func listed(_ set: ToolSet) -> [ToolDefinition] {
@@ -204,7 +223,10 @@ extension VaultTools {
                                   summary: "\(lines.count) files")
             case "burrow_recall":
                 let full = ["yes", "true", "y"].contains(given.text("full")?.trimmingCharacters(in: .whitespaces).lowercased() ?? "")
-                let shown = Folds.recall(FoldStore(vault: vault), id: given.text("fold"), find: given.text("find"), full: full)
+                // The folds go to any program this tool is listed for; their original messages only to the program and
+                // Claude Code session that wrote them (D-105).
+                let reader = Folds.Reader(client: connectionClient, session: claudeCodeSession)
+                let shown = Folds.recall(FoldStore(vault: vault), id: given.text("fold"), find: given.text("find"), full: full, reader: reader)
                 return remembered(name, given, ToolResult(text: shown.text, summary: shown.found ? "recalled \(given.text("fold") ?? given.text("find") ?? "latest folds")" : "no fold"))
             case "burrow_revert":
                 let made = try ledger.revert(given.text("commit")!, why: given.text("right")!, author: who, client: connectionClient)

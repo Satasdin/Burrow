@@ -112,6 +112,9 @@ public final class VaultTools {
     var hiddenSession: String? { connectionIsNew ? connection?.id : nil }
     /// The program on the other end, as it named itself.
     public var connectionClient: String?
+    /// The Claude Code session this Burrow was started for, when Claude Code started it (it sets `CLAUDE_CODE_SESSION_ID`
+    /// for the MCP servers it runs). Only that session is given a fold's original messages (D-105).
+    public var claudeCodeSession: String? = ProcessInfo.processInfo.environment["CLAUDE_CODE_SESSION_ID"].flatMap { $0.isEmpty ? nil : $0 }
     /// True where the Ledger's write tools may run: a program connected over MCP. Off for Burrow's own chat and tests.
     public var ledgerWrites = false
     /// The trust line on every search (D-66). Off only for an evaluation's baseline arm.
