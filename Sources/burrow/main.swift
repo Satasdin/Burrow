@@ -90,8 +90,14 @@ func run() async throws {
         print(usage)
         return
     }
+    if ["--version", "-v", "version"].contains(command) {
+        print("burrow \(BurrowVersion.number)")
+        return
+    }
     let options = try Options(Array(arguments.dropFirst()))
-    guard let projectPath = options.positional.first else { throw Failure(usage) }
+    guard let projectPath = options.positional.first else {
+        throw Failure("\(command) needs a folder: burrow \(command) <folder>. Run burrow help for every command.")
+    }
     let vault = try Vault(project: URL(fileURLWithPath: projectPath), store: options.values["--store"].map { URL(fileURLWithPath: $0) }, everything: options.flags.contains("--vault"))
     let ollama = Ollama()
     let text = options.positional.dropFirst().first
@@ -241,7 +247,8 @@ func run() async throws {
 
     case "stats":
         let stats = try vault.stats()
-        print("\(stats.files) files, \(stats.notes) notes, \(stats.clusters) clusters, \(stats.chunks) chunks, \(stats.links) links, \(stats.vectors) vectors, index \(stats.indexBytes / 1024) KB")
+        // The same count `burrow index` and the app give: every file, and how many of them are the vault's own notes.
+        print("\(stats.files + stats.notes) files (\(stats.notes) notes in the vault, \(stats.files) other files), \(stats.clusters) clusters, \(stats.chunks) chunks, \(stats.links) links, \(stats.vectors) vectors, index \(stats.indexBytes / 1024) KB")
 
     case "kv":
         // burrow kv <vault> save|ask|list [files...] [--server URL] ["question"]
