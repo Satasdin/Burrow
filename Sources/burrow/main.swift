@@ -30,6 +30,8 @@ burrow: private project memory for local models
 The Ledger, a git for what AIs understood:
 \(ledgerUsage)
 
+\(vaultUsage)
+
 Add --store DIR to keep the memory somewhere other than <project>/.burrow.
 Add --vault to index a whole vault, where every Markdown file is a note.
 """
@@ -40,7 +42,7 @@ struct Options {
     var values: [String: String] = [:]
 
     init(_ arguments: [String]) throws {
-        let takesValue: Set<String> = ["--mode", "--model", "--kind", "--store", "--folder", "--characters", "--server", "--llama", "--part", "--window", "--tools"]
+        let takesValue: Set<String> = ["--mode", "--model", "--kind", "--store", "--folder", "--characters", "--server", "--llama", "--part", "--window", "--tools", "--name"]
         var index = 0
         while index < arguments.count {
             let word = arguments[index]
@@ -86,6 +88,7 @@ func run() async throws {
     let arguments = Array(CommandLine.arguments.dropFirst())
     if try await runTerminalCommand(arguments) { return }
     if try await runLedgerCommand(arguments) { return }
+    if try await runVaultCommand(arguments) { return }
     guard let command = arguments.first, !["help", "--help", "-h"].contains(command) else {
         print(usage)
         return
@@ -110,6 +113,12 @@ func run() async throws {
         }
         FileHandle.standardError.write(Data("\n".utf8))
         print("\(report.filesSeen) files, \(report.filesChanged) changed, \(report.filesRemoved) removed, \(report.chunks) chunks, \(report.links) links, \(report.embedded) embedded in \(String(format: "%.1f", Date().timeIntervalSince(started))) s")
+        KnownVaults.remember(vault)
+        if report.tooLarge > 0 { print("\(report.tooLarge) file\(report.tooLarge == 1 ? " was" : "s were") larger than index.maxFileSize and left out.") }
+        if let stop = report.storageStop {
+            fflush(stdout)
+            throw Failure(stop.message)
+        }
 
     case "find":
         guard let text else { throw Failure("find needs a question") }
@@ -273,6 +282,7 @@ func run() async throws {
         let stats = try vault.stats()
         // The same count `burrow index` and the app give: every file, and how many of them are the vault's own notes.
         print("\(stats.files + stats.notes) files (\(stats.notes) notes in the vault, \(stats.files) other files), \(stats.clusters) clusters, \(stats.chunks) chunks, \(stats.links) links, \(stats.vectors) vectors, index \(stats.indexBytes / 1024) KB")
+        try storageLines(vault).forEach { print($0) }
 
     case "kv":
         // burrow kv <vault> save|ask|list [files...] [--server URL] ["question"]

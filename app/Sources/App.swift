@@ -121,11 +121,16 @@ final class Delegate: NSObject, NSApplicationDelegate {
         guard let path = environment["BURROW_SNAPSHOT"] else { return }
         let wait = Double(environment["BURROW_SNAPSHOT_AFTER"] ?? "") ?? 10
         DispatchQueue.main.asyncAfter(deadline: .now() + wait) {
-            if let view = NSApp.windows.first(where: \.isVisible)?.contentView?.superview,
+            // An open sheet (BURROW_SHEET) is a window of its own: it is what gets saved, and it is closed so the app can quit.
+            let sheets = NSApp.windows.filter { $0.isVisible && $0.sheetParent != nil }
+            let main = sheets.first?.sheetParent ?? NSApp.windows.first(where: { $0.isVisible && $0.sheetParent == nil })
+            if let window = sheets.first ?? main, let view = window.contentView?.superview ?? window.contentView,
                let picture = view.bitmapImageRepForCachingDisplay(in: view.bounds) {
                 view.cacheDisplay(in: view.bounds, to: picture)
                 try? picture.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: path))
             }
+            // AppKit ignores a quit while a sheet is still closing, so a check that opened one leaves at once.
+            if !sheets.isEmpty { exit(0) }
             NSApp.terminate(nil)
         }
     }

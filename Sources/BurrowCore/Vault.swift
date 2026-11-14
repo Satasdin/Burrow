@@ -7,6 +7,10 @@ public struct IndexReport: Sendable, Equatable {
     public var chunks = 0
     public var links = 0
     public var embedded = 0
+    /// Set when a storage limit stopped the index short (D-98). Nothing is deleted when it is.
+    public var storageStop: StorageStop?
+    /// Files left out for being larger than `index.maxFileSize` (D-98).
+    public var tooLarge = 0
 }
 
 public struct VaultStats: Sendable {
@@ -32,6 +36,13 @@ public final class Vault {
     public let everything: Bool
     public var notesFolder: URL { everything ? root.appendingPathComponent("Memory") : store.appendingPathComponent("notes") }
     let database: Database
+    /// True for another vault opened through a bridge (D-97): nothing is written to it, not even a cache file.
+    public let readOnly: Bool
+    /// Vaults opened through this one's bridges, by bridge name and folder, opened once and kept (D-97).
+    var bridgedVaults: [String: Vault] = [:]
+    /// Where Burrow keeps what belongs to no one vault: the global config and the list of known vaults (D-98).
+    /// `BURROW_STATE_DIR` moves it; tests set it directly.
+    public var stateFolder: URL = BurrowPlaces.stateFolder
 
     /// Raised when files must be cut into pieces differently, so an existing index rebuilds itself.
     private static let indexVersion = 3
@@ -52,6 +63,7 @@ public final class Vault {
         self.root = root.standardizedFileURL
         self.store = (store ?? root.appendingPathComponent(".burrow")).standardizedFileURL
         self.everything = everything
+        readOnly = false
         let files = FileManager.default
         try files.createDirectory(at: self.store, withIntermediateDirectories: true)
         if !everything { try files.createDirectory(at: self.store.appendingPathComponent("notes"), withIntermediateDirectories: true) }
@@ -63,6 +75,16 @@ public final class Vault {
         }
     }
 
+    /// Opens another vault only to read it, through a bridge (D-97). Nothing is created or changed in its folder:
+    /// no store, no schema, no cache. It fails if that vault has no index yet.
+    public init(readingOnly root: URL, store: URL? = nil, everything: Bool = true) throws {
+        self.root = root.standardizedFileURL
+        self.store = (store ?? root.appendingPathComponent(".burrow")).standardizedFileURL
+        self.everything = everything
+        readOnly = true
+        database = try Database(readingOnly: self.store.appendingPathComponent("index.sqlite").path)
+    }
+
     // MARK: Building the index
 
     /// Brings the index up to date with the files, touching only what changed.
@@ -71,14 +93,24 @@ public final class Vault {
         var report = IndexReport()
         var found: [String: Scanner.Found] = [:]
         var notes = Set<String>()
+        let largest = largestFileSetting
+        // A file over `index.maxFileSize` is passed over before it is read (D-98).
+        func read(_ path: String, in base: URL) -> Scanner.Found? {
+            if let largest, let size = (try? FileManager.default.attributesOfItem(atPath: base.appendingPathComponent(path).path))?[.size] as? Int,
+               size > largest {
+                report.tooLarge += 1
+                return nil
+            }
+            return Scanner.read(path, in: base, largest: largest)
+        }
         for path in Scanner.paths(in: root) {
-            guard let file = Scanner.read(path, in: root) else { continue }
+            guard let file = read(path, in: root) else { continue }
             found[path] = file
             if everything, Vault.isMarkdown(path) { notes.insert(path) }
         }
         for folder in linkedFolders() {
             for path in Scanner.paths(in: folder.url) {
-                guard let file = Scanner.read(path, in: folder.url) else { continue }
+                guard let file = read(path, in: folder.url) else { continue }
                 let shown = folder.name + "/" + path
                 found[shown] = Scanner.Found(path: shown, text: file.text, hash: file.hash)
             }
@@ -97,19 +129,44 @@ public final class Vault {
         var known: [String: String] = [:]
         for row in try database.rows("SELECT path, hash FROM files") { known[row[0].text!] = row[1].text! }
         let outOfDate = try database.rows("PRAGMA user_version").first?[0].int != Self.indexVersion
+        // The storage limits, read once (D-98). With a limit, each file goes in as a transaction of its own and is rolled
+        // back if the store would then be over, so indexing stops before crossing it, never after. (A savepoint is not
+        // enough: rolling back to one leaves the pages it grew into.) Removing comes first: it frees room.
+        let limits = StorageGuard(vault: self)
+        var stop: StorageStop?
+        var leftOut = Set<String>()
+        struct OverLimit: Error {}
 
-        try database.transaction {
-            for path in known.keys where found[path] == nil {
-                try remove(path)
-                report.filesRemoved += 1
+        func add(_ path: String) throws {
+            if known[path] != nil { try remove(path) }
+            try insert(found[path]!, isNote: notes.contains(path))
+        }
+        func addWithin(_ limits: StorageGuard, _ path: String) throws {
+            if stop != nil {
+                stop!.filesNotAdded.append(path)
+                if known[path] == nil { leftOut.insert(path) }
+                return
             }
-            for path in found.keys.sorted() where outOfDate || known[path] != found[path]!.hash {
-                if known[path] != nil { try remove(path) }
-                try insert(found[path]!, isNote: notes.contains(path))
-                report.filesChanged += 1
+            var crossed: StorageStop?
+            do {
+                try database.transaction {
+                    try add(path)
+                    // The word index keeps new terms in memory until commit; this writes them out, so they are measured.
+                    try database.run("INSERT INTO chunks_fts(chunks_fts, rank) VALUES('merge', 0)")
+                    crossed = limits.crossed(limits.total(index: try indexBytesInUse()))
+                    if crossed != nil { throw OverLimit() }
+                }
+            } catch is OverLimit {
+                // A changed file keeps its earlier version in the index; a new one stays out.
+                crossed!.filesNotAdded = [path]
+                stop = limits.stop(crossed!, holdingNow: limits.total(index: try indexBytesInUse()))
+                if known[path] == nil { leftOut.insert(path) }
+                return
             }
-            if outOfDate { try database.execute("PRAGMA user_version = \(Self.indexVersion)") }
-            let texts = found.mapValues(\.text)
+            report.filesChanged += 1
+        }
+        func links() throws {
+            let texts = found.filter { !leftOut.contains($0.key) }.mapValues(\.text)
             let links = LinkFinder.links(files: texts, notes: notes)
             try database.run("DELETE FROM links")
             for link in links {
@@ -117,10 +174,63 @@ public final class Vault {
                                  [.text(link.from), .text(link.to), .text(link.kind.rawValue), link.via.map(Value.text) ?? .null])
             }
             report.links = links.count
-            if outOfDate || report.filesChanged + report.filesRemoved > 0 { try bumpGeneration() }
+        }
+        let changed = found.keys.sorted().filter { outOfDate || known[$0] != found[$0]!.hash }
+
+        if let limits {
+            try database.transaction {
+                for path in known.keys where found[path] == nil {
+                    try remove(path)
+                    report.filesRemoved += 1
+                }
+                // The links go in before the files, so the limit is checked with them already counted.
+                try links()
+            }
+            for path in changed { try addWithin(limits, path) }
+            try database.transaction {
+                if !leftOut.isEmpty { try links() }
+                // An index stopped short of a new version stays marked old, so the next run finishes it.
+                if outOfDate, stop == nil { try database.execute("PRAGMA user_version = \(Self.indexVersion)") }
+                if outOfDate || report.filesChanged + report.filesRemoved > 0 { try bumpGeneration() }
+            }
+        } else {
+            try database.transaction {
+                for path in known.keys where found[path] == nil {
+                    try remove(path)
+                    report.filesRemoved += 1
+                }
+                for path in changed {
+                    try add(path)
+                    report.filesChanged += 1
+                }
+                if outOfDate { try database.execute("PRAGMA user_version = \(Self.indexVersion)") }
+                try links()
+                if outOfDate || report.filesChanged + report.filesRemoved > 0 { try bumpGeneration() }
+            }
         }
         database.locked { forgetCaches() }
-        if let embedder { report.embedded = try await embedMissing(embedder, onProgress: onProgress) }
+        if let embedder {
+            let embedded = try await embedMissing(embedder, onProgress: onProgress, limits: limits)
+            report.embedded = embedded.done
+            if let short = embedded.stop {
+                if stop == nil { stop = short } else { stop!.piecesWithoutMeaning = short.piecesWithoutMeaning }
+            }
+        }
+        if stop != nil {
+            // What finishing would take, from this vault's own proportions: index bytes per byte of text, pieces per
+            // byte, and a vector's two places for each piece still without one (D-98).
+            let indexedText = found.filter { !leftOut.contains($0.key) }.reduce(0) { $0 + $1.value.text.utf8.count }
+            let restText = stop!.filesNotAdded.reduce(0) { $0 + (found[$1]?.text.utf8.count ?? 0) }
+            let index = try indexBytesInUse()
+            let pieces = try count("chunks")
+            let perByte = Double(index) / Double(max(1, indexedText))
+            let restPieces = Int((Double(pieces) / Double(max(1, indexedText)) * Double(restText)).rounded(.up))
+            let width = vectorDimension() > 0 ? vectorDimension() : 1024
+            let perVector = embedder == nil ? 0 : 8 * width + 8 + 64
+            let more = Int(perByte * Double(restText)) + (stop!.piecesWithoutMeaning + (embedder == nil ? 0 : restPieces)) * perVector
+            stop!.needed = stop!.holding + more
+        }
+        report.storageStop = stop
         report.chunks = try count("chunks")
         return report
     }
@@ -147,13 +257,14 @@ public final class Vault {
         }
     }
 
-    private func embedMissing(_ embedder: Embedder, onProgress: ((String) -> Void)?) async throws -> Int {
+    private func embedMissing(_ embedder: Embedder, onProgress: ((String) -> Void)?, limits: StorageGuard?) async throws -> (done: Int, stop: StorageStop?) {
         let missing = try database.rows("""
             SELECT c.id, f.path, c.body, c.section FROM chunks c JOIN files f ON f.id = c.file_id
             WHERE c.id NOT IN (SELECT chunk_id FROM vectors) ORDER BY c.id
             """)
         var done = 0
         var start = 0
+        var stop: StorageStop?
         while start < missing.count {
             let batch = Array(missing[start..<min(start + 32, missing.count)])
             // The path goes first because it often says more about a chunk than its first lines do.
@@ -163,16 +274,30 @@ public final class Vault {
             })
             try database.transaction {
                 for (row, vector) in zip(batch, vectors) {
+                    if let limits {
+                        // Each vector is a row in the index, counted in whole pages since a long one spills onto a
+                        // second, and a place in the meaning-search block (D-98).
+                        let place = 8 + vector.count * 4
+                        let index = try indexBytesInUse()
+                        let pageSize = try database.rows("PRAGMA page_size").first?[0].int ?? 4096
+                        let row = ((vector.count * 4 + 64) / pageSize + 1) * pageSize
+                        if var crossed = limits.crossed(limits.total(index: index, extra: (done + 1) * place + row)) {
+                            crossed.piecesWithoutMeaning = missing.count - done
+                            stop = limits.stop(crossed, holdingNow: limits.total(index: index, extra: done * place))
+                            break
+                        }
+                    }
                     try database.run("INSERT OR REPLACE INTO vectors(chunk_id, vector) VALUES(?,?)", [row[0], .blob(Self.pack(vector))])
+                    done += 1
                 }
             }
-            done += batch.count
+            if stop != nil { break }
             start += batch.count
             onProgress?("embedded \(done) of \(missing.count)")
         }
         if done > 0 { try bumpGeneration() }
         database.locked { forgetCaches() }
-        return done
+        return (done, stop)
     }
 
     // MARK: Vectors

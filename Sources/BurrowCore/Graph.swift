@@ -115,8 +115,13 @@ extension Vault {
     /// Where a vault path is on disk, for reading its modified date.
     func locationForSalience(_ path: String) -> URL? { location(of: path)?.url }
 
-    private func location(of path: String) -> (url: URL, root: URL, relative: String, linked: Bool)? {
+    func location(of path: String) -> (url: URL, root: URL, relative: String, linked: Bool)? {
         guard !path.isEmpty, !path.hasPrefix("/"), !path.split(separator: "/", omittingEmptySubsequences: false).contains("..") else { return nil }
+        // A path through a bridge is in the other vault, and read-only like a linked folder (D-97).
+        if let (bridge, inner) = bridged(path) {
+            guard let place = bridgedVault(bridge)?.location(of: inner) else { return nil }
+            return (place.url, place.root, place.relative, true)
+        }
         if let first = path.split(separator: "/").first, let folder = linkedFolders().first(where: { $0.name == first }) {
             let relative = String(path.dropFirst(first.count + 1))
             return (folder.url.appendingPathComponent(relative), folder.url, relative, true)
@@ -126,6 +131,7 @@ extension Vault {
 
     /// The text of anything in the vault.
     public func text(of path: String) -> String? {
+        if let (bridge, inner) = bridged(path) { return bridgedVault(bridge)?.text(of: inner) }
         if !everything, let note = try? noteURL(path) { return try? String(contentsOf: note, encoding: .utf8) }
         guard let place = location(of: path) else { return nil }
         return Scanner.read(place.relative, in: place.root)?.text
@@ -295,6 +301,7 @@ extension Vault {
 
     /// Writes a proposed change someone accepted, only if the file is still what the change was made from.
     public func applyChange(_ path: String, expecting old: String, with new: String) throws {
+        guard bridged(path) == nil else { throw NoteProblem(description: "\(path) is in a bridged vault, which Burrow only reads.") }
         guard let place = location(of: path) else { throw NoteProblem(description: "\(path) is outside this vault.") }
         guard text(of: path) == old else { throw NoteProblem(description: "\((path as NSString).lastPathComponent) has changed since this was proposed, so it was left alone.") }
         try new.write(to: place.url, atomically: true, encoding: .utf8)

@@ -203,7 +203,8 @@ public final class VaultTools {
         }
         let usesMeaning = hasVectors
         do {
-            try await vault.refresh(embedder: usesMeaning ? embedder : nil)
+            let report = try await vault.refresh(embedder: usesMeaning ? embedder : nil)
+            if let stop = report.storageStop { log(stop.message) }
             // Taken before the re-index, so a file changed during it is picked up next time.
             try? current.write(to: fingerprintFile, atomically: true, encoding: .utf8)
         } catch {
@@ -363,6 +364,14 @@ public final class VaultTools {
     /// Every folder that holds an indexed file, plus the vault's own and the linked ones.
     private func knownFolders() throws -> Set<String> {
         var out = Set(vault.folders())
+        // A bridged vault is a folder a tool can be limited to, by its name or a folder inside it (D-97).
+        for shelf in vault.bridgedShelves() {
+            out.insert(shelf.bridge.name)
+            for file in shelf.files {
+                var folder = (file.path as NSString).deletingLastPathComponent
+                while folder.contains(Bridge.separator), out.insert(folder).inserted { folder = (folder as NSString).deletingLastPathComponent }
+            }
+        }
         for file in try vault.projectMap().files {
             var folder = (file.path as NSString).deletingLastPathComponent
             while !folder.isEmpty, out.insert(folder).inserted { folder = (folder as NSString).deletingLastPathComponent }
@@ -379,6 +388,7 @@ public final class VaultTools {
     /// Only indexed files can be opened. That keeps out git-ignored files, Burrow's own store, and anything outside the vault.
     private func resolve(_ asked: String) async throws -> Resolved {
         var clean = Self.tidy(asked)
+        if let bridged = resolveBridged(clean) { return bridged }
         if clean.hasPrefix(vault.root.path + "/") { clean = String(clean.dropFirst(vault.root.path.count + 1)) }
         for folder in vault.linkedFolders() where clean.hasPrefix(folder.path + "/") {
             clean = folder.name + "/" + clean.dropFirst(folder.path.count + 1)
@@ -397,8 +407,41 @@ public final class VaultTools {
         }
         if same.count == 1 { return .found(same[0]) }
         if same.count > 1 { return .ambiguous(same) }
+        // "Work/notes/plan.md" for "Work › notes/plan.md", when this vault has nothing there itself.
+        if let first = clean.split(separator: "/").first, let bridge = vault.bridges().first(where: { $0.name == first }),
+           let bridged = resolveBridged(bridge.label(String(clean.dropFirst(first.count + 1)))) { return bridged }
         let stem = ((wanted as NSString).lastPathComponent as NSString).deletingPathExtension
         return .missing(close: stem.isEmpty ? [] : Array(paths.filter { $0.lowercased().contains(stem) }.prefix(8)))
+    }
+
+    /// A path through a bridge (D-97), checked against the other vault's own index. " > " is taken for the separator,
+    /// since a model may not type "›". Nil when the path is not a bridged one.
+    private func resolveBridged(_ asked: String) -> Resolved? {
+        var clean = asked
+        for bridge in vault.bridges() where clean.hasPrefix(bridge.name + " > ") {
+            clean = bridge.label(String(clean.dropFirst(bridge.name.count + 3)))
+        }
+        guard let (bridge, inner) = vault.bridged(clean) else { return nil }
+        let files = vault.bridgedShelves().first { $0.bridge.name == bridge.name }?.files.map(\.path) ?? []
+        if files.contains(clean) { return .found(clean) }
+        let wanted = inner.lowercased()
+        let same = files.filter { path in
+            let name = (path as NSString).lastPathComponent.lowercased()
+            return path.lowercased() == clean.lowercased() || name == wanted || (name as NSString).deletingPathExtension == wanted
+                || path.lowercased() == clean.lowercased() + ".md"
+        }
+        if same.count == 1 { return .found(same[0]) }
+        if same.count > 1 { return .ambiguous(same) }
+        let stem = ((wanted as NSString).lastPathComponent as NSString).deletingPathExtension
+        return .missing(close: stem.isEmpty ? [] : Array(files.filter { $0.lowercased().contains(stem) }.prefix(8)))
+    }
+
+    /// Whether a vault path is a note, here or through a bridge.
+    private func isNote(_ path: String) -> Bool {
+        if vault.bridged(path) != nil {
+            return vault.bridgedShelves().flatMap(\.files).first { $0.path == path }?.isNote ?? false
+        }
+        return (try? vault.projectMap().files.first { $0.path == path }?.isNote) ?? nil ?? false
     }
 
     private func pathOrFailure(_ asked: String) async throws -> (path: String?, failure: ToolResult?) {
@@ -422,14 +465,17 @@ public final class VaultTools {
         guard !excerpts.isEmpty else {
             let trust = trustLine(found)
             let notes = await ledgerNotes(for: query, ranked: [])
-            return ToolResult(text: "\(trust.isEmpty ? "" : trust + "\n")Nothing in the vault\(inFolder) matches \"\(query)\". \(found.how)\(notes.text)", ledger: notes.ids, summary: "nothing found\(inFolder)")
+            let bridgedNotes = ledgerNotesOn ? BridgedLedger.notes(vault: vault, question: query, shown: []) : ""
+            return ToolResult(text: "\(trust.isEmpty ? "" : trust + "\n")Nothing in the vault\(inFolder) matches \"\(query)\". \(found.how)\(notes.text)\(bridgedNotes)", ledger: notes.ids, summary: "nothing found\(inFolder)")
         }
         let body = excerpts.map(ProjectContent.block).joined(separator: "\n\n")
         let trust = trustLine(found)
         let steering = excerpts.flatMap { piece in Steering.lines(in: piece.text, firstLine: piece.startLine).map { (path: piece.path, line: $0.line) } }
         remember(steering)
         let notes = await ledgerNotes(for: query, ranked: found.retrieved.paths)
-        return ToolResult(text: "\(ProjectContent.notice)\n\(trust.isEmpty ? "" : trust + "\n")\(excerpts.count) excerpts for \"\(query)\"\(inFolder). \(found.how)\n\n\(body)\(notes.text)\(Steering.notice(steering))",
+        // Decisions from a bridged vault that shares its Ledger, labelled with that vault (D-97).
+        let bridgedNotes = ledgerNotesOn ? BridgedLedger.notes(vault: vault, question: query, shown: Set(excerpts.map(\.path))) : ""
+        return ToolResult(text: "\(ProjectContent.notice)\n\(trust.isEmpty ? "" : trust + "\n")\(excerpts.count) excerpts for \"\(query)\"\(inFolder). \(found.how)\n\n\(body)\(notes.text)\(bridgedNotes)\(Steering.notice(steering))",
                           sources: sources(found.retrieved), ledger: notes.ids,
                           summary: "\(excerpts.count) excerpts from \(found.retrieved.paths.count) files, \(found.retrieved.characters) characters")
     }
@@ -457,8 +503,7 @@ public final class VaultTools {
         }
         let last = start + kept.count - 1
         let more = last < all.count ? " Continue with start_line \(last + 1)." : ""
-        let isNote = (try? vault.projectMap().files.first { $0.path == path }?.isNote) ?? nil ?? false
-        let body = ProjectContent.block(path: path, lines: "\(start)-\(last)", kind: isNote ? "note" : Extractor.handles(path) ? "document" : "code", why: nil, body: kept.joined(separator: "\n"))
+        let body = ProjectContent.block(path: path, lines: "\(start)-\(last)", kind: isNote(path) ? "note" : Extractor.handles(path) ? "document" : "code", why: nil, body: kept.joined(separator: "\n"))
         let steering = Steering.lines(in: all[(start - 1)..<last].joined(separator: "\n"), firstLine: start).map { (path: path, line: $0.line) }
         remember(steering)
         // A read carries the Ledger's notes on this file and its import neighbours, as a search does (D-75):
@@ -493,10 +538,14 @@ public final class VaultTools {
         } else {
             folder = fixedFolder ?? ""
         }
-        let prefix = folder.isEmpty ? "" : folder + "/"
+        let shelves = vault.bridgedShelves()
+        // A bridged vault lists as a folder of its own: "Work › notes/plan.md" sits in "Work", then "Work › notes" (D-97).
+        let prefix = folder.isEmpty ? "" : shelves.contains { $0.bridge.name == folder } ? folder + Bridge.separator : folder + "/"
         var folderCounts: [String: Int] = [:]
         var files: [MapFile] = []
-        for file in try vault.projectMap().files where file.path.hasPrefix(prefix) {
+        let everyFile = try vault.projectMap().files + (folder.isEmpty ? [] : shelves.flatMap(\.files))
+        if folder.isEmpty { for shelf in shelves where !shelf.files.isEmpty { folderCounts[shelf.bridge.name] = shelf.files.count } }
+        for file in everyFile where file.path.hasPrefix(prefix) {
             let rest = file.path.dropFirst(prefix.count)
             if let slash = rest.firstIndex(of: "/") { folderCounts[String(rest[..<slash]), default: 0] += 1 } else { files.append(file) }
         }
@@ -517,7 +566,9 @@ public final class VaultTools {
             return "  \(ProjectContent.defanged(name))  (\(count) files\(linked.contains(name) ? ", linked code, read-only" : ""))"
         }
         let cut = names.count > lines.count ? "\n  and \(names.count - lines.count) more" : ""
-        return ToolResult(text: "\(ProjectContent.listingNotice)\n\(lines.isEmpty ? "  This vault has no folders yet." : lines.joined(separator: "\n"))\(cut)",
+        let bridged = vault.bridgedShelves().map { "  \(ProjectContent.defanged($0.bridge.name))  (\($0.files.count) files, bridged vault, read-only; its paths start \"\(ProjectContent.defanged($0.bridge.name))\(Bridge.separator)\")" }
+        let all = lines + bridged
+        return ToolResult(text: "\(ProjectContent.listingNotice)\n\(all.isEmpty ? "  This vault has no folders yet." : all.joined(separator: "\n"))\(cut)",
                           summary: "\(names.count) folders, \(linked.count) linked")
     }
 
@@ -673,6 +724,9 @@ extension VaultTools {
             if line.count + piece.count + 2 > most { break }
             line += line.isEmpty ? piece : ". " + piece
         }
+        // Bridged vaults are named, so a model knows a question about them is one to search for (D-97).
+        let bridged = vault.bridgedShelves().filter { !$0.files.isEmpty }.map { "\(plain($0.bridge.name, 30)) (\($0.files.count) files)" }
+        if !bridged.isEmpty { line += (line.isEmpty ? "" : ". ") + "Bridged vaults, read-only, paths starting with their name and ›: " + bridged.joined(separator: ", ") }
         return line
     }
 }

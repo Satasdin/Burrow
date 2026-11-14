@@ -24,6 +24,7 @@ struct LibraryPage: View {
     }
 
     var body: some View {
+        ScrollViewReader { reader in
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 26, pinnedViews: []) {
                 header
@@ -40,28 +41,46 @@ struct LibraryPage: View {
                         .foregroundStyle(Night.dim).frame(maxWidth: .infinity).padding(.top, 60)
                 }
                 ForEach(groups, id: \.folder) { group in
-                    VStack(alignment: .leading, spacing: 12) {
-                        HStack(alignment: .firstTextBaseline, spacing: 8) {
-                            Image(systemName: group.folder.isEmpty ? "tray" : workspace.linked.contains { $0.name == group.folder } ? "link" : "folder")
-                                .foregroundStyle(Night.faint)
-                            Text(group.folder.isEmpty ? "In the vault" : group.folder).font(.system(size: 15, weight: .semibold))
-                            Text("\(group.files.count)").font(.system(size: 13)).foregroundStyle(Night.faint).monospacedDigit()
-                        }
-                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 168, maximum: 240), spacing: 16, alignment: .top)], alignment: .leading, spacing: 18) {
-                            ForEach(Array(group.files.enumerated()), id: \.element.path) { index, file in
-                                CoverCard(workspace: workspace, path: file.path, selected: workspace.librarySelection == file.path)
-                                    .arrive(index)
-                                    .onTapGesture(count: 2) { workspace.go(.file(file.path), newTab: true) }
-                                    .simultaneousGesture(TapGesture().onEnded { workspace.librarySelection = file.path })
-                            }
-                        }
-                    }
+                    shelfSection(group)
+                }
+                // Each bridged vault as its own section, after this vault's own (D-97).
+                ForEach(workspace.bridged, id: \.bridge.name) { shelf in
+                    BridgedSection(workspace: workspace, shelf: shelf, kind: kind).id("bridge-" + shelf.bridge.name)
                 }
             }
             .padding(.horizontal, 28).padding(.vertical, 22)
         }
+        // For checking the layout without a person at the screen: BURROW_LIBRARY_SCROLL=bridges shows the first bridged vault.
+        .task(id: workspace.bridged.count) {
+            guard ProcessInfo.processInfo.environment["BURROW_LIBRARY_SCROLL"] == "bridges", let first = workspace.bridged.first else { return }
+            try? await Task.sleep(for: .milliseconds(600))
+            reader.scrollTo("bridge-" + first.bridge.name, anchor: .top)
+        }
+        }
         .background(NightSky())
         .environment(\.colorScheme, .dark)
+        .sheet(isPresented: Binding(get: { workspace.bridgesOpen }, set: { workspace.bridgesOpen = $0 })) {
+            BridgesSheet(workspace: workspace)
+        }
+    }
+
+    private func shelfSection(_ group: (folder: String, files: [MapFile])) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Image(systemName: group.folder.isEmpty ? "tray" : workspace.linked.contains { $0.name == group.folder } ? "link" : "folder")
+                    .foregroundStyle(Night.faint)
+                Text(group.folder.isEmpty ? "In the vault" : group.folder).font(.system(size: 15, weight: .semibold))
+                Text("\(group.files.count)").font(.system(size: 13)).foregroundStyle(Night.faint).monospacedDigit()
+            }
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 168, maximum: 240), spacing: 16, alignment: .top)], alignment: .leading, spacing: 18) {
+                ForEach(Array(group.files.enumerated()), id: \.element.path) { index, file in
+                    CoverCard(workspace: workspace, path: file.path, selected: workspace.librarySelection == file.path)
+                        .arrive(index)
+                        .onTapGesture(count: 2) { workspace.go(.file(file.path), newTab: true) }
+                        .simultaneousGesture(TapGesture().onEnded { workspace.librarySelection = file.path })
+                }
+            }
+        }
     }
 
     private var header: some View {
@@ -70,6 +89,12 @@ struct LibraryPage: View {
                 Text(kind == .all ? "Library" : kind.title).font(.system(size: 28, weight: .bold)).tracking(-0.4)
                 Text(summary).foregroundStyle(Night.dim).monospacedDigit()
                 Spacer()
+                if let storage = workspace.storage { StorageBars(report: storage) }
+                Button { workspace.bridgesOpen = true } label: {
+                    Label(workspace.bridged.isEmpty ? "Bridges" : "Bridges \(workspace.bridged.count)", systemImage: BridgedSection.symbol)
+                }
+                .buttonStyle(.bordered).controlSize(.small)
+                .help("Let this vault read another vault, one way and read-only")
             }
             // The kinds the sidebar used to list, as filter chips: Obsidian keeps the sidebar for the file tree.
             HStack(spacing: 8) {

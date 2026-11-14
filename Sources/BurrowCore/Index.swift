@@ -170,6 +170,12 @@ extension Vault {
             }
             let data = VectorIndex.encode(ids: ids, vectors: vectors, generation: current)
             // The file only saves time. If it cannot be written, the block in memory still answers.
+            // A vault read through a bridge is never written to, so its block stays in memory only (D-97).
+            if readOnly {
+                let built = VectorIndex(data, generation: current)!
+                vectorIndexCache = built
+                return built
+            }
             try? data.write(to: vectorFile, options: .atomic)
             let mapped = (try? Data(contentsOf: vectorFile, options: .alwaysMapped)) ?? data
             let built = VectorIndex(mapped, generation: current) ?? VectorIndex(data, generation: current)!

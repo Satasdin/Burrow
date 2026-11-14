@@ -66,3 +66,37 @@ Nothing is deleted either way.
 - The status bar light: green when nothing needs a look, amber when changed code rests on a decision, red when the
   vault holds text written to steer an AI.
 - `burrow log ~/Notes` lists what was kept, newest first; `burrow --version` says which `burrow` you are running.
+
+## More than one vault
+
+Keep a vault for each part of your life (`~/Notes` for home, `~/Work` for the job) and let one read another:
+
+```
+burrow vault new ~/Work --name Work     # makes the folder a vault and builds its index
+burrow bridge ~/Notes ~/Work            # ~/Notes can now read Work; Work can't read ~/Notes
+burrow bridge list ~/Notes
+burrow unbridge ~/Notes Work
+```
+
+Through the bridge, `burrow find`, `burrow ask`, a connected program's `burrow_find` and `burrow_read`, and the app's
+Library, search and Ask also look in Work. Everything from it is marked with its name, like
+`Work › Projects/launch.md`, and is only ever read: Burrow never writes into Work from `~/Notes`. A bridge only goes
+one step: if Work bridges to a Team vault, `~/Notes` still can't see Team. Work's decisions stay private unless you add
+`--with-ledger`. In the app, the Library shows Work as its own section, and **Bridges** at its top adds or removes one.
+
+## How much Burrow keeps
+
+Burrow's own store (the index, meaning search, conversations, the Ledger) lives in `.burrow`. Your own files are never
+counted against a limit and never deleted.
+
+```
+burrow stats ~/Notes                              # what the store holds, against any limit, and your files beside it
+burrow config ~/Notes set storage.limit 2GB       # this vault
+burrow config --global set storage.limit 20GB     # every vault Burrow knows, together
+burrow config ~/Notes set index.maxFileSize 5MB   # leave bigger files out of the index
+burrow config ~/Notes list
+```
+
+When indexing would go over a limit, Burrow stops adding to the index and says which limit, by how much, which files
+were left out and the command to raise it. Nothing is deleted, and what is already indexed keeps working. The app's
+Library shows a bar for this vault and one for all vaults, amber when nearly full.

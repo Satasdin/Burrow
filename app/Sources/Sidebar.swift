@@ -285,7 +285,15 @@ struct SearchPanel: View {
                             .buttonStyle(.plain)
                         }
                     } header: {
-                        Text(group.path.title).lineLimit(1).help(group.path)
+                        HStack(spacing: 5) {
+                            // A match in a bridged vault names that vault (D-97).
+                            if let cut = group.path.range(of: Bridge.separator) {
+                                Image(systemName: BridgedSection.symbol).foregroundStyle(Night.conversation)
+                                Text(String(group.path[..<cut.lowerBound]) + " ›").foregroundStyle(Night.conversation)
+                            }
+                            Text(group.path.title).lineLimit(1)
+                        }
+                        .help(group.path)
                     }
                 }
             }
