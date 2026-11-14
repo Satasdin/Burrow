@@ -17,7 +17,7 @@ public enum Secrets {
     /// Not "tokens" or "tokenizer": max_tokens and the like are settings.
     /// Not an exception's name (InvalidTokenError: …): an error line stays as printed.
     private static let secretName =
-        #"(?:[A-Za-z0-9_.-]*(?i:token(?!s|izer)|secret|passw(?:or)?d|passphrase|credentials?|(?:api|access|private|signing|encryption|master|license|account|client|secret)[_-]?key|apikey)[A-Za-z0-9_.-]*|[A-Z0-9_]*_KEY)(?<!Error)(?<!Exception)(?<!Warning)"#
+        #"(?:[A-Za-z0-9_.-]{0,64}(?i:token(?!s|izer)|secret|passw(?:or)?d|passphrase|credentials?|(?:api|access|private|signing|encryption|master|license|account|client|secret)[_-]?key|apikey)[A-Za-z0-9_.-]{0,64}|[A-Z0-9_]{0,64}_KEY)(?<!Error)(?<!Exception)(?<!Warning)"#
 
     private static let rules: [(NSRegularExpression, String)] = [
         // A private key block, whole; one cut short by a clip runs to the end of the text.
@@ -52,13 +52,31 @@ public enum Secrets {
         (#"(["']?)\b("# + secretName + #")\1(\s*:\s*)"# + notMarker + notNumber + #"("[^"]+"|'[^']+'|[^\s"',}]{8,})"#, "$1$2$1$3" + marker),
     ].map { (try! NSRegularExpression(pattern: $0.0), $0.1) }
 
-    /// The text with every secret Burrow can recognise replaced by the marker.
+    /// The text with every secret Burrow can recognise replaced by the marker. Names are bounded (64 characters each
+    /// side) so no line, however long, makes a pattern backtrack for long; callers clip before taking secrets out.
     public static func redacted(_ text: String) -> String {
         guard !text.isEmpty else { return text }
         var out = text
-        for (rule, template) in rules {
+        for (rule, template) in rules.dropLast(named) {
             out = rule.stringByReplacingMatches(in: out, range: NSRange(out.startIndex..., in: out), withTemplate: template)
         }
-        return out
+        // The two "a secret's name, then its value" rules try a name at every word start, which is slow on a very long
+        // line. They run line by line, only on a line that has a secret's word in it, and not on a line longer than any
+        // command or error line a fold keeps (D-106): the token shapes above still cover such a line.
+        let lowered = out.lowercased()
+        guard nameWords.contains(where: lowered.contains) else { return out }
+        return out.components(separatedBy: "\n").map { line -> String in
+            guard line.utf16.count <= 4_000, nameWords.contains(where: line.lowercased().contains) else { return line }
+            var kept = line
+            for (rule, template) in rules.suffix(named) {
+                kept = rule.stringByReplacingMatches(in: kept, range: NSRange(kept.startIndex..., in: kept), withTemplate: template)
+            }
+            return kept
+        }.joined(separator: "\n")
     }
+
+    /// How many of `rules`, at the end, match by a secret's name.
+    private static let named = 2
+    /// A secret's name always has one of these in it (lowercased), so a line without one can't match by name.
+    private static let nameWords = ["token", "secret", "passw", "passphrase", "credential", "key"]
 }
