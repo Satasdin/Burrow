@@ -1,5 +1,6 @@
 @testable import BurrowCore
 @testable import BurrowTools
+import CryptoKit
 import Darwin
 import XCTest
 
@@ -35,6 +36,9 @@ final class PersonPresenceTests: XCTestCase {
         vault.stateFolder = state
         try vault.linkFolder(code)
         try await vault.refresh(embedder: nil)
+        // An empty record of codes made, so the real binary waits the usual 2 seconds before each code rather than the 20
+        // it waits when it can't tell (that wait is tested on its own).
+        try "[]".write(to: state.appendingPathComponent("person-codes.json"), atomically: true, encoding: .utf8)
     }
 
     override func tearDown() { try? FileManager.default.removeItem(at: top) }
@@ -156,58 +160,110 @@ final class PersonPresenceTests: XCTestCase {
 
     // MARK: Layer 3
 
-    func testACodeIsKeptHashedUsedOnceEndsAfterTwoMinutesOrThreeWrongTries() throws {
-        let now = Date()
-        let issued = try PersonCode.issue(action: "let a change through", state: state, now: now)
-        XCTAssertEqual(issued.plain.count, 6)
-        XCTAssertTrue(issued.plain.allSatisfy(\.isNumber))
-        let file = try String(contentsOf: state.appendingPathComponent("person-codes.json"), encoding: .utf8)
-        XCTAssertFalse(file.contains("\"\(issued.plain)\""), "only a salted hash is kept")
-        XCTAssertFalse(file.contains(issued.plain), file)
-        let attributes = try FileManager.default.attributesOfItem(atPath: state.appendingPathComponent("person-codes.json").path)
-        XCTAssertEqual((attributes[.posixPermissions] as? NSNumber)?.intValue, 0o600)
-
-        let wrong = issued.plain == "000000" ? "111111" : "000000"
-        XCTAssertEqual(PersonCode.redeem(wrong, issued, state: state, now: now), .wrong(triesLeft: 2))
-        XCTAssertEqual(PersonCode.redeem(" \(issued.plain) ", issued, state: state, now: now), .accepted)
-        XCTAssertEqual(PersonCode.redeem(issued.plain, issued, state: state, now: now), .spent, "used once")
-
-        let late = try PersonCode.issue(action: "x", state: state, now: now)
-        XCTAssertEqual(PersonCode.redeem(late.plain, late, state: state, now: now.addingTimeInterval(121)), .expired)
-        XCTAssertEqual(PersonCode.redeem(late.plain, late, state: state, now: now), .spent, "an expired code is gone")
-
-        let guessed = try PersonCode.issue(action: "x", state: state, now: now)
-        let guess = guessed.plain == "000000" ? "111111" : "000000"
-        XCTAssertEqual(PersonCode.redeem(guess, guessed, state: state, now: now), .wrong(triesLeft: 2))
-        XCTAssertEqual(PersonCode.redeem(guess, guessed, state: state, now: now), .wrong(triesLeft: 1))
-        XCTAssertEqual(PersonCode.redeem(guess, guessed, state: state, now: now), .spent)
-        XCTAssertEqual(PersonCode.redeem(guessed.plain, guessed, state: state, now: now), .spent, "three wrong tries end it")
-
-        // The file can only make it stricter: a record taken away, or rewritten to another code's hash, lets nothing in.
-        let forged = try PersonCode.issue(action: "x", state: state, now: now)
-        var entries = PersonCode.load(state)
-        let other = PersonCode.digest("123456", salt: forged.salt).base64EncodedString()
-        entries[entries.firstIndex { $0.id == forged.id }!].digest = other
-        try PersonCode.save(entries, state)
-        XCTAssertEqual(PersonCode.redeem("123456", forged, state: state, now: now), .spent)
-        XCTAssertEqual(PersonCode.redeem(forged.plain, forged, state: state, now: now), .spent)
-
-        // At most six in ten minutes.
-        let crowded = top.appendingPathComponent("crowded")
-        for _ in 0..<PersonCode.perTenMinutes { _ = try PersonCode.issue(action: "x", state: crowded, now: now) }
-        XCTAssertThrowsError(try PersonCode.issue(action: "x", state: crowded, now: now.addingTimeInterval(60)))
-        XCTAssertNoThrow(try PersonCode.issue(action: "x", state: crowded, now: now.addingTimeInterval(601)))
+    /// Codes made without real waiting; the waits asked for are recorded.
+    private func issue(_ action: String = "x", state: URL? = nil, at now: Date = Date(), waits: inout [TimeInterval]) throws -> PersonCode.Challenge {
+        var asked: [TimeInterval] = []
+        defer { waits += asked }
+        return try PersonCode.issue(action: action, state: state ?? self.state, now: { now }, wait: { asked.append($0) })
     }
 
-    func testTheCodeGoesOnlyOutsideTheTerminal() throws {
-        let issued = try PersonCode.issue(action: "confirm the check for decision d1", state: state)
+    func testACodeIsCheckedOnlyInTheMemoryOfTheRunThatMadeItUsedOnceForTwoMinutesAndThreeTries() throws {
+        let now = Date()
+        var waits: [TimeInterval] = []
+        let challenge = try issue("let a change through", at: now, waits: &waits)
+        XCTAssertEqual(challenge.plain.count, 8)
+        XCTAssertTrue(challenge.plain.allSatisfy(\.isNumber))
+        let wrong = challenge.plain == "00000000" ? "11111111" : "00000000"
+        XCTAssertEqual(challenge.verify(wrong, now: now), .wrong(triesLeft: 2))
+        XCTAssertEqual(challenge.verify(" \(challenge.plain.prefix(4)) \(challenge.plain.dropFirst(4)) ", now: now), .accepted, "typed as shown, in two groups")
+        XCTAssertEqual(challenge.verify(challenge.plain, now: now), .spent, "used once")
+
+        let late = try issue(at: now, waits: &waits)
+        XCTAssertEqual(late.verify(late.plain, now: now.addingTimeInterval(121)), .expired)
+        XCTAssertEqual(late.verify(late.plain, now: now), .spent, "an expired code is gone")
+
+        let guessed = try issue(at: now, waits: &waits)
+        let guess = guessed.plain == "00000000" ? "11111111" : "00000000"
+        XCTAssertEqual(guessed.verify(guess, now: now), .wrong(triesLeft: 2))
+        XCTAssertEqual(guessed.verify(guess, now: now), .wrong(triesLeft: 1))
+        XCTAssertEqual(guessed.verify(guess, now: now), .spent)
+        XCTAssertEqual(guessed.verify(guessed.plain, now: now), .spent, "three wrong tries end it")
+        PersonCode.record(guessed, state: state)
+        XCTAssertEqual(PersonCode.history(state)?.first { $0.id == guessed.id }?.wrong, 3)
+
+        let abandoned = try issue(at: now, waits: &waits)
+        abandoned.abandon()
+        XCTAssertEqual(abandoned.verify(abandoned.plain, now: now), .spent)
+    }
+
+    func testTheRecordCanNeverCheckACodeAndAPlantedOneLetsNothingThrough() throws {
+        var waits: [TimeInterval] = []
+        let challenge = try issue("let a change through although it breaks decision d1", waits: &waits)
+        let file = state.appendingPathComponent("person-codes.json")
+        let text = try String(contentsOf: file, encoding: .utf8)
+        // Only when, for what and how it ended: no code, no salt, no digest, no hash, nothing to test a guess against.
+        let entries = try XCTUnwrap(JSONSerialization.jsonObject(with: Data(text.utf8)) as? [[String: Any]])
+        XCTAssertEqual(Set(entries.flatMap(\.keys)), ["id", "action", "issued", "expires", "used", "wrong"])
+        for word in ["salt", "digest", "hash", "\"code\"", challenge.plain] { XCTAssertFalse(text.contains(word), word) }
+        // Created 0600, in a folder made 0700 here.
+        XCTAssertEqual((try FileManager.default.attributesOfItem(atPath: file.path)[.posixPermissions] as? NSNumber)?.intValue, 0o600)
+        let fresh = top.appendingPathComponent("fresh-state")
+        _ = try issue(state: fresh, waits: &waits)
+        XCTAssertEqual((try FileManager.default.attributesOfItem(atPath: fresh.path)[.posixPermissions] as? NSNumber)?.intValue, 0o700)
+
+        // A program writes a record for a code it knows, in the old shape with a salted hash and with the code itself,
+        // and marks the real one used: the code it knows still isn't the code, and the real one still works.
+        let known = "12345678"
+        let salt = Data(repeating: 7, count: 16)
+        let planted: [[String: Any]] = [
+            ["id": challenge.id, "action": challenge.action, "issued": "2026-11-15T00:00:00Z", "expires": "2099-01-01T00:00:00Z", "used": true, "wrong": 0,
+             "salt": salt.base64EncodedString(), "digest": Data(SHA256.hash(data: salt + Data(known.utf8))).base64EncodedString()],
+            ["id": "planted", "action": "x", "issued": "2026-11-15T00:00:00Z", "expires": "2099-01-01T00:00:00Z", "used": false, "wrong": 0,
+             "code": known],
+        ]
+        try JSONSerialization.data(withJSONObject: planted).write(to: file)
+        if challenge.plain != known { XCTAssertEqual(challenge.verify(known), .wrong(triesLeft: 2)) }
+        XCTAssertEqual(challenge.verify(challenge.plain), .accepted, "the file never decides")
+    }
+
+    func testMakingACodeIsSlowedAndAMissingRecordSlowsItMore() throws {
+        let now = Date()
+        var waits: [TimeInterval] = []
+        // No record (setUp's empty one taken away): can't tell how many were made, so the long wait.
+        try FileManager.default.removeItem(at: state.appendingPathComponent("person-codes.json"))
+        _ = try issue(at: now, waits: &waits)
+        XCTAssertEqual(waits, [PersonCode.unknownHistoryDelay])
+        // A readable record: the short wait.
+        _ = try issue(at: now, waits: &waits)
+        XCTAssertEqual(waits.last, PersonCode.issueDelay)
+        // Unreadable (a program wrote rubbish): the long wait again, never an empty history.
+        try "not json".write(to: state.appendingPathComponent("person-codes.json"), atomically: true, encoding: .utf8)
+        _ = try issue(at: now, waits: &waits)
+        XCTAssertEqual(waits.last, PersonCode.unknownHistoryDelay)
+        XCTAssertEqual(PersonCode.issueDelay, 2)
+        XCTAssertEqual(PersonCode.unknownHistoryDelay, 20)
+        // At most six in ten minutes, counted from the record.
+        let crowded = top.appendingPathComponent("crowded")
+        for _ in 0..<PersonCode.perTenMinutes { _ = try issue(state: crowded, at: now, waits: &waits) }
+        XCTAssertThrowsError(try issue(state: crowded, at: now.addingTimeInterval(60), waits: &waits))
+        XCTAssertNoThrow(try issue(state: crowded, at: now.addingTimeInterval(601), waits: &waits))
+    }
+
+    func testTheCodeGoesOnlyToANotificationAndNothingListensForIt() throws {
+        var waits: [TimeInterval] = []
+        let challenge = try issue("confirm the check for decision d1", waits: &waits)
         // The test hook exists in debug builds only (this one); the release binary has no such branch.
         let hook = top.appendingPathComponent("hook")
-        XCTAssertEqual(PersonCode.show(issued, state: state, environment: ["BURROW_TEST_CODE_FILE": hook.path]), .testHook)
-        XCTAssertEqual(try String(contentsOf: hook, encoding: .utf8), issued.plain)
-        // The app is reached by a port named for its state folder, so a test or demo state never reaches the person's app.
-        XCTAssertNotEqual(PersonCodeInbox.portName(state: state), PersonCodeInbox.portName(state: top.appendingPathComponent("other")))
-        XCTAssertTrue(PersonCodeInbox.portName(state: state).hasPrefix("app.burrow.mac.code.\(getuid())."))
+        XCTAssertEqual(PersonCode.show(challenge, environment: ["BURROW_TEST_CODE_FILE": hook.path]), .testHook)
+        XCTAssertEqual(try String(contentsOf: hook, encoding: .utf8), challenge.plain)
+        XCTAssertEqual(PersonCode.grouped("12345678"), "1234 5678")
+        // No message port carries a code any more: under the names the app used to register, for this state folder and
+        // the person's own, nobody is listening (the app registers none; burrow sends to none).
+        for folder in [state, BurrowPlaces.stateFolder] {
+            let path = folder.standardizedFileURL.resolvingSymlinksInPath().path
+            let hash = SHA256.hash(data: Data(path.utf8)).prefix(6).map { String(format: "%02x", $0) }.joined()
+            XCTAssertNil(CFMessagePortCreateRemote(nil, "app.burrow.mac.code.\(getuid()).\(hash)" as CFString))
+        }
         // What goes into the notification's script can't break out of its string or carry control characters.
         XCTAssertEqual(PersonCode.appleScriptString("a \"b\" \\ c\u{1b}[2J\u{202e}"), "\"a \\\"b\\\" \\\\ c[2J\"")
         // A decision check's command is never taken for the person, nor is anything burrow mcp starts.
@@ -233,13 +289,21 @@ final class PersonPresenceTests: XCTestCase {
         // The override that would defeat the gate: no code, a wrong code three times, then a code from another run.
         let walked = try BurrowBinary.inTerminal(["decision", "override", path, decision.id], state: state, answer: "yes", code: .none)
         XCTAssertEqual(walked.status, 1, walked.out)
-        XCTAssertTrue(walked.out.contains("Burrow showed a 6-digit code in the test's code file. It is never printed here"), walked.out)
+        XCTAssertTrue(walked.out.contains("Burrow showed an 8-digit code in the test's code file. It is never printed here"), walked.out)
         XCTAssertTrue(walked.out.contains("no code was typed: nothing was allowed"), walked.out)
         XCTAssertFalse(walked.out.contains("Type yes"), "the yes comes only after the code")
         XCTAssertFalse(overridden(decision))
-        XCTAssertTrue(PersonCode.load(state).allSatisfy(\.used), "a code nobody typed is ended on file")
+        XCTAssertTrue(PersonCode.history(state)?.allSatisfy(\.used) ?? false, "a code nobody typed is ended on file")
 
-        let guessed = try BurrowBinary.inTerminal(["decision", "override", path, decision.id], state: state, answer: "yes", code: .typed("123456"))
+        // A program plants a record for a code it knows, with the salted hash the first build kept and with the code
+        // itself, then types that code three times: nothing written can make a code valid.
+        let salt = Data(repeating: 7, count: 16)
+        let planted: [[String: Any]] = [["id": "planted", "action": "let a change through although it breaks decision \(decision.id)",
+                                         "issued": ISO8601DateFormatter().string(from: Date()), "expires": "2099-01-01T00:00:00Z", "used": false, "wrong": 0,
+                                         "salt": salt.base64EncodedString(), "digest": Data(SHA256.hash(data: salt + Data("12345678".utf8))).base64EncodedString(),
+                                         "code": "12345678"]]
+        try JSONSerialization.data(withJSONObject: planted).write(to: state.appendingPathComponent("person-codes.json"))
+        let guessed = try BurrowBinary.inTerminal(["decision", "override", path, decision.id], state: state, answer: "yes", code: .typed("12345678"))
         XCTAssertEqual(guessed.status, 1, guessed.out)
         XCTAssertTrue(guessed.out.contains("That isn't the code. 2 tries left."), guessed.out)
         XCTAssertTrue(guessed.out.contains("That isn't the code. 1 try left."), guessed.out)
@@ -299,6 +363,6 @@ final class PersonPresenceTests: XCTestCase {
         XCTAssertEqual(clear.status, 0, clear.out)
         XCTAssertNil(DecisionChecks.confirmed(vault)[other.id])
         // Each code was used once and is spent on file.
-        XCTAssertTrue(PersonCode.load(state).allSatisfy(\.used))
+        XCTAssertTrue(PersonCode.history(state)?.allSatisfy(\.used) ?? false)
     }
 }
