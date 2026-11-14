@@ -24,6 +24,20 @@ struct Scanner {
         let hash: String
     }
 
+    /// Files a build or an editor makes, which nobody wrote: compiled Python, object files, Finder's folder settings.
+    static let builtExtensions: Set<String> = ["pyc", "pyo", "o", "obj", "class", "so", "dylib", "a", "d", "swiftmodule", "swiftdeps", "tsbuildinfo"]
+    static let builtNames: Set<String> = [".DS_Store", "Thumbs.db"]
+
+    /// True for a file inside a folder the index skips (`__pycache__`, `node_modules`, `.build`, hidden folders) or a
+    /// file a build makes. `burrow_check` uses the same rule, so a run of the tests is not counted as changing 15 files
+    /// when one was written by hand (D-87).
+    static func isBuildOutput(_ path: String) -> Bool {
+        let parts = path.split(separator: "/").map(String.init)
+        guard let name = parts.last else { return false }
+        if parts.dropLast().contains(where: { skippedFolders.contains($0) || ($0.hasPrefix(".") && $0 != ".github") }) { return true }
+        return builtNames.contains(name) || builtExtensions.contains((name as NSString).pathExtension.lowercased())
+    }
+
     static func wanted(_ path: String) -> Bool {
         let parts = path.split(separator: "/").map(String.init)
         guard let name = parts.last else { return false }
@@ -94,6 +108,11 @@ struct Scanner {
     static func digest(_ data: Data) -> String {
         SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
     }
+}
+
+extension Vault {
+    /// The index's own rule for what nobody wrote: files in folders it skips, and files a build makes.
+    public static func isBuildOutput(_ path: String) -> Bool { Scanner.isBuildOutput(path) }
 }
 
 /// A cluster is the folder a file lives in, limited to two levels so a deep tree stays readable on the Map.

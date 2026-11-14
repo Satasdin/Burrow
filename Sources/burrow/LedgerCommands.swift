@@ -9,6 +9,7 @@ let ledgerUsage = """
   burrow blame  <vault> <path>                                      which sessions explained or changed a file
   burrow diff   <vault> --since <commit>                            files that changed since a model last understood them
   burrow revert <vault> <commit> "what is right"                    marks a commit wrong; nothing is deleted
+  burrow confirm <vault> <commit> ["note"]                         says a commit still holds after a file it cites changed
   burrow branch <vault> [name]                                      show the branches, or switch to one
   burrow hook claude <vault>                                        for Claude Code's SessionStart, PreCompact and SessionEnd hooks
   burrow hook git <vault>                                           for git's post-commit hook, run inside the repository
@@ -17,7 +18,7 @@ let ledgerUsage = """
 
 /// The Ledger's commands. Returns false when the command is not one of them.
 func runLedgerCommand(_ arguments: [String]) async throws -> Bool {
-    guard let command = arguments.first, ["commit", "log", "resume", "blame", "diff", "revert", "branch", "hook"].contains(command) else { return false }
+    guard let command = arguments.first, ["commit", "log", "resume", "blame", "diff", "revert", "confirm", "branch", "hook"].contains(command) else { return false }
     var words = Array(arguments.dropFirst())
     var values: [String: String] = [:]
     let takesValue: Set<String> = ["--kind", "--files", "--branch", "--author", "--file", "--limit", "--since", "--store"]
@@ -57,16 +58,16 @@ func runLedgerCommand(_ arguments: [String]) async throws -> Bool {
     case "log":
         let commits = ledger.log(branch: values["--branch"], file: values["--file"], limit: Int(values["--limit"] ?? "") ?? 30)
         if commits.isEmpty { print("The Ledger is empty here.") }
-        let wrong = ledger.reverted()
-        for commit in commits { print(describe(commit, ledger: ledger, wrong: wrong)) }
+        let wrong = ledger.reverted(), stale = ledger.staleness()
+        for commit in commits { print(describe(commit, stale: stale(commit), wrong: wrong)) }
     case "resume":
         print(ledger.resume(branch: rest.first))
     case "blame":
         guard let path = rest.first else { throw Failure("blame needs a vault path") }
         let commits = ledger.blame(path)
         if commits.isEmpty { print("No commit cites \(path) yet.") }
-        let wrong = ledger.reverted()
-        for commit in commits { print(describe(commit, ledger: ledger, wrong: wrong)) }
+        let wrong = ledger.reverted(), stale = ledger.staleness()
+        for commit in commits { print(describe(commit, stale: stale(commit), wrong: wrong)) }
     case "diff":
         guard let since = values["--since"] ?? rest.first else { throw Failure("diff needs --since <commit>") }
         let found = try ledger.diff(since: since)
@@ -77,6 +78,10 @@ func runLedgerCommand(_ arguments: [String]) async throws -> Bool {
         guard rest.count >= 2 else { throw Failure("revert needs a commit and what is right instead") }
         let made = try ledger.revert(rest[0], why: rest[1], author: author, client: "terminal")
         print("[\(made.branch) \(made.id)] correction: \(made.message)")
+    case "confirm":
+        guard let id = rest.first else { throw Failure("confirm needs a commit id") }
+        let made = try ledger.confirm(id, author: author, client: "terminal", note: rest.dropFirst().joined(separator: " "))
+        print("[\(made.branch) \(made.id)] confirmation: \(made.message)")
     case "branch":
         if let name = rest.first {
             try ledger.switchTo(name)
@@ -91,10 +96,10 @@ func runLedgerCommand(_ arguments: [String]) async throws -> Bool {
     return true
 }
 
-private func describe(_ commit: LedgerCommit, ledger: Ledger, wrong: Set<String>) -> String {
-    var line = "\(commit.id)  \(commit.branch)  \(commit.kind.rawValue)  \(commit.author)\n    \(commit.message)"
+private func describe(_ commit: LedgerCommit, stale: [String], wrong: Set<String>) -> String {
+    var line = "\(commit.id)  \(commit.branch)  \(commit.kind.rawValue)  \(commit.byline)\n    \(commit.message)"
+    if let because = commit.because { line += "\n    because: \(because)" }
     if wrong.contains(commit.id) { line += "\n    marked wrong" }
-    let stale = ledger.changed(commit)
     if !stale.isEmpty { line += "\n    check again: \(stale.joined(separator: ", ")) changed since" }
     if !commit.cites.isEmpty { line += "\n    cites \(commit.cites.keys.sorted().prefix(5).joined(separator: ", "))" }
     return line
@@ -117,7 +122,9 @@ private func runHook(_ kind: String, vault: Vault) throws {
             print(Hooks.sessionStart(ledger: ledger, place: place))
         case let name where name == "PreCompact" || name == "SessionEnd" || name == "Stop":
             guard let path = event["transcript_path"] as? String, let text = try? String(contentsOfFile: path, encoding: .utf8) else { return }
-            let made = try Hooks.checkpoint(ledger: ledger, place: place, transcript: Hooks.readTranscript(text),
+            let transcript = Hooks.readTranscript(text)
+            if let named = Hooks.nameConversation(SessionStore(vault: vault), transcript: transcript) { logToStandardError("named conversation \(named)") }
+            let made = try Hooks.checkpoint(ledger: ledger, place: place, transcript: transcript,
                                             session: event["session_id"] as? String ?? "unknown", event: name)
             for commit in made { logToStandardError("kept \(commit.kind.rawValue) \(commit.id) on \(commit.branch)") }
         default:

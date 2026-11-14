@@ -168,9 +168,17 @@ typealias VaultSession = BurrowTools.SessionRecord
 
 extension VaultSession {
     var program: Program { Program(client: client) }
-    /// Every lookup that touched the vault, from the trail Burrow keeps itself.
-    var lookups: Int { (trail ?? []).count }
-    var question: String? { turns.first?.question ?? trail?.first(where: { !$0.asked.isEmpty })?.asked }
+    /// Searches and reads, from the trail Burrow keeps itself. Resumes, checks and commits are not lookups (D-85), so this
+    /// is the number the conversation's own handoff gives.
+    var lookupCount: Int { lookups.count }
+}
+
+extension Workspace {
+    /// A conversation's name: what the person asked for when a program said so, else its first logged question, else the
+    /// decision it kept, else its first search (D-86).
+    func title(of record: VaultSession) -> String? {
+        record.title(kept: ledger.commits.filter { $0.session == record.id && $0.kind == .decision }.map(\.message))
+    }
 }
 
 extension Workspace {

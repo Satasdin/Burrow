@@ -40,6 +40,14 @@ public struct TrailStep: Codable, Sendable {
         self.files = files
         self.at = at
     }
+
+    /// The tools that look something up in the vault. Resuming, checking a change and keeping a commit are steps too, but
+    /// not lookups, so "3 lookups" no longer counts a resume, a check and a commit (D-85).
+    public static let lookupTools: Set<String> = [
+        "vault_search", "vault_read", "vault_links", "vault_list", "vault_ask", "vault_prepare", "vault_pack",
+        "burrow_find", "burrow_read", "burrow_log", "burrow_blame", "burrow_diff",
+    ]
+    public var isLookup: Bool { Self.lookupTools.contains(tool) }
 }
 
 /// A conversation kept in the vault, so another model, another program or another day can pick it up.
@@ -54,6 +62,26 @@ public struct SessionRecord: Codable, Sendable {
     public var client: String?
     /// What that program looked up, in order. Burrow writes this itself, so a model that forgets to log still leaves a trace.
     public var trail: [TrailStep]?
+    /// What the person asked for, when a program says so: Claude Code's hook reads it from the transcript. MCP itself
+    /// never carries the person's words, so most conversations have none.
+    public var request: String?
+
+    /// The searches and reads in the trail, without resumes, checks and commits (D-85).
+    public var lookups: [TrailStep] { (trail ?? []).filter(\.isLookup) }
+
+    /// A conversation's name for a person: what they asked for when that is known, then the first question a program
+    /// logged, then what it kept, then its first search. The model's first search is a guess at the task, so it comes
+    /// last among the words, and a conversation that only resumed and kept something is named for that (D-86).
+    public func title(kept: [String] = []) -> String? {
+        if let request = request?.trimmingCharacters(in: .whitespacesAndNewlines), !request.isEmpty { return request }
+        if let first = turns.first?.question { return first }
+        if let decision = kept.first { return "Kept: " + decision }
+        if let search = lookups.first(where: { !$0.asked.isEmpty })?.asked { return search }
+        let tools = Set((trail ?? []).map(\.tool))
+        if tools.contains("burrow_check") { return "Checked a change against the Ledger" }
+        if tools.contains("burrow_resume") { return "Picked up from the Ledger" }
+        return nil
+    }
 
     public init(id: String = SessionRecord.newID(), resumedFrom: String? = nil) {
         self.id = id
@@ -113,11 +141,11 @@ public struct SessionStore: Sendable {
         !id.isEmpty && id.count <= 64 && id.unicodeScalars.allSatisfy { CharacterSet.alphanumerics.contains($0) && $0.isASCII || $0 == "-" }
     }
 
-    public func save(_ record: SessionRecord) throws {
+    public func save(_ record: SessionRecord, touching: Bool = true) throws {
         guard Self.isPlainID(record.id) else { throw CocoaError(.fileWriteInvalidFileName) }
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         var record = record
-        record.updated = Date()
+        if touching { record.updated = Date() }
         try Self.encoder.encode(record).write(to: folder.appendingPathComponent(record.id + ".json"), options: .atomic)
     }
 

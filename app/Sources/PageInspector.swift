@@ -156,7 +156,7 @@ struct SessionGlance: View {
                 }
             }
             HStack(spacing: 10) {
-                number(trail.count, "lookups", record.program.colour)
+                number(record.lookupCount, "lookups", record.program.colour)
                 number(files.count, "files read", Night.note)
                 number(kept.count, "kept", WatchPanel.mint)
             }
@@ -217,7 +217,7 @@ struct ActivityGlance: View {
 
     var body: some View {
         let used = Program.allCases.map { program in
-            (program, workspace.sessions(for: program).reduce(0) { $0 + $1.lookups }, workspace.sessions(for: program).count)
+            (program, workspace.sessions(for: program).reduce(0) { $0 + $1.lookupCount }, workspace.sessions(for: program).count)
         }.filter { $0.2 > 0 }
 
         VStack(alignment: .leading, spacing: 10) {
@@ -243,7 +243,7 @@ struct ActivityGlance: View {
                     HStack(alignment: .top, spacing: 9) {
                         Circle().fill(record.program.colour).frame(width: 7, height: 7).padding(.top, 5)
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(record.question ?? "\(record.lookups.counted("lookup"))").font(.system(size: 12.5)).foregroundStyle(Night.note).lineLimit(2)
+                            Text(workspace.title(of: record) ?? "\(record.lookupCount.counted("lookup"))").font(.system(size: 12.5)).foregroundStyle(Night.note).lineLimit(2)
                             Text("\(record.program.name) · \(record.updated.formatted(.relative(presentation: .named)))").font(.system(size: 10.5)).foregroundStyle(Night.faint)
                         }
                         Spacer(minLength: 0)

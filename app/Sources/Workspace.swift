@@ -28,7 +28,8 @@ actor Engine {
         let ledger = Ledger(vault: vault)
         let commits = ledger.log(limit: 2_000)
         var stale: [String: [String]] = [:]
-        for commit in commits { let changed = ledger.changed(commit); if !changed.isEmpty { stale[commit.id] = changed } }
+        let staleness = ledger.staleness()
+        for commit in commits { let changed = staleness(commit); if !changed.isEmpty { stale[commit.id] = changed } }
         var state = LedgerState(commits: commits, reverted: ledger.reverted(), stale: stale, current: ledger.current)
         state.inForce = VaultTools.inForce(ledger).map(\.id)
         state.check = VaultTools.checkReport(vault: vault, ledger: ledger)
@@ -52,6 +53,7 @@ actor Engine {
         try Ledger(vault: vault).commit(kind, message, files: files, author: "person", client: "Burrow app", branch: branch, session: session)
     }
     func revert(_ id: String, why: String) throws { try Ledger(vault: vault).revert(id, why: why, author: "person", client: "Burrow app") }
+    func confirm(_ id: String) throws { try Ledger(vault: vault).confirm(id, author: "person", client: "Burrow app") }
     func resumeText(_ branch: String?) -> String { Ledger(vault: vault).resume(branch: branch) }
     /// Bookmarks live beside the index, as Obsidian keeps its own in the vault: a plain list of vault paths.
     func bookmarks() -> [String] {
@@ -506,6 +508,14 @@ final class Workspace {
             try await engine.revert(id, why: why)
             ledger = await engine.ledger()
         } catch { warning = "Could not mark that wrong: \(error)" }
+    }
+
+    /// "Still right": the person looked at a changed file and a commit resting on it still holds (D-82).
+    func confirm(_ id: String) async {
+        do {
+            try await engine.confirm(id)
+            ledger = await engine.ledger()
+        } catch { warning = "Could not confirm that: \(error)" }
     }
 
     func resumeText(_ branch: String?) async -> String { await engine.resumeText(branch) }

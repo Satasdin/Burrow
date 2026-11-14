@@ -37,6 +37,7 @@ extension LedgerCommit.Kind {
         case .plan: return "Plan"
         case .handoff: return "Handoff"
         case .code: return "Code commit"
+        case .confirmation: return "Still right"
         }
     }
 
@@ -48,6 +49,7 @@ extension LedgerCommit.Kind {
         case .plan: return "list.bullet.clipboard"
         case .handoff: return "arrow.right.circle"
         case .code: return "chevron.left.forwardslash.chevron.right"
+        case .confirmation: return "checkmark.circle"
         }
     }
 
@@ -61,6 +63,7 @@ extension LedgerCommit.Kind {
         case .handoff: return Night.conversation
         case .correction: return Night.stale
         case .code: return Night.dim
+        case .confirmation: return Color(red: 0.42, green: 0.92, blue: 0.66).opacity(0.75)
         }
     }
 }
@@ -234,6 +237,9 @@ struct CommitRow: View {
                 }
                 if let because = parts.because { reason("Because", because, "quote.opening", Color(red: 0.42, green: 0.92, blue: 0.66)) }
                 if let rejected = parts.rejected { reason("Turned down", rejected, "xmark.circle", Color(red: 1.0, green: 0.55, blue: 0.5)) }
+                if !stale.isEmpty, !wrong, ![.handoff, .confirmation, .code].contains(commit.kind) {
+                    StillRight(workspace: workspace, commit: commit, changed: stale)
+                }
                 files
                 if correcting {
                     HStack {
@@ -256,6 +262,9 @@ struct CommitRow: View {
         }
         .contextMenu {
             if commit.kind != .correction && !wrong { Button("Mark Wrong…") { correcting = true } }
+            if !stale.isEmpty, !wrong, ![.handoff, .confirmation, .code].contains(commit.kind) {
+                Button("Still Right") { Task { await workspace.confirm(commit.id) } }
+            }
             Button("Copy Message") { NSPasteboard.general.clearContents(); NSPasteboard.general.setString(commit.message, forType: .string) }
             if let session = commit.session, workspace.sessions.contains(where: { $0.id == session }) {
                 Button("Open Conversation") { workspace.go(.session(session)) }
@@ -267,10 +276,10 @@ struct CommitRow: View {
         let who = commit.author
         return HStack(spacing: 6) {
             AuthorBadge(name: who)
-            Text("\(who)\(commit.client.map { $0 == who ? "" : " · \($0)" } ?? "")\(commit.sha.map { " · \($0.prefix(7))" } ?? "")")
+            Text("\(who)\(commit.client.map { $0 == who ? "" : " · \($0)" } ?? "")\(commit.modelSaid.map { $0 == who ? "" : " · model said \($0)" } ?? "")\(commit.sha.map { " · \($0.prefix(7))" } ?? "")")
                 .font(.system(size: 11.5)).foregroundStyle(Night.faint).lineLimit(1)
         }
-        .help("Written by \(who)\(commit.client.map { " in \($0)" } ?? "")")
+        .help(commit.byline.prefix(1).uppercased() + commit.byline.dropFirst())
     }
 
     private func reason(_ title: String, _ text: String, _ symbol: String, _ colour: Color) -> some View {

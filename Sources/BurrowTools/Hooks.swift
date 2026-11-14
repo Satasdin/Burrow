@@ -127,6 +127,20 @@ public enum Hooks {
         return made
     }
 
+    /// MCP never carries what the person asked, but Claude Code's transcript does. When its hook runs, the newest
+    /// conversation Claude Code had with Burrow in the last few minutes, if it has no name from the person yet, takes the
+    /// person's first request as its name (D-86). Returns the conversation's id, or nil when none fits.
+    @discardableResult
+    public static func nameConversation(_ sessions: SessionStore, transcript: Transcript, now: Date = Date()) -> String? {
+        guard let first = transcript.asked.first else { return nil }
+        guard var record = sessions.list().first(where: { $0.client == "claude-code" && now.timeIntervalSince($0.updated) < 300 }),
+              record.request == nil else { return nil }
+        record.request = String(first.prefix(300))
+        // Naming it is not activity: the time it was last used stays as it was.
+        guard (try? sessions.save(record, touching: false)) != nil else { return nil }
+        return record.id
+    }
+
     /// After a git commit: a code commit in the Ledger, linked by git's id, citing the files it changed.
     @discardableResult
     public static func gitCommit(ledger: Ledger, place: Place, sha: String, subject: String, files: [String], author: String = "git") throws -> LedgerCommit? {
