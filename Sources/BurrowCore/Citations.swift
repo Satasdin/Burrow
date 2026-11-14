@@ -82,13 +82,46 @@ public enum Citations {
             if !unverified.contains(place) { unverified.append(place) }
             wrong.append(widened(match.range, in: text, lineRange: false))
         }
-        let out = NSMutableString(string: answer)
-        var done: [NSRange] = []
-        for range in wrong.sorted(by: { $0.location > $1.location }) where !done.contains(where: { NSIntersectionRange($0, range).length > 0 }) {
-            done.append(range)
-            takeOut(range, from: out)
+        // Every edit is worked out on the answer as the model wrote it, then the answer is rebuilt in one pass. Editing
+        // in place let a later edit use a range an earlier one had cut away, and NSString threw on what a model wrote.
+        var kept: [NSRange] = []
+        for range in wrong.sorted(by: { $0.location < $1.location }) where !kept.contains(where: { NSIntersectionRange($0, range).length > 0 }) {
+            kept.append(range)
         }
-        return CheckedAnswer(text: out as String, unverified: unverified, ledgerCited: cited)
+        // The other places being taken out read as nothing when a bracket is checked for words that say something, so
+        // "(notes/a.md:1, notes/b.md:2)" goes whole when neither was given.
+        let masked = NSMutableString(string: answer)
+        for range in kept { masked.replaceCharacters(in: range, with: String(repeating: " ", count: range.length)) }
+        let edits = kept.map { edit(for: $0, in: masked) }
+        return CheckedAnswer(text: apply(edits, to: text), unverified: unverified, ledgerCited: cited)
+    }
+
+    /// A stretch of the answer to replace: a cut has empty `with`, a mark an empty `range`.
+    struct Edit: Equatable {
+        let range: NSRange
+        let with: String
+    }
+
+    /// The answer with the edits made, front to back in one pass over the original. Overlapping cuts join, a mark inside
+    /// a cut is dropped, and every range is held inside the text, so no answer can make this throw.
+    static func apply(_ edits: [Edit], to text: NSString) -> String {
+        let length = text.length
+        var out = ""
+        var cursor = 0
+        for edit in edits.sorted(by: { ($0.range.location, $0.range.length) < ($1.range.location, $1.range.length) }) {
+            let start = min(max(edit.range.location, 0), length)
+            let end = min(max(start + max(edit.range.length, 0), start), length)
+            if start < cursor {
+                // Inside what an earlier cut took: a cut carries on to its own end; a mark goes with the text it followed.
+                if edit.with.isEmpty { cursor = max(cursor, end) }
+                continue
+            }
+            out += text.substring(with: NSRange(location: cursor, length: start - cursor))
+            out += edit.with
+            cursor = end
+        }
+        if cursor < length { out += text.substring(from: cursor) }
+        return out
     }
 
     /// The citation with the quote marks around it, a line range after it ("13-18"), and a "Ledger " before an id.
@@ -114,47 +147,48 @@ public enum Citations {
         return NSRange(location: start, length: end - start)
     }
 
-    /// Takes a citation out of the answer. In brackets with nothing else that says something, the brackets go too; one
-    /// of a list in brackets goes with its comma; one inside a sentence is marked, since cutting it would change what the
-    /// sentence says.
-    private static func takeOut(_ range: NSRange, from out: NSMutableString) {
-        let line = out.lineRange(for: range)
+    /// How a citation comes out of the answer. In brackets with nothing else that says something, the brackets go too;
+    /// one of a list in brackets goes with its comma; one inside a sentence is marked, since cutting it would change what
+    /// the sentence says. `text` is the answer with every place being taken out blanked to spaces; nothing is changed here.
+    static func edit(for range: NSRange, in text: NSString) -> Edit {
+        let length = text.length
+        guard range.location >= 0, range.length >= 0, range.location + range.length <= length else {
+            return Edit(range: NSRange(location: min(max(range.location, 0), length), length: 0), with: "")
+        }
+        let line = text.lineRange(for: range)
         var lineEnd = line.location + line.length
-        while lineEnd > line.location, let last = UnicodeScalar(out.character(at: lineEnd - 1)), CharacterSet.newlines.contains(last) { lineEnd -= 1 }
-        func char(_ at: Int) -> Character { Character(UnicodeScalar(out.character(at: at)) ?? " ") }
+        while lineEnd > line.location, let last = UnicodeScalar(text.character(at: lineEnd - 1)), CharacterSet.newlines.contains(last) { lineEnd -= 1 }
+        func char(_ at: Int) -> Character { at >= 0 && at < length ? Character(UnicodeScalar(text.character(at: at)) ?? " ") : " " }
+        let end = range.location + range.length
 
         var open = range.location - 1
         while open >= line.location, !"([)]".contains(char(open)) { open -= 1 }
-        var close = range.location + range.length
+        var close = end
         while close < lineEnd, !"([)]".contains(char(close)) { close += 1 }
         let bracketed = open >= line.location && "([".contains(char(open)) && close < lineEnd && ")]".contains(char(close))
 
         if bracketed {
-            let before = out.substring(with: NSRange(location: open + 1, length: range.location - open - 1))
-            let after = out.substring(with: NSRange(location: range.location + range.length, length: close - range.location - range.length))
-            let words = (before + " " + after).lowercased().split { !$0.isLetter }.map(String.init)
+            let inside = text.substring(with: NSRange(location: open + 1, length: close - open - 1))
+            let words = inside.lowercased().split { !$0.isLetter }.map(String.init)
             if words.allSatisfy(filler.contains) {
                 var from = open
                 while from > line.location, char(from - 1) == " " { from -= 1 }
-                out.deleteCharacters(in: NSRange(location: from, length: close + 1 - from))
-                return
+                return Edit(range: NSRange(location: from, length: close + 1 - from), with: "")
             }
             // One of a list: "(Home/Lease.md:7, notes/plan.md:12)".
-            var next = range.location + range.length
+            var next = end
             while next < close, char(next) == " " { next += 1 }
             if next < close, ",;".contains(char(next)) {
                 next += 1
                 while next < close, char(next) == " " { next += 1 }
-                out.deleteCharacters(in: NSRange(location: range.location, length: next - range.location))
-                return
+                return Edit(range: NSRange(location: range.location, length: next - range.location), with: "")
             }
             var previous = range.location - 1
             while previous > open, char(previous) == " " { previous -= 1 }
             if previous > open, ",;".contains(char(previous)) {
-                out.deleteCharacters(in: NSRange(location: previous, length: range.location + range.length - previous))
-                return
+                return Edit(range: NSRange(location: previous, length: end - previous), with: "")
             }
         }
-        out.insert(notReadMark, at: range.location + range.length)
+        return Edit(range: NSRange(location: end, length: 0), with: notReadMark)
     }
 }
