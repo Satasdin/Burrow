@@ -307,6 +307,12 @@ public final class VaultTools {
         } else {
             parts.append(ProjectContent.notice + "\n" + excerpts.map(ProjectContent.block).joined(separator: "\n\n"))
         }
+        // The Ledger's decisions for the question and the files read, as the app's Ask hands them over: `burrow chat`
+        // answered "the split of the rent is not recorded" with the split kept as a decision (14 November, D-90).
+        if ledgerNotesOn {
+            let ledgerContext = AskLedger.context(vault: vault, question: task, shown: Set(brief.retrieved.paths))
+            if !ledgerContext.text.isEmpty { parts.append(ledgerContext.text) }
+        }
         return ToolResult(text: parts.joined(separator: "\n\n"), sources: sources(brief.retrieved),
                           summary: "\(brief.route.mode.rawValue), \(excerpts.count) excerpts" + (brief.skill.map { ", method: \($0.name)" } ?? ""))
     }

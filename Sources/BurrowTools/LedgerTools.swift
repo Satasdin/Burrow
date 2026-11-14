@@ -316,9 +316,9 @@ extension VaultTools {
         guard ledgerNotesOn else { return "" }
         let notes = Self.ledgerNotes(vault: vault, ledger: ledger, question: question, shown: files)
         guard !notes.isEmpty else { return "" }
-        let stale = ledger.staleness()
-        let lines = notes.map { "- [\($0.kind.rawValue)] \($0.stated) (\($0.byline); rests on \($0.cites.keys.sorted().prefix(3).joined(separator: ", ")))" + Ledger.checkAgain(stale($0)) }
-        return "\n\nNotes earlier sessions left in the Ledger that match this question, rest on these files, or rest on a file these import or are imported by. Check them against the excerpts above before relying on them:\n<ledger>\n" + Ledger.defanged(lines.joined(separator: "\n")) + "\n</ledger>"
+        // Labelled with their ids, as the app's Ask and `burrow chat` hand them over, so an answer can name one (D-90).
+        return "\n\nNotes earlier sessions left in the Ledger that match this question, rest on these files, or rest on a file these import or are imported by. Check them against the excerpts above before relying on them:\n"
+            + AskLedger.block(notes, stale: ledger.staleness())
     }
 
     /// The Ledger notes for a question and the files shown for it, one import step out both ways (D-75). The app's Ask

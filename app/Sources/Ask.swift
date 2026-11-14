@@ -1,4 +1,5 @@
 import BurrowCore
+import BurrowTools
 import BurrowTrial
 import SwiftUI
 
@@ -189,17 +190,26 @@ struct AnswerView: View {
                     .font(.caption).foregroundStyle(.orange)
             }
             if !turn.ledger.isEmpty {
-                Text("From the Ledger").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
+                // A note on a file read comes with any question about that file, so "From the Ledger" over the rent
+                // decision read as if the deposit answer used it. What it was given, and what the answer named (D-90).
+                Text("Ledger notes it was given").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
                 ForEach(turn.ledger, id: \.id) { commit in
                     Button { workspace.go(.ledger(commit.branch)) } label: {
                         HStack(alignment: .firstTextBaseline, spacing: 7) {
                             Image(systemName: commit.kind.symbol).foregroundStyle(commit.kind.colour)
-                            Text(commit.message).lineLimit(2)
-                            Text(commit.author).foregroundStyle(.tertiary).lineLimit(1)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(commit.message).lineLimit(2)
+                                // The reason travels with the decision (D-74), and the label is the one the answer cites (D-90).
+                                if let because = commit.because {
+                                    Text("Because " + because).foregroundStyle(.secondary).lineLimit(2)
+                                }
+                                Text(AskLedger.label(commit.id) + " · " + commit.author + (turn.ledgerCited.contains(commit.id) ? " · cited in the answer" : ""))
+                                    .font(.caption).foregroundStyle(.tertiary).lineLimit(1)
+                            }
                         }
                         .font(.callout)
                     }
-                    .buttonStyle(.plain).help(commit.because.map { "Because " + $0 } ?? commit.id)
+                    .buttonStyle(.plain).help(commit.stated)
                 }
             }
             if !turn.sources.isEmpty { Text("Used").font(.caption.weight(.semibold)).foregroundStyle(.secondary) }

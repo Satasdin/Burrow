@@ -97,6 +97,39 @@ final class ChatTests: XCTestCase {
         XCTAssertTrue(backend.sent[0].contains { $0["role"] as? String == "tool" })
     }
 
+    func testTheChatHearsTheLedgerAsTheAppsAskDoes() async throws {
+        // 14 November: `burrow chat` said "the split of the rent is not recorded" with the split kept as a decision,
+        // because only the app's Ask read the Ledger (D-90).
+        let kept = try tools.ledger.commit(.decision, "From December the retry limit for a failed charge is five, and I check it each Monday",
+                                           body: "Because: the bank asked for more tries.", author: "claude-opus", client: "claude-code")
+        let backend = ScriptedBackend(script: [ModelReply(text: "Five tries (Ledger \(kept.id)), because the bank asked. (notes/plan.md:12)", toolCalls: [])])
+        var settings = ChatSession.Settings()
+        settings.alwaysSearchFirst = true
+        var streamed = ""
+        var watching = ChatSession.Observer()
+        watching.word = { streamed += $0 }
+        let turn = try await ChatSession(tools: tools, backend: backend, settings: settings)
+            .ask("How many times is a failed charge retried from December?", observer: watching)
+        let system = try XCTUnwrap(backend.sent[0].first?["content"] as? String)
+        XCTAssertTrue(system.contains(AskLedger.rule), "the chat is told what the Ledger is, in the app's words")
+        let prepared = try XCTUnwrap(backend.sent[0].first { $0["role"] as? String == "tool" }?["content"] as? String)
+        XCTAssertTrue(prepared.contains("<ledger>"), prepared)
+        XCTAssertTrue(prepared.contains("- \(AskLedger.label(kept.id)) [decision]: From December"), prepared)
+        XCTAssertTrue(prepared.contains("Because: the bank asked for more tries."), prepared)
+        XCTAssertEqual(turn.ledger, [kept.id])
+        // The decision it was given stays cited; the file it was never shown is taken out, from the screen and the answer.
+        XCTAssertEqual(turn.answer, "Five tries (Ledger \(kept.id)), because the bank asked.")
+        XCTAssertEqual(streamed, turn.answer)
+        XCTAssertEqual(turn.unverified, ["notes/plan.md:12"])
+    }
+
+    func testTheLedgerStaysOutOfPrepareWhenItsNotesAreOff() async throws {
+        _ = try tools.ledger.commit(.decision, "A failed charge is retried five times", body: "Because: the bank asked.", author: "a")
+        tools.ledgerNotesOn = false
+        let result = try await tools.call("vault_prepare", arguments: ["task": "How often is a failed charge retried?"])
+        XCTAssertFalse(result.text.contains("<ledger>"), result.text)
+    }
+
     func testAModelCannotKeepANoteUnlessSomeoneAgrees() async throws {
         let before = try fixture.snapshot()
         let remember = ModelReply(text: "", toolCalls: [ModelToolCall(name: "vault_remember", arguments: ["text": "evil", "kind": "note"])])

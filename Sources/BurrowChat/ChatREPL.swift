@@ -80,6 +80,14 @@ public final class ChatREPL {
                 let read = turn.sources.prefix(8).map { "\($0.path):\($0.startLine)-\($0.endLine)" }.joined(separator: ", ")
                 let extra = turn.sources.count > 8 ? " and \(turn.sources.count - 8) more" : ""
                 if !read.isEmpty { put(dim("\n  read: \(read)\(extra)\n")) }
+                // Every note it was handed, and which the answer named: a note on a file read comes along with any question.
+                if !turn.ledger.isEmpty {
+                    let notes = turn.ledger.prefix(4).map { AskLedger.label($0) + (turn.ledgerCited.contains($0) ? " (cited)" : "") }
+                    put(dim("  ledger notes given: " + notes.joined(separator: ", ") + "\n"))
+                }
+                if !turn.unverified.isEmpty {
+                    put(dim("  ✗ not among what it read, so not a source: " + turn.unverified.prefix(4).joined(separator: ", ") + "\n"))
+                }
                 put(dim(String(format: "  %d tool calls, %d rounds, %d prompt tokens, %.1f s%@\n\n", turn.events.count, turn.rounds, turn.promptTokens, turn.seconds, turn.endedAtLimit ? ", stopped at the tool limit" : "")))
             } catch where OllamaReach.isUnreachable(error) {
                 put("\n✗ \(OllamaReach.message)\n\n")
