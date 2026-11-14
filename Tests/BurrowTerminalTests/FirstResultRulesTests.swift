@@ -118,13 +118,29 @@ final class FirstResultRulesTests: XCTestCase {
         XCTAssertTrue(first.contains("Because: Easter Monday: 31 wrong tickets."), first)
     }
 
-    func testAFindWhoseNotesShowTheDecisionDoesNotRepeatIt() async throws {
+    func testAShortFindWhoseNotesShowTheDecisionDoesNotRepeatIt() async throws {
         let kept = try keep("We retry a failed charge three times, never more.", because: "The bank blocks a card after the fourth try.")
         let other = try keep(files: ["Home.md"])
         await initialize()
         let first = try await call(1, "burrow_find", #"{"query":"retry a failed charge"}"#)
         XCTAssertEqual(occurrences(of: kept.id, in: first), 1, first)
         XCTAssertEqual(occurrences(of: other.id, in: first), 1, first)
+    }
+
+    /// Programs cut long results from the end: OpenClaw cut a 20,000-character burrow_find to 16,000 in a real run, and
+    /// the decision, only in the Ledger notes at its end, never reached the model. So a decision shown only far into the
+    /// first result is still put before it.
+    func testADecisionShownOnlyAtTheEndOfALongResultIsStillPutFirst() async throws {
+        let lines = (1...120).map { "Line \($0): the retry schedule for a failed charge, as finance wrote it down." }
+        try lines.joined(separator: "\n").write(to: fixture.vaultFolder.appendingPathComponent("Decisions/Schedule.md"), atomically: true, encoding: .utf8)
+        try await tools.vault.refresh(embedder: nil)
+        let kept = try keep("We retry a failed charge three times, never more.", because: "The bank blocks a card after the fourth try.",
+                            files: ["Decisions/Schedule.md"])
+        await initialize()
+        let first = try await call(1, "burrow_read", #"{"path":"Decisions/Schedule.md"}"#)
+        XCTAssertGreaterThan(first.count, MCPServer.shownWithin * 2, first)
+        XCTAssertTrue(first.hasPrefix(MCPServer.rulesWithResult), first)
+        XCTAssertTrue(String(first.prefix(MCPServer.shownWithin)).contains(kept.id), first)
     }
 
     // MARK: What the connection kept itself

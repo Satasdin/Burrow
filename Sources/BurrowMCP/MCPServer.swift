@@ -257,16 +257,21 @@ public final class MCPServer {
 
     /// Said before the decisions in force when they come with a connection's first tool result (D-95, D-103).
     static let rulesWithResult = "Burrow hands over the decisions in force once, here, with this connection's first result, since not every program shows its instructions to the model."
+    /// How far into a first result a decision counts as already shown: burrow_resume's whole room (D-81, D-103).
+    static let shownWithin = 3_200
 
     /// The decisions in force, once, before the first tool result a connection gets, in either era and whether or not the
     /// program was given the instructions: OpenClaw and Hermes Agent pass none of them to their model (0 of 458 requests on
     /// 14 November), so a decision reached it only through a tool that happened to show it (D-103). Left out: a decision
-    /// this result already shows (burrow_resume's latest commits, a search's Ledger notes, burrow_check), and one this
-    /// connection kept itself, which its burrow_commit result confirmed. Later results never repeat them.
+    /// this result already shows near its start (burrow_resume's latest commits), and one this connection kept itself,
+    /// which its burrow_commit result confirmed. Later results never repeat them.
     private func handingRules(to text: String, on connection: String) -> String {
         guard firstResultSent.insert(connection).inserted else { return text }
         let kept = keptOn[connection] ?? []
-        let rules = tools.rulesInForce(leavingOut: { kept.contains($0) || text.contains($0) })
+        // Only the start counts as shown: programs cut long results from the end. OpenClaw cut a 20,000-character
+        // burrow_find to 16,000, and the Ledger notes at its end, the only place the decision was, went with it.
+        let start = String(text.prefix(Self.shownWithin))
+        let rules = tools.rulesInForce(leavingOut: { kept.contains($0) || start.contains($0) })
         guard !rules.isEmpty else { return text }
         log("decisions in force handed with the first result on this connection")
         return Self.rulesWithResult + rules + "\n\n" + text
