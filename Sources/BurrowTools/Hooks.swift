@@ -55,7 +55,8 @@ public enum Hooks {
             let role = message["role"] as? String ?? entry["type"] as? String
             let parts = message["content"] as? [[String: Any]] ?? []
             // Only what the person typed: not copies the program keeps of its requests, not tool results that ride in the user's turn.
-            let typed = entry["type"] as? String == "user" && entry["isMeta"] as? Bool != true
+            // Nor Claude Code's own summary after a compaction, which rides in a user entry (D-102).
+            let typed = entry["type"] as? String == "user" && entry["isMeta"] as? Bool != true && entry["isCompactSummary"] as? Bool != true
                 && !parts.contains { $0["type"] as? String == "tool_result" }
             if role == "user", typed {
                 if let words = message["content"] as? String { remember(words, in: &out.asked) }
@@ -99,7 +100,8 @@ public enum Hooks {
 
     /// Before compaction or at the end: a handoff commit, and the plan when the session kept one. Nothing when nothing happened.
     @discardableResult
-    public static func checkpoint(ledger: Ledger, place: Place, transcript: Transcript, session: String, event: String) throws -> [LedgerCommit] {
+    public static func checkpoint(ledger: Ledger, place: Place, transcript: Transcript, session: String, event: String,
+                                  folded: Fold? = nil) throws -> [LedgerCommit] {
         guard !transcript.asked.isEmpty || !transcript.edited.isEmpty else { return [] }
         let author = transcript.model ?? "claude-code"
         let files = transcript.edited.compactMap(place.vaultPath)
@@ -122,6 +124,8 @@ public enum Hooks {
         var body = ["Asked: " + transcript.asked.suffix(4).map { String($0.prefix(160)) }.joined(separator: " | ")]
         if !files.isEmpty { body.append("Edited: " + files.suffix(10).joined(separator: ", ")) }
         if !outside.isEmpty { body.append("Outside the vault: \(outside.count) file\(outside.count == 1 ? "" : "s")") }
+        // Where the exact words of this stretch are kept, so a later session can get them back (D-102).
+        if let folded { body.append("Kept word for word in fold \(folded.id) (\(folded.messages) messages): burrow_recall \(folded.id)") }
         made.append(try ledger.commit(.handoff, "Claude Code stopped \(when). Last asked: \(last)", body: body.joined(separator: "\n"),
                                       files: files, author: author, client: "claude-code", branch: place.branch, session: "claude-" + session))
         return made

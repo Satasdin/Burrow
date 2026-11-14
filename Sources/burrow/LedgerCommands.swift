@@ -13,6 +13,7 @@ let ledgerUsage = """
   burrow confirm <vault> <commit> ["note"]                         says a commit still holds after a file it cites changed
   burrow branch <vault> [name]                                      show the branches, or switch to one
   burrow check  <vault> [--staged] [--json]                         the decisions your change rests on, beside it; exit 2 until shown once
+  burrow recall <vault> [fold|session] [--full] [--find WORDS]     what earlier stretches of a Claude Code session said, word for word
   burrow hook claude <vault> [--gate]                               for Claude Code's SessionStart, PreCompact, SessionEnd and Stop hooks
   burrow hook git <vault>                                           for git's post-commit hook, run inside the repository
   burrow hook install claude|git|git-gate <vault>                   prints the Claude Code settings, or writes .git/hooks/post-commit or pre-commit
@@ -20,10 +21,10 @@ let ledgerUsage = """
 
 /// The Ledger's commands. Returns false when the command is not one of them.
 func runLedgerCommand(_ arguments: [String]) async throws -> Bool {
-    guard let command = arguments.first, ["commit", "log", "resume", "blame", "diff", "revert", "confirm", "branch", "hook", "check"].contains(command) else { return false }
+    guard let command = arguments.first, ["commit", "log", "resume", "blame", "diff", "revert", "confirm", "branch", "hook", "check", "recall"].contains(command) else { return false }
     var words = Array(arguments.dropFirst())
     var values: [String: String] = [:]
-    let takesValue: Set<String> = ["--kind", "--files", "--branch", "--author", "--file", "--limit", "--since", "--store", "--because", "--rejected", "--supersedes"]
+    let takesValue: Set<String> = ["--kind", "--files", "--branch", "--author", "--file", "--limit", "--since", "--store", "--because", "--rejected", "--supersedes", "--find"]
     var index = 0
     var positional: [String] = []
     while index < words.count {
@@ -32,7 +33,7 @@ func runLedgerCommand(_ arguments: [String]) async throws -> Bool {
         else { positional.append(words[index]); index += 1 }
     }
     // Switches without a value: only `check` and `hook` take any.
-    let switches = Set(positional.filter { ["--staged", "--json", "--gate"].contains($0) })
+    let switches = Set(positional.filter { ["--staged", "--json", "--gate", "--full"].contains($0) })
     words = positional.filter { !switches.contains($0) }
 
     if command == "hook" {
@@ -44,6 +45,14 @@ func runLedgerCommand(_ arguments: [String]) async throws -> Bool {
             let vault = try openVault(words[1], store: values["--store"])
             try runHook(words[0], vault: vault, gateOnly: switches.contains("--gate"))
         }
+        return true
+    }
+
+    if command == "recall" {
+        guard let folder = words.first else { throw Failure("recall needs the vault") }
+        let vault = try openVault(folder, store: values["--store"])
+        let shown = Folds.recall(FoldStore(vault: vault), id: words.dropFirst().first, find: values["--find"], full: switches.contains("--full"))
+        print(shown.text)
         return true
     }
 
@@ -182,13 +191,24 @@ private func runHook(_ kind: String, vault: Vault, gateOnly: Bool = false) throw
         }
         switch event["hook_event_name"] as? String ?? "" {
         case "SessionStart":
-            print(Hooks.sessionStart(ledger: ledger, place: place))
+            // After a compaction the session's folds come back with the Ledger's head (D-102); any other start is as before.
+            if event["source"] as? String == "compact", let session = event["session_id"] as? String {
+                print(Folds.sessionStartAfterCompact(ledger: ledger, place: place, folds: FoldStore(vault: vault).folds(session: session)))
+            } else {
+                print(Hooks.sessionStart(ledger: ledger, place: place))
+            }
         case let name where name == "PreCompact" || name == "SessionEnd" || name == "Stop":
             guard let path = event["transcript_path"] as? String, let text = try? String(contentsOfFile: path, encoding: .utf8) else { return }
             let transcript = Hooks.readTranscript(text)
             if let named = Hooks.nameConversation(SessionStore(vault: vault), transcript: transcript) { logToStandardError("named conversation \(named)") }
+            let session = event["session_id"] as? String ?? "unknown"
+            // Only what was said since this session's last fold is folded, once (D-102). A fold that fails never stops the handoff.
+            var folded: Fold?
+            do { folded = try FoldStore(vault: vault).fold(transcript: text, path: path, session: session, event: name) }
+            catch { logToStandardError("hook: could not keep a fold: \(error)") }
+            if let folded { logToStandardError("kept fold \(folded.id) (\(folded.messages) messages)") }
             let made = try Hooks.checkpoint(ledger: ledger, place: place, transcript: transcript,
-                                            session: event["session_id"] as? String ?? "unknown", event: name)
+                                            session: session, event: name, folded: folded)
             for commit in made { logToStandardError("kept \(commit.kind.rawValue) \(commit.id) on \(commit.branch)") }
         default:
             return
