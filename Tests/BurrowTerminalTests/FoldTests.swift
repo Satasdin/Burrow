@@ -208,14 +208,17 @@ final class FoldTests: XCTestCase {
         XCTAssertFalse(Hooks.sessionStart(ledger: ledger, place: place).contains("burrow-folds"))
     }
 
-    func testBurrowRecallAnswersByNameOverMCP() async throws {
+    func testBurrowRecallAnswersOverMCPWithToolsFull() async throws {
         let fixture = try VaultFixture()
         let vault = try await fixture.opened()
         let store = FoldStore(vault: vault)
         try store.fold(transcript: firstStretch.joined(separator: "\n"), path: "/nowhere/s.jsonl", session: "sess-77", event: "PreCompact")
         let tools = VaultTools(vault: vault, embedder: nil) { _ in FakeAnswerer() }
+        // The fold's own Claude Code session, as Claude Code sets CLAUDE_CODE_SESSION_ID for the servers it starts.
+        tools.claudeCodeSession = "sess-77"
         let server = MCPServer(tools: tools, keepsSessions: false)
-        server.toolSet = .door
+        // burrow_recall is offered with --tools full only, and a tool not offered is refused by name (D-105).
+        server.toolSet = .full
         _ = await server.handle(#"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"claude-code","version":"1"}}}"#)
         func call(_ arguments: String) async throws -> String {
             let line = await server.handle(#"{"jsonrpc":"2.0","id":9,"method":"tools/call","params":{"name":"burrow_recall","arguments":\#(arguments)}}"#)

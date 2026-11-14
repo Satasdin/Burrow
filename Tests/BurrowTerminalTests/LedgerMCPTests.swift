@@ -42,6 +42,8 @@ final class LedgerMCPTests: XCTestCase {
     }
 
     func testCommitResumeAndACorrectionOnTheTrustLine() async throws {
+        // burrow_revert and burrow_blame are offered only with --tools full, and a tool not offered is refused (D-105).
+        server.toolSet = .full
         let kept = try await call("burrow_commit", #"{"kind":"fact","message":"Charges retry five times","files":"Decisions/Retry.md","model":"qwen3:4b"}"#)
         XCTAssertTrue(kept.hasPrefix("Kept as fact "), kept)
         let id = String(kept.dropFirst("Kept as fact ".count).prefix { $0 != " " })

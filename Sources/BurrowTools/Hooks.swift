@@ -108,8 +108,8 @@ public enum Hooks {
         let outside = transcript.edited.filter { place.vaultPath($0) == nil }
         var made: [LedgerCommit] = []
         if !transcript.openTodos.isEmpty {
-            let plan = "Open: " + transcript.openTodos.prefix(6).joined(separator: "; ")
-            let done = transcript.doneTodos.isEmpty ? "" : "Done: " + transcript.doneTodos.suffix(6).joined(separator: "; ")
+            let plan = Secrets.redacted("Open: " + transcript.openTodos.prefix(6).joined(separator: "; "))
+            let done = transcript.doneTodos.isEmpty ? "" : Secrets.redacted("Done: " + transcript.doneTodos.suffix(6).joined(separator: "; "))
             let latest = ledger.log(branch: place.branch, limit: 20).first { $0.kind == .plan }
             if latest?.message != String(plan.prefix(600)) {
                 made.append(try ledger.commit(.plan, String(plan.prefix(600)), body: done, files: files, author: author,
@@ -120,8 +120,9 @@ public enum Hooks {
         let closing = ledger.log(limit: 20).first { $0.kind == .handoff && $0.client == "claude-code" && !($0.session ?? "").hasPrefix("claude-") }
         if event != "PreCompact", let closing, Date().timeIntervalSince(closing.at) < 120 { return made }
         let when = event == "PreCompact" ? "before compacting" : "when the session ended"
-        let last = transcript.asked.last.map { String($0.prefix(220)) } ?? "editing"
-        var body = ["Asked: " + transcript.asked.suffix(4).map { String($0.prefix(160)) }.joined(separator: " | ")]
+        // What the person typed can hold a key or a password: taken out before it is kept in the vault (D-105).
+        let last = transcript.asked.last.map { String(Secrets.redacted($0).prefix(220)) } ?? "editing"
+        var body = ["Asked: " + transcript.asked.suffix(4).map { String(Secrets.redacted($0).prefix(160)) }.joined(separator: " | ")]
         if !files.isEmpty { body.append("Edited: " + files.suffix(10).joined(separator: ", ")) }
         if !outside.isEmpty { body.append("Outside the vault: \(outside.count) file\(outside.count == 1 ? "" : "s")") }
         // Where the exact words of this stretch are kept, so a later session can get them back (D-102).
@@ -139,7 +140,7 @@ public enum Hooks {
         guard let first = transcript.asked.first else { return nil }
         guard var record = sessions.list().first(where: { $0.client == "claude-code" && now.timeIntervalSince($0.updated) < 300 }),
               record.request == nil else { return nil }
-        record.request = String(first.prefix(300))
+        record.request = String(Secrets.redacted(first).prefix(300))
         // Naming it is not activity: the time it was last used stays as it was.
         guard (try? sessions.save(record, touching: false)) != nil else { return nil }
         return record.id

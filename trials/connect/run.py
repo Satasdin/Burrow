@@ -42,7 +42,8 @@ class Burrow:
     """A client of `burrow mcp`: one JSON-RPC message per line on stdin and stdout."""
 
     def __init__(self, vault=VAULT):
-        self.proc = subprocess.Popen([BURROW, "mcp", vault], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+        # The trial's own list, from before the Ledger: it calls vault_session_ tools, offered only on that list (D-105).
+        self.proc = subprocess.Popen([BURROW, "mcp", vault, "--tools", "classic"], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                                      stderr=subprocess.DEVNULL, text=True, bufsize=1)
         self.next = 0
         started = time.time()
