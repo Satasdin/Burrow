@@ -58,7 +58,7 @@ public enum Engine {
     static func isCode(_ path: String) -> Bool { codeKinds.contains((path as NSString).pathExtension.lowercased()) }
 
     /// `path/file.ext:12`, as the rules ask for, and the way a model says it in a sentence: "file.ext at line 12", "file.ext, lines 12".
-    private static let cited = try! NSRegularExpression(
+    static let cited = try! NSRegularExpression(
         pattern: #"([A-Za-z0-9_][A-Za-z0-9_./\-]*\.[A-Za-z0-9]{1,8})[`'"*)\]]*(?::|,? (?:at |on |in )?lines? )(\d+)"#, options: [.caseInsensitive])
 
     /// Every place an answer names, checked against what the model was shown.
