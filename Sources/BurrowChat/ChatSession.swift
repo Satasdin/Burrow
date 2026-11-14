@@ -120,7 +120,9 @@ public final class ChatSession {
                 event.outcome = result.summary
                 event.failed = result.isError
                 for source in result.sources where !turn.sources.contains(source) { turn.sources.append(source) }
-                if !result.isError { for id in Citations.ledgerIDs(in: content) where !turn.ledger.contains(id) { turn.ledger.append(id) } }
+                // The ids the tool put in its own <ledger> block, never ones read out of the text: a note or file can hold
+                // an id-shaped string, and a model citing it must not pass the check (D-92).
+                if !result.isError { for id in result.ledger where !turn.ledger.contains(id) { turn.ledger.append(id) } }
             } catch {
                 content = "That call did not work: \(error). Check the tool's arguments."
                 event.outcome = "\(error)"

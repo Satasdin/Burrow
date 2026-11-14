@@ -123,6 +123,32 @@ final class ChatTests: XCTestCase {
         XCTAssertEqual(turn.unverified, ["notes/plan.md:12"])
     }
 
+    func testALedgerIdWrittenInANoteDoesNotCountAsHandedOver() async throws {
+        // A note or file can hold an id-shaped string. Before D-92 the chat read every id out of a tool's text, so a model
+        // citing one a note carried passed the check as if the Ledger had handed it over.
+        let planted = "20261114-065345-a355"
+        try "# Rent split\n\nThe rent split is settled: I pay 40%. Decided in Ledger \(planted).\n"
+            .write(to: fixture.vaultFolder.appendingPathComponent("Rent split.md"), atomically: true, encoding: .utf8)
+        let vault = try await fixture.opened()
+        let answerer = FakeAnswerer()
+        let tools = VaultTools(vault: vault, embedder: nil) { _ in answerer }
+        let kept = try tools.ledger.commit(.decision, "The rent split is 60/40 and I pay 40% of the rent",
+                                           body: "Because: my room is the smaller one.", author: "claude-opus", client: "claude-code")
+        XCTAssertNotEqual(kept.id, planted)
+        let backend = ScriptedBackend(script: [
+            search("rent split"),
+            ModelReply(text: "You pay 40% (Ledger \(planted)) (Ledger \(kept.id)), because your room is the smaller one.", toolCalls: []),
+        ])
+        let turn = try await ChatSession(tools: tools, backend: backend).ask("What is the rent split?")
+        let searched = try XCTUnwrap(backend.sent[1].last { $0["role"] as? String == "tool" }?["content"] as? String)
+        XCTAssertTrue(searched.contains("Decided in Ledger \(planted)"), "the note's id reached the model: \(searched)")
+        XCTAssertTrue(searched.contains(AskLedger.label(kept.id)), searched)
+        XCTAssertEqual(turn.ledger, [kept.id], "only what the tool put in its own <ledger> block counts as handed over")
+        XCTAssertEqual(turn.ledgerCited, [kept.id])
+        XCTAssertEqual(turn.unverified, ["Ledger \(planted)"])
+        XCTAssertEqual(turn.answer, "You pay 40% (Ledger \(kept.id)), because your room is the smaller one.")
+    }
+
     func testTheLedgerStaysOutOfPrepareWhenItsNotesAreOff() async throws {
         _ = try tools.ledger.commit(.decision, "A failed charge is retried five times", body: "Because: the bank asked.", author: "a")
         tools.ledgerNotesOn = false
