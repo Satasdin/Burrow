@@ -4,6 +4,7 @@ import Foundation
 
 let ledgerUsage = """
   burrow commit <vault> "message" [--kind decision|fact|correction|plan|handoff] [--files a,b] [--branch B] [--author NAME]
+                [--because WHY] [--rejected WHAT] [--supersedes <commit>] [--alongside]
   burrow log    <vault> [--branch B] [--file PATH] [--limit N]      what AIs understood, newest first
   burrow resume <vault> [branch]                                    where the work stopped, for any model to carry on
   burrow blame  <vault> <path>                                      which sessions explained or changed a file
@@ -22,11 +23,13 @@ func runLedgerCommand(_ arguments: [String]) async throws -> Bool {
     guard let command = arguments.first, ["commit", "log", "resume", "blame", "diff", "revert", "confirm", "branch", "hook", "check"].contains(command) else { return false }
     var words = Array(arguments.dropFirst())
     var values: [String: String] = [:]
-    let takesValue: Set<String> = ["--kind", "--files", "--branch", "--author", "--file", "--limit", "--since", "--store"]
+    let takesValue: Set<String> = ["--kind", "--files", "--branch", "--author", "--file", "--limit", "--since", "--store", "--because", "--rejected", "--supersedes"]
     var index = 0
     var positional: [String] = []
     while index < words.count {
-        if takesValue.contains(words[index]), index + 1 < words.count { values[words[index]] = words[index + 1]; index += 2 } else { positional.append(words[index]); index += 1 }
+        if takesValue.contains(words[index]), index + 1 < words.count { values[words[index]] = words[index + 1]; index += 2 }
+        else if words[index] == "--alongside" { values["--alongside"] = "yes"; index += 1 }
+        else { positional.append(words[index]); index += 1 }
     }
     // Switches without a value: only `check` and `hook` take any.
     let switches = Set(positional.filter { ["--staged", "--json", "--gate"].contains($0) })
@@ -81,21 +84,44 @@ func runLedgerCommand(_ arguments: [String]) async throws -> Bool {
         let kindName = values["--kind"] ?? "fact"
         guard let kind = LedgerCommit.Kind(rawValue: kindName) else { throw Failure("unknown kind \(kindName)") }
         let files = (values["--files"] ?? "").split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
-        let made = try ledger.commit(kind, message, files: files, author: author, client: "terminal", branch: values["--branch"])
+        func oneLine(_ key: String) -> String {
+            (values[key] ?? "").components(separatedBy: .newlines).map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }.joined(separator: " ")
+        }
+        let because = oneLine("--because"), rejected = oneLine("--rejected")
+        let body = [rejected.isEmpty ? nil : "Rejected: " + String(rejected.prefix(600)), because.isEmpty ? nil : "Because: " + String(because.prefix(600))].compactMap { $0 }
+        // A person at the terminal is the one who would be asked, so an overlap is kept and named rather than refused (D-94).
+        var replaced: LedgerCommit?
+        if let id = values["--supersedes"] {
+            guard let old = ledger.find(id) else { throw Failure("there is no commit \(id) to supersede") }
+            replaced = old
+        }
+        var overlaps: [LedgerCommit] = []
+        if kind == .decision, replaced == nil, values["--alongside"] == nil {
+            overlaps = VaultTools.overlapping(vault: vault, ledger: ledger, text: message + " " + body.joined(separator: " "), files: files, branch: values["--branch"])
+        }
+        let made = try ledger.commit(kind, message, body: body.joined(separator: "\n"), files: files, author: author, client: "terminal", branch: values["--branch"],
+                                     reverts: replaced?.id, overlaps: overlaps.map(\.id))
         print("[\(made.branch) \(made.id)] \(made.kind.rawValue): \(made.message)")
+        if let replaced { print("    replaces \(replaced.id), now retired") }
+        for old in overlaps {
+            print("    UNRESOLVED: may contradict \(old.id): \(old.message.prefix(160))")
+        }
+        if !overlaps.isEmpty {
+            print("    Programs are told to ask which holds. Settle it with: burrow revert <vault> <id> \"…\", or commit again with --supersedes <id> or --alongside, or in the app.")
+        }
     case "log":
         let commits = ledger.log(branch: values["--branch"], file: values["--file"], limit: Int(values["--limit"] ?? "") ?? 30)
         if commits.isEmpty { print("The Ledger is empty here.") }
-        let wrong = ledger.reverted(), stale = ledger.staleness()
-        for commit in commits { print(describe(commit, stale: stale(commit), wrong: wrong)) }
+        let retired = ledger.retirements(), open = ledger.unresolved(), stale = ledger.staleness()
+        for commit in commits { print(describe(commit, stale: stale(commit), retired: retired[commit.id], open: open[commit.id] ?? [])) }
     case "resume":
         print(ledger.resume(branch: rest.first))
     case "blame":
         guard let path = rest.first else { throw Failure("blame needs a vault path") }
         let commits = ledger.blame(path)
         if commits.isEmpty { print("No commit cites \(path) yet.") }
-        let wrong = ledger.reverted(), stale = ledger.staleness()
-        for commit in commits { print(describe(commit, stale: stale(commit), wrong: wrong)) }
+        let retired = ledger.retirements(), open = ledger.unresolved(), stale = ledger.staleness()
+        for commit in commits { print(describe(commit, stale: stale(commit), retired: retired[commit.id], open: open[commit.id] ?? [])) }
     case "diff":
         guard let since = values["--since"] ?? rest.first else { throw Failure("diff needs --since <commit>") }
         let found = try ledger.diff(since: since)
@@ -124,10 +150,11 @@ func runLedgerCommand(_ arguments: [String]) async throws -> Bool {
     return true
 }
 
-private func describe(_ commit: LedgerCommit, stale: [String], wrong: Set<String>) -> String {
+private func describe(_ commit: LedgerCommit, stale: [String], retired: LedgerCommit?, open: [String]) -> String {
     var line = "\(commit.id)  \(commit.branch)  \(commit.kind.rawValue)  \(commit.byline)\n    \(commit.message)"
     if let because = commit.because { line += "\n    because: \(because)" }
-    if wrong.contains(commit.id) { line += "\n    marked wrong" }
+    if let retired { line += retired.kind == .decision ? "\n    replaced by \(retired.id)" : "\n    marked wrong" }
+    if !open.isEmpty { line += "\n    unresolved: may contradict \(open.joined(separator: ", ")); ask which holds" }
     if !stale.isEmpty { line += "\n    check again: \(stale.joined(separator: ", ")) changed since" }
     if !commit.cites.isEmpty { line += "\n    cites \(commit.cites.keys.sorted().prefix(5).joined(separator: ", "))" }
     return line

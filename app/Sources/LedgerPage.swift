@@ -7,6 +7,10 @@ import SwiftUI
 struct LedgerState: Sendable {
     var commits: [LedgerCommit] = []
     var reverted: Set<String> = []
+    /// Retired commit id → the commit that retired it: a correction, or a newer decision that replaced it (D-94).
+    var retiredBy: [String: LedgerCommit] = [:]
+    /// Decision id → the decisions in force it may contradict, until the person says which holds (D-94).
+    var unresolved: [String: [String]] = [:]
     /// Commit id → the cited files that changed since it was written.
     var stale: [String: [String]] = [:]
     var current = Ledger.defaultBranch
@@ -223,7 +227,9 @@ struct CommitRow: View {
                         .padding(.horizontal, 8).padding(.vertical, 3).background(commit.kind.colour.opacity(0.14), in: .capsule)
                     Label(commit.branch, systemImage: "arrow.triangle.branch").font(.system(size: 11.5)).foregroundStyle(Night.dim)
                     Text(commit.at.formatted(date: .omitted, time: .shortened)).font(.system(size: 11.5)).foregroundStyle(Night.faint).monospacedDigit()
-                    if wrong { tag("Marked wrong", Night.stale) }
+                    if let by = workspace.ledger.retiredBy[commit.id], by.kind == .decision { tag("Replaced", Night.stale).help("Replaced by decision \(by.id)") }
+                    else if wrong { tag("Marked wrong", Night.stale) }
+                    if workspace.ledger.unresolved[commit.id] != nil { tag("Unresolved", WatchPanel.amber) }
                     if !stale.isEmpty { tag("Check again", Night.stale).help("Changed since: " + stale.joined(separator: ", ")) }
                     Spacer(minLength: 0)
                     author
@@ -240,6 +246,7 @@ struct CommitRow: View {
                 if !stale.isEmpty, !wrong, ![.handoff, .confirmation, .code].contains(commit.kind) {
                     StillRight(workspace: workspace, commit: commit, changed: stale)
                 }
+                if !wrong { Unresolved(workspace: workspace, commit: commit) }
                 files
                 if correcting {
                     HStack {

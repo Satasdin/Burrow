@@ -48,10 +48,14 @@ public struct LedgerCommit: Codable, Sendable, Equatable {
     public var sha: String?
     /// The saved conversation it came from, if any.
     public var session: String?
+    /// For a decision kept while decisions in force on the same files said something that may differ: their ids, so
+    /// it is handed over marked UNRESOLVED until the person says which holds (D-94). For a "both hold" confirmation:
+    /// the ids it settles.
+    public var overlaps: [String]?
 
     public init(id: String, branch: String, parent: String?, kind: Kind, message: String, body: String = "", author: String,
                 client: String? = nil, cites: [String: String] = [:], at: Date = Date(), reverts: String? = nil, sha: String? = nil, session: String? = nil,
-                modelSaid: String? = nil, confirms: String? = nil) {
+                modelSaid: String? = nil, confirms: String? = nil, overlaps: [String]? = nil) {
         self.id = id
         self.branch = branch
         self.parent = parent
@@ -67,6 +71,7 @@ public struct LedgerCommit: Codable, Sendable, Equatable {
         self.session = session
         self.modelSaid = modelSaid
         self.confirms = confirms
+        self.overlaps = overlaps
     }
 }
 
@@ -218,7 +223,7 @@ public struct Ledger: Sendable {
     @discardableResult
     public func commit(_ kind: LedgerCommit.Kind, _ message: String, body: String = "", files: [String] = [], author: String,
                        client: String? = nil, branch: String? = nil, reverts: String? = nil, sha: String? = nil, session: String? = nil,
-                       at: Date = Date(), modelSaid: String? = nil, confirms: String? = nil) throws -> LedgerCommit {
+                       at: Date = Date(), modelSaid: String? = nil, confirms: String? = nil, overlaps: [String]? = nil) throws -> LedgerCommit {
         let text = message.replacingOccurrences(of: "\0", with: "").trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty else { throw LedgerProblem("A commit needs a message.") }
         guard text.count <= 600 else { throw LedgerProblem("A commit message holds 600 characters; put the rest in its body.") }
@@ -233,7 +238,8 @@ public struct Ledger: Sendable {
         var entry = LedgerCommit(id: makeID(at), branch: name, parent: parent, kind: kind, message: text,
                                  body: String(body.replacingOccurrences(of: "\0", with: "").prefix(8_000)), author: author, client: client,
                                  cites: hashes(files), at: at, reverts: reverts, sha: sha, session: session,
-                                 modelSaid: modelSaid.map { String($0.replacingOccurrences(of: "\0", with: "").prefix(120)) }, confirms: confirms)
+                                 modelSaid: modelSaid.map { String($0.replacingOccurrences(of: "\0", with: "").prefix(120)) }, confirms: confirms,
+                                 overlaps: overlaps.flatMap { $0.isEmpty ? nil : Array($0.prefix(8)) })
         try FileManager.default.createDirectory(at: place, withIntermediateDirectories: true)
         // Many programs can commit in the same second, and an id is that second and four random characters, so two can meet.
         // The commit is written whole to a file of its own, then given its name with link(2), which refuses a name that is
@@ -274,6 +280,18 @@ public struct Ledger: Sendable {
         let words = note.trimmingCharacters(in: .whitespacesAndNewlines)
         return try commit(.confirmation, "Still right\(looked): \"\(String(old.message.prefix(160)))\"", body: words, files: Array(old.cites.keys),
                           author: author, client: client, branch: old.branch, confirms: old.id)
+    }
+
+    /// The person says a decision kept as UNRESOLVED and the decisions it may contradict all hold (D-94): a confirmation
+    /// of it that names the ones it settles. Nothing is rewritten, and none of them is retired.
+    @discardableResult
+    public func bothHold(_ id: String, author: String, client: String? = nil) throws -> LedgerCommit {
+        guard let kept = find(id) else { throw LedgerProblem("There is no commit \(id).") }
+        let open = unresolved()[kept.id] ?? []
+        guard !open.isEmpty else { throw LedgerProblem("\(kept.id) is not waiting on anyone to say which decision holds.") }
+        let others = open.compactMap(find).map { "\"\(String($0.message.prefix(120)))\"" }.joined(separator: " and ")
+        return try commit(.confirmation, "Both hold: \"\(String(kept.message.prefix(160)))\" and \(others)", files: Array(kept.cites.keys),
+                          author: author, client: client, branch: kept.branch, confirms: kept.id, overlaps: open)
     }
 
     /// A commit's id is the second it was made, on this Mac's clock, and four random characters, so it reads the same
@@ -352,6 +370,62 @@ public struct Ledger: Sendable {
     /// Commits that were later marked wrong, by id.
     public func reverted() -> Set<String> { Set(all().compactMap(\.reverts)) }
 
+    /// Each retired commit, by id, with the newest commit that retired it: a correction that marked it wrong, or a
+    /// decision kept with `supersedes` (D-94).
+    public func retirements() -> [String: LedgerCommit] { Self.retirements(in: all()) }
+
+    static func retirements(in commits: [LedgerCommit]) -> [String: LedgerCommit] {
+        var out: [String: LedgerCommit] = [:]
+        for commit in commits { if let id = commit.reverts, out[id] == nil { out[id] = commit } }   // newest first
+        return out
+    }
+
+    /// How a retired commit is shown to a program: replaced by a newer decision, or marked wrong by a correction (D-94).
+    public static func retiredNote(_ by: LedgerCommit?) -> String {
+        guard let by, by.kind == .decision else { return "MARKED WRONG" }
+        return "REPLACED by \(by.id) (\(by.byline))"
+    }
+
+    /// Decisions kept while they may contradict decisions still in force, by id, with the ids not yet settled (D-94).
+    /// Settled means the older one was since retired, or a person said both hold (`bothHold`), or the newer one was retired.
+    public func unresolved() -> [String: [String]] { Self.unresolved(in: all()) }
+
+    static func unresolved(in commits: [LedgerCommit]) -> [String: [String]] {
+        let wrong = Set(commits.compactMap(\.reverts))
+        var settled: [String: Set<String>] = [:]
+        for commit in commits where commit.kind == .confirmation {
+            if let id = commit.confirms { settled[id, default: []].formUnion(commit.overlaps ?? []) }
+        }
+        var out: [String: [String]] = [:]
+        for commit in commits where commit.kind != .confirmation && !wrong.contains(commit.id) {
+            let open = (commit.overlaps ?? []).filter { !wrong.contains($0) && !(settled[commit.id] ?? []).contains($0) }
+            if !open.isEmpty { out[commit.id] = open }
+        }
+        return out
+    }
+
+    /// What a program is told beside a decision that may contradict one still in force (D-94). Empty when none.
+    public static func unresolvedNote(_ ids: [String]) -> String {
+        guard !ids.isEmpty else { return "" }
+        return " UNRESOLVED: may contradict \(ids.joined(separator: ", ")); ask the person which holds."
+    }
+
+    /// Decisions and corrections in force on a branch that may say something different from `text` about the same thing:
+    /// they rest on one of `files`, or on a file in `near` (one import step away), and share at least two content words
+    /// with it (D-94). Newest first, at most four.
+    public func overlapping(_ text: String, files: [String], near: Set<String> = [], branch: String? = nil) -> [LedgerCommit] {
+        let cited = Set(files.compactMap { Self.vaultPath($0.components(separatedBy: ":").first ?? $0) }).union(near)
+        let words = Self.words(text)
+        guard !cited.isEmpty, words.count >= 2, let name = try? Self.branchName(branch ?? current) else { return [] }
+        let everything = all()
+        let wrong = Set(everything.compactMap(\.reverts))
+        return Array(everything.filter { commit in
+            commit.branch == name && [.decision, .correction].contains(commit.kind) && !wrong.contains(commit.id)
+                && !cited.isDisjoint(with: commit.cites.keys)
+                && words.intersection(Self.words(commit.message + " " + commit.body)).count >= 2
+        }.prefix(4))
+    }
+
     /// Commits whose words match a question, best first: checked facts, decisions and corrections an earlier session
     /// left, so a later model finds them while searching. Wrong and stale commits are left out; so are handoffs and plans.
     /// Notes for a search: those that rest on a file the search returned (D-69), then those that share words with the
@@ -422,10 +496,12 @@ public struct Ledger: Sendable {
         }
         let everything = all()
         let wrong = Set(everything.compactMap(\.reverts))
+        let retired = Self.retirements(in: everything), open = Self.unresolved(in: everything)
         let stale = staleness(confirmations: Self.latestConfirmations(everything))
         func line(_ commit: LedgerCommit, _ most: Int) -> String {
             var text = "- [\(commit.kind.rawValue)] \(commit.stated(within: most).replacingOccurrences(of: "\n\n", with: "\n")) (\(commit.byline), \(Self.when(commit.at)), \(commit.id))"
-            if wrong.contains(commit.id) { text += " MARKED WRONG, see the correction" }
+            if let by = retired[commit.id] { text += by.kind == .decision ? " " + Self.retiredNote(by) : " MARKED WRONG, see the correction" }
+            text += Self.unresolvedNote(open[commit.id] ?? [])
             text += Self.checkAgain(stale(commit))
             return text
         }
@@ -540,6 +616,7 @@ public struct Ledger: Sendable {
         if let said = commit.modelSaid { lines.append("model_said: \(json(said))") }
         if let reverts = commit.reverts { lines.append("reverts: \(json(reverts))") }
         if let confirms = commit.confirms { lines.append("confirms: \(json(confirms))") }
+        if let overlaps = commit.overlaps, !overlaps.isEmpty { lines.append("overlaps: \(json(overlaps))") }
         if let sha = commit.sha { lines.append("sha: \(json(sha))") }
         if let session = commit.session { lines.append("session: \(json(session))") }
         if !commit.cites.isEmpty { lines.append("cites: \(json(commit.cites))") }
@@ -568,7 +645,8 @@ public struct Ledger: Sendable {
         return LedgerCommit(id: id, branch: branch, parent: fields["parent"] as? String, kind: kind, message: message, body: body,
                             author: author, client: fields["client"] as? String, cites: fields["cites"] as? [String: String] ?? [:],
                             at: at, reverts: fields["reverts"] as? String, sha: fields["sha"] as? String, session: fields["session"] as? String,
-                            modelSaid: fields["model_said"] as? String, confirms: fields["confirms"] as? String)
+                            modelSaid: fields["model_said"] as? String, confirms: fields["confirms"] as? String,
+                            overlaps: (fields["overlaps"] as? [Any])?.compactMap { $0 as? String })
     }
 
     public static func when(_ date: Date) -> String {

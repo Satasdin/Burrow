@@ -214,7 +214,7 @@ final class GapFixTests: XCTestCase {
         let message = String(repeating: "reconcile matches a line by its account reference and nothing else; ", count: 6)
         for number in 1...4 {
             let arguments: [String: Any] = ["kind": "decision", "message": "\(number). " + message, "because": "Reason \(number). " + long,
-                                            "rejected": turnedDown, "files": "shop/payments/reconcile.py"]
+                                            "rejected": turnedDown, "files": "shop/payments/reconcile.py", "alongside": "yes"]  // four on one file (D-94)
             let made = try await tools.call("burrow_commit", arguments: arguments)
             XCTAssertFalse(made.isError, made.text)
         }

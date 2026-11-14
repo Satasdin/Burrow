@@ -6,6 +6,10 @@ import Foundation
 struct LedgerViewState {
     var all: [LedgerCommit] = []
     var reverted: Set<String> = []
+    /// Retired commit id → the newer decision that replaced it, when a decision did (D-94).
+    var replacedBy: [String: String] = [:]
+    /// Commit id → decisions in force it may contradict, until the person says which holds (D-94).
+    var unresolved: [String: [String]] = [:]
     /// Commit id → cited files that changed since it was written.
     var stale: [String: [String]] = [:]
     var branches: [String] = []
@@ -26,6 +30,8 @@ extension Model {
         var state = LedgerViewState()
         state.all = ledger.log(limit: 1_000)
         state.reverted = ledger.reverted()
+        state.replacedBy = ledger.retirements().compactMapValues { $0.kind == .decision ? $0.id : nil }
+        state.unresolved = ledger.unresolved()
         let stale = ledger.staleness()
         for commit in state.all { let changed = stale(commit); if !changed.isEmpty { state.stale[commit.id] = changed } }
         state.branches = Array(Set(state.all.map(\.branch))).sorted()
@@ -134,7 +140,9 @@ enum LedgerScreen {
         var x = frame.put(area.x, y, commit.kind.rawValue.capitalized, Style(ink: style(commit, state).ink, bold: true))
         x = frame.put(x + 2, y, "\(commit.branch) · \(Ledger.when(commit.at)) · \(commit.id)", .quiet, limit: area.right)
         y += 2
-        if state.reverted.contains(commit.id) { line("Marked wrong: a later correction says what is right.", .alert) }
+        if let by = state.replacedBy[commit.id] { line("Replaced by decision \(by).", .alert) }
+        else if state.reverted.contains(commit.id) { line("Marked wrong: a later correction says what is right.", .alert) }
+        if let open = state.unresolved[commit.id] { line("Unresolved: may contradict \(open.joined(separator: ", ")); ask which holds.", .alert) }
         if let changed = state.stale[commit.id] { line("Check again: \(changed.joined(separator: ", ")) changed since this was written.", .alert) }
         line(commit.message, state.reverted.contains(commit.id) ? .quiet : .strong)
         if !commit.body.isEmpty {

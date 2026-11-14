@@ -60,7 +60,9 @@ struct LedgerGlance: View {
         let kinds = LedgerCommit.Kind.allCases.map { kind in (kind, commits.filter { $0.kind == kind }.count) }.filter { $0.1 > 0 }
         let authors = Dictionary(grouping: commits, by: \.author).map { ($0.key, $0.value.count) }.sorted { $0.1 > $1.1 }
         let stale = commits.filter { workspace.ledger.stale[$0.id] != nil }.count
-        let wrong = commits.filter { workspace.ledger.reverted.contains($0.id) }.count
+        // A decision replaced by a newer one (D-94) was settled, not found wrong: it needs no look.
+        let wrong = commits.filter { workspace.ledger.reverted.contains($0.id) && workspace.ledger.retiredBy[$0.id]?.kind != .decision }.count
+        let open = commits.filter { workspace.ledger.unresolved[$0.id] != nil }.count
 
         VStack(alignment: .leading, spacing: 10) {
             GlanceTitle(text: "What is kept")
@@ -89,11 +91,12 @@ struct LedgerGlance: View {
             }
         }
 
-        if stale + wrong > 0 {
+        if stale + wrong + open > 0 {
             VStack(alignment: .leading, spacing: 8) {
                 GlanceTitle(text: "Needs a look")
                 if stale > 0 { warning("\(stale.counted("commit")) rest on files changed since", "exclamationmark.arrow.triangle.2.circlepath") }
                 if wrong > 0 { warning("\(wrong.counted("commit")) marked wrong", "xmark.octagon") }
+                if open > 0 { warning("\(open.counted("decision")) may contradict an older one", "arrow.left.arrow.right.circle") }
             }
         }
 

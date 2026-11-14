@@ -106,6 +106,9 @@ public final class VaultTools {
     /// Lines flagged as written to steer an AI (D-80) in what this connection was shown, repeated by burrow_check, which
     /// models call just before they reply, so the reminder to tell the person lands where the reply is written.
     var flagged: [(path: String, line: Int)] = []
+    /// Decisions in force this connection was already shown when a decision it kept may contradict them (D-94). A second
+    /// attempt that overlaps only these goes through, marked UNRESOLVED.
+    var overlapWarned: Set<String> = []
     var hiddenSession: String? { connectionIsNew ? connection?.id : nil }
     /// The program on the other end, as it named itself.
     public var connectionClient: String?
