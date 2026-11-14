@@ -18,10 +18,17 @@ actor Engine {
         self.store = vault.store
     }
 
-    func index() async throws { try await vault.refresh(embedder: nil) }
-    func embed(onProgress: @escaping @Sendable (String) -> Void) async throws {
+    @discardableResult func index() async throws -> IndexReport { try await vault.refresh(embedder: nil) }
+    @discardableResult func embed(onProgress: @escaping @Sendable (String) -> Void) async throws -> IndexReport {
         try await vault.refresh(embedder: ollama.embedder(), onProgress: onProgress)
     }
+
+    // Bridges and storage (D-97, D-98).
+    func bridgedShelves() -> [BridgedShelf] { vault.bridgedShelves() }
+    func addBridge(_ url: URL, withLedger: Bool) throws -> Bridge { try vault.addBridge(to: url, withLedger: withLedger) }
+    func removeBridge(_ name: String) throws { try vault.removeBridge(name) }
+    func storage() -> StorageReport? { try? vault.storageReport() }
+    func remember() { KnownVaults.remember(vault) }
 
     func map() throws -> ProjectMap { try vault.projectMap() }
     func ledger() -> LedgerState {
@@ -83,7 +90,7 @@ actor Engine {
     func canEdit(_ path: String) -> Bool { vault.canEdit(path) }
     func neighbours(of path: String) -> [Vault.Neighbour] { (try? vault.neighbours(of: path)) ?? [] }
     func mentions(of path: String) -> [FoundLine] { (try? vault.mentions(of: path)) ?? [] }
-    func search(_ query: String, scope: String?) -> [FoundLine] { (try? vault.searchLines(query, scope: scope)) ?? [] }
+    func search(_ query: String, scope: String?) -> [FoundLine] { (try? vault.searchLinesAcrossBridges(query, scope: scope)) ?? [] }
 
     func write(_ path: String, text: String) throws { try vault.writeNote(path, text: text) }
     func createNote(named name: String, in folder: String, text: String) throws -> String { try vault.createNote(named: name, in: folder, text: text) }
@@ -236,6 +243,11 @@ final class Workspace {
     var map = ProjectMap(files: [], links: [])
     var tree: [FileNode] = []
     var linked: [LinkedFolder] = []
+    /// Other vaults this one reads through a bridge, with their files labelled (D-97).
+    var bridged: [BridgedShelf] = []
+    /// Burrow's store for this vault and for every vault, beside their limits (D-98).
+    var storage: StorageReport?
+    var bridgesOpen = false
     var tags: [String: [String]] = [:]
     var stats: VaultStats?
     var sessions: [VaultSession] = []
@@ -300,7 +312,7 @@ final class Workspace {
     func open() async {
         progress = "Reading your vault"
         do {
-            try await engine.index()
+            noteStorage(try await engine.index())
             await reload()
             watchActivity()
             afterFirstRead?()
@@ -323,10 +335,33 @@ final class Workspace {
         progress = nil
     }
 
-    private func embed() async throws {
-        try await engine.embed { line in
-            Task { @MainActor [weak self] in self?.progress = "Learning what things mean: \(line.replacingOccurrences(of: "embedded ", with: ""))" }
+    /// A storage limit that stopped the index short shows as the warning line, in its own first words (D-98).
+    private func noteStorage(_ report: IndexReport) {
+        guard let stop = report.storageStop else { return }
+        warning = stop.message.components(separatedBy: "\n").first.map { $0 + " Nothing was deleted; raise the limit with burrow config." }
+    }
+
+    /// Counts this vault for the global storage limit (D-98).
+    func remember() async { await engine.remember() }
+
+    func addBridge(_ url: URL, withLedger: Bool) async {
+        await act {
+            _ = try await engine.addBridge(url, withLedger: withLedger)
+            await reload()
         }
+    }
+
+    func removeBridge(_ name: String) async {
+        await act {
+            try await engine.removeBridge(name)
+            await reload()
+        }
+    }
+
+    private func embed() async throws {
+        noteStorage(try await engine.embed { line in
+            Task { @MainActor [weak self] in self?.progress = "Learning what things mean: \(line.replacingOccurrences(of: "embedded ", with: ""))" }
+        })
         await reload()
     }
 
@@ -363,7 +398,7 @@ final class Workspace {
         guard !isIndexing else { return }
         isIndexing = true
         defer { isIndexing = false }
-        try? await engine.index()
+        if let report = try? await engine.index() { noteStorage(report) }
         await reload()
         reloadUnchangedDocuments()
         if (try? await embed()) == nil { warning = "Ollama isn't running, so new notes aren't searchable by meaning yet." } else { progress = nil }
@@ -385,6 +420,8 @@ final class Workspace {
         defer { hasRead = true }
         let foldersNow = await engine.folders()
         linked = await engine.linked()
+        bridged = await engine.bridgedShelves()
+        storage = await engine.storage()
         tree = Self.buildTree(files: newMap.files, folders: foldersNow, linked: Set(linked.map(\.name)))
         tags = await engine.tags()
         stats = try? await engine.stats()
@@ -923,6 +960,8 @@ final class Library {
             let opened = try Workspace(folder: folder, store: environment["BURROW_STORE"].map { URL(fileURLWithPath: $0) })
             opened.library = self
             workspace = opened
+            // Counted for the global storage limit (D-98). A layout check counts only into a scratch state folder.
+            if environment["BURROW_SNAPSHOT"] == nil || environment["BURROW_STATE_DIR"] != nil { Task { await opened.remember() } }
             // A layout check opens scratch vaults; it should not push the person's own vaults off their list.
             if environment["BURROW_SNAPSHOT"] == nil {
                 recents = [folder.path] + recents.filter { $0 != folder.path }
@@ -999,6 +1038,7 @@ final class Library {
         default: break
         }
         if let pick = environment["BURROW_SELECT"] { workspace.librarySelection = pick }
+        if environment["BURROW_SHEET"] == "bridges" { workspace.bridgesOpen = true }
         if environment["BURROW_PALETTE"] != nil { workspace.paletteOpen = true }
         if let query = environment["BURROW_SEARCH"] {
             workspace.sidebarMode = .search

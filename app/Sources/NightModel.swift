@@ -192,6 +192,15 @@ extension Workspace {
 extension Workspace {
     /// Where a vault path lives on disk: inside the vault, or inside a linked folder.
     func fileURL(_ path: String) -> URL {
+        // A labelled path from a bridged vault is in that vault's folder, or in one of its linked folders (D-97).
+        if let cut = path.range(of: Bridge.separator), let shelf = bridged.first(where: { $0.bridge.name == path[..<cut.lowerBound] }) {
+            let inner = String(path[cut.upperBound...])
+            for folder in shelf.linked where inner == folder.name || inner.hasPrefix(folder.name + "/") {
+                let rest = String(inner.dropFirst(folder.name.count)).trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+                return rest.isEmpty ? folder.url : folder.url.appendingPathComponent(rest)
+            }
+            return shelf.bridge.url.appendingPathComponent(inner)
+        }
         for folder in linked where path == folder.name || path.hasPrefix(folder.name + "/") {
             let rest = String(path.dropFirst(folder.name.count)).trimmingCharacters(in: CharacterSet(charactersIn: "/"))
             return rest.isEmpty ? folder.url : folder.url.appendingPathComponent(rest)

@@ -218,6 +218,11 @@ struct AnswerView: View {
                     HStack(spacing: 7) {
                         Circle().fill(colour(source.path)).frame(width: 7, height: 7)
                         Text(source.path.title).lineLimit(1)
+                        // A source read through a bridge says which vault it came from (D-97).
+                        if let cut = source.path.range(of: Bridge.separator) {
+                            Label(String(source.path[..<cut.lowerBound]), systemImage: BridgedSection.symbol)
+                                .foregroundStyle(Night.conversation).help(source.path)
+                        }
                         Text(source.isNote ? "note" : "lines \(source.startLine) to \(source.endLine)").foregroundStyle(.tertiary)
                         if source.how != "search" { Image(systemName: "link").foregroundStyle(.secondary).help(source.how) }
                     }
