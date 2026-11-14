@@ -99,13 +99,13 @@ extension Fold {
             if entry["type"] as? String == "user" {
                 if let words = message["content"] as? String {
                     fold.characters += words.count
-                    if typed(words) { asked.append(Quote(ref: ref, text: clip(Secrets.redacted(clip(words, 1000)), 800))) }
+                    if typed(words) { asked.append(Quote(ref: ref, text: clip(Secrets.redacted(Secrets.cutForRedaction(words, 1000)), 800))) }
                 }
                 let results = parts.filter { $0["type"] as? String == "tool_result" }
                 for part in parts where part["type"] as? String == "text" && results.isEmpty {
                     let words = part["text"] as? String ?? ""
                     fold.characters += words.count
-                    if typed(words) { asked.append(Quote(ref: ref, text: clip(Secrets.redacted(clip(words, 1000)), 800))) }
+                    if typed(words) { asked.append(Quote(ref: ref, text: clip(Secrets.redacted(Secrets.cutForRedaction(words, 1000)), 800))) }
                 }
                 for result in results {
                     let words = resultText(result["content"])
@@ -216,13 +216,13 @@ extension Fold {
             guard line.count >= 6, !line.hasPrefix("Traceback (most recent call last)"), isNamed || !previous.hasPrefix("File \""),
                   !line.hasSuffix("... ok"), !line.hasSuffix("... skipped") else { continue }
             guard errorWords.firstMatch(in: line, range: NSRange(line.startIndex..., in: line)) != nil, !found.contains(line), !named.contains(line) else { continue }
-            if isNamed { named.append(clip(Secrets.redacted(clip(line, 500)), 300)) } else { found.append(clip(Secrets.redacted(clip(line, 500)), 300)) }
+            if isNamed { named.append(clip(Secrets.redacted(Secrets.cutForRedaction(line, 500)), 300)) } else { found.append(clip(Secrets.redacted(Secrets.cutForRedaction(line, 500)), 300)) }
         }
         found = named + found
         if found.count > 4 { found = Array(found.prefix(2) + found.suffix(2)) }
         // A tool that failed without an error word still failed: its first line says how.
         if found.isEmpty, failed, let first = text.components(separatedBy: "\n").first(where: { !$0.trimmingCharacters(in: .whitespaces).isEmpty }) {
-            found.append(clip(Secrets.redacted(clip(first, 500)), 300))
+            found.append(clip(Secrets.redacted(Secrets.cutForRedaction(first, 500)), 300))
         }
         return found
     }

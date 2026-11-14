@@ -46,33 +46,87 @@ public enum Secrets {
         (#"(?i)(--?(?:password|passwd|token|api[-_]?key|secret|client[-_]?secret|access[-_]?key|auth[-_]?token)(?:\s+|=))"# + notMarker
             + #"("[^"]*"|'[^']*'|[^\s"'-][^\s"']*)"#, "$1" + marker),
         // NAME=value with a secret's name: OPENAI_API_KEY=..., export DB_PASSWORD="...", ?access_token=...
-        (#"\b("# + secretName + #")(\s*=\s*)"# + notMarker + notNumber + #"(?!\$)("[^"]*"|'[^']*'|[^\s"'&;,)]+)"#, "$1$2" + marker),
+        (#"("# + secretName + #")(\s*=\s*)"# + notMarker + notNumber + #"(?!\$)("[^"]*"|'[^']*'|[^\s"'&;,)]+)"#, "$1$2" + marker),
         // "name": value with a secret's name, as JSON, YAML or a header writes it. Unquoted, the value must be 8 or more
         // characters, so "Invalid token: expired" in an error line stays as printed.
-        (#"(["']?)\b("# + secretName + #")\1(\s*:\s*)"# + notMarker + notNumber + #"("[^"]+"|'[^']+'|[^\s"',}]{8,})"#, "$1$2$1$3" + marker),
+        (#"(["']?)("# + secretName + #")\1(\s*:\s*)"# + notMarker + notNumber + #"("[^"]+"|'[^']+'|[^\s"',}]{8,})"#, "$1$2$1$3" + marker),
     ].map { (try! NSRegularExpression(pattern: $0.0), $0.1) }
 
     /// The text with every secret Burrow can recognise replaced by the marker. Names are bounded (64 characters each
-    /// side) so no line, however long, makes a pattern backtrack for long; callers clip before taking secrets out.
+    /// side), and the name rules run on pieces of at most `piece` characters, so no line, however long, makes a pattern
+    /// backtrack for long (D-106). Nothing is skipped for being long: a piece that can't be cut safely and has a secret's
+    /// word in it is replaced whole (fails closed).
     public static func redacted(_ text: String) -> String {
         guard !text.isEmpty else { return text }
         var out = text
         for (rule, template) in rules.dropLast(named) {
             out = rule.stringByReplacingMatches(in: out, range: NSRange(out.startIndex..., in: out), withTemplate: template)
         }
-        // The two "a secret's name, then its value" rules try a name at every word start, which is slow on a very long
-        // line. They run line by line, only on a line that has a secret's word in it, and not on a line longer than any
-        // command or error line a fold keeps (D-106): the token shapes above still cover such a line.
-        let lowered = out.lowercased()
-        guard nameWords.contains(where: lowered.contains) else { return out }
-        return out.components(separatedBy: "\n").map { line -> String in
-            guard line.utf16.count <= 4_000, nameWords.contains(where: line.lowercased().contains) else { return line }
-            var kept = line
+        guard nameWords.contains(where: out.lowercased().contains) else { return out }
+        return pieces(of: out).map { piece -> String in
+            guard nameWords.contains(where: piece.text.lowercased().contains) else { return piece.text }
+            guard piece.safe else { return marker }
+            var kept = piece.text
             for (rule, template) in rules.suffix(named) {
                 kept = rule.stringByReplacingMatches(in: kept, range: NSRange(kept.startIndex..., in: kept), withTemplate: template)
             }
             return kept
-        }.joined(separator: "\n")
+        }.joined()
+    }
+
+    /// Longest piece the name rules run on.
+    static let piece = 2_000
+
+    /// The text cut into consecutive pieces of at most `piece` characters that join back to it exactly. A cut is made only
+    /// at a space, a line break or one of & ; , outside quotes and not next to = or :, so a name and its value are never
+    /// split. A stretch with no such place is one piece, marked not safe.
+    static func pieces(of text: String) -> [(text: String, safe: Bool)] {
+        let chars = Array(text)
+        guard chars.count > piece else { return [(text, true)] }
+        var result: [(text: String, safe: Bool)] = []
+        var start = 0, lastCut: Int? = nil, quote: Character? = nil
+        func isCut(_ i: Int) -> Bool {
+            guard quote == nil, " \t\n\r&;,".contains(chars[i]) else { return false }
+            var before = i - 1
+            while before >= start, chars[before] == " " { before -= 1 }
+            var after = i + 1
+            while after < chars.count, chars[after] == " " { after += 1 }
+            let near: Set<Character> = ["=", ":"]
+            return !(before >= start && near.contains(chars[before])) && !(after < chars.count && near.contains(chars[after]))
+        }
+        var i = 0
+        while i < chars.count {
+            let c = chars[i]
+            if c == "\"" || c == "'" { quote = quote == nil ? c : (quote == c ? nil : quote) }
+            if isCut(i) { lastCut = i }
+            if i - start + 1 >= piece {
+                if let cut = lastCut, cut >= start {
+                    result.append((String(chars[start...cut]), true)); start = cut + 1
+                } else {
+                    // No safe place: run on to the next one, and mark the whole stretch not safe.
+                    var j = i + 1
+                    while j < chars.count, !(" \t\n\r".contains(chars[j])) { j += 1 }
+                    let stop = j - 1   // the stretch up to, not including, the space that ends it
+                    result.append((String(chars[start...stop]), false)); start = stop + 1; i = stop
+                }
+                lastCut = nil
+            }
+            i += 1
+        }
+        if start < chars.count { result.append((String(chars[start...]), true)) }
+        return result
+    }
+
+    /// The text cut to `limit` characters, before secrets are taken out, at a space so no secret is cut in half and left
+    /// partly unrecognised. A text with no space in its last 200 characters is cut there whole (D-106).
+    public static func cutForRedaction(_ text: String, _ limit: Int) -> String {
+        guard text.count > limit else { return text }
+        let head = text.prefix(limit)
+        if let space = head.lastIndex(where: { $0 == " " || $0 == "\n" || $0 == "\t" }),
+           head.distance(from: space, to: head.endIndex) <= 200 {
+            return String(head[..<space])
+        }
+        return String(head.dropLast(200))
     }
 
     /// How many of `rules`, at the end, match by a secret's name.

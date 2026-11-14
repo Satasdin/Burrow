@@ -129,8 +129,8 @@ public enum Hooks {
         if event != "PreCompact", let closing, Date().timeIntervalSince(closing.at) < 120 { return made }
         let when = event == "PreCompact" ? "before compacting" : "when the session ended"
         // What the person typed can hold a key or a password: taken out before it is kept in the vault (D-105).
-        let last = transcript.asked.last.map { String(Secrets.redacted(String($0.prefix(420))).prefix(220)) } ?? "editing"
-        var body = ["Asked: " + transcript.asked.suffix(4).map { String(Secrets.redacted(String($0.prefix(360))).prefix(160)) }.joined(separator: " | ")]
+        let last = transcript.asked.last.map { String(Secrets.redacted(Secrets.cutForRedaction($0, 420)).prefix(220)) } ?? "editing"
+        var body = ["Asked: " + transcript.asked.suffix(4).map { String(Secrets.redacted(Secrets.cutForRedaction($0, 360)).prefix(160)) }.joined(separator: " | ")]
         if !files.isEmpty { body.append("Edited: " + files.suffix(10).joined(separator: ", ")) }
         if !outside.isEmpty { body.append("Outside the vault: \(outside.count) file\(outside.count == 1 ? "" : "s")") }
         // Where the exact words of this stretch are kept, so a later session can get them back (D-102).
@@ -148,7 +148,7 @@ public enum Hooks {
         guard let first = transcript.asked.first else { return nil }
         guard var record = sessions.list().first(where: { $0.client == "claude-code" && now.timeIntervalSince($0.updated) < 300 }),
               record.request == nil else { return nil }
-        record.request = String(Secrets.redacted(String(first.prefix(500))).prefix(300))
+        record.request = String(Secrets.redacted(Secrets.cutForRedaction(first, 500)).prefix(300))
         // Naming it is not activity: the time it was last used stays as it was.
         guard (try? sessions.save(record, touching: false)) != nil else { return nil }
         return record.id
