@@ -57,17 +57,62 @@ public enum Asking {
     }
 }
 
+/// Notes a caller hands a model beside the vault's excerpts, with the rule for reading them. The Ledger lives in
+/// BurrowTools, which this module can't see, so `burrow ask` and `vault_ask` hand its notes in this way (D-96).
+public struct HandedNotes: Sendable, Equatable {
+    /// Said before the excerpts and the question.
+    public let text: String
+    /// Said after the engine's own rules, which stay as they were frozen (D-49, D-58).
+    public let rule: String
+    /// The Ledger commits handed over, by id: the only ones an answer may cite (D-92).
+    public let ids: [String]
+
+    public init(text: String, rule: String, ids: [String]) {
+        self.text = text
+        self.rule = rule
+        self.ids = ids
+    }
+}
+
+/// Where the notes for a question come from, given the question and what was read for it. Called once, before the model
+/// is. A struct rather than a bare closure, so a trailing closure after it still means the words of the answer.
+public struct NoteSource {
+    public let notes: (_ question: String, _ read: Retrieved) -> HandedNotes?
+
+    public init(_ notes: @escaping (_ question: String, _ read: Retrieved) -> HandedNotes?) { self.notes = notes }
+}
+
+extension Asking {
+    /// The engine's words with notes handed in (D-96). The rules stay word for word and the notes' rule follows them; the
+    /// notes come before the excerpts, as the app's Ask puts them. A question the engine would answer without the vault
+    /// still has the person's own notes to answer from, so it gets the rules for answering from material, as in the app.
+    public static func adding(_ notes: HandedNotes?, system: String, user: String, question: String, memory: Bool, skill: Skill?) -> (system: String, user: String) {
+        guard let notes, !notes.text.isEmpty else { return (system, user) }
+        let rules = memory ? system : Self.system(for: question, memory: true, skill: skill)
+        return (rules + "\n\n" + notes.rule, notes.text + "\n\n" + user)
+    }
+}
+
 public struct Answer: Sendable {
     public let retrieved: Retrieved
     public let result: ChatResult
+    /// The notes handed in with the question, if any.
+    public var handed: HandedNotes? = nil
+    /// The answer with its citations checked against the excerpts and the notes handed over (D-91, D-96).
+    public var checked: CheckedAnswer {
+        Citations.check(result.text, shown: retrieved.excerpts.map(ShownLines.init), ledger: Set(handed?.ids ?? []))
+    }
 }
 
 extension Vault {
     public func ask(_ question: String, mode: Mode, budget: Budget = Budget(), embedder: Embedder? = nil, scope: String? = nil, answerer: Answerer,
-                    onWord: @escaping @Sendable (String) -> Void = { _ in }) async throws -> Answer {
+                    notes source: NoteSource? = nil, onWord: @escaping @Sendable (String) -> Void = { _ in }) async throws -> Answer {
         let found = try await retrieve(question, mode: mode, budget: budget, embedder: embedder, scope: scope)
         let system = mode == .none ? Asking.withoutMemory : Asking.rules(for: question)
-        let result = try await answerer.answer(system: system, user: Asking.prompt(question: question, excerpts: found.excerpts), onWord: onWord)
-        return Answer(retrieved: found, result: result)
+        let handed = source?.notes(question, found)
+        let asked = Asking.adding(handed, system: system, user: Asking.prompt(question: question, excerpts: found.excerpts), question: question,
+                                  memory: mode != .none, skill: nil)
+        let result = try await answerer.answer(system: asked.system, user: asked.user, onWord: onWord)
+        return Answer(retrieved: found, result: result, handed: handed)
     }
 }

@@ -49,4 +49,17 @@ public enum AskLedger {
             + block(found, stale: Ledger(vault: vault).staleness())
         return (found, text)
     }
+
+    /// The same notes, block and rule, for the engine's own ask paths: `burrow ask` and `vault_ask` (D-96). Nil when no
+    /// note matches, so the engine's words go to the model exactly as before.
+    public static func handed(vault: Vault, question: String, shown: Set<String>) -> HandedNotes? {
+        let found = context(vault: vault, question: question, shown: shown)
+        guard !found.notes.isEmpty else { return nil }
+        return HandedNotes(text: found.text, rule: rule, ids: found.notes.map(\.id))
+    }
+
+    /// Where `burrow ask` and `vault_ask` get the Ledger's notes for a question and the files read for it.
+    public static func source(vault: Vault) -> NoteSource {
+        NoteSource { question, read in handed(vault: vault, question: question, shown: Set(read.paths)) }
+    }
 }

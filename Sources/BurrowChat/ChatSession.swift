@@ -202,28 +202,3 @@ public final class ChatSession {
         return turn
     }
 }
-
-/// Holds streamed words until a line ends, then lets the line out with its citations checked (D-91).
-final class CheckedStream {
-    private var pending = ""
-    private let emit: (String) -> Void
-    var shown: [ShownLines] = []
-    var ledger: Set<String> = []
-
-    init(emit: @escaping (String) -> Void) { self.emit = emit }
-
-    func add(_ words: String) {
-        pending += words
-        while let newline = pending.firstIndex(of: "\n") {
-            let line = String(pending[...newline])
-            pending.removeSubrange(...newline)
-            emit(Citations.check(line, shown: shown, ledger: ledger).text)
-        }
-    }
-
-    func finish() {
-        guard !pending.isEmpty else { return }
-        emit(Citations.check(pending, shown: shown, ledger: ledger).text)
-        pending = ""
-    }
-}

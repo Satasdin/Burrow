@@ -32,7 +32,13 @@ public struct EngineReply: Sendable {
     /// True when the first answer cited places it was not shown and the model was asked again.
     public let retried: Bool
     public let profile: ModelProfile
+    /// The notes handed in with the question, if any (D-96).
+    public var handed: HandedNotes? = nil
     public var unverified: [Citation] { citations.filter { !$0.shown } }
+    /// The answer with its citations checked against the excerpts and the notes handed over (D-91, D-96).
+    public var checked: CheckedAnswer {
+        Citations.check(result.text, shown: brief.retrieved.excerpts.map(ShownLines.init), ledger: Set(handed?.ids ?? []))
+    }
 }
 
 /// The thresholds the engine decides by. They were set on development questions before any scored run.
@@ -142,14 +148,19 @@ extension Vault {
 
     /// The whole loop for a model Burrow hosts: decide, fit, answer, check.
     public func engage(_ question: String, profile: ModelProfile, embedder: Embedder? = nil, scope: String? = nil, answerer: Answerer,
-                       settings: EngineSettings = EngineSettings(), onWord: @escaping @Sendable (String) -> Void = { _ in }) async throws -> EngineReply {
+                       settings: EngineSettings = EngineSettings(), notes source: NoteSource? = nil,
+                       onWord: @escaping @Sendable (String) -> Void = { _ in }) async throws -> EngineReply {
         let brief = try await brief(question, budget: profile.budget, embedder: embedder, scope: scope, settings: settings)
-        var result = try await answerer.answer(system: brief.system, user: brief.user, onWord: onWord)
+        // Notes handed in (the Ledger, for `burrow ask`) go beside the brief; the brief's own words are not changed (D-96).
+        let handed = source?.notes(question, brief.retrieved)
+        let asked = Asking.adding(handed, system: brief.system, user: brief.user, question: question,
+                                  memory: brief.route.mode != .none, skill: brief.skill)
+        var result = try await answerer.answer(system: asked.system, user: asked.user, onWord: onWord)
         var citations = Engine.citations(in: result.text, shown: brief.retrieved.excerpts)
         var retried = false
         let wrong = citations.filter { !$0.shown }
         if settings.check, !wrong.isEmpty, !brief.retrieved.excerpts.isEmpty {
-            let second = try await answerer.answer(system: brief.system, user: brief.user + Engine.correction(wrong), onWord: { _ in })
+            let second = try await answerer.answer(system: asked.system, user: asked.user + Engine.correction(wrong), onWord: { _ in })
             let recheck = Engine.citations(in: second.text, shown: brief.retrieved.excerpts)
             // The second answer is kept only if it is better grounded than the first.
             if recheck.filter({ !$0.shown }).count < wrong.count {
@@ -161,7 +172,7 @@ extension Vault {
             }
             retried = true
         }
-        return EngineReply(brief: brief, result: result, citations: citations, retried: retried, profile: profile)
+        return EngineReply(brief: brief, result: result, citations: citations, retried: retried, profile: profile, handed: handed)
     }
 }
 
