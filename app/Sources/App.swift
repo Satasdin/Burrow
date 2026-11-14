@@ -66,6 +66,8 @@ final class Delegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.regular)
         if ProcessInfo.processInfo.environment["BURROW_SNAPSHOT"] == nil { NSApp.activate(ignoringOtherApps: true) }
+        // Codes burrow asks for in a terminal are shown here, never there (D-113).
+        MainActor.assumeIsolated { PersonCodeSheet.start() }
         snapshotIfAsked()
         recordIfAsked()
         placeIfAsked()

@@ -23,8 +23,27 @@ mkdir -p "$WORK"
 # `burrow link approve` only works in a terminal, with yes typed after it asks (D-104). This is the trial standing in for
 # the person: script(1) gives burrow a pseudo-terminal, and yes is typed two seconds in, once burrow has asked (typed at
 # once, script's end-of-input can reach burrow first and nothing is approved). Stops the run if nothing was approved.
+#
+# Since D-113 burrow also refuses a terminal inside an agent's environment or process tree, and this script is often run
+# by one (Claude Code). So the trial stands in for the person the way D-113 says a program set on it still could: every
+# agent variable taken out, and script(1) detached from this process tree (its parent exits, so launchd adopts it). That
+# is enough for a linked folder; a decision's check also needs the one-time code shown outside the terminal, which only
+# a debug build hands to a test (BURROW_TEST_CODE_FILE, compiled out of release builds), so set_check needs the debug build.
+AGENT_VARS="CLAUDECODE CLAUDE_CODE_SESSION_ID CLAUDE_CODE_CHILD_SESSION CLAUDE_CODE_SESSION_ATTENDED CLAUDE_CODE_ENTRYPOINT CLAUDE_PID AI_AGENT
+  OPENCODE OPENCODE_SESSION_ID OPENCODE_TERMINAL CODEX_THREAD_ID CODEX_CI CODEX_SANDBOX CODEX_SANDBOX_NETWORK_DISABLED OPENCLAW_SHELL OPENCLAW_CLI
+  OPENCLAW_SUBAGENT_EXEC HERMES_AGENT HERMES_SESSION_ID HERMES_SESSION_KEY HERMES_SESSION_PLATFORM _HERMES_GATEWAY HERMES_EXEC_ASK GEMINI_CLI
+  CURSOR_AGENT BURROW_MCP BURROW_CHECK_RUN"
+# person_terminal <out-file> <burrow arguments…>: what comes in on stdin is what the person types.
+person_terminal() {
+  local out=$1; shift
+  local done="$WORK/.terminal-done.$$"; rm -f "$done"
+  local unset=(); for v in $AGENT_VARS; do unset+=(-u "$v"); done
+  ( exec 3<&0; ( sleep 0.3; env "${unset[@]}" script -q /dev/null "$B" "$@" <&3 > "$out" 2>&1; echo $? > "$done" ) & )
+  while [ ! -f "$done" ]; do sleep 0.2; done
+  rm -f "$done"
+}
 approve_in_terminal() {
-  { sleep 2; echo yes; sleep 1; } | script -q /dev/null "$B" link approve "$1" "$2" > /dev/null 2>&1
+  { sleep 2; echo yes; sleep 1; } | person_terminal /dev/null link approve "$1" "$2"
   "$B" link list "$1" 2>/dev/null | grep -q "   approved$" || { echo "gate.sh: could not approve $2 for $1" >&2; exit 1; }
 }
 
@@ -102,7 +121,10 @@ claude_gate() {
 DECISION=20261112-214056-002e
 FORBID='forbid: \.phone\s*==|==\s*\w+\.phone'
 set_check() {
-  { sleep 2; echo yes; sleep 1; } | script -q /dev/null "$B" decision check "$1" "$DECISION" --set "$2" > "$WORK/set-check.txt" 2>&1
+  local code="$WORK/.shown-code"; rm -f "$code"
+  { sleep 2; cat "$code" 2>/dev/null; echo; sleep 1; echo yes; sleep 1; } \
+    | BURROW_TEST_CODE_FILE=$code person_terminal "$WORK/set-check.txt" decision check "$1" "$DECISION" --set "$2"
+  rm -f "$code"
   grep -q "check confirmed" "$WORK/set-check.txt" || { echo "gate.sh: could not confirm the check for $1" >&2; cat "$WORK/set-check.txt" >&2; exit 1; }
 }
 

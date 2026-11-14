@@ -30,18 +30,64 @@ func meetLinks(_ vault: Vault, say: Bool = true) {
     if say, let line = vault.linksAwaitingApprovalLine(detailed: isatty(STDERR_FILENO) == 1) { logToStandardError(line) }
 }
 
-/// True when burrow runs in a person's own terminal, where what it asks is shown and the answer is typed (D-104). A
-/// program that runs burrow through its own shell tool (Claude Code, OpenCode, Hermes, OpenClaw) gives it pipes instead.
-func inPersonsTerminal() -> Bool { isatty(STDIN_FILENO) == 1 && isatty(STDERR_FILENO) == 1 }
+/// Why burrow won't take this as the person in their own terminal, or nil when nothing says otherwise (D-104, D-113):
+/// stdin and stderr must be terminals (a program's shell tool gives pipes), no agent's variables may be set, and no
+/// agent may be among burrow's parents or own the session its terminal belongs to (`PersonPresence`).
+func whyNotThePerson() -> String? {
+    guard isatty(STDIN_FILENO) == 1, isatty(STDERR_FILENO) == 1 else { return "it isn't running in a terminal" }
+    return PersonPresence.refusal()?.reason
+}
+
+/// True when burrow runs in a person's own terminal, where what it asks is shown and the answer is typed, and nothing
+/// says a program connected to Burrow is the one running it (D-104, D-113).
+func inPersonsTerminal() -> Bool { whyNotThePerson() == nil }
 
 /// Said when a step only the person may take is run without a terminal (D-104).
 let needsThePerson = "only you can approve a linked folder: approve it in the Burrow app, or run this in your own terminal. It can't be done through a pipe or by a program you've connected to Burrow."
 
-/// Shows the person what they are about to allow and waits for them to type yes. Throws for anything else.
-func askThePerson(_ lines: [String]) throws {
-    guard inPersonsTerminal() else { throw Failure(needsThePerson) }
-    let question = lines.joined(separator: "\n") + "\nType yes to allow, anything else to stop: "
-    FileHandle.standardError.write(Data(question.utf8))
+/// The one call for every step only the person may take (D-113): throws `refusal`, with the reason, unless burrow is in
+/// the person's own terminal and nothing says an agent is running it.
+func requireThePerson(_ refusal: String = needsThePerson) throws {
+    if let why = whyNotThePerson() { throw Failure("\(refusal) Refused because \(why).") }
+}
+
+/// Layer 3 (D-113), for a step that defeats the gate: Burrow shows a six-digit code outside the terminal (the Burrow
+/// app, or a macOS notification) and the person types it here. Never printed, so a program driving this terminal
+/// can't read it. Throws unless the right code is typed within 2 minutes, in at most 3 tries.
+func askForCode(_ action: String) throws {
+    let state = BurrowPlaces.stateFolder
+    let issued: PersonCode.Issued
+    do { issued = try PersonCode.issue(action: action, state: state) } catch { throw Failure("\(error)") }
+    let place: String
+    switch PersonCode.show(issued, state: state) {
+    case .app: place = "in the Burrow app"
+    case .notification: place = "in a notification (top right of your screen)"
+    case .testHook: place = "in the test's code file"
+    case .nowhere: throw Failure("Burrow could not show a code outside this terminal (no Burrow app running, and the notification failed). Do this in the Burrow app instead.")
+    }
+    FileHandle.standardError.write(Data("Burrow showed a 6-digit code \(place). It is never printed here, so a program running this terminal can't see it.\n".utf8))
+    while true {
+        FileHandle.standardError.write(Data("Type the code (valid 2 minutes): ".utf8))
+        guard let typed = readLine(strippingNewline: true) else {
+            PersonCode.spend(issued, state: state)
+            throw Failure("no code was typed: nothing was allowed")
+        }
+        switch PersonCode.redeem(typed, issued, state: state) {
+        case .accepted: return
+        case let .wrong(left): FileHandle.standardError.write(Data("That isn't the code. \(left) \(left == 1 ? "try" : "tries") left.\n".utf8))
+        case .expired: throw Failure("the code expired: nothing was allowed. Run the command again for a new one.")
+        case .spent: throw Failure("that code can't be used any more: nothing was allowed. Run the command again for a new one.")
+        }
+    }
+}
+
+/// Shows the person what they are about to allow and waits for them to type yes. Throws for anything else. With
+/// `code`, the person first types the code Burrow showed outside the terminal (D-113); the typed yes is always last.
+func askThePerson(_ lines: [String], code action: String? = nil) throws {
+    try requireThePerson()
+    FileHandle.standardError.write(Data((lines.joined(separator: "\n") + "\n").utf8))
+    if let action { try askForCode(action) }
+    FileHandle.standardError.write(Data("Type yes to allow, anything else to stop: ".utf8))
     let answer = readLine(strippingNewline: true)?.trimmingCharacters(in: .whitespaces).lowercased()
     guard answer == "yes" else { throw Failure("nothing was approved") }
 }
@@ -114,6 +160,8 @@ func runTerminalCommand(_ arguments: [String]) async throws -> Bool {
     let vault = try openVault(folder, store: options.values["--store"], sayLinks: command != "link")
     switch command {
     case "mcp":
+        // Whatever this server starts (a decision check through burrow_check) is never taken for the person (D-113).
+        setenv(PersonPresence.mcpMarker, "1", 1)
         let output = ProtocolOutput()
         let tools = VaultTools.onThisMac(vault: vault, model: options.values["--model"] ?? Ollama.defaultModel, log: logToStandardError)
         logToStandardError("MCP server for \(vault.root.path)")
@@ -160,7 +208,7 @@ func runTerminalCommand(_ arguments: [String]) async throws -> Bool {
         guard FileManager.default.fileExists(atPath: target.path, isDirectory: &isFolder), isFolder.boolValue else { throw Failure("\(target.path) is not a folder") }
         // Linking here approves the folder, so it needs the person in their own terminal too (D-104): otherwise a
         // connected program could link, and so approve, any folder on this Mac.
-        guard inPersonsTerminal() else { throw Failure(needsThePerson) }
+        try requireThePerson()
         let real = Vault.realPath(target.path)
         let path = target.standardizedFileURL.path
         try askThePerson([
@@ -185,7 +233,7 @@ private func linkApprovals(_ action: String, _ words: [String], all: Bool, store
                                        : "link approve needs a vault folder: burrow link approve <vault> <folder>")
     }
     // Approving needs the person in their own terminal (D-104), checked before anything is opened.
-    if action == "approve", !inPersonsTerminal() { throw Failure(needsThePerson) }
+    if action == "approve" { try requireThePerson() }
     let vault = try openVault(folder, store: store, sayLinks: false)
     // Everything printed from the vault's list is cleaned of control characters, since anyone who shared the vault could
     // have written it (D-104), and every suggested command quotes its words so a pasted path can't run anything.
