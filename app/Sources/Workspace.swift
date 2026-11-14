@@ -51,7 +51,21 @@ actor Engine {
         state.check = VaultTools.checkReport(vault: vault, ledger: ledger)
         state.flagged = flaggedText()
         addTeams(to: &state)
+        let confirmed = DecisionChecks.confirmed(vault), proposed = DecisionChecks.proposed(vault)
+        let folders = vault.linkedFolders()
+        for id in Set(confirmed.keys).union(proposed.keys) {
+            // Where it would run: the linked folder of the decision's first cited file, as the terminal's question says.
+            let cited = commits.first { $0.id == id }?.cites.keys.sorted() ?? []
+            let folder = cited.lazy.compactMap { path in folders.first { path.hasPrefix($0.name + "/") }?.path }.first
+            state.checks[id] = DecisionCheckState(confirmed: confirmed[id], proposed: proposed[id], folder: folder)
+        }
         return state
+    }
+
+    /// The person confirms a decision's proposed check in the app, having seen exactly what it runs (D-107).
+    func confirmCheck(_ id: String, _ shown: DecisionCheck) throws {
+        guard DecisionChecks.proposed(vault)[id] == shown else { throw LedgerProblem("The proposed check changed since it was shown; look again.") }
+        try DecisionChecks.confirm(shown, for: id, vault: vault)
     }
 
     /// Lines in the vault's notes and code written to steer AI assistants (D-80), the same pattern burrow_read flags.
@@ -612,6 +626,14 @@ final class Workspace {
     /// way, with the newer one named as what is right instead.
     func keepNewer(_ newer: LedgerCommit, over older: String) async {
         await markWrong(older, why: "Replaced by the newer decision \(newer.id), kept by the person: \"\(String(newer.message.prefix(200)))\"")
+    }
+
+    /// The person confirms a decision's proposed check (D-107): it runs from now on.
+    func confirmCheck(_ id: String, _ shown: DecisionCheck) async {
+        do {
+            try await engine.confirmCheck(id, shown)
+            ledger = await engine.ledger()
+        } catch { warning = "Could not confirm that check: \(error)" }
     }
 
     /// The person says the UNRESOLVED decision and the ones it may contradict all hold (D-94).

@@ -24,6 +24,8 @@ struct LedgerState: Sendable {
     var team: [String: String] = [:]
     /// The teams this vault reads, for "Share with the team" where a decision is kept.
     var teams: [String] = []
+    /// Each decision's check (D-107): confirmed on this Mac, or proposed by a program and not run.
+    var checks: [String: DecisionCheckState] = [:]
 
     var branches: [String] { Array(Set(commits.map(\.branch))).sorted() }
     func commits(on branch: String?) -> [LedgerCommit] { branch.map { name in commits.filter { $0.branch == name } } ?? commits }
@@ -251,6 +253,7 @@ struct CommitRow: View {
                     StillRight(workspace: workspace, commit: commit, changed: stale)
                 }
                 if !wrong { Unresolved(workspace: workspace, commit: commit) }
+                if !wrong, commit.kind == .decision { DecisionCheckRow(workspace: workspace, commit: commit) }
                 files
                 if correcting {
                     HStack {
