@@ -54,15 +54,36 @@ final class SecretsNoBypassTests: XCTestCase {
     }
 
     func testCuttingNeverLeavesHalfASecret() {
-        let text = String(repeating: "a ", count: 495) + "sk-test-" + String(repeating: "Z", count: 40)
-        let cut = Secrets.cutForRedaction(text, 1_000)
-        XCTAssertFalse(cut.contains("sk-test"), "the cut-off token is left out, not kept half")
-        XCTAssertLessThanOrEqual(cut.count, 1_000)
+        // A secret that straddles the kept length is taken out whole before anything is clipped.
+        let text = String(repeating: "a ", count: 495) + "sk-test-" + String(repeating: "Z", count: 40) + " tail"
+        let kept = String(Secrets.redacted(Secrets.cutForRedaction(text, 1_000)).prefix(1_000))
+        XCTAssertFalse(kept.contains("sk-test"))
+        XCTAssertFalse(kept.contains("ZZZZ"))
+        XCTAssertTrue(kept.contains("[secret"), "the marker starts where the secret was")
     }
 
-    func testPiecesJoinBackExactly() {
-        let line = (0..<3_000).map { "k\($0)=v\($0)" }.joined(separator: " ")
-        XCTAssertEqual(Secrets.pieces(of: line).map(\.text).joined(), line)
+    func testAnUnmatchedQuoteBeforeALongQuotedSecretDoesNotHideIt() {
+        let line = "echo \"it's fine " + String(repeating: "pad ", count: 800) + "API_TOKEN=\"" + String(repeating: "s3cr3t ", count: 400) + "\" done"
+        let out = Secrets.redacted(line)
+        XCTAssertFalse(out.contains("s3cr3t"))
+        XCTAssertTrue(out.hasSuffix(" done"))
+    }
+
+    func testAQuotedValueThatNeverClosesGoesToTheEndOfTheLine() {
+        let out = Secrets.redacted("DB_PASSWORD=\"open secret value\nnext line")
+        XCTAssertEqual(out, "DB_PASSWORD=[secret removed]\nnext line")
+    }
+
+    func testTabsAndLineBreaksAroundTheSignStillMatch() {
+        XCTAssertEqual(Secrets.redacted("API_KEY\t=\tabcdef123456"), "API_KEY\t=\t[secret removed]")
+        XCTAssertEqual(Secrets.redacted("\"client_secret\":\n  \"abcdefgh12345\""), "\"client_secret\":\n  [secret removed]")
+    }
+
+    func testWhatIsNotASecretStaysAsPrinted() {
+        for line in ["max_tokens=4096", "InvalidTokenError: token expired", "Invalid token: expired", "tokenizer=bpe", "monkey=banana42",
+                     "export KEY=$HOME", "port: 8080"] {
+            XCTAssertEqual(Secrets.redacted(line), line)
+        }
     }
 }
 

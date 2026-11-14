@@ -13,12 +13,6 @@ public enum Secrets {
     /// A value that is only digits is a count, a port or a size (max_tokens=4096), not a secret.
     private static let notNumber = #"(?![0-9]+(?![A-Za-z0-9_-]))"#
 
-    /// A name that says its value is a secret: OPENAI_API_KEY, db_password, access_token, client-secret, X-Api-Key.
-    /// Not "tokens" or "tokenizer": max_tokens and the like are settings.
-    /// Not an exception's name (InvalidTokenError: …): an error line stays as printed.
-    private static let secretName =
-        #"(?:[A-Za-z0-9_.-]{0,64}(?i:token(?!s|izer)|secret|passw(?:or)?d|passphrase|credentials?|(?:api|access|private|signing|encryption|master|license|account|client|secret)[_-]?key|apikey)[A-Za-z0-9_.-]{0,64}|[A-Z0-9_]{0,64}_KEY)(?<!Error)(?<!Exception)(?<!Warning)"#
-
     private static let rules: [(NSRegularExpression, String)] = [
         // A private key block, whole; one cut short by a clip runs to the end of the text.
         (#"-----BEGIN [A-Z0-9 ]*PRIVATE KEY(?: BLOCK)?-----[\s\S]*?(?:-----END [A-Z0-9 ]*PRIVATE KEY(?: BLOCK)?-----|\z)"#, marker),
@@ -45,92 +39,130 @@ public enum Secrets {
         // A command-line flag that takes a secret: --password hunter2, --api-key=..., --token "...".
         (#"(?i)(--?(?:password|passwd|token|api[-_]?key|secret|client[-_]?secret|access[-_]?key|auth[-_]?token)(?:\s+|=))"# + notMarker
             + #"("[^"]*"|'[^']*'|[^\s"'-][^\s"']*)"#, "$1" + marker),
-        // NAME=value with a secret's name: OPENAI_API_KEY=..., export DB_PASSWORD="...", ?access_token=...
-        (#"("# + secretName + #")(\s*=\s*)"# + notMarker + notNumber + #"(?!\$)("[^"]*"|'[^']*'|[^\s"'&;,)]+)"#, "$1$2" + marker),
-        // "name": value with a secret's name, as JSON, YAML or a header writes it. Unquoted, the value must be 8 or more
-        // characters, so "Invalid token: expired" in an error line stays as printed.
-        (#"(["']?)("# + secretName + #")\1(\s*:\s*)"# + notMarker + notNumber + #"("[^"]+"|'[^']+'|[^\s"',}]{8,})"#, "$1$2$1$3" + marker),
     ].map { (try! NSRegularExpression(pattern: $0.0), $0.1) }
 
-    /// The text with every secret Burrow can recognise replaced by the marker. Names are bounded (64 characters each
-    /// side), and the name rules run on pieces of at most `piece` characters, so no line, however long, makes a pattern
-    /// backtrack for long (D-106). Nothing is skipped for being long: a piece that can't be cut safely and has a secret's
-    /// word in it is replaced whole (fails closed).
+    /// The text with every secret Burrow can recognise replaced by the marker.
     public static func redacted(_ text: String) -> String {
         guard !text.isEmpty else { return text }
         var out = text
-        for (rule, template) in rules.dropLast(named) {
+        for (rule, template) in rules {
             out = rule.stringByReplacingMatches(in: out, range: NSRange(out.startIndex..., in: out), withTemplate: template)
         }
-        guard nameWords.contains(where: out.lowercased().contains) else { return out }
-        return pieces(of: out).map { piece -> String in
-            guard nameWords.contains(where: piece.text.lowercased().contains) else { return piece.text }
-            guard piece.safe else { return marker }
-            var kept = piece.text
-            for (rule, template) in rules.suffix(named) {
-                kept = rule.stringByReplacingMatches(in: kept, range: NSRange(kept.startIndex..., in: kept), withTemplate: template)
-            }
-            return kept
-        }.joined()
+        return namedValuesRemoved(out)
     }
 
-    /// Longest piece the name rules run on.
-    static let piece = 2_000
+    // MARK: A secret's name, then its value (D-106)
 
-    /// The text cut into consecutive pieces of at most `piece` characters that join back to it exactly. A cut is made only
-    /// at a space, a line break or one of & ; , outside quotes and not next to = or :, so a name and its value are never
-    /// split. A stretch with no such place is one piece, marked not safe.
-    static func pieces(of text: String) -> [(text: String, safe: Bool)] {
+    /// NAME=value and "name": value where the name says the value is a secret (OPENAI_API_KEY=..., export
+    /// DB_PASSWORD="...", ?access_token=..., "api_key": "...", X-Api-Key: ...). Found by reading the text once: each place
+    /// a secret's word appears, the whole name around it, then `=` or `:`, then the value. No pattern tries a name at every
+    /// position, so a long line costs no more than reading it, and nothing is skipped for being long. A quoted value that
+    /// never closes is removed to the end of its line (fails closed).
+    static func namedValuesRemoved(_ text: String) -> String {
         let chars = Array(text)
-        guard chars.count > piece else { return [(text, true)] }
-        var result: [(text: String, safe: Bool)] = []
-        var start = 0, lastCut: Int? = nil, quote: Character? = nil
-        func isCut(_ i: Int) -> Bool {
-            guard quote == nil, " \t\n\r&;,".contains(chars[i]) else { return false }
-            var before = i - 1
-            while before >= start, chars[before] == " " { before -= 1 }
-            var after = i + 1
-            while after < chars.count, chars[after] == " " { after += 1 }
-            let near: Set<Character> = ["=", ":"]
-            return !(before >= start && near.contains(chars[before])) && !(after < chars.count && near.contains(chars[after]))
-        }
+        // Lowercased one character at a time, so positions line up even where a letter's lowercase is longer.
+        let lower = chars.map { c -> Character in let l = String(c).lowercased(); return l.count == 1 ? Character(l) : c }
+        var cuts: [Range<Int>] = []
+        var seen = Set<Int>()
         var i = 0
-        while i < chars.count {
-            let c = chars[i]
-            if c == "\"" || c == "'" { quote = quote == nil ? c : (quote == c ? nil : quote) }
-            if isCut(i) { lastCut = i }
-            if i - start + 1 >= piece {
-                if let cut = lastCut, cut >= start {
-                    result.append((String(chars[start...cut]), true)); start = cut + 1
-                } else {
-                    // No safe place: run on to the next one, and mark the whole stretch not safe.
-                    var j = i + 1
-                    while j < chars.count, !(" \t\n\r".contains(chars[j])) { j += 1 }
-                    let stop = j - 1   // the stretch up to, not including, the space that ends it
-                    result.append((String(chars[start...stop]), false)); start = stop + 1; i = stop
-                }
-                lastCut = nil
+        while i < lower.count {
+            guard let word = nameWords.first(where: { matches($0, in: lower, at: i) }) else { i += 1; continue }
+            // The whole name around the word: letters, digits, _ . -
+            var from = i, to = i + word.count
+            while from > 0, isNameChar(chars[from - 1]) { from -= 1 }
+            while to < chars.count, isNameChar(chars[to]) { to += 1 }
+            i = to
+            guard seen.insert(from).inserted, isSecretName(String(chars[from..<to])) else { continue }
+            if let value = value(after: to, nameFrom: from, in: chars) { cuts.append(value) }
+        }
+        guard !cuts.isEmpty else { return text }
+        var out = chars
+        for cut in cuts.sorted(by: { $0.lowerBound > $1.lowerBound }) { out.replaceSubrange(cut, with: Array(marker)) }
+        return String(out)
+    }
+
+    /// The words a secret's name has in it, lowercased.
+    private static let nameWords = ["passphrase", "password", "passwd", "credential", "secret", "token", "apikey", "key"]
+
+    private static func matches(_ word: String, in lower: [Character], at i: Int) -> Bool {
+        let w = Array(word)
+        guard i + w.count <= lower.count else { return false }
+        for k in 0..<w.count where lower[i + k] != w[k] { return false }
+        return true
+    }
+
+    private static func isNameChar(_ c: Character) -> Bool {
+        c == "_" || c == "." || c == "-" || (c.isASCII && (c.isLetter || c.isNumber))
+    }
+
+    /// Whether a whole name says its value is a secret. "tokens" and "tokenizer" are settings (max_tokens); a name that
+    /// ends like an exception (InvalidTokenError) is part of an error line and stays as printed.
+    static func isSecretName(_ name: String) -> Bool {
+        if name.hasSuffix("Error") || name.hasSuffix("Exception") || name.hasSuffix("Warning") { return false }
+        if name.hasSuffix("_KEY") { return true }
+        let lower = name.lowercased()
+        for word in ["secret", "passphrase", "credential", "apikey", "password", "passwd"] where lower.contains(word) { return true }
+        var rest = lower[...]
+        while let hit = rest.range(of: "token") {
+            let after = rest[hit.upperBound...]
+            if !after.hasPrefix("s"), !after.hasPrefix("izer") { return true }
+            rest = after
+        }
+        for prefix in ["api", "access", "private", "signing", "encryption", "master", "license", "account", "client", "secret"] {
+            for joiner in ["", "_", "-"] where lower.contains(prefix + joiner + "key") { return true }
+        }
+        return false
+    }
+
+    /// The range of the value after a secret's name that ends at `to`, or nil when what follows is not `=` or `:` and a
+    /// value. Mirrors the old patterns: NAME = value, or a name (quoted alike on both sides, or not) then `:` and a value.
+    private static func value(after to: Int, nameFrom from: Int, in chars: [Character]) -> Range<Int>? {
+        var j = to
+        // "name": the same quote after the name as before it.
+        var quoted: Character? = nil
+        if from > 0, chars[from - 1] == "\"" || chars[from - 1] == "'", j < chars.count, chars[j] == chars[from - 1] {
+            quoted = chars[j]; j += 1
+        }
+        while j < chars.count, chars[j].isWhitespace { j += 1 }
+        guard j < chars.count, chars[j] == "=" || chars[j] == ":" else { return nil }
+        let colon = chars[j] == ":"
+        if quoted != nil, !colon { return nil }
+        j += 1
+        while j < chars.count, chars[j].isWhitespace { j += 1 }
+        guard j < chars.count else { return nil }
+        // Already removed, a shell variable, or only digits (a count, a port, a size): leave it.
+        if String(chars[j..<min(chars.count, j + marker.count)]) == marker { return nil }
+        if !colon, chars[j] == "$" { return nil }
+        var digits = j
+        while digits < chars.count, chars[digits].isASCII, chars[digits].isNumber { digits += 1 }
+        if digits > j, digits == chars.count || !(isNameChar(chars[digits]) && chars[digits] != "." ) { return nil }
+        if chars[j] == "\"" || chars[j] == "'" {
+            let q = chars[j]
+            var k = j + 1
+            while k < chars.count, chars[k] != q { k += 1 }
+            if k < chars.count {
+                if colon, k == j + 1 { return nil }   // "name": "" holds nothing
+                return j..<(k + 1)
             }
-            i += 1
+            // Never closed: everything to the end of the line goes.
+            var end = j
+            while end < chars.count, chars[end] != "\n" { end += 1 }
+            return j..<end
         }
-        if start < chars.count { result.append((String(chars[start...]), true)) }
-        return result
+        let stops: Set<Character> = colon ? [" ", "\t", "\n", "\r", "\"", "'", ",", "}"] : [" ", "\t", "\n", "\r", "\"", "'", "&", ";", ",", ")"]
+        var k = j
+        while k < chars.count, !stops.contains(chars[k]) { k += 1 }
+        if k == j { return nil }
+        // Unquoted after a colon, the value must be 8 or more characters: "Invalid token: expired" stays as printed.
+        if colon, k - j < 8 { return nil }
+        return j..<k
     }
 
-    /// The text cut to `limit` characters, before secrets are taken out, at a space so no secret is cut in half and left
-    /// partly unrecognised. A text with no space in its last 200 characters is cut there whole (D-106).
+    /// The text cut before secrets are taken out, generously: taking secrets out reads a text once, so this only bounds
+    /// the work. The cut sits far past any length a caller keeps (`limit` × 20, at least 20,000 characters), so a secret
+    /// it splits can never be pulled back into what is kept (D-106).
     public static func cutForRedaction(_ text: String, _ limit: Int) -> String {
-        guard text.count > limit else { return text }
-        let head = text.prefix(limit)
-        if let space = head.lastIndex(where: { $0 == " " || $0 == "\n" || $0 == "\t" }),
-           head.distance(from: space, to: head.endIndex) <= 200 {
-            return String(head[..<space])
-        }
-        return String(head.dropLast(200))
+        let room = max(limit * 20, 20_000)
+        return text.count > room ? String(text.prefix(room)) : text
     }
-
-    /// How many of `rules`, at the end, match by a secret's name.
-    private static let named = 2
-    /// A secret's name always has one of these in it (lowercased), so a line without one can't match by name.
-    private static let nameWords = ["token", "secret", "passw", "passphrase", "credential", "key"]
 }
