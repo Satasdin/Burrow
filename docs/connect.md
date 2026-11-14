@@ -8,8 +8,9 @@ burrow mcp ~/Notes
 ```
 
 That one command shows the program five tools: `burrow_find`, `burrow_read`, `burrow_resume`, `burrow_commit` and
-`burrow_check`. `--tools full` lists all 22 (the Ledger's history tools and the older `vault_` tools as well), and every
-tool answers by name whichever list is shown. When the program connects, its instructions carry the decisions in force on
+`burrow_check`. `--tools full` lists all 22 (the Ledger's history tools and the older `vault_` tools as well). A program
+can call only the tools it is shown; `vault_search` and `vault_read` still answer as the old names of `burrow_find` and
+`burrow_read`. When the program connects, its instructions carry the decisions in force on
 the vault's current branch, each with its reason; a decision resting on a file that changed since comes marked "check
 again". See [ledger.md](ledger.md).
 
