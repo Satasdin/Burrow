@@ -122,7 +122,8 @@ DECISION=20261112-214056-002e
 FORBID='forbid: \.phone\s*==|==\s*\w+\.phone'
 set_check() {
   local code="$WORK/.shown-code"; rm -f "$code"
-  { sleep 2; cat "$code" 2>/dev/null; echo; sleep 1; echo yes; sleep 1; } \
+  # The code comes 2 seconds after asking (20 when Burrow's record of codes is missing), so it is typed once it exists.
+  { n=0; while [ ! -s "$code" ] && [ $n -lt 300 ]; do sleep 0.2; n=$((n+1)); done; sleep 0.5; cat "$code" 2>/dev/null; echo; sleep 1; echo yes; sleep 1; } \
     | BURROW_TEST_CODE_FILE=$code person_terminal "$WORK/set-check.txt" decision check "$1" "$DECISION" --set "$2"
   rm -f "$code"
   grep -q "check confirmed" "$WORK/set-check.txt" || { echo "gate.sh: could not confirm the check for $1" >&2; cat "$WORK/set-check.txt" >&2; exit 1; }

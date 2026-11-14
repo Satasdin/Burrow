@@ -1,5 +1,4 @@
 import BurrowCore
-import CryptoKit
 import Darwin
 import Foundation
 
@@ -11,7 +10,8 @@ import Foundation
 /// This adds the layers in front of that typed yes:
 ///   1. never from an agent's environment: the variables each agent sets for the commands it runs;
 ///   2. never from an agent's process tree: burrow's own parents, its session leader's and its terminal's;
-///   3. for the steps that defeat the gate, a one-time code shown only outside the terminal (`PersonCode`).
+///   3. for the steps that defeat the gate, a one-time code shown only in a notification and checked only
+///      in the memory of the burrow process that made it (`PersonCode`).
 /// An agent that already runs arbitrary code as the person can in principle strip its environment and detach from its
 /// tree; layers 1 and 2 stop the ordinary path, and layer 3 stops even that for what defeats the gate.
 public enum PersonPresence {
@@ -200,108 +200,128 @@ public enum PersonPresence {
 
 // MARK: Layer 3: a code shown only outside the terminal
 
-/// A six-digit code for one step that defeats the gate: shown in the Burrow app if it is running, else in a macOS
-/// notification, never in the terminal, a file, an argument list or an environment. Valid 2 minutes, used once, three
-/// wrong tries end it; only its salted hash is kept, in Burrow's own folder (`person-codes.json`) (D-113).
+/// An eight-digit code for one step that defeats the gate, shown only in a macOS notification: never in the terminal,
+/// a file, an argument list, an environment or a message to another process (D-113, and its security review).
+///
+/// The burrow process that asks for it makes it, shows it, reads what is typed and compares, all in one run and in its
+/// own memory (`Challenge`). Nothing written anywhere can check a code: `person-codes.json` in Burrow's own folder keeps
+/// only when codes were made, for what, and how they ended, to slow a program that keeps asking for new ones. Any
+/// program running as the person can write that file, so verification never reads it, and a missing or unreadable one
+/// is taken as "can't tell" (burrow waits longer before making a code), never as an empty history.
 public enum PersonCode {
+    public static let digits = 8
     public static let lifetime: TimeInterval = 120
     public static let tries = 3
-    /// At most this many codes in ten minutes, so a program can't keep asking for codes and guessing.
+    /// At most this many codes in ten minutes (counted from the file, so this only slows a program down).
     public static let perTenMinutes = 6
+    /// Waited before every code is made.
+    public static let issueDelay: TimeInterval = 2
+    /// Waited instead, when the record of earlier codes is missing or can't be read.
+    public static let unknownHistoryDelay: TimeInterval = 20
     static let fileName = "person-codes.json"
 
-    /// A code as the process that asked for it holds it. The plain code stays in this process's memory.
-    public struct Issued: Sendable {
+    /// One code, held only by the process that made it. Nothing outside this object can check a typed code.
+    public final class Challenge: @unchecked Sendable {
         public let id: String
         public let action: String
         public let expires: Date
-        let salt: Data
-        let digest: Data
         let plain: String
-    }
+        private(set) var wrong = 0
+        private(set) var finished = false
 
-    struct Entry: Codable, Equatable {
-        var id: String
-        var action: String
-        var issued: Date
-        var expires: Date
-        var salt: String
-        var digest: String
-        var used: Bool
-        var wrong: Int
-    }
+        init(id: String, action: String, expires: Date, plain: String) {
+            self.id = id; self.action = action; self.expires = expires; self.plain = plain
+        }
 
-    static func digest(_ code: String, salt: Data) -> Data { Data(SHA256.hash(data: salt + Data(code.utf8))) }
+        /// Compares a typed code with the one made here, in this process's memory.
+        public func verify(_ typed: String, now: Date = Date()) -> Outcome {
+            guard !finished else { return .spent }
+            guard now <= expires else { finished = true; return .expired }
+            let answer = typed.filter { !$0.isWhitespace }
+            if PersonCode.equalInConstantTime(Data(answer.utf8), Data(plain.utf8)) {
+                finished = true
+                return .accepted
+            }
+            wrong += 1
+            if wrong >= PersonCode.tries { finished = true; return .spent }
+            return .wrong(triesLeft: PersonCode.tries - wrong)
+        }
 
-    static func load(_ state: URL) -> [Entry] {
-        guard let data = try? Data(contentsOf: state.appendingPathComponent(fileName)) else { return [] }
-        let decoder = JSONDecoder(); decoder.dateDecodingStrategy = .iso8601
-        return (try? decoder.decode([Entry].self, from: data)) ?? []
-    }
-
-    static func save(_ entries: [Entry], _ state: URL) throws {
-        try FileManager.default.createDirectory(at: state, withIntermediateDirectories: true)
-        let encoder = JSONEncoder(); encoder.dateEncodingStrategy = .iso8601; encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-        let url = state.appendingPathComponent(fileName)
-        try encoder.encode(entries).write(to: url, options: .atomic)
-        chmod(url.path, 0o600)
-    }
-
-    public struct TooMany: Error, CustomStringConvertible {
-        public var description: String { "Burrow has shown \(PersonCode.perTenMinutes) codes in the last ten minutes; wait a few minutes and try again." }
-    }
-
-    /// Makes a code for `action` and keeps its salted hash. Old entries (over ten minutes) are dropped.
-    public static func issue(action: String, state: URL, now: Date = Date()) throws -> Issued {
-        var entries = load(state).filter { now.timeIntervalSince($0.issued) < 600 }
-        guard entries.count < perTenMinutes else { throw TooMany() }
-        var generator = SystemRandomNumberGenerator()
-        let plain = String(format: "%06d", Int.random(in: 0..<1_000_000, using: &generator))
-        let salt = Data((0..<16).map { _ in UInt8.random(in: 0...255, using: &generator) })
-        let id = UUID().uuidString.lowercased()
-        let issued = Issued(id: id, action: action, expires: now.addingTimeInterval(lifetime), salt: salt, digest: digest(plain, salt: salt), plain: plain)
-        entries.append(Entry(id: id, action: action, issued: now, expires: issued.expires, salt: salt.base64EncodedString(),
-                             digest: issued.digest.base64EncodedString(), used: false, wrong: 0))
-        try save(entries, state)
-        return issued
+        /// Ends it without a right answer (the input closed).
+        public func abandon() { finished = true }
     }
 
     public enum Outcome: Equatable {
         case accepted
         case wrong(triesLeft: Int)
         case expired
-        /// Already used, ended by wrong tries, or no longer on file.
+        /// Already used, or ended by wrong tries.
         case spent
     }
 
-    /// Checks a typed code against the one this process holds, and against the record on file: the record can only make
-    /// it stricter (taken away or marked used, the code no longer works), never let a different code through.
-    public static func redeem(_ typed: String, _ issued: Issued, state: URL, now: Date = Date()) -> Outcome {
-        var entries = load(state)
-        guard let index = entries.firstIndex(where: { $0.id == issued.id }), !entries[index].used,
-              entries[index].digest == issued.digest.base64EncodedString() else { return .spent }
-        guard now <= issued.expires, now <= entries[index].expires else {
-            entries[index].used = true; try? save(entries, state)
-            return .expired
-        }
-        let answer = typed.filter { !$0.isWhitespace }
-        let matches = equalInConstantTime(digest(answer, salt: issued.salt), issued.digest)
-        if matches {
-            entries[index].used = true
-            do { try save(entries, state) } catch { return .spent }
-            return .accepted
-        }
-        entries[index].wrong += 1
-        if entries[index].wrong >= tries { entries[index].used = true }
-        try? save(entries, state)
-        return entries[index].used ? .spent : .wrong(triesLeft: tries - entries[index].wrong)
+    /// What the record keeps of a code: never the code, a hash or salt of it, or anything else that could check one.
+    struct Entry: Codable, Equatable {
+        var id: String
+        var action: String
+        var issued: Date
+        var expires: Date
+        var used: Bool
+        var wrong: Int
     }
 
-    /// Ends a code nobody typed (the input closed): marked used on file, so its record says it can't be used.
-    public static func spend(_ issued: Issued, state: URL) {
-        var entries = load(state)
-        guard let index = entries.firstIndex(where: { $0.id == issued.id }) else { return }
-        entries[index].used = true
+    /// The record of earlier codes, or nil when it is missing or can't be read.
+    static func history(_ state: URL) -> [Entry]? {
+        guard let data = try? Data(contentsOf: state.appendingPathComponent(fileName)) else { return nil }
+        let decoder = JSONDecoder(); decoder.dateDecodingStrategy = .iso8601
+        return try? decoder.decode([Entry].self, from: data)
+    }
+
+    /// Burrow's folder is made 0700 when it is made here; the record is written to a new file created 0600 and then
+    /// moved into place, so it is never readable by others, even for a moment.
+    static func save(_ entries: [Entry], _ state: URL) throws {
+        if !FileManager.default.fileExists(atPath: state.path) {
+            try FileManager.default.createDirectory(at: state, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])
+        }
+        let encoder = JSONEncoder(); encoder.dateEncodingStrategy = .iso8601; encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        let data = try encoder.encode(entries)
+        let target = state.appendingPathComponent(fileName)
+        let temporary = state.appendingPathComponent(".\(fileName).\(getpid()).\(UUID().uuidString)")
+        let descriptor = open(temporary.path, O_WRONLY | O_CREAT | O_EXCL | O_NOFOLLOW, 0o600)
+        guard descriptor >= 0 else { throw CocoaError(.fileWriteNoPermission) }
+        let written = data.withUnsafeBytes { Darwin.write(descriptor, $0.baseAddress, $0.count) }
+        close(descriptor)
+        guard written == data.count, rename(temporary.path, target.path) == 0 else {
+            unlink(temporary.path)
+            throw CocoaError(.fileWriteUnknown)
+        }
+    }
+
+    public struct TooMany: Error, CustomStringConvertible {
+        public var description: String { "Burrow has shown \(PersonCode.perTenMinutes) codes in the last ten minutes; wait a few minutes and try again." }
+    }
+
+    /// Makes a code for `action`, after waiting `issueDelay` (or `unknownHistoryDelay` when the record of earlier
+    /// codes is missing or unreadable), and notes it in the record. `now` and `wait` are there for tests.
+    public static func issue(action: String, state: URL, now: () -> Date = Date.init,
+                             wait: (TimeInterval) -> Void = { Thread.sleep(forTimeInterval: $0) }) throws -> Challenge {
+        let known = history(state)
+        wait(known == nil ? unknownHistoryDelay : issueDelay)
+        let at = now()
+        var entries = (known ?? []).filter { at.timeIntervalSince($0.issued) < 600 }
+        guard entries.count < perTenMinutes else { throw TooMany() }
+        var generator = SystemRandomNumberGenerator()
+        let plain = String((0..<digits).map { _ in Character(String(Int.random(in: 0...9, using: &generator))) })
+        let challenge = Challenge(id: UUID().uuidString.lowercased(), action: action, expires: at.addingTimeInterval(lifetime), plain: plain)
+        entries.append(Entry(id: challenge.id, action: action, issued: at, expires: challenge.expires, used: false, wrong: 0))
+        try save(entries, state)
+        return challenge
+    }
+
+    /// Notes in the record how a code ended. The record is never read to decide whether a code is right.
+    public static func record(_ challenge: Challenge, state: URL) {
+        guard var entries = history(state), let index = entries.firstIndex(where: { $0.id == challenge.id }) else { return }
+        entries[index].used = challenge.finished
+        entries[index].wrong = challenge.wrong
         try? save(entries, state)
     }
 
@@ -314,38 +334,38 @@ public enum PersonCode {
 
     /// Where a code was shown.
     public enum Shown: Equatable, Sendable {
-        case app
         case notification
         /// Debug and test builds only: written to the file BURROW_TEST_CODE_FILE names.
         case testHook
         case nowhere
     }
 
-    /// Shows the code outside the terminal: in the Burrow app when it is running for this state folder, else as a macOS
-    /// notification (osascript, given its script on stdin so the code is never in an argument list a program can read
-    /// with ps). In debug and test builds only, BURROW_TEST_CODE_FILE makes it write the code to that file instead; the
-    /// branch is compiled out of release builds (`swift build -c release`, the app's bundled burrow), so no variable a
-    /// program could set reveals the code there.
-    public static func show(_ issued: Issued, state: URL, environment: [String: String] = ProcessInfo.processInfo.environment) -> Shown {
+    /// Shows the code outside the terminal, as a macOS notification (osascript, given its script on stdin so the code is
+    /// never in an argument list a program can read with ps). It is not sent to the Burrow app: the app is ad-hoc
+    /// signed, so burrow can't tell it from a program that took its channel first. In debug and test builds only,
+    /// BURROW_TEST_CODE_FILE makes it write the code to that file instead; the branch is compiled out of release builds
+    /// (`swift build -c release`, the app's bundled burrow), so no variable a program could set reveals the code there.
+    public static func show(_ challenge: Challenge, environment: [String: String] = ProcessInfo.processInfo.environment) -> Shown {
         #if DEBUG
         if let file = environment["BURROW_TEST_CODE_FILE"], !file.isEmpty {
-            return (try? issued.plain.write(toFile: file, atomically: true, encoding: .utf8)) != nil ? .testHook : .nowhere
+            return (try? challenge.plain.write(toFile: file, atomically: true, encoding: .utf8)) != nil ? .testHook : .nowhere
         }
         #endif
-        if PersonCodeInbox.deliver(issued, state: state) { return .app }
-        if notify(issued) { return .notification }
-        return .nowhere
+        return notify(challenge) ? .notification : .nowhere
     }
 
     static func appleScriptString(_ text: String) -> String {
         "\"" + Printable.clean(text).replacingOccurrences(of: "\\", with: "\\\\").replacingOccurrences(of: "\"", with: "\\\"") + "\""
     }
 
+    /// The code as shown: two groups of four, easier to read off a notification.
+    static func grouped(_ code: String) -> String { "\(code.prefix(4)) \(code.dropFirst(4))" }
+
     /// A macOS notification, from osascript (a bare command-line program can't use UserNotifications: that needs an app
     /// bundle). Headless-safe: it needs no window and no Accessibility permission.
-    static func notify(_ issued: Issued) -> Bool {
-        let script = "display notification \(appleScriptString("Type it in your terminal only if you asked for this yourself: \(issued.action). Never give it to a program or a chat."))"
-            + " with title \(appleScriptString("Burrow code \(issued.plain)"))"
+    static func notify(_ challenge: Challenge) -> Bool {
+        let script = "display notification \(appleScriptString("Type it in your terminal only if you asked for this yourself: \(challenge.action). Never give it to a program or a chat."))"
+            + " with title \(appleScriptString("Burrow code \(grouped(challenge.plain))"))"
             + " subtitle \(appleScriptString("Valid for 2 minutes, once"))\n"
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
@@ -361,72 +381,5 @@ public enum PersonCode {
         while process.isRunning, Date() < deadline { Thread.sleep(forTimeInterval: 0.05) }
         if process.isRunning { process.terminate(); return false }
         return process.terminationStatus == 0
-    }
-}
-
-/// The Burrow app's side of the code: it listens on a local Mach message port named for its state folder, and a burrow
-/// command asking for a code sends it there only while a Burrow.app is running. The app shows it in a small sheet.
-public enum PersonCodeInbox {
-    /// What the app is sent: the code and what it is for.
-    public struct Request: Codable, Equatable, Sendable {
-        public var code: String
-        public var action: String
-        public var expires: Date
-    }
-
-    /// One port per state folder, so a burrow run with its own BURROW_STATE_DIR (a test, a demo) never reaches the app
-    /// the person has open.
-    public static func portName(state: URL) -> String {
-        let path = state.standardizedFileURL.resolvingSymlinksInPath().path
-        let hash = SHA256.hash(data: Data(path.utf8)).prefix(6).map { String(format: "%02x", $0) }.joined()
-        return "app.burrow.mac.code.\(getuid()).\(hash)"
-    }
-
-    nonisolated(unsafe) private static var handler: ((Request) -> Void)?
-    nonisolated(unsafe) private static var port: CFMessagePort?
-
-    /// For the app: starts listening on the main run loop. False when the port could not be made (another process holds
-    /// the name: then the app says so, and codes come as notifications).
-    @discardableResult
-    public static func listen(state: URL, show: @escaping (Request) -> Void) -> Bool {
-        handler = show
-        var shouldFree: DarwinBoolean = false
-        guard let local = CFMessagePortCreateLocal(nil, portName(state: state) as CFString, { _, _, data, _ in
-            guard let data, let request = try? PersonCodeInbox.decoder.decode(Request.self, from: data as Data),
-                  request.code.count == 6, request.code.allSatisfy(\.isNumber) else { return nil }
-            DispatchQueue.main.async { PersonCodeInbox.handler?(request) }
-            return Unmanaged.passRetained(Data("shown".utf8) as CFData)
-        }, nil, &shouldFree) else { return false }
-        port = local
-        CFRunLoopAddSource(CFRunLoopGetMain(), CFMessagePortCreateRunLoopSource(nil, local, 0), .commonModes)
-        return true
-    }
-
-    static var decoder: JSONDecoder { let decoder = JSONDecoder(); decoder.dateDecodingStrategy = .iso8601; return decoder }
-
-    /// True when a Burrow.app is running on this Mac (its executable is Burrow.app/Contents/MacOS/Burrow).
-    public static func appIsRunning() -> Bool {
-        let count = proc_listallpids(nil, 0)
-        guard count > 0 else { return false }
-        var pids = [pid_t](repeating: 0, count: Int(count) + 32)
-        let found = proc_listallpids(&pids, Int32(pids.count * MemoryLayout<pid_t>.size))
-        var buffer = [CChar](repeating: 0, count: 4 * Int(MAXPATHLEN))
-        for pid in pids.prefix(Int(max(found, 0))) where pid > 0 {
-            guard proc_pidpath(pid, &buffer, UInt32(buffer.count)) > 0 else { continue }
-            if String(cString: buffer).hasSuffix(".app/Contents/MacOS/Burrow") { return true }
-        }
-        return false
-    }
-
-    /// For burrow: sends the code to the app, and true only when the app answered that it is showing it.
-    static func deliver(_ issued: PersonCode.Issued, state: URL) -> Bool {
-        guard appIsRunning(), let remote = CFMessagePortCreateRemote(nil, portName(state: state) as CFString) else { return false }
-        defer { CFMessagePortInvalidate(remote) }
-        let encoder = JSONEncoder(); encoder.dateEncodingStrategy = .iso8601
-        guard let payload = try? encoder.encode(Request(code: issued.plain, action: issued.action, expires: issued.expires)) else { return false }
-        var reply: Unmanaged<CFData>?
-        let status = CFMessagePortSendRequest(remote, 1, payload as CFData, 2, 2, CFRunLoopMode.defaultMode.rawValue, &reply)
-        guard status == kCFMessagePortSuccess, let answer = reply?.takeRetainedValue() else { return false }
-        return (answer as Data) == Data("shown".utf8)
     }
 }

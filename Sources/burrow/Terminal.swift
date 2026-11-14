@@ -51,28 +51,31 @@ func requireThePerson(_ refusal: String = needsThePerson) throws {
     if let why = whyNotThePerson() { throw Failure("\(refusal) Refused because \(why).") }
 }
 
-/// Layer 3 (D-113), for a step that defeats the gate: Burrow shows a six-digit code outside the terminal (the Burrow
-/// app, or a macOS notification) and the person types it here. Never printed, so a program driving this terminal
-/// can't read it. Throws unless the right code is typed within 2 minutes, in at most 3 tries.
+/// Layer 3 (D-113), for a step that defeats the gate: this process makes an eight-digit code, shows it in a macOS
+/// notification, and the person types it here; the comparison is in this process's memory, so nothing written to disk
+/// can make a code valid. Never printed, so a program driving this terminal can't read it. Throws unless the right
+/// code is typed within 2 minutes, in at most 3 tries.
 func askForCode(_ action: String) throws {
     let state = BurrowPlaces.stateFolder
-    let issued: PersonCode.Issued
-    do { issued = try PersonCode.issue(action: action, state: state) } catch { throw Failure("\(error)") }
+    let challenge: PersonCode.Challenge
+    do { challenge = try PersonCode.issue(action: action, state: state) } catch { throw Failure("\(error)") }
+    defer { PersonCode.record(challenge, state: state) }
     let place: String
-    switch PersonCode.show(issued, state: state) {
-    case .app: place = "in the Burrow app"
+    switch PersonCode.show(challenge) {
     case .notification: place = "in a notification (top right of your screen)"
     case .testHook: place = "in the test's code file"
-    case .nowhere: throw Failure("Burrow could not show a code outside this terminal (no Burrow app running, and the notification failed). Do this in the Burrow app instead.")
+    case .nowhere:
+        challenge.abandon()
+        throw Failure("Burrow could not show a code outside this terminal (the notification failed; allow notifications for Script Editor in System Settings). Nothing was allowed.")
     }
-    FileHandle.standardError.write(Data("Burrow showed a 6-digit code \(place). It is never printed here, so a program running this terminal can't see it.\n".utf8))
+    FileHandle.standardError.write(Data("Burrow showed an \(PersonCode.digits)-digit code \(place). It is never printed here, so a program running this terminal can't see it.\n".utf8))
     while true {
         FileHandle.standardError.write(Data("Type the code (valid 2 minutes): ".utf8))
         guard let typed = readLine(strippingNewline: true) else {
-            PersonCode.spend(issued, state: state)
+            challenge.abandon()
             throw Failure("no code was typed: nothing was allowed")
         }
-        switch PersonCode.redeem(typed, issued, state: state) {
+        switch challenge.verify(typed) {
         case .accepted: return
         case let .wrong(left): FileHandle.standardError.write(Data("That isn't the code. \(left) \(left == 1 ? "try" : "tries") left.\n".utf8))
         case .expired: throw Failure("the code expired: nothing was allowed. Run the command again for a new one.")

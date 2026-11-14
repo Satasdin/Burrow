@@ -44,7 +44,7 @@ struct DecisionCheckRow: View {
                     }
                     Button {
                         // The app is the person's own UI: its own question, then the check is confirmed (D-113).
-                        guard PersonCodeSheet.confirmCheck(check, decision: commit.id, folder: state.folder) else { return }
+                        guard PersonConfirm.confirmCheck(check, decision: commit.id, folder: state.folder) else { return }
                         Task { await workspace.confirmCheck(commit.id, check) }
                     } label: { Label("Confirm Check", systemImage: "checkmark.circle") }
                         .controlSize(.small)
