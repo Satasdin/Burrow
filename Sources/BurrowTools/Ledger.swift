@@ -489,7 +489,11 @@ public struct Ledger: Sendable {
     /// what decisions turned down, then the oldest and least binding commits; a decision's reason is never what is cut
     /// (D-81). In the 14 November walkthrough the whole text was cut at the end, which fell inside the decision:
     /// "closest in time: rejecte…", with no reason at all.
-    public func resume(branch: String? = nil, characters: Int = 3_200) -> String {
+    ///
+    /// `midway` gives, for the branch shown, what the last Claude Code session on it was in the middle of (D-110). It
+    /// shares the same budget, by priority: decisions and their reasons are never cut for it (D-81); it comes next; older
+    /// and less binding commits go first. When even its smallest form does not fit beside the decisions, it is left out.
+    public func resume(branch: String? = nil, characters: Int = 3_200, midway: ((String) -> Midway?)? = nil) -> String {
         var name = (try? Self.branchName(branch ?? current)) ?? Self.defaultBranch
         var note = ""
         // Small models invent branch names ("last-conversation"). A branch that does not exist falls back to the
@@ -534,11 +538,14 @@ public struct Ledger: Sendable {
             (240, 160, 400, 5, true), (200, 120, 320, 4, true), (160, 100, 240, 3, true), (120, 80, 200, 2, true),
         ]
         var inside = ""
-        for step in steps {
+        func render(_ step: (handoff: Int, plan: Int, line: Int, keep: Int, binding: Bool), covered: Midway? = nil, withFiles: Bool = true) -> String {
             var parts = [header]
             if let plan { parts.append("Plan: " + cut(plan.message + (plan.body.isEmpty ? "" : "\n" + plan.body), step.plan)) }
             // The handoff is what a model that lost its memory needs first, but never at the cost of a decision's reason.
-            if let stop { parts.append("Where the last session stopped: " + cut(stop.message + (stop.body.isEmpty ? "" : "\n" + stop.body), step.handoff)) }
+            // When the session block below is the same session's, it says more than the handoff, so this only points to it (D-110).
+            if let stop, let covered, stop.session == "claude-" + covered.session {
+                parts.append("Where the last session stopped: \(Midway.display(covered.program)) stopped \(Self.when(stop.at)); what it was in the middle of follows this block.")
+            } else if let stop { parts.append("Where the last session stopped: " + cut(stop.message + (stop.body.isEmpty ? "" : "\n" + stop.body), step.handoff)) }
             if !corrections.isEmpty { parts.append("Corrections on these files:\n" + corrections.map { line($0, step.line) }.joined(separator: "\n")) }
             let shown = recent.filter { !step.binding || [.decision, .fact].contains($0.kind) }.prefix(step.keep)
             if !shown.isEmpty {
@@ -546,8 +553,34 @@ public struct Ledger: Sendable {
                 parts.append("Latest commits:\n" + shown.map { line($0, step.line) }.joined(separator: "\n")
                              + (left > 0 ? "\n(\(left) more left out for length: burrow_log lists them.)" : ""))
             }
-            if !files.isEmpty { parts.append("Files in play: " + files.prefix(8).joined(separator: ", ") + ".") }
-            inside = Self.defanged(parts.joined(separator: "\n\n"))
+            if withFiles, !files.isEmpty { parts.append("Files in play: " + files.prefix(8).joined(separator: ", ") + ".") }
+            return Self.defanged(parts.joined(separator: "\n\n"))
+        }
+        // With a session block (D-110): first the handoff, plan and line room shrink as before, then the commits that are
+        // neither decisions nor facts go, with the files the older commits cite (the block names the session's own),
+        // then the block loses detail, then what decisions turned down is shortened, then
+        // the oldest decisions and facts go, down to the newest two. A decision shown always keeps its whole reason
+        // (D-81), and the newest two are never dropped for the block; when they don't fit beside its smallest form it
+        // is left out and the steps below run as before. A decision dropped here still reaches a program on its
+        // connection's first result, which carries every decision in force that the result does not show (D-103).
+        if let session = midway?(name), !session.levels.isEmpty {
+            let smallest = session.levels.count - 1
+            let binding: (handoff: Int, plan: Int, line: Int, keep: Int, binding: Bool) = (400, 300, 700, 6, true)
+            var schedule: [(step: (handoff: Int, plan: Int, line: Int, keep: Int, binding: Bool), level: Int)] =
+                [(steps[0], 0), (steps[1], 0), (steps[2], 0), (binding, 0)]
+            schedule += (0...smallest).dropFirst().map { (binding, $0) }
+            schedule += [(300, 200, 520, 6, true), (240, 160, 520, 5, true), (200, 120, 520, 4, true), (160, 100, 520, 3, true),
+                         (120, 80, 520, 2, true)].map { ($0, smallest) }
+            for (index, (step, level)) in schedule.enumerated() {
+                let ledgerPart = opening + render(step, covered: session, withFiles: index < 3) + closing + "\n\n"
+                guard ledgerPart.count + session.levels[level].count <= characters else { continue }
+                // The room older decisions left is given back to the block: its richest form that now fits.
+                let richest = session.levels.first { ledgerPart.count + $0.count <= characters } ?? session.levels[level]
+                return ledgerPart + richest
+            }
+        }
+        for step in steps {
+            inside = render(step)
             if inside.count <= room { break }
         }
         // Only a budget too small for even two commits' reasons gets here.

@@ -144,7 +144,8 @@ func runLedgerCommand(_ arguments: [String]) async throws -> Bool {
         let retired = ledger.retirements(), open = ledger.unresolved(), stale = ledger.staleness()
         for commit in commits { print(describe(commit, stale: stale(commit), retired: retired[commit.id], open: open[commit.id] ?? [])) }
     case "resume":
-        print(ledger.resume(branch: rest.first))
+        // The same as burrow_resume, with the last Claude Code session's place in its work (D-110).
+        print(ledger.resume(branch: rest.first, midway: { Midway.latest(store: FoldStore(vault: vault), ledger: ledger, branch: $0, elsewhere: rest.first == nil) }))
     case "blame":
         guard let path = rest.first else { throw Failure("blame needs a vault path") }
         let commits = ledger.blame(path)
@@ -224,7 +225,8 @@ private func runHook(_ kind: String, vault: Vault, gateOnly: Bool = false) throw
             let session = event["session_id"] as? String ?? "unknown"
             // Only what was said since this session's last fold is folded, once (D-102). A fold that fails never stops the handoff.
             var folded: Fold?
-            do { folded = try FoldStore(vault: vault).fold(transcript: text, path: path, session: session, event: name) }
+            // The fold keeps the branch, so another program's burrow_resume on it can say what this session was doing (D-110).
+            do { folded = try FoldStore(vault: vault).fold(transcript: text, path: path, session: session, event: name, branch: place.branch) }
             catch { logToStandardError("hook: could not keep a fold: \(error)") }
             if let folded { logToStandardError("kept fold \(folded.id) (\(folded.messages) messages)") }
             let made = try Hooks.checkpoint(ledger: ledger, place: place, transcript: transcript,
