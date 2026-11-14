@@ -144,6 +144,9 @@ private func log(_ positional: [String], _ values: [String: String]) throws {
     }
     var retired: [String: [String: LedgerCommit]] = [:]
     for team in vault.teams() { retired[team.name] = TeamLedger.retirements(TeamLedger.commits(team)) }
+    for team in vault.teams() {
+        for line in TeamLedger.scan(team).skipped { print(Printable.clean("\(team.name): not read: \(line)")) }
+    }
     // Everything in it was written on other Macs: printed clean of anything that could rewrite the terminal (D-104).
     for (team, commit) in all {
         var line = "\(team.name) \(commit.id) [\(commit.kind.rawValue)] \(commit.stated(within: 400)) (\(commit.byline), \(Ledger.when(commit.at)))"
@@ -168,9 +171,28 @@ private func leave(_ positional: [String]) throws {
 private func revert(_ positional: [String]) throws {
     guard positional.count >= 3 else { throw Failure("team revert needs your vault, the commit and what is right: burrow team revert <vault> <commit> \"what is right\"") }
     let vault = try teamVault(positional[0], "team revert")
-    guard let team = TeamLedger.holding(positional[1], vault: vault) else { throw Failure("no team this vault reads has a commit \(positional[1])") }
+    guard let team = TeamLedger.holding(positional[1], vault: vault), let old = TeamLedger.find(positional[1], in: team) else {
+        throw Failure("no team this vault reads has a commit \(positional[1])")
+    }
+    let why = positional[2].trimmingCharacters(in: .whitespacesAndNewlines)
+    guard !why.isEmpty else { throw Failure("say what is right instead") }
+    let message = "Wrong: \"\(String(old.message.prefix(160)))\". \(why)"
+    // Run through a pipe, as a connected program runs it, the correction waits for the person like a share (D-112).
+    guard inPersonsTerminal() else {
+        do {
+            let waiting = try TeamPending.add(vault: vault, team: team, kind: .correction, message: message, body: "", files: Array(old.cites.keys),
+                                              author: "person", client: "terminal", session: nil, modelSaid: nil, reverts: old.id)
+            print("Not marked wrong yet: waiting for \(vault.teamMember?.name ?? "the person")'s approval before it goes to \(team.name), as \(waiting.id).")
+            print("    Run from a pipe or a program, a team correction waits. Approve it in your own terminal: burrow team approve \(vault.root.path) \(waiting.id)")
+        } catch let problem as LedgerProblem {
+            throw Failure(problem.description)
+        }
+        return
+    }
+    try askThePerson(["Mark this team decision wrong for everyone in \(team.name)?"] + TeamPending.commitLines(old, team: team)
+                     + ["Your correction, signed \"\(Printable.clean(vault.teamMember?.name ?? "you"))\" in the terminal:", "  " + Printable.clean(Secrets.redacted(message))])
     do {
-        let made = try TeamLedger.revert(vault: vault, team: team, id: positional[1], why: positional[2], author: "person", client: "terminal")
+        let made = try TeamLedger.revert(vault: vault, team: team, id: old.id, why: why, author: "person", client: "terminal")
         print("[\(team.name) \(made.id)] correction: \(made.message)")
         print("    \(positional[1]) now shows as wrong for the whole team; the file it is in was not touched.")
     } catch let problem as LedgerProblem {
@@ -211,6 +233,12 @@ private func teamCommit(_ words: [String]) throws {
         }
         return
     }
+    var shown = ["Share this \(kind.rawValue) with \(team.name), signed \"\(Printable.clean(vault.teamMember?.name ?? "you"))\" in the terminal? Every teammate's programs will be handed it:",
+                 "  " + Printable.clean(Secrets.redacted(positional[1]))]
+    for line in body where !line.isEmpty { shown.append("  " + Printable.clean(Secrets.redacted(line))) }
+    if !files.isEmpty { shown.append("  rests on: " + Printable.clean(files.joined(separator: ", "))) }
+    if let replaced { shown += ["  and it replaces:"] + TeamPending.commitLines(replaced, team: team) }
+    try askThePerson(shown)
     do {
         let made = try TeamLedger.commit(vault: vault, team: team, kind: kind, message: positional[1], body: body.joined(separator: "\n"), files: files,
                                          author: values["--author"] ?? "person", client: "terminal", reverts: replaced?.id)

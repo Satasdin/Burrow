@@ -345,7 +345,7 @@ final class TeamTests: XCTestCase {
         XCTAssertEqual(wanjiru.vault.teamMember?.name, "Wanjiru Kamau")
 
         // Keeping a team decision typed in the terminal, then reading it back.
-        let commit = try BurrowBinary.inTerminal(["commit", wanjiru.vault.root.path, refundRule, "--kind", "decision", "--because", refundWhy, "--team"], state: wanjiru.state)
+        let commit = try BurrowBinary.inTerminal(["commit", wanjiru.vault.root.path, refundRule, "--kind", "decision", "--because", refundWhy, "--team"], state: wanjiru.state, answer: "yes")
         XCTAssertEqual(commit.status, 0, commit.out)
         XCTAssertTrue(commit.out.contains("kept by Wanjiru Kamau in the terminal"), commit.out)
         let log = try BurrowBinary.piped(["team", "log", wanjiru.vault.root.path], state: wanjiru.state)

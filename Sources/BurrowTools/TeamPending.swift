@@ -106,7 +106,23 @@ public enum TeamPending {
                      "  " + share.shownMessage]
         for line in share.shownBody.components(separatedBy: "\n") where !line.isEmpty { lines.append("  " + line) }
         if !share.files.isEmpty { lines.append("  rests on: " + share.files.joined(separator: ", ")) }
-        if let reverts = share.reverts { lines.append("  replaces team decision \(reverts)") }
+        if let reverts = share.reverts {
+            let team = Team(name: share.team, path: share.teamPath)
+            if let old = TeamLedger.find(reverts, in: team) {
+                lines.append(share.kind == .correction ? "  and it marks this team decision wrong:" : "  and it replaces this team decision:")
+                lines += commitLines(old, team: team)
+            } else {
+                lines.append("  and it replaces team decision \(reverts), which is no longer in the team's Ledger")
+            }
+        }
+        return lines.map(Printable.clean)
+    }
+
+    /// A team commit in full, as the person is shown it before agreeing to replace it or mark it wrong (D-112).
+    public static func commitLines(_ commit: LedgerCommit, team: Team) -> [String] {
+        var lines = ["    \(team.name) \(commit.id) [\(commit.kind.rawValue)], \(commit.byline), \(Ledger.when(commit.at))", "    " + commit.message]
+        for line in commit.body.components(separatedBy: "\n") where !line.isEmpty { lines.append("    " + line) }
+        if !commit.cites.isEmpty { lines.append("    rests on: " + commit.cites.keys.sorted().joined(separator: ", ")) }
         return lines.map(Printable.clean)
     }
 }
