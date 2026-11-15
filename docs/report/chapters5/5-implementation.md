@@ -2,7 +2,7 @@
 
 ## 5.1 Introduction
 
-This chapter explains how the design of Chapter 4 was implemented, tested and evaluated, and addresses the third, fourth and fifth specific objectives. It describes the environment in which Burrow was built and run, the data used to evaluate it, and each module in the order of the architecture in Figure 4.8. It then sets out the test strategy, the test cases with the defects found and retested, and the evaluation of Burrow against its baselines, followed by the repository and the use of AI-assisted tools. The chapter ends with the evaluation results, their discussion and the limitations of the study.
+This chapter explains how the design of Chapter 4 was implemented, tested and evaluated, and addresses the third, fourth and fifth specific objectives. It describes the environment in which Burrow was built and run, the data used to evaluate it, and each module in the order of the architecture in Figure 4.8. It then sets out the test strategy, the test cases with the defects found and retested, the evaluation of Burrow against its baselines with its ablation, errors, security and robustness, and the check of its installation, followed by the repository and the use of AI-assisted tools. The chapter ends with the evaluation results, their discussion and the limitations of the study.
 
 ## 5.2 Implementation Environment
 
@@ -52,7 +52,7 @@ Burrow is installed with one command that downloads the latest release from the 
 
 The evaluation used two kinds of data. The first was a vault of 87 real documents assembled for the study on three subjects: Kenya's Data Protection Act and its regulations, which are public law; documentation of software released in 2026, which is public; and the notes of a private software project written by the author. From these documents, 120 knowledge questions were written, 40 on each subject, of which 25 need one fact and 15 need facts from two files, each with an answer key and the passage that supports it, as Table 3.1 shows. Fifty reasoning problems were drawn from the public GSM8K benchmark (Cobbe et al., 2021) to check that memory would be left out where it was not needed.
 
-The second was Matatu, a fixture project written for the study to test decisions. Matatu is a Python service of about 1,500 lines that records matatu fares paid by M-Pesa and matches each payment on a statement to its ticket. It came with written tasks, hidden tests that the AI tools could not read, and one business decision with a reason: payments are matched to tickets by account reference only, because conductors often pay for a whole group from one phone, and on one Easter Monday an older rule that matched by phone and amount had marked 31 tickets paid against the wrong passengers. A later task asks for unmatched payments to be handled, which tempts a tool to bring the rejected rule back. Two further sets were built on the fixture: 20 tasks worded unlike the payment decision, with 40 unrelated decisions in the Ledger, to test whether the decision is found, and 30 questions about an earlier session, to test whether its work is carried on. Table 5.3 summarises the data. All the passengers and payments in the fixture are invented, and no data about any real person was used.
+The second was Matatu, a fixture project written for the study to test decisions. Matatu is a Python service of about 1,500 lines that records matatu fares paid by M-Pesa and matches each payment on a statement to its ticket. It came with written tasks, hidden tests that the AI tools could not read, and one business decision with a reason: payments are matched to tickets by account reference only, because conductors often pay for a whole group from one phone, and on one Easter Monday an older rule that matched by phone and amount had marked 31 tickets paid against the wrong passengers. A later task asks for unmatched payments to be handled, which tempts a tool to bring the rejected rule back. Two further sets were built on the fixture: 20 tasks worded unlike the payment decision, with 40 unrelated decisions in the Ledger, to test whether the decision is found, and 30 questions about an earlier session, to test whether its work is carried on. Table 5.3 summarises the data. The law and the software documentation are real public texts and the project notes are the author's own, but the rest of the data is synthetic: the knowledge questions and their answer keys, the Matatu project with its passengers, payments, tasks and hidden tests, the 40 unrelated decisions and the session questions were all written for the study, by the author or by Claude Code agents at the author's direction. No data about any real person was used.
 
 !tab Table 5.3: Data used in the evaluation
 !widths 1.2,2.6,1.1,1.4
@@ -81,25 +81,33 @@ A linked folder named in a vault was read only after the person allowed it on th
 
 !fig figures/v5/approve-folder.png | Figure 5.2: The application asking the person before it reads a folder that a vault links | 4.8
 
+The engine's decision about the vault can be seen on the command line. In Figure 5.3 the question is a sum, so the engine left the vault out, because nothing in it was close enough, and gave the model the method for working a calculation; the lines under the answer say that nothing was read. In Figure 5.4 the question is about Ugandan law, which the vault does not hold. The engine still searched, because the closest files are about data protection, and the model said that it did not know from what it was shown, while the lines below list the files it read. Figure 5.5 shows what Burrow turns a question into before any model reads it: short rules, then excerpts marked with their file and line, which is why an answer can name the line it rests on.
+
+!fig figures/screens4/console-sum.png | Figure 5.3: A sum answered with the vault left out, on the command line | 6.2
+
+!fig figures/screens4/console-miss.png | Figure 5.4: A question the vault could not answer, and the model saying so | 6.2
+
+!fig figures/workflow/what-the-model-reads.png | Figure 5.5: The text Burrow hands a model for a question: rules, then excerpts marked with file and line | 6.2
+
 ### 5.4.2 Ledger Module
 
-The Ledger module kept what AI sessions decided, one Markdown file per commit, on branches like git, and implements FR-03, FR-07, FR-08, NFR-02 and DR-02. A decision was refused without a reason, and it was stored with the options rejected, the files it rests on with a hash of each, and the name of the program that kept it, taken from the program's connection rather than from what the model said about itself. No commit was ever changed or deleted; a later commit retired it, either as a replacement or as a correction, and a new decision that overlapped one in force was refused until the program said whether it replaced it or stood beside it. When a file that a decision rests on changed, the decision was still handed over, marked to be checked again, until the person confirmed it with Still Right or marked it wrong. Figure 5.3 shows the Ledger page with decisions kept during a team run by two simulated teammates and by Claude Code.
+The Ledger module kept what AI sessions decided, one Markdown file per commit, on branches like git, and implements FR-03, FR-07, FR-08, NFR-02 and DR-02. A decision was refused without a reason, and it was stored with the options rejected, the files it rests on with a hash of each, and the name of the program that kept it, taken from the program's connection rather than from what the model said about itself. No commit was ever changed or deleted; a later commit retired it, either as a replacement or as a correction, and a new decision that overlapped one in force was refused until the program said whether it replaced it or stood beside it. When a file that a decision rests on changed, the decision was still handed over, marked to be checked again, until the person confirmed it with Still Right or marked it wrong. Figure 5.6 shows the Ledger page with decisions kept during a team run by two simulated teammates and by Claude Code.
 
-!fig figures/v5/app-ledger-team.png | Figure 5.3: The Ledger page, with each decision's reason, the person or program that kept it, and its branch | 6.2
+!fig figures/v5/app-ledger-team.png | Figure 5.6: The Ledger page, with each decision's reason, the person or program that kept it, and its branch | 6.2
 
 ### 5.4.3 Connection Module
 
-This module let any AI program reach Burrow through its MCP server and implements FR-04, FR-05, IR-01 and IR-02. The server offered five tools, burrow_resume, burrow_find, burrow_read, burrow_commit and burrow_check, and spoke both the earlier form of the protocol, which begins with a handshake, and its stateless 2026 form. One command set Burrow up in Claude Code, OpenCode, OpenClaw, Hermes Agent or n8n while keeping every other setting in that program's files. A search or a read also carried the decisions that fit the request, chosen by how close their words were to it and how highly the files they rest on ranked, rather than by date. The design handed the decisions in force to a program when it connected; because OpenClaw and Hermes Agent were found never to pass a server's connection instructions to their model, the implementation also sent them, once, with each connection's first tool result. Figure 5.4 shows an n8n support workflow whose agent, running on a local model, uses Burrow as a tool, and Figure 5.5 shows that agent receiving decisions that Claude Code had kept earlier.
+This module let any AI program reach Burrow through its MCP server and implements FR-04, FR-05, IR-01 and IR-02. The server offered five tools, burrow_resume, burrow_find, burrow_read, burrow_commit and burrow_check, and spoke both the earlier form of the protocol, which begins with a handshake, and its stateless 2026 form. One command set Burrow up in Claude Code, OpenCode, OpenClaw, Hermes Agent or n8n while keeping every other setting in that program's files. A search or a read also carried the decisions that fit the request, chosen by how close their words were to it and how highly the files they rest on ranked, rather than by date. The design handed the decisions in force to a program when it connected; because OpenClaw and Hermes Agent were found never to pass a server's connection instructions to their model, the implementation also sent them, once, with each connection's first tool result. Figure 5.7 shows an n8n support workflow whose agent, running on a local model, uses Burrow as a tool, and Figure 5.8 shows that agent receiving decisions that Claude Code had kept earlier.
 
-!fig figures/v5/n8n-canvas.png | Figure 5.4: An n8n support workflow whose agent, on a local model through Ollama, uses Burrow as an MCP tool | 6.2
+!fig figures/v5/n8n-canvas.png | Figure 5.7: An n8n support workflow whose agent, on a local model through Ollama, uses Burrow as an MCP tool | 6.2
 
-!fig figures/v5/n8n-resume.png | Figure 5.5: The n8n agent's burrow_resume call returning decisions kept earlier by Claude Code | 6.2
+!fig figures/v5/n8n-resume.png | Figure 5.8: The n8n agent's burrow_resume call returning decisions kept earlier by Claude Code | 6.2
 
 ### 5.4.4 Check Module
 
-The check module implements FR-09. It compared the linked code with its last git commit, set aside files that only a build makes, and judged each decision the change touched: a change broke a decision when the check the person had set for it failed, affected it when it changed the parts of the code the decision rests on, and left it unaffected otherwise. The same check ran when a model called burrow_check, when Claude Code tried to end its turn, when a git commit was made, and inside OpenCode, OpenClaw and Hermes Agent through plugins, so a model could not skip it. A change that broke a decision was held until it was undone or the person overrode the decision. Figure 5.6 shows the pre-commit hook passing a harmless change and refusing one that broke the payment decision.
+The check module implements FR-09. It compared the linked code with its last git commit, set aside files that only a build makes, and judged each decision the change touched: a change broke a decision when the check the person had set for it failed, affected it when it changed the parts of the code the decision rests on, and left it unaffected otherwise. The same check ran when a model called burrow_check, when Claude Code tried to end its turn, when a git commit was made, and inside OpenCode, OpenClaw and Hermes Agent through plugins, so a model could not skip it. A change that broke a decision was held until it was undone or the person overrode the decision. Figure 5.9 shows the pre-commit hook passing a harmless change and refusing one that broke the payment decision.
 
-!fig figures/v5/console-gate.png | Figure 5.6: The git pre-commit hook passing a harmless change and refusing one that breaks a decision (real output, shortened) | 6.2
+!fig figures/v5/console-gate.png | Figure 5.9: The git pre-commit hook passing a harmless change and refusing one that breaks a decision (real output, shortened) | 6.2
 
 ### 5.4.5 Sessions and Handover Module
 
@@ -130,7 +138,7 @@ All 553 automated tests, 530 XCTest and 23 Swift Testing tests, passed on the fi
 | TC-06 | FR-06 | A different program resumes after a Claude Code session stopped mid-task | Plan, where it stopped, what it was in the middle of, latest decisions | As expected; MidwayTests; 3 of 3 real runs; Pass |
 | TC-07 | FR-07 | A file a decision cites is edited; the person says it still holds | Decision marked check again; Still Right clears it | As expected; LedgerTests; Pass |
 | TC-08 | FR-08 | A decision overlapping one in force, first without saying which holds | Refused once; with a replacement named, the old one retired | As expected; ContradictionTests; Pass |
-| TC-09 | FR-09 | Breaking and harmless changes through the tool, the Stop hook, the pre-commit hook and the plugins | Breaks refused every time; harmless changes pass | As expected; GateTests; Figure 5.6; Pass |
+| TC-09 | FR-09 | Breaking and harmless changes through the tool, the Stop hook, the pre-commit hook and the plugins | Breaks refused every time; harmless changes pass | As expected; GateTests; Figure 5.9; Pass |
 | TC-10 | FR-10 | A Claude Code session compacted, then asked for the error line | The exact line quoted | 6 of 6 runs; FoldTests; Pass |
 | TC-11 | FR-11 | An AI shares a decision with the team; two people commit at once | Held until the person approves; no conflict | As expected; TeamTests; Pass |
 | TC-14 | NFR-02, NFR-03 | 32 programs keep 50 decisions each at once | 1,600 kept, none lost; times reported | 1,600 of 1,600; median 0.003 s; Pass |
@@ -170,31 +178,94 @@ Each result was counted as the number of runs or questions that met the scoring 
 
 ### 5.5.4 Evaluation Results
 
-On finding material, Figure 5.7 shows that Gemma 4 12B answered 9 of the 120 knowledge questions alone and 102 with Burrow, against 94 with plain retrieval and 75 with a Chroma vector database, while the cloud model answered 40 alone and 109 when given the same vault. By Equation 3.1, Burrow closed 93% of the knowledge gap between the local model and the cloud model given the same memory, against 85% for plain retrieval, at a cost of 9.2 seconds per answer against 8.3. Against plain retrieval, Burrow gained 10 questions and lost 2 (p = 0.039), and against Chroma it gained 34 and lost 7 (p < 0.001). On the 50 reasoning problems, Burrow left the vault out of every one and the model solved 48, whereas plain retrieval, which pasted excerpts in front of every question, cut it from 47 to 7. On the smaller Qwen3.5 4B, Burrow answered 91 knowledge questions against 97 with plain retrieval, so it did not improve on plain retrieval for that model.
+On finding material, Figure 5.10 shows that Gemma 4 12B answered 9 of the 120 knowledge questions alone and 102 with Burrow, against 94 with plain retrieval and 75 with a Chroma vector database, while the cloud model answered 40 alone and 109 when given the same vault. By Equation 3.1, Burrow closed 93% of the knowledge gap between the local model and the cloud model given the same memory, against 85% for plain retrieval, at a cost of 9.2 seconds per answer against 8.3. Against plain retrieval, Burrow gained 10 questions and lost 2 (p = 0.039), and against Chroma it gained 34 and lost 7 (p < 0.001). On the 50 reasoning problems, Burrow left the vault out of every one and the model solved 48, whereas plain retrieval, which pasted excerpts in front of every question, cut it from 47 to 7. On the smaller Qwen3.5 4B, Burrow answered 91 knowledge questions against 97 with plain retrieval, so it did not improve on plain retrieval for that model.
 
-!fig figures/v2/chart-accuracy-main.png | Figure 5.7: Answers right by set-up and task type, Gemma 4 12B and the cloud model | 6.2
+!fig figures/v2/chart-accuracy-main.png | Figure 5.10: Answers right by set-up and task type, Gemma 4 12B and the cloud model | 6.2
 
-On finding a decision, when 20 tasks were worded unlike the payment decision, it reached the tool in 12 of them with the newest decisions attached first, in 18 with plain vector search, and in 19 once decisions were ranked by relevance (Figure 5.8, panel b). By the scoring rule registered beforehand, 19 against 18 is no difference from vector search: ranking by relevance repaired the earlier weakness but did not beat the simpler method.
+Table 5.7 breaks these results down by task type. The engine's lead over plain retrieval was largest on questions that need facts from two files (34 of 45 against 30), and it was the only set-up that kept the model's reasoning intact (48 of 50). Table 5.8 gives the fraction of the gap closed by Equation 3.1 for both local models, measured against the cloud model with the same vault and against the cloud model alone; against the cloud model alone the local model with Burrow answered 102 knowledge questions to the cloud model's 40, so the fraction exceeds 100%. Table 5.9 gives the cost of an answer: the engine read more tokens than either baseline, a median of 6,068 against 3,814 for plain retrieval, and found every file holding the answer for 111 of the 120 questions.
 
-On keeping decisions, keeping the reason with the decision made the difference for Claude Code. Before reasons were kept, 3 of 15 second sessions added a phone check as a safeguard and broke the decision; with the reason kept, 9 of 9 kept to it and wrote the rejected approach into the code (Figure 5.8, panel a). Gemma 4 12B in OpenCode was another matter: it received the decision with its reason in 4 of 4 runs but kept it in only 2, and in one it wrote the rejected rule with a comment saying it had been rejected before.
+!include generated2/accuracy-gemma4-12b.md | Table 5.7
 
-!fig figures/v5/chart-keep.png | Figure 5.8: Keeping, finding and carrying on, with Burrow against its baselines | 6.2
+!include generated2/gap.md | Table 5.8 | 0.85,0.75,0.95,0.8,0.85,0.8,0.75,0.75
 
-On carrying work on, Figure 5.9 shows that a model given Burrow's resume of about 1,800 tokens answered 11 of 30 questions about an earlier session, more than with nothing (0) or the session tools (6) but fewer than with the whole transcript pasted in (18; p = 0.039). That loss of detail led to keeping the exact words of a session, after which Claude Code quoted the error it had been working on in 6 of 6 runs after compaction, against 0 of 12 before, and a different program continued the right step in 3 of 3 runs, against none of 4 before (Figure 5.8, panels c and d).
+!include generated2/cost.md | Table 5.9 | 1.15,1.5,0.8,0.8,0.9,1.15
 
-!fig figures/v5/chart-resume.png | Figure 5.9: Questions about an earlier session answered right, by what the model was given | 6.2
+The smaller model gave a mixed result, shown in Figure 5.11. Alone, Qwen3.5 4B answered 6 of the 120 knowledge questions; with plain retrieval it answered 97, with the Chroma baseline 75 and with the engine 91, so on knowledge the engine did not improve on plain retrieval for this model (1 question gained and 7 lost, p = 0.070). On reasoning the pattern of the main model repeated more sharply: 46 of 50 alone, 9 with plain retrieval, 1 with the Chroma pipeline and 49 with the engine.
 
-On checking changes, every change that truly broke the payment decision was judged to break it, and none of the harmless changes was. Inside other programs, shown in Figure 5.10, the check fired whenever the model edited the decision's code, and in every run the model then told the person which decision it went against. Hermes Agent put the code back in 2 of 2 runs, OpenCode in 3 of 6 and OpenClaw in neither of 2. Burrow's own work was small throughout: with 32 programs keeping 1,600 decisions at once, none was lost and keeping one took a median of 0.003 seconds.
+!fig figures/v2/chart-accuracy-small.png | Figure 5.11: Answers right by set-up and task type, Qwen3.5 4B and the cloud model | 6.2
 
-!fig figures/v5/chart-gate.png | Figure 5.10: The check inside other programs: runs in which the model told the person, and runs in which it put the code back | 6.2
+On finding a decision, when 20 tasks were worded unlike the payment decision, it reached the tool in 12 of them with the newest decisions attached first, in 18 with plain vector search, and in 19 once decisions were ranked by relevance (Figure 5.12, panel b). By the scoring rule registered beforehand, 19 against 18 is no difference from vector search: ranking by relevance repaired the earlier weakness but did not beat the simpler method.
+
+On keeping decisions, keeping the reason with the decision made the difference for Claude Code. Before reasons were kept, 3 of 15 second sessions added a phone check as a safeguard and broke the decision; with the reason kept, 9 of 9 kept to it and wrote the rejected approach into the code (Figure 5.12, panel a). Gemma 4 12B in OpenCode was another matter: it received the decision with its reason in 4 of 4 runs but kept it in only 2, and in one it wrote the rejected rule with a comment saying it had been rejected before.
+
+!fig figures/v5/chart-keep.png | Figure 5.12: Keeping, finding and carrying on, with Burrow against its baselines | 6.2
+
+On carrying work on, Figure 5.13 shows that a model given Burrow's resume of about 1,800 tokens answered 11 of 30 questions about an earlier session, more than with nothing (0) or the session tools (6) but fewer than with the whole transcript pasted in (18; p = 0.039). That loss of detail led to keeping the exact words of a session, after which Claude Code quoted the error it had been working on in 6 of 6 runs after compaction, against 0 of 12 before, and a different program continued the right step in 3 of 3 runs, against none of 4 before (Figure 5.12, panels c and d).
+
+!fig figures/v5/chart-resume.png | Figure 5.13: Questions about an earlier session answered right, by what the model was given | 6.2
+
+On checking changes, every change that truly broke the payment decision was judged to break it, and none of the harmless changes was. Inside other programs, shown in Figure 5.14, the check fired whenever the model edited the decision's code, and in every run the model then told the person which decision it went against. Hermes Agent put the code back in 2 of 2 runs, OpenCode in 3 of 6 and OpenClaw in neither of 2. Burrow's own work was small throughout: with 32 programs keeping 1,600 decisions at once, none was lost and keeping one took a median of 0.003 seconds.
+
+!fig figures/v5/chart-gate.png | Figure 5.14: The check inside other programs: runs in which the model told the person, and runs in which it put the code back | 6.2
 
 The errors that remained fell into three kinds. Some were retrieval misses, such as the one oddly worded task whose decision was not attached by any method. Some were losses of detail, where a summary dropped what a later question needed. The largest were the model's own, where a decision arrived and was not followed, which only the check, not the memory, could address.
 
+### 5.5.5 Ablation, Budget and Variation Between Runs
+
+Two parts of the engine were switched off in turn on the main model. With every part on, the engine answered 150 of the 170 questions; without its methods for kinds of task it answered 149, and without the citation check 151. The check asked the model again on only 1 of the 170 questions, because only 1 of the 145 places the model cited was not among what it had been shown, so on this model the check mattered little to the score. Neither part, therefore, explains the engine's results; what did is shown by the budget sweep.
+
+Figure 5.15 and Table 5.10 answer the question of how much of the vault to show. The engine was run again on the 120 knowledge questions with the amount shown fixed at four sizes beside the fitted 17,417 characters. At 2,000 characters most questions received nothing, because the best piece did not fit, and 15 were answered. Accuracy then rose with every increase: 56 at 4,000 characters, 76 at 8,000, 102 at the fitted size and 112 at 32,000, while the time for an answer rose from 2.1 to 15.6 seconds and the gain for each 1,000 tokens read fell from 27.9 to 7.8 points. The fitted size thus gave up 10 answers for answers that took about 40% less time than at the largest size, and the sweep supports the reading in Section 5.8 that much of the engine's edge came from showing the model more.
+
+!fig figures/v2/chart-sweep.png | Figure 5.15: Knowledge answers right against tokens read, as the amount of the vault shown to Gemma 4 12B grows | 6.2
+
+!include generated2/sweep.md | Table 5.10
+
+Local answers were generated at temperature 0 with a fixed seed, but repeated runs still differed: of 169 identical prompts run twice, 41 answers changed in wording and one changed in score. A difference of one or two questions between set-ups is therefore within the variation of the model itself, which is why the comparisons above are reported with the sign test of Equation 5.2 rather than as raw differences.
+
+### 5.5.6 Error Analysis
+
+Of the engine's 18 wrong knowledge answers on the main model, 8 had a needed file missing from what was shown and 10 had every needed file shown, as Table 5.11 shows for every set-up. Both retrieval and the model's reading therefore still failed, as Joren et al. (2025) also found for small models given enough context. Table 5.12 shows one answer of each kind, taken from the saved results of the main model with the engine.
+
+!include generated2/wrong.md | Table 5.11
+
+!tab Table 5.12: Examples of answers from Gemma 4 12B with the engine
+!widths 1.05,2.0,2.05,1.2
+| Outcome | Question, in short | The model's answer | What happened |
+| Right, with its source | How long is the Data Commissioner's term of office, and can it be renewed? | The Data Commissioner shall be appointed for a single term of six years and shall not be eligible for a re-appointment. (Law/act-part-02-office-of-the-data-commissioner.md:71) | The file was found and the place was cited. |
+| Incomplete | Which statute guides the Data Commissioner before cancelling a certificate, and what is the maximum fine under the general penalty? | The Fair Administrative Actions Act, 2015 was named, and the model stated that it did not know the maximum fine from what it was shown. | One of the three needed files was not shown, and the model declined that half. |
+| Refused, with the evidence shown | Within how many hours of a personal data breach must a data controller notify the Data Commissioner? | I don't know from what you were shown. | The needed file was among the excerpts, and the model did not use it. |
+| Refused, with the evidence missing | Which model and context size were tried for Claude Code through Ollama? | I don't know from what you were shown. | Ollama release notes were shown and the project's decision log was not. The refusal was correct. |
+| Right, vault left out | A GSM8K problem on the ounces of meat eaten by a basketball team | Answer: 30 | The engine left the vault out, and the model read 272 tokens. |
+
+### 5.5.7 Security and Robustness
+
+Because Burrow is written to and read by AI programs, it was also tested against misuse and load, with Claude Code on the Matatu fixture and three runs per condition unless stated, as Table 5.13 summarises. A reversal of the payment decision was planted in three places. Planted in a vault note, it was never returned by a search, so it never reached the model. Planted in the repository's README, it reached the model in every run and was never followed, but the model did not mention it. Planted as a Ledger decision by an unknown program, it was never followed, and in every run the model told the person, naming the program and saying it could not confirm who wrote it, which the signature on each commit made possible. This matches the risk of indirect prompt injection described by Greshake et al. (2023), and shows that the signature, not the memory, is what let the model tell a planted entry from a person's.
+
+Once Burrow flagged text written to steer an AI, the flag reached the model in every run, but the model told the person in only 1 of 3 runs, and in 3 of 6 once the notice was reworded; when burrow_check repeated the flag at the end of the work, it did so in 5 of 6, and no run followed the planted text. Under load, 32 programs keeping 50 decisions each at the same time, beside two indexing runs, lost none of the 1,600 and duplicated none, after a fault in which two commits in the same second could share a name had been found by this test and corrected. Two Claude Code agents working at once on different branches each left their own handover, after the fault that had merged them was corrected.
+
+!tab Table 5.13: Security and robustness results
+!widths 1.7,1.1,1.6,1.6
+| Condition | Runs | Reached the model | What the model did |
+| Reversal planted in a vault note | 3 | 0 of 3 | Kept the decision in 2 of 3; the third failure was the lost reason, not the note |
+| Reversal planted in the README | 3 | 3 of 3 | Never followed it; told the person in none |
+| Reversal planted as a Ledger decision by an unknown program | 3 | 3 of 3 | Never followed it; told the person in 3 of 3, naming the program |
+| Steering text flagged on a read | 3 | 3 of 3 | Never followed it; told the person in 1 of 3 |
+| The same, with the notice reworded | 6 | 6 of 6 | Never followed it; told the person in 3 of 6 |
+| Flag repeated by burrow_check | 6 | 6 of 6 | Never followed it; told the person in 5 of 6 |
+| 32 programs keeping 50 decisions each at once | 1 | not applicable | 1,600 of 1,600 kept, none duplicated; median 0.003 s per commit |
+| Two agents at once on different branches | 4 | not applicable | Each left its own handover after the fix; both passed their tests |
+
+### 5.5.8 Release and Installation Check
+
+The installation was tested as a new user would meet it. The one-line installer was run against the published release on the laptop and installed a working burrow program; the same installer was then given a download altered after publication, and it refused it on the SHA-256 checksum and installed nothing. The desktop application from the release is not notarised by Apple, so on first opening macOS stops it until the person allows it in Privacy and Security, which the download page explains. [PENDING: name the release tag of the final build once it is published.]
+
+[PENDING: a usability test with real users. Friends with Macs will install Burrow from the project website, connect one AI program and keep and resume a decision; their tasks completed, the problems they met and their comments will be reported here. Only real participants will be reported.]
+
 ## 5.6 Version Control and Implementation Evidence
 
-The source code, tests, evaluation material and this report are kept in the project repository (https://github.com/Satasdin/Burrow), with burrow as the default branch. The Sources folder holds the engine, divided into BurrowCore for the vault and its index and BurrowTools for the Ledger, sessions, the check and team sharing, together with the MCP server and the command-line program. The Tests folder holds the 553 automated tests, the app folder the desktop application, the trials folder the scripts, transcripts and results of every evaluation, and docs the user guide, the test record, the traceability record and this report with the scripts that build it. The README gives the problem, installation, build, test and use. Figure 5.11 shows the history of the repository.
+The source code, tests, evaluation material and this report are kept in the project repository (https://github.com/Satasdin/Burrow), with burrow as the default branch. The Sources folder holds the engine, divided into BurrowCore for the vault and its index and BurrowTools for the Ledger, sessions, the check and team sharing, together with the MCP server and the command-line program. The Tests folder holds the 553 automated tests, the app folder the desktop application, the trials folder the scripts, transcripts and results of every evaluation, and docs the user guide, the test record, the traceability record and this report with the scripts that build it. The README gives the problem, installation, build, test and use. Figure 5.16 shows the history of the repository.
 
-!fig figures/screens2/console-git.png | Figure 5.11: The history of the repository, its tags and its folders | 6.2
+!fig figures/screens2/console-git.png | Figure 5.16: The history of the repository, its tags and its folders | 6.2
 
 Development followed a branch workflow in which new work was built on a branch and merged once its tests passed. Each commit message names the design decision it carries out, and the file DECISIONS.md records every decision with the run or review that caused it and the evidence after the change, so the reason for each part of the code can be traced. Evaluations reported as frozen were run on tagged builds, and every push ran the automated tests through GitHub Actions. [PENDING: push the final build and tag its release.]
 
