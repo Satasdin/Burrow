@@ -2,7 +2,7 @@
 
 ## 5.1 Introduction
 
-This chapter presents how Burrow was implemented, tested and evaluated, and addresses the fourth and fifth specific objectives. It describes the implementation environment, the data used in the evaluation, and each module of the system, and then reports how well AI tools found material, kept earlier decisions, carried work on and had their changes checked when Burrow was in use. It closes with the results of the system tests, a discussion of the findings, and the project's GitHub documentation.
+This chapter presents how Burrow was implemented, tested and evaluated, and addresses the third, fourth and fifth specific objectives. It describes the implementation environment, the data used in the evaluation, and each module of the system, and then reports how well AI tools found material, kept earlier decisions, carried work on and had their changes checked when Burrow was in use. It closes with the results of the system tests, a discussion of the findings, and the project's GitHub documentation.
 
 ## 5.2 Implementation Environment
 
@@ -116,7 +116,7 @@ Each result was counted as the number of runs or questions that met the scoring 
 
 ### 5.5.3 Evaluation Results
 
-On finding material, Figure 5.7 shows that Gemma 4 12B answered 9 of the 120 knowledge questions alone and 102 with Burrow, against 94 with plain retrieval and 75 with a Chroma vector database, while the cloud model answered 40 alone and 109 when given the same vault. On the 50 reasoning problems, Burrow left the vault out of every one and the model solved 48, whereas plain retrieval, which pasted excerpts in front of every question, cut it from 47 to 7. Decisions were harder to find than facts: when 20 tasks were worded unlike the payment decision, it reached the tool in 12 of them with the newest decisions attached first, in 18 with plain vector search, and in 19 once decisions were ranked by relevance (Figure 5.8, panel b).
+On finding material, Figure 5.7 shows that Gemma 4 12B answered 9 of the 120 knowledge questions alone and 102 with Burrow, against 94 with plain retrieval and 75 with a Chroma vector database, while the cloud model answered 40 alone and 109 when given the same vault. By Equation 3.1, Burrow therefore closed 93% of the knowledge gap between the local model and the cloud model given the same memory, at a cost of 9.2 seconds per answer against 8.3 for plain retrieval. On the 50 reasoning problems, Burrow left the vault out of every one and the model solved 48, whereas plain retrieval, which pasted excerpts in front of every question, cut it from 47 to 7. Decisions were harder to find than facts: when 20 tasks were worded unlike the payment decision, it reached the tool in 12 of them with the newest decisions attached first, in 18 with plain vector search, and in 19 once decisions were ranked by relevance (Figure 5.8, panel b).
 
 !fig figures/v2/chart-accuracy-main.png | Figure 5.7: Answers right by set-up and task type, Gemma 4 12B and the cloud model | 6.2
 

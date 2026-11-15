@@ -1,16 +1,16 @@
 # Acknowledgment
 
-I thank God for the strength and good health that carried me through this project. I am sincerely grateful to my supervisor, Mr. Tiberius Tabulu, for his guidance, his honest feedback at every stage and the time he gave to reviewing this work; his comments on the proposal and during the sprint reviews shaped both the system and this report. I also thank Strathmore University and the School of Computing and Engineering Sciences for the opportunity to undertake this project and for the instruction in research writing that guided its documentation. Finally, I thank my family for their encouragement and support throughout my studies.
+First and foremost, I thank God for the guidance, strength, and good health that carried me through this work. I am sincerely grateful to my supervisor, Mr. Tiberius Tabulu, for his steady guidance, patience, and constructive feedback, which shaped the direction of this project from the proposal to the finished system. I also thank the faculty of the School of Computing and Engineering Sciences at Strathmore University for the foundation they have given me. Finally, I am deeply thankful to my family and friends for their encouragement and unwavering support throughout this journey.
 
 # Abstract
 
-Artificial intelligence (AI) tools are now used together on the same work, often a cloud coding assistant alongside a local model chosen for privacy. Each tool starts from what its own program supplies, so a decision reached with one tool, and its reason, is lost to the next, which then brings back options already rejected.
+Cloud language models are highly capable, but every request costs money and sends the user's data off the device, while small models on a consumer laptop are private and free but weaker, most visibly on knowledge they have not memorised. Both kinds of model also share a second weakness: they keep nothing between sessions, so what a person settled with one tool, and why, is lost to the next.
 
-This study designed, developed and evaluated Burrow, a private memory engine that runs on the person's own computer. AI tools record each decision in it with its reason and the files it rests on; Burrow hands the decisions to every tool that connects through the Model Context Protocol and checks new work against them. Following Design Science Research, Burrow was built in Swift with an embedded SQLite index and evaluated with six AI programs, including Claude Code, OpenCode and n8n, on a fixture project with hidden tests and on 120 knowledge questions.
+To address these challenges, this study designed, developed and evaluated Burrow, a local vault that gives local and cloud language models one shared memory. Burrow keeps the person's notes, documents and code on their own computer, with a ledger of the decisions AI tools make with the person and their reasons, and any model reaches it through the Model Context Protocol. Following Design Science Research, it was built in Swift with SQLite and evaluated on 120 knowledge questions and on coding tasks with hidden tests.
 
-With Burrow, a local model answered 102 of 120 questions on private material, against 9 without it and 75 with a vector database. Once reasons were kept, Claude Code kept to an earlier decision in all 9 runs, against 12 of 15 before; another program carried earlier work on in 3 of 3 runs, against none; and every change that broke a decision was held. A shared memory of decisions and their reasons therefore helps AI tools keep earlier decisions, while a final check is still needed where a model does not follow them.
+With Burrow, a local model answered 102 of the 120 knowledge questions, against 9 alone and 75 with a vector database, close to the cloud model given the same memory (109). Once reasons were kept with decisions, a cloud coding model kept to an earlier decision in all 9 runs, and a local model in a different program carried earlier work on in 3 of 3 runs, against none before. A shared local memory therefore narrows the gap between local and cloud models and lets them build on each other's work.
 
-***Keywords: AI coding tools, agent memory, design decisions, Model Context Protocol, on-device language models***
+***Keywords: on-device language models, external memory, shared memory, retrieval-augmented generation, Model Context Protocol***
 
 # Table of Contents
 

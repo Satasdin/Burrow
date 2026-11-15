@@ -89,16 +89,16 @@ def pill(x, y, words, colour):
     d.text((x + 32, y + 12), words, font=font, fill="white")
 
 # Title
-text(W / 2, 34, "Burrow: one memory of decisions for every AI tool", f(60, AB), anchor="m")
-text(W / 2, 112, "The vault, the Ledger and the engine run on the person's own Mac; any local or cloud AI tool connects to it", f(40, AI), fill=SOFT, anchor="m")
+text(W / 2, 34, "Burrow: one shared memory for local and cloud language models", f(60, AB), anchor="m")
+text(W / 2, 112, "The vault, its index and the Ledger of decisions run on the person's own laptop; any local or cloud model connects to it", f(40, AI), fill=SOFT, anchor="m")
 
 # INPUT
 pill(60, 190, "1  INPUT", BLUE)
 box((60, 286, 1130, 700), BLUE_BG, BLUE_LINE)
 icon("person.fill", "1D4ED8", (160, 380), 110); icon("bubble.left.and.bubble.right.fill", "1D4ED8", (160, 560), 120)
-text(250, 318, "Work with AI tools", f(54, AB), fill=BLUE)
-text(250, 392, "A decision settled with one tool: “Match payments by account reference only, never by phone and amount.”", f(40), width=850)
-text(250, 584, "Later: another tool, another session.", f(40, AI), fill=SOFT, width=850)
+text(250, 318, "Questions and tasks", f(54, AB), fill=BLUE)
+text(250, 392, "Knowledge: “How many hours does a company have to report a data breach?” Work: a decision settled with one model, kept for the next.", f(40), width=850)
+text(250, 584, "From local and cloud models alike.", f(40, AI), fill=SOFT, width=850)
 
 box((1210, 286, 2250, 700), BLUE_BG, BLUE_LINE)
 icon("folder.fill", "1D4ED8", (1310, 390), 125); icon("doc.text.fill", "1D4ED8", (1310, 560), 100)
@@ -109,11 +109,11 @@ text(1400, 396, "Notes and documents in Markdown, and code folders linked in rea
 pill(60, 790, "2  PROCESSING: the Burrow engine", PURPLE)
 box((60, 886, 2250, 2170), PURPLE_BG, PURPLE_LINE, radius=36)
 stages = [
-    ("Keep", "tray.and.arrow.down.fill", "The tool keeps the decision with its reason, what was rejected and the files it rests on, signed by the program."),
-    ("Hand over", "arrow.left.arrow.right", "Every tool that connects gets the decisions in force; a resume says where work stopped."),
-    ("Watch", "eye.fill", "A decision whose file changed is marked to check again; a new decision that contradicts an old one is caught."),
-    ("Check", "checkmark.shield.fill", "Before work is done, the change is judged against each decision it touches, and held until it has been shown."),
-    ("Share", "person.2.fill", "With the person's approval, a decision goes to a team folder that teammates' tools also read."),
+    ("Find", "magnifyingglass", "Is the vault needed? If so, search it by words and meaning and supply the excerpts, each with its file and line."),
+    ("Keep", "tray.and.arrow.down.fill", "The model keeps each decision with its reason, what was rejected and the files it rests on."),
+    ("Hand over", "arrow.left.arrow.right", "Every model that connects gets the decisions in force, and a resume says where the last one stopped."),
+    ("Check", "checkmark.shield.fill", "A decision whose files changed is marked; a change that breaks a decision is held until it is undone."),
+    ("Share", "person.2.fill", "With the person's approval, decisions go to a team folder that teammates' models also read."),
 ]
 rows = []
 for i, (name, sym, words) in enumerate(stages):
@@ -129,20 +129,20 @@ for i, (name, sym, words) in enumerate(stages):
 for a, b in zip(rows, rows[1:]):
     arrow([(720, a + 107), (720, b - 107)], PURPLE, width=8, head=24)
 
-# The Ledger and the index, beside Keep and Hand over
-box((1500, 930, 2200, 1150), "white", PURPLE_LINE, radius=24)
-icon("books.vertical.fill", "6D28D9", (1580, 1040), 96)
-text(1660, 956, "The Ledger", f(44, AB), fill=PURPLE)
-text(1660, 1014, "Plain files, never changed or deleted: a later commit retires an earlier one.", f(34), fill=SOFT, width=520)
+# The index beside Find, the Ledger beside Keep
+box((1500, rows[0] - 70, 2200, rows[0] + 70), "white", PURPLE_LINE, radius=24)
+icon("cylinder.split.1x2.fill", "6D28D9", (1580, rows[0]), 90)
+text(1660, rows[0] - 48, "Rebuildable index", f(42, AB), fill=PURPLE)
+text(1660, rows[0] + 6, "SQLite: words, vectors, links", f(36), fill=SOFT)
 arrow([(1340, rows[0]), (1500, rows[0])], PURPLE, width=8, head=24, both=True)
-box((1500, rows[1] - 70, 2200, rows[1] + 70), "white", PURPLE_LINE, radius=24)
-icon("cylinder.split.1x2.fill", "6D28D9", (1580, rows[1]), 90)
-text(1660, rows[1] - 48, "Rebuildable index", f(42, AB), fill=PURPLE)
-text(1660, rows[1] + 6, "SQLite: words, vectors, links", f(36), fill=SOFT)
+box((1500, rows[1] - 82, 2200, rows[1] + 82), "white", PURPLE_LINE, radius=24)
+icon("books.vertical.fill", "6D28D9", (1580, rows[1]), 90)
+text(1660, rows[1] - 70, "The Ledger", f(42, AB), fill=PURPLE)
+text(1660, rows[1] - 20, "Plain files, never changed or deleted: a later commit retires an earlier one.", f(29), fill=SOFT, width=520)
 arrow([(1340, rows[1]), (1500, rows[1])], PURPLE, width=8, head=24, both=True)
 
 # The AI tools, beside Hand over and Check
-box((1500, 1380, 2200, 1900), TEAL, TEAL, radius=30)
+box((1500, 1400, 2200, 1910), TEAL, TEAL, radius=30)
 icon("terminal.fill", "FFFFFF", (1850, 1480), 140)
 text(1850, 1572, "Any AI tool, local or cloud", f(46, AB), fill="white", anchor="m")
 text(1850, 1640, "Claude Code, OpenCode, OpenClaw,", f(38), fill="white", anchor="m")
@@ -157,12 +157,12 @@ text(1530, 1960, "Burrow calls no cloud model: only the local model service, for
 # OUTPUT
 pill(60, 2254, "3  OUTPUT", GREEN)
 outs = [
-    ("hand.raised.fill", "The decision kept", "The next tool keeps to it, or names it and asks the person.",
-     "“I haven't made this change. It goes against the decision on group payments.”"),
-    ("arrow.forward", "Work carried on", "A different tool picks up the right step, with the constraint and the last error.",
+    ("text.bubble.fill", "Answer with its sources", "A local model answers from the person's own material, naming the file and line.",
+     "“Within 72 hours,” with the file and line it came from."),
+    ("hand.raised.fill", "The decision kept", "The next model keeps an earlier decision, or names it and asks the person.",
+     "“This goes against the decision on group payments.”"),
+    ("arrow.forward", "Work carried on", "A different model picks up the right step, with its constraint and the last error.",
      "“Carry on where the last session stopped.”"),
-    ("checkmark", "A verdict on the change", "Breaks, affected or unaffected, for each decision the change touches.",
-     "A change that breaks a decision is held until it is undone or overturned."),
 ]
 for i, (sym, name, words, example) in enumerate(outs):
     x0 = 60 + i * 740
@@ -181,18 +181,18 @@ arrow([(1895, 2170), (1895, 2350)], GREEN, width=12, head=36)
 # Feedback: new decisions return to the Ledger
 arrow([(2250, 2560), (2340, 2560), (2340, 493), (2250, 493)], ORANGE, width=10, head=34, dash=True)
 label = Image.new("RGBA", (1200, 60), (255, 255, 255, 0))
-ImageDraw.Draw(label).text((600, 4), "FEEDBACK: each new decision joins the Ledger", font=f(40, AB), fill=ORANGE, anchor="ma")
+ImageDraw.Draw(label).text((600, 4), "FEEDBACK: each new decision returns to the vault", font=f(40, AB), fill=ORANGE, anchor="ma")
 label = label.rotate(90, expand=True)
 img.paste(label, (2346, 900), label)
 
 box((60, 2840, 1130, 3010), GREY_BG, GREY, dash=True, width=5)
 icon("cloud.fill", "64748B", (150, 2925), 110)
-text(230, 2862, "Compared with: no memory, a pasted transcript,", f(38, AB), fill=SOFT)
-text(230, 2918, "plain vector search, and Burrow before each fix. Not part of the engine.", f(34), fill=SOFT, width=870, gap=1.2)
+text(230, 2862, "Compared with: the model alone, a vector DB,", f(38, AB), fill=SOFT)
+text(230, 2918, "the cloud model, a pasted transcript, and earlier builds. Not part of Burrow.", f(34), fill=SOFT, width=870, gap=1.2)
 box((1210, 2840, 2250, 3010), GREY_BG, GREY, width=5)
 icon("chart.bar.fill", "334155", (1300, 2925), 100)
 text(1380, 2862, "Measured on every run", f(40, AB), fill=SOFT)
-text(1380, 2918, "Material found, decision kept (hidden tests), work carried on, verdict right, seconds.", f(34), fill=SOFT, width=840, gap=1.2)
+text(1380, 2918, "Answers right, decision kept (hidden tests), work carried on, seconds taken.", f(34), fill=SOFT, width=840, gap=1.2)
 arrow([(1130, 2925), (1210, 2925)], GREY, width=8, head=24)
 
 (HERE / "v5").mkdir(exist_ok=True)
