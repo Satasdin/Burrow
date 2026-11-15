@@ -1262,58 +1262,6 @@
   "issued": {
    "date-parts": [
     [
-     2024
-    ]
-   ]
-  },
-  "DOI": "10.1145/3637528.3671470",
-  "URL": "https://doi.org/10.1145/3637528.3671470",
-  "author": [
-   {
-    "family": "Fan",
-    "given": "W."
-   },
-   {
-    "family": "Ding",
-    "given": "Y."
-   },
-   {
-    "family": "Ning",
-    "given": "L."
-   },
-   {
-    "family": "Wang",
-    "given": "S."
-   },
-   {
-    "family": "Li",
-    "given": "H."
-   },
-   {
-    "family": "Yin",
-    "given": "D."
-   },
-   {
-    "family": "Chua",
-    "given": "T.-S."
-   },
-   {
-    "family": "Li",
-    "given": "Q."
-   }
-  ],
-  "title": "A survey on RAG meeting LLMs: Towards retrieval-augmented large language models",
-  "type": "paper-conference",
-  "container-title": "Proceedings of the 30th ACM SIGKDD Conference on Knowledge Discovery and Data Mining",
-  "page": "6491-6501",
-  "publisher": "ACM",
-  "_apa": "Fan, W., Ding, Y., Ning, L., Wang, S., Li, H., Yin, D., Chua, T.-S., & Li, Q. (2024). A survey on RAG meeting LLMs: Towards retrieval-augmented large language models. In *Proceedings of the 30th ACM SIGKDD Conference on Knowledge Discovery and Data Mining* (pp. 6491–6501). ACM. https://doi.org/10.1145/3637528.3671470",
-  "id": "Fan2024"
- },
- {
-  "issued": {
-   "date-parts": [
-    [
      2025
     ]
    ]
@@ -6431,42 +6379,6 @@
   "publisher": "arXiv",
   "_apa": "Rasmussen, P., Paliychuk, P., Beauvais, T., Ryan, J., & Chalef, D. (2025). *Zep: A temporal knowledge graph architecture for agent memory*. arXiv. https://doi.org/10.48550/arXiv.2501.13956",
   "id": "Rasmussen2025"
- },
- {
-  "issued": {
-   "date-parts": [
-    [
-     2016
-    ]
-   ]
-  },
-  "DOI": "10.1145/2884781.2884851",
-  "URL": "https://doi.org/10.1145/2884781.2884851",
-  "author": [
-   {
-    "family": "Rigby",
-    "given": "P. C."
-   },
-   {
-    "family": "Zhu",
-    "given": "Y. C."
-   },
-   {
-    "family": "Donadelli",
-    "given": "S. M."
-   },
-   {
-    "family": "Mockus",
-    "given": "A."
-   }
-  ],
-  "title": "Quantifying and mitigating turnover-induced knowledge loss: Case studies of Chrome and a project at Avaya",
-  "type": "paper-conference",
-  "container-title": "Proceedings of the 38th International Conference on Software Engineering",
-  "page": "1006-1016",
-  "publisher": "ACM",
-  "_apa": "Rigby, P. C., Zhu, Y. C., Donadelli, S. M., & Mockus, A. (2016). Quantifying and mitigating turnover-induced knowledge loss: Case studies of Chrome and a project at Avaya. In *Proceedings of the 38th International Conference on Software Engineering* (pp. 1006–1016). ACM. https://doi.org/10.1145/2884781.2884851",
-  "id": "Rigby2016"
  },
  {
   "issued": {

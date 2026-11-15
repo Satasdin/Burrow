@@ -2,11 +2,11 @@
 
 ## 4.1 Introduction
 
-This chapter presents the analysis and design of Burrow and addresses the second specific objective. The system was analysed and designed with Object-Oriented Analysis and Design (OOAD), as justified in Section 3.3.1, and the diagrams use the Unified Modeling Language (UML). Section 4.2 gives the requirements. Section 4.3 presents the analysis diagrams: a use case diagram, a sequence diagram, an activity diagram and a class diagram. Section 4.4 presents the design diagrams: the system architecture, the logical schema, the wireframes and the deployment diagram. Chapter 5 describes how the design was built and tested.
+This chapter presents the analysis and design of Burrow and addresses the second specific objective. The system was analysed and designed with Object-Oriented Analysis and Design (OOAD), as justified in Section 3.3.1, and the diagrams use the Unified Modeling Language (UML). Section 4.2 gives the functional, non-functional, data and interface requirements and traces them to the components and tests that answer them. Section 4.3 presents the analysis diagrams: a use case diagram, a sequence diagram, an activity diagram and a class diagram. Section 4.4 presents the design diagrams: the system architecture, the logical schema, the wireframes and the deployment diagram. Chapter 5 describes how the design was built and tested.
 
 ## 4.2 System Requirements
 
-The system requirements identified for this project are presented in the following subsections. Each requirement has an identifier, names the specific objective it serves, and names the test case of Section 5.6 that verifies it. No time limit was set in advance, because no measurement existed to justify one; where speed matters, the requirement is to measure it.
+The system requirements identified for this project are presented in the following subsections. Each requirement has an identifier, names the specific objective it serves, and names the test case of Section 5.5.2 that verifies it. No time limit was set in advance, because no measurement existed to justify one; where speed matters, the requirement is to measure it.
 
 ### 4.2.1 Functional Requirements
 
@@ -66,13 +66,27 @@ Table 4.4 lists the interface and integration requirements: how programs and peo
 | IR-03 | If the local model service cannot embed a request, search shall continue on words alone. | ii, iii | TC-23 |
 | IR-04 | The vault shall stay a folder that Obsidian can open, with links written between double square brackets. | ii, iii | TC-24 |
 
-## 4.3 System Analysis Diagrams
+### 4.2.5 Requirements Traceability
 
-This section presents the diagrams used to analyse the actors, the behaviour and the structure of the system. Each diagram is introduced, shown and then interpreted.
+Every requirement links back to a specific objective, named in Tables 4.1 to 4.4, and forward to the diagrams that model it, the module that implements it and the test that verifies it. Table 4.5 groups the requirements by the module that answers them, so that a change to a requirement can be followed to the design, the code and the evidence it affects.
+
+!tab Table 4.5: Traceability from requirements to diagrams, implementation and tests
+!widths 1.2,1.6,1.1,1.2,1.3
+| Module | Requirements | Diagrams | Implemented in | Verified by |
+| Vault and index | FR-01, FR-02, DR-01, DR-04, IR-03, IR-04 | Figures 4.1, 4.4, 4.5 | Section 5.4.1 | TC-01, TC-02, TC-18, TC-20, TC-23, TC-24 |
+| Ledger | FR-03, FR-07, FR-08, NFR-02, DR-02 | Figures 4.4, 4.6, 4.7 | Section 5.4.2 | TC-03, TC-07, TC-08, TC-14 |
+| Connection | FR-04, FR-05, IR-01, IR-02 | Figures 4.2, 4.5, 4.9 | Section 5.4.3 | TC-04, TC-05, TC-21, TC-22 |
+| Check | FR-09 | Figures 4.2, 4.3 | Section 5.4.4 | TC-09 |
+| Sessions and handover | FR-06, FR-10, NFR-04 | Figures 4.2, 4.6 | Section 5.4.5 | TC-06, TC-10, TC-15 |
+| Team and approval | FR-11, NFR-05 | Figures 4.1, 4.10 | Section 5.4.6 | TC-11, TC-16 |
+| Desktop application | FR-12 | Figures 4.7, 4.8, 4.9 | Sections 5.4.1 to 5.4.3 | TC-12 |
+| Whole system | NFR-01, NFR-03, NFR-06, DR-03 | Figures 4.5, 4.10 | Sections 5.2 and 5.3 | TC-13, TC-14, TC-17, TC-19 |
+
+## 4.3 System Analysis Diagrams
 
 ### 4.3.1 Use Case Diagram
 
-Figure 4.1 shows the actors and the use cases. The person and the AI tool are the primary actors; a teammate receives what is shared, and the local model service supports search by meaning.
+Figure 4.1 shows who interacts with Burrow and what each of them can do with it. It sets the boundary of the system: everything inside the boundary is done by Burrow on the person's laptop, while the person, the AI tools they use, a teammate and the local model service act from outside it. The person and the AI tool are the primary actors; a teammate receives what is shared, and the local model service supports search by meaning. The diagram covers the goals behind FR-01 to FR-12 and the actions that NFR-05 reserves for the person.
 
 !fig figures/v5/use_cases.png | Figure 4.1: Use case diagram of Burrow | 6.0
 
@@ -80,7 +94,7 @@ The person owns the vault and the Ledger: they open the vault, review what was k
 
 ### 4.3.2 Sequence Diagram
 
-Figure 4.2 shows one session of an AI tool with Burrow, from connecting to finishing, with the two ways a session can end.
+Figure 4.2 follows one session of an AI tool with Burrow over time, from connecting to finishing. A sequence diagram was chosen because the order of the messages decides whether a decision reaches a model before it acts, which FR-04, FR-05, FR-06 and FR-09 require. Its scope is a single session and the two ways it can end: with the change and a new decision kept, or with the change held.
 
 !fig figures/v5/sequence_session.png | Figure 4.2: Sequence diagram of an AI tool resuming, looking up, changing and checking work through Burrow | 6.0
 
@@ -88,7 +102,7 @@ Decisions reach the tool three times: at connection, in the resume, and beside t
 
 ### 4.3.3 Activity Diagram
 
-Figure 4.3 shows the activity of checking a change, across the AI tool, Burrow and the person.
+Figure 4.3 shows the steps of checking a change, in lanes for the AI tool, Burrow and the person. An activity diagram was chosen because the check is a flow with branches and a loop rather than an exchange of messages, and it details FR-09 together with the override that NFR-05 keeps for the person.
 
 !fig figures/v5/activity_check.png | Figure 4.3: Activity diagram of a change checked against the decisions it touches | 6.0
 
@@ -96,7 +110,7 @@ Three verdicts let a change through: no decision rests on its files, it leaves t
 
 ### 4.3.4 Class Diagram
 
-Figure 4.4 shows the main classes of the engine and their relationships.
+Figure 4.4 shows the main classes of Burrow's engine with their attributes, operations and relationships. It is the structural view of the objects that the use cases and the sequence rely on, and covers the vault and its index (FR-01, FR-02), the Ledger and its commits (FR-03, FR-07, FR-08), sessions (FR-06, FR-10) and the check (FR-09).
 
 !fig figures/v5/classes.png | Figure 4.4: Class diagram of Burrow's engine | 6.2
 
@@ -104,11 +118,9 @@ VaultTools is the single place where every tool call is handled, whichever inter
 
 ## 4.4 System Design Diagrams
 
-This section presents the design of the system: its architecture, the records it keeps, its main screens and where it runs.
-
 ### 4.4.1 System Architecture
 
-Figure 4.5 shows the architecture in four layers: the AI programs, the interfaces they use, the engine, and the stores on disk.
+Figure 4.5 shows how Burrow is organised in four layers: the AI programs, the interfaces they use, the engine, and the stores on disk. It is the view from which the modules of Chapter 5 were built, and it shows how NFR-01 is met by keeping every part of Burrow on the person's laptop.
 
 !fig figures/v5/architecture.png | Figure 4.5: Architecture of Burrow | 6.2
 
@@ -116,7 +128,7 @@ The programs need no change to use Burrow: they reach it through MCP, and the ho
 
 ### 4.4.2 Logical Database Schema
 
-Figure 4.6 shows the logical schema of what Burrow keeps, with keys and cardinalities.
+Figure 4.6 shows the logical schema of what Burrow keeps: the commits of the Ledger, the sessions and checks, and the index of the vault, with their keys, relationships and cardinalities. It addresses DR-02 and DR-04 and the durability that NFR-02 requires.
 
 !fig figures/v5/schema.png | Figure 4.6: Logical schema of the Ledger, sessions and the index | 6.2
 
@@ -124,7 +136,7 @@ A relational database was used only for the index, which can be rebuilt. The Led
 
 ### 4.4.3 Wireframes
 
-Figure 4.7, Figure 4.8 and Figure 4.9 show the three screens of the desktop application through which the person sees and governs what AI tools keep: the Ledger, the Watch panel and the Programs page.
+Figure 4.7, Figure 4.8 and Figure 4.9 show the three screens of the desktop application through which the person sees and governs what AI tools keep, as FR-12 requires: the Ledger, the Watch panel and the Programs page. They show the layout and the controls each screen needs.
 
 !fig figures/v5/wire_ledger.png | Figure 4.7: Wireframe of the Ledger page | 6.0
 
@@ -140,7 +152,7 @@ The Programs page reads each program's own settings and says whether it will fin
 
 ### 4.4.4 Deployment Diagram
 
-Figure 4.10 shows where each part runs and how the parts connect.
+Figure 4.10 shows the machines on which each part of Burrow runs and how the parts connect. It addresses NFR-01, by showing what leaves the laptop and what does not, and the single-package build of NFR-06.
 
 !fig figures/v5/deployment.png | Figure 4.10: Deployment diagram of Burrow | 6.2
 

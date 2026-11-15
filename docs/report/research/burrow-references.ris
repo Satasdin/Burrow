@@ -391,25 +391,6 @@ PB  - arXiv
 UR  - https://arxiv.org/abs/2404.16130
 ER  - 
 
-TY  - CONF
-AU  - Fan, W.
-AU  - Ding, Y.
-AU  - Ning, L.
-AU  - Wang, S.
-AU  - Li, H.
-AU  - Yin, D.
-AU  - Chua, T.-S.
-AU  - Li, Q.
-TI  - A survey on RAG meeting LLMs: Towards retrieval-augmented large language models
-PY  - 2024
-T2  - Proceedings of the 30th ACM SIGKDD Conference on Knowledge Discovery and Data Mining
-PB  - ACM
-DO  - 10.1145/3637528.3671470
-UR  - https://doi.org/10.1145/3637528.3671470
-SP  - 6491
-EP  - 6501
-ER  - 
-
 TY  - GEN
 AU  - Gemma Team
 TI  - Gemma 3 technical report
@@ -1914,21 +1895,6 @@ PY  - 2025
 PB  - arXiv
 DO  - 10.48550/arXiv.2501.13956
 UR  - https://doi.org/10.48550/arXiv.2501.13956
-ER  - 
-
-TY  - CONF
-AU  - Rigby, P. C.
-AU  - Zhu, Y. C.
-AU  - Donadelli, S. M.
-AU  - Mockus, A.
-TI  - Quantifying and mitigating turnover-induced knowledge loss: Case studies of Chrome and a project at Avaya
-PY  - 2016
-T2  - Proceedings of the 38th International Conference on Software Engineering
-PB  - ACM
-DO  - 10.1145/2884781.2884851
-UR  - https://doi.org/10.1145/2884781.2884851
-SP  - 1006
-EP  - 1016
 ER  - 
 
 TY  - JOUR
