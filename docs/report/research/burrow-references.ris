@@ -203,21 +203,6 @@ EP  - 2240
 ER  - 
 
 TY  - JOUR
-AU  - Bruch, S.
-AU  - Gai, S.
-AU  - Ingber, A.
-TI  - An analysis of fusion functions for hybrid retrieval
-PY  - 2023
-JO  - ACM Transactions on Information Systems
-VL  - 42
-IS  - 1
-DO  - 10.1145/3596512
-UR  - https://doi.org/10.1145/3596512
-SP  - 1
-EP  - 35
-ER  - 
-
-TY  - JOUR
 AU  - Buchgeher, G.
 AU  - Schöberl, S.
 AU  - Geist, V.
@@ -423,21 +408,6 @@ DO  - 10.1145/3637528.3671470
 UR  - https://doi.org/10.1145/3637528.3671470
 SP  - 6491
 EP  - 6501
-ER  - 
-
-TY  - CONF
-AU  - Gao, T.
-AU  - Yen, H.
-AU  - Yu, J.
-AU  - Chen, D.
-TI  - Enabling large language models to generate text with citations
-PY  - 2023
-T2  - Proceedings of the 2023 Conference on Empirical Methods in Natural Language Processing
-PB  - Association for Computational Linguistics
-DO  - 10.18653/v1/2023.emnlp-main.398
-UR  - https://doi.org/10.18653/v1/2023.emnlp-main.398
-SP  - 6465
-EP  - 6488
 ER  - 
 
 TY  - GEN
@@ -1593,6 +1563,15 @@ SP  - 47
 EP  - 56
 ER  - 
 
+TY  - ELEC
+AU  - Letta
+TI  - Memory blocks: The key to agentic context management
+PY  - 2025
+DA  - 2025/05/14
+T2  - Letta Blog
+UR  - https://www.letta.com/blog/memory-blocks
+ER  - 
+
 TY  - CONF
 AU  - Levy, M.
 AU  - Jacoby, A.
@@ -1628,6 +1607,47 @@ PB  - Curran Associates
 UR  - https://proceedings.neurips.cc/paper/2020/hash/6b493230205f780e1bc26945df7481e5-Abstract.html
 SP  - 9459
 EP  - 9474
+ER  - 
+
+TY  - JOUR
+AU  - Liu, N. F.
+AU  - Lin, K.
+AU  - Hewitt, J.
+AU  - Paranjape, A.
+AU  - Bevilacqua, M.
+AU  - Petroni, F.
+AU  - Liang, P.
+TI  - Lost in the middle: How language models use long contexts
+PY  - 2024
+JO  - Transactions of the Association for Computational Linguistics
+VL  - 12
+DO  - 10.1162/tacl_a_00638
+UR  - https://doi.org/10.1162/tacl_a_00638
+SP  - 157
+EP  - 173
+ER  - 
+
+TY  - CONF
+AU  - Liu, Z.
+AU  - Zhao, C.
+AU  - Iandola, F.
+AU  - Lai, C.
+AU  - Tian, Y.
+AU  - Fedorov, I.
+AU  - Xiong, Y.
+AU  - Chang, E.
+AU  - Shi, Y.
+AU  - Krishnamoorthi, R.
+AU  - Lai, L.
+AU  - Chandra, V.
+TI  - MobileLLM: Optimizing sub-billion parameter language models for on-device use cases
+PY  - 2024
+T2  - Proceedings of the 41st International Conference on Machine Learning
+VL  - 235
+PB  - PMLR
+UR  - https://proceedings.mlr.press/v235/liu24ce.html
+SP  - 32431
+EP  - 32454
 ER  - 
 
 TY  - CONF
@@ -1698,6 +1718,31 @@ DO  - 10.18653/v1/2023.acl-long.546
 UR  - https://doi.org/10.18653/v1/2023.acl-long.546
 SP  - 9802
 EP  - 9822
+ER  - 
+
+TY  - GEN
+AU  - Mehtiyev, T.
+AU  - Tadesse, B.
+AU  - Arkoh, L.
+AU  - Assunção, W.
+TI  - When instruction files go stale: Documentation debt and hidden cost in coding agents
+PY  - 2026
+PB  - arXiv
+DO  - 10.48550/arXiv.2611.09802
+UR  - https://doi.org/10.48550/arXiv.2611.09802
+ER  - 
+
+TY  - CPAPER
+AU  - Mireshghallah, N.
+AU  - Antoniak, M.
+AU  - More, Y.
+AU  - Choi, Y.
+AU  - Farnadi, G.
+TI  - Trust no bot: Discovering personal disclosures in human-LLM conversations in the wild
+PY  - 2024
+T2  - Conference on Language Modeling (COLM 2024)
+DO  - 10.48550/arXiv.2407.11438
+UR  - https://doi.org/10.48550/arXiv.2407.11438
 ER  - 
 
 TY  - CPAPER
@@ -1786,6 +1831,15 @@ T2  - Obsidian Help
 UR  - https://obsidian.md/help/plugins/graph
 ER  - 
 
+TY  - ELEC
+AU  - Ogonjo, F. A.
+TI  - The Kenya National AI Strategy 2025-2030: Regional and global positioning
+PY  - 2025
+DA  - 2025/04/22
+T2  - Centre for Intellectual Property and Information Technology Law, Strathmore University
+UR  - https://cipit.strathmore.edu/?p=4885
+ER  - 
+
 TY  - COMP
 AU  - Ollama
 TI  - Ollama
@@ -1825,23 +1879,6 @@ SP  - 1
 EP  - 22
 ER  - 
 
-TY  - CONF
-AU  - Patra, A.
-AU  - Kundu, S.
-AU  - Dey, A.
-AU  - Saha, T.
-AU  - Karmakar, S.
-AU  - Bishnu, S. K.
-TI  - A survey on on-device small language models: Architectures, compression, applications, and open challenges
-PY  - 2026
-T2  - 2026 9th International Conference on Electronics, Materials Engineering & Nano-Technology (IEMENTech)
-PB  - IEEE
-DO  - 10.1109/IEMENTech202669403.2026.11434122
-UR  - https://doi.org/10.1109/IEMENTech202669403.2026.11434122
-SP  - 1
-EP  - 6
-ER  - 
-
 TY  - JOUR
 AU  - Peffers, K.
 AU  - Tuunanen, T.
@@ -1864,6 +1901,34 @@ TI  - Qwen3.5: Towards native multimodal agents
 PY  - 2026
 DA  - 2026/02
 UR  - https://qwen.ai/blog?id=qwen3.5
+ER  - 
+
+TY  - GEN
+AU  - Rasmussen, P.
+AU  - Paliychuk, P.
+AU  - Beauvais, T.
+AU  - Ryan, J.
+AU  - Chalef, D.
+TI  - Zep: A temporal knowledge graph architecture for agent memory
+PY  - 2025
+PB  - arXiv
+DO  - 10.48550/arXiv.2501.13956
+UR  - https://doi.org/10.48550/arXiv.2501.13956
+ER  - 
+
+TY  - CONF
+AU  - Rigby, P. C.
+AU  - Zhu, Y. C.
+AU  - Donadelli, S. M.
+AU  - Mockus, A.
+TI  - Quantifying and mitigating turnover-induced knowledge loss: Case studies of Chrome and a project at Avaya
+PY  - 2016
+T2  - Proceedings of the 38th International Conference on Software Engineering
+PB  - ACM
+DO  - 10.1145/2884781.2884851
+UR  - https://doi.org/10.1145/2884781.2884851
+SP  - 1006
+EP  - 1016
 ER  - 
 
 TY  - JOUR
@@ -1919,6 +1984,13 @@ TI  - SQLite FTS5 extension
 PY  - 2026
 DA  - 2026/10/09
 UR  - https://www.sqlite.org/fts5.html
+ER  - 
+
+TY  - ELEC
+AU  - Stack Overflow
+TI  - AI: 2025 Stack Overflow Developer Survey
+PY  - 2025
+UR  - https://survey.stackoverflow.co/2025/ai
 ER  - 
 
 TY  - JOUR
@@ -1990,32 +2062,6 @@ DO  - 10.48550/arXiv.2611.13709
 UR  - https://doi.org/10.48550/arXiv.2611.13709
 ER  - 
 
-TY  - JOUR
-AU  - Wang, F.
-AU  - Zhang, Z.
-AU  - Zhang, X.
-AU  - Wu, Z.
-AU  - Mo, T.
-AU  - Lu, Q.
-AU  - Wang, W.
-AU  - Li, R.
-AU  - Xu, J.
-AU  - Tang, X.
-AU  - He, Q.
-AU  - Ma, Y.
-AU  - Huang, M.
-AU  - Wang, S.
-TI  - A comprehensive survey of small language models in the era of large language models: Techniques, enhancements, applications, collaboration with LLMs, and trustworthiness
-PY  - 2025
-JO  - ACM Transactions on Intelligent Systems and Technology
-VL  - 16
-IS  - 6
-DO  - 10.1145/3768165
-UR  - https://doi.org/10.1145/3768165
-SP  - 1
-EP  - 87
-ER  - 
-
 TY  - CONF
 AU  - Weller, O.
 AU  - Lawrie, D.
@@ -2075,6 +2121,16 @@ DO  - 10.52202/085713-0593
 UR  - https://doi.org/10.52202/085713-0593
 SP  - 20004
 EP  - 20031
+ER  - 
+
+TY  - GEN
+AU  - Xu, X.
+AU  - Wu, W.
+TI  - Stale instruction files override the code in coding agents: A one-sentence fix
+PY  - 2026
+PB  - arXiv
+DO  - 10.48550/arXiv.2610.30571
+UR  - https://doi.org/10.48550/arXiv.2610.30571
 ER  - 
 
 TY  - GEN
@@ -2140,6 +2196,21 @@ UR  - https://doi.org/10.48550/arXiv.2310.01558
 ER  - 
 
 TY  - GEN
+AU  - Zhang, X.
+AU  - Wang, G.
+AU  - Cui, Y.
+AU  - Qiu, W.
+AU  - Li, Z.
+AU  - Zhu, B.
+AU  - He, P.
+TI  - Guardrails beat guidance: A large-scale study of rules, skills, and persistent configuration for coding agents
+PY  - 2026
+PB  - arXiv
+DO  - 10.48550/arXiv.2604.11088
+UR  - https://doi.org/10.48550/arXiv.2604.11088
+ER  - 
+
+TY  - GEN
 AU  - Zhang, Y.
 AU  - Li, M.
 AU  - Long, D.
@@ -2157,6 +2228,25 @@ PY  - 2025
 PB  - arXiv
 DO  - 10.48550/arXiv.2506.05176
 UR  - https://doi.org/10.48550/arXiv.2506.05176
+ER  - 
+
+TY  - CONF
+AU  - Zhang, Z.
+AU  - Jia, M.
+AU  - Lee, H.-P.
+AU  - Yao, B.
+AU  - Das, S.
+AU  - Lerner, A.
+AU  - Wang, D.
+AU  - Li, T.
+TI  - "It's a fair game", or is it? Examining how users navigate disclosure risks and benefits when using LLM-based conversational agents
+PY  - 2024
+T2  - Proceedings of the CHI Conference on Human Factors in Computing Systems
+PB  - ACM
+DO  - 10.1145/3613904.3642385
+UR  - https://doi.org/10.1145/3613904.3642385
+SP  - 1
+EP  - 26
 ER  - 
 
 TY  - JOUR

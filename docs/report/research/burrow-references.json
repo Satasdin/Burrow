@@ -751,39 +751,6 @@
     ]
    ]
   },
-  "DOI": "10.1145/3596512",
-  "URL": "https://doi.org/10.1145/3596512",
-  "author": [
-   {
-    "family": "Bruch",
-    "given": "S."
-   },
-   {
-    "family": "Gai",
-    "given": "S."
-   },
-   {
-    "family": "Ingber",
-    "given": "A."
-   }
-  ],
-  "title": "An analysis of fusion functions for hybrid retrieval",
-  "type": "article-journal",
-  "container-title": "ACM Transactions on Information Systems",
-  "volume": "42",
-  "issue": "1",
-  "page": "1-35",
-  "_apa": "Bruch, S., Gai, S., & Ingber, A. (2023). An analysis of fusion functions for hybrid retrieval. *ACM Transactions on Information Systems*, *42*(1), 1–35. https://doi.org/10.1145/3596512",
-  "id": "Bruch2023"
- },
- {
-  "issued": {
-   "date-parts": [
-    [
-     2023
-    ]
-   ]
-  },
   "DOI": "10.1109/ACCESS.2023.3287654",
   "URL": "https://doi.org/10.1109/ACCESS.2023.3287654",
   "author": [
@@ -1342,42 +1309,6 @@
   "publisher": "ACM",
   "_apa": "Fan, W., Ding, Y., Ning, L., Wang, S., Li, H., Yin, D., Chua, T.-S., & Li, Q. (2024). A survey on RAG meeting LLMs: Towards retrieval-augmented large language models. In *Proceedings of the 30th ACM SIGKDD Conference on Knowledge Discovery and Data Mining* (pp. 6491–6501). ACM. https://doi.org/10.1145/3637528.3671470",
   "id": "Fan2024"
- },
- {
-  "issued": {
-   "date-parts": [
-    [
-     2023
-    ]
-   ]
-  },
-  "DOI": "10.18653/v1/2023.emnlp-main.398",
-  "URL": "https://doi.org/10.18653/v1/2023.emnlp-main.398",
-  "author": [
-   {
-    "family": "Gao",
-    "given": "T."
-   },
-   {
-    "family": "Yen",
-    "given": "H."
-   },
-   {
-    "family": "Yu",
-    "given": "J."
-   },
-   {
-    "family": "Chen",
-    "given": "D."
-   }
-  ],
-  "title": "Enabling large language models to generate text with citations",
-  "type": "paper-conference",
-  "container-title": "Proceedings of the 2023 Conference on Empirical Methods in Natural Language Processing",
-  "page": "6465-6488",
-  "publisher": "Association for Computational Linguistics",
-  "_apa": "Gao, T., Yen, H., Yu, J., & Chen, D. (2023). Enabling large language models to generate text with citations. In *Proceedings of the 2023 Conference on Empirical Methods in Natural Language Processing* (pp. 6465–6488). Association for Computational Linguistics. https://doi.org/10.18653/v1/2023.emnlp-main.398",
-  "id": "Gao2023"
  },
  {
   "issued": {
@@ -5536,6 +5467,28 @@
   "issued": {
    "date-parts": [
     [
+     2025,
+     5,
+     14
+    ]
+   ]
+  },
+  "URL": "https://www.letta.com/blog/memory-blocks",
+  "author": [
+   {
+    "literal": "Letta"
+   }
+  ],
+  "title": "Memory blocks: The key to agentic context management",
+  "type": "webpage",
+  "container-title": "Letta Blog",
+  "_apa": "Letta. (2025, May 14). *Memory blocks: The key to agentic context management*. Letta Blog. https://www.letta.com/blog/memory-blocks",
+  "id": "Letta2025"
+ },
+ {
+  "issued": {
+   "date-parts": [
+    [
      2024
     ]
    ]
@@ -5640,6 +5593,54 @@
     ]
    ]
   },
+  "DOI": "10.1162/tacl_a_00638",
+  "URL": "https://doi.org/10.1162/tacl_a_00638",
+  "author": [
+   {
+    "family": "Liu",
+    "given": "N. F."
+   },
+   {
+    "family": "Lin",
+    "given": "K."
+   },
+   {
+    "family": "Hewitt",
+    "given": "J."
+   },
+   {
+    "family": "Paranjape",
+    "given": "A."
+   },
+   {
+    "family": "Bevilacqua",
+    "given": "M."
+   },
+   {
+    "family": "Petroni",
+    "given": "F."
+   },
+   {
+    "family": "Liang",
+    "given": "P."
+   }
+  ],
+  "title": "Lost in the middle: How language models use long contexts",
+  "type": "article-journal",
+  "container-title": "Transactions of the Association for Computational Linguistics",
+  "volume": "12",
+  "page": "157-173",
+  "_apa": "Liu, N. F., Lin, K., Hewitt, J., Paranjape, A., Bevilacqua, M., Petroni, F., & Liang, P. (2024). Lost in the middle: How language models use long contexts. *Transactions of the Association for Computational Linguistics*, *12*, 157–173. https://doi.org/10.1162/tacl_a_00638",
+  "id": "Liu2024"
+ },
+ {
+  "issued": {
+   "date-parts": [
+    [
+     2024
+    ]
+   ]
+  },
   "URL": "https://proceedings.mlr.press/v235/liu24ce.html",
   "author": [
    {
@@ -5698,7 +5699,7 @@
   "page": "32431-32454",
   "publisher": "PMLR",
   "_apa": "Liu, Z., Zhao, C., Iandola, F., Lai, C., Tian, Y., Fedorov, I., Xiong, Y., Chang, E., Shi, Y., Krishnamoorthi, R., Lai, L., & Chandra, V. (2024). MobileLLM: Optimizing sub-billion parameter language models for on-device use cases. In *Proceedings of the 41st International Conference on Machine Learning* (Vol. 235, pp. 32431–32454). PMLR. https://proceedings.mlr.press/v235/liu24ce.html",
-  "id": "Liu2024"
+  "id": "Liu2024b"
  },
  {
   "issued": {
@@ -5893,6 +5894,79 @@
   "publisher": "Association for Computational Linguistics",
   "_apa": "Mallen, A., Asai, A., Zhong, V., Das, R., Khashabi, D., & Hajishirzi, H. (2023). When not to trust language models: Investigating effectiveness of parametric and non-parametric memories. In *Proceedings of the 61st Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)* (pp. 9802–9822). Association for Computational Linguistics. https://doi.org/10.18653/v1/2023.acl-long.546",
   "id": "Mallen2023"
+ },
+ {
+  "issued": {
+   "date-parts": [
+    [
+     2026
+    ]
+   ]
+  },
+  "DOI": "10.48550/arXiv.2611.09802",
+  "URL": "https://doi.org/10.48550/arXiv.2611.09802",
+  "author": [
+   {
+    "family": "Mehtiyev",
+    "given": "T."
+   },
+   {
+    "family": "Tadesse",
+    "given": "B."
+   },
+   {
+    "family": "Arkoh",
+    "given": "L."
+   },
+   {
+    "family": "Assunção",
+    "given": "W."
+   }
+  ],
+  "title": "When instruction files go stale: Documentation debt and hidden cost in coding agents",
+  "type": "article",
+  "publisher": "arXiv",
+  "_apa": "Mehtiyev, T., Tadesse, B., Arkoh, L., & Assunção, W. (2026). *When instruction files go stale: Documentation debt and hidden cost in coding agents*. arXiv. https://doi.org/10.48550/arXiv.2611.09802",
+  "id": "Mehtiyev2026"
+ },
+ {
+  "issued": {
+   "date-parts": [
+    [
+     2024
+    ]
+   ]
+  },
+  "DOI": "10.48550/arXiv.2407.11438",
+  "URL": "https://doi.org/10.48550/arXiv.2407.11438",
+  "author": [
+   {
+    "family": "Mireshghallah",
+    "given": "N."
+   },
+   {
+    "family": "Antoniak",
+    "given": "M."
+   },
+   {
+    "family": "More",
+    "given": "Y."
+   },
+   {
+    "family": "Choi",
+    "given": "Y."
+   },
+   {
+    "family": "Farnadi",
+    "given": "G."
+   }
+  ],
+  "title": "Trust no bot: Discovering personal disclosures in human-LLM conversations in the wild",
+  "type": "speech",
+  "genre": "Paper presentation",
+  "event-title": "Conference on Language Modeling (COLM 2024)",
+  "_apa": "Mireshghallah, N., Antoniak, M., More, Y., Choi, Y., & Farnadi, G. (2024). *Trust no bot: Discovering personal disclosures in human-LLM conversations in the wild* [Paper presentation]. Conference on Language Modeling (COLM 2024). https://doi.org/10.48550/arXiv.2407.11438",
+  "id": "Mireshghallah2024"
  },
  {
   "issued": {
@@ -6134,6 +6208,29 @@
   "issued": {
    "date-parts": [
     [
+     2025,
+     4,
+     22
+    ]
+   ]
+  },
+  "URL": "https://cipit.strathmore.edu/?p=4885",
+  "author": [
+   {
+    "family": "Ogonjo",
+    "given": "F. A."
+   }
+  ],
+  "title": "The Kenya National AI Strategy 2025-2030: Regional and global positioning",
+  "type": "webpage",
+  "container-title": "Centre for Intellectual Property and Information Technology Law, Strathmore University",
+  "_apa": "Ogonjo, F. A. (2025, April 22). *The Kenya National AI Strategy 2025-2030: Regional and global positioning*. Centre for Intellectual Property and Information Technology Law, Strathmore University. https://cipit.strathmore.edu/?p=4885",
+  "id": "Ogonjo2025"
+ },
+ {
+  "issued": {
+   "date-parts": [
+    [
      2026
     ]
    ]
@@ -6244,50 +6341,6 @@
   "issued": {
    "date-parts": [
     [
-     2026
-    ]
-   ]
-  },
-  "DOI": "10.1109/IEMENTech202669403.2026.11434122",
-  "URL": "https://doi.org/10.1109/IEMENTech202669403.2026.11434122",
-  "author": [
-   {
-    "family": "Patra",
-    "given": "A."
-   },
-   {
-    "family": "Kundu",
-    "given": "S."
-   },
-   {
-    "family": "Dey",
-    "given": "A."
-   },
-   {
-    "family": "Saha",
-    "given": "T."
-   },
-   {
-    "family": "Karmakar",
-    "given": "S."
-   },
-   {
-    "family": "Bishnu",
-    "given": "S. K."
-   }
-  ],
-  "title": "A survey on on-device small language models: Architectures, compression, applications, and open challenges",
-  "type": "paper-conference",
-  "container-title": "2026 9th International Conference on Electronics, Materials Engineering & Nano-Technology (IEMENTech)",
-  "page": "1-6",
-  "publisher": "IEEE",
-  "_apa": "Patra, A., Kundu, S., Dey, A., Saha, T., Karmakar, S., & Bishnu, S. K. (2026). A survey on on-device small language models: Architectures, compression, applications, and open challenges. In *2026 9th International Conference on Electronics, Materials Engineering & Nano-Technology (IEMENTech)* (pp. 1–6). IEEE. https://doi.org/10.1109/IEMENTech202669403.2026.11434122",
-  "id": "Patra2026"
- },
- {
-  "issued": {
-   "date-parts": [
-    [
      2007
     ]
    ]
@@ -6340,6 +6393,80 @@
   "type": "webpage",
   "_apa": "Qwen Team. (2026, February). *Qwen3.5: Towards native multimodal agents*. https://qwen.ai/blog?id=qwen3.5",
   "id": "QwenTeam2026"
+ },
+ {
+  "issued": {
+   "date-parts": [
+    [
+     2025
+    ]
+   ]
+  },
+  "DOI": "10.48550/arXiv.2501.13956",
+  "URL": "https://doi.org/10.48550/arXiv.2501.13956",
+  "author": [
+   {
+    "family": "Rasmussen",
+    "given": "P."
+   },
+   {
+    "family": "Paliychuk",
+    "given": "P."
+   },
+   {
+    "family": "Beauvais",
+    "given": "T."
+   },
+   {
+    "family": "Ryan",
+    "given": "J."
+   },
+   {
+    "family": "Chalef",
+    "given": "D."
+   }
+  ],
+  "title": "Zep: A temporal knowledge graph architecture for agent memory",
+  "type": "article",
+  "publisher": "arXiv",
+  "_apa": "Rasmussen, P., Paliychuk, P., Beauvais, T., Ryan, J., & Chalef, D. (2025). *Zep: A temporal knowledge graph architecture for agent memory*. arXiv. https://doi.org/10.48550/arXiv.2501.13956",
+  "id": "Rasmussen2025"
+ },
+ {
+  "issued": {
+   "date-parts": [
+    [
+     2016
+    ]
+   ]
+  },
+  "DOI": "10.1145/2884781.2884851",
+  "URL": "https://doi.org/10.1145/2884781.2884851",
+  "author": [
+   {
+    "family": "Rigby",
+    "given": "P. C."
+   },
+   {
+    "family": "Zhu",
+    "given": "Y. C."
+   },
+   {
+    "family": "Donadelli",
+    "given": "S. M."
+   },
+   {
+    "family": "Mockus",
+    "given": "A."
+   }
+  ],
+  "title": "Quantifying and mitigating turnover-induced knowledge loss: Case studies of Chrome and a project at Avaya",
+  "type": "paper-conference",
+  "container-title": "Proceedings of the 38th International Conference on Software Engineering",
+  "page": "1006-1016",
+  "publisher": "ACM",
+  "_apa": "Rigby, P. C., Zhu, Y. C., Donadelli, S. M., & Mockus, A. (2016). Quantifying and mitigating turnover-induced knowledge loss: Case studies of Chrome and a project at Avaya. In *Proceedings of the 38th International Conference on Software Engineering* (pp. 1006–1016). ACM. https://doi.org/10.1145/2884781.2884851",
+  "id": "Rigby2016"
  },
  {
   "issued": {
@@ -6474,6 +6601,25 @@
   "type": "webpage",
   "_apa": "SQLite. (2026, October 9). *SQLite FTS5 extension*. https://www.sqlite.org/fts5.html",
   "id": "SQLite2026"
+ },
+ {
+  "issued": {
+   "date-parts": [
+    [
+     2025
+    ]
+   ]
+  },
+  "URL": "https://survey.stackoverflow.co/2025/ai",
+  "author": [
+   {
+    "literal": "Stack Overflow"
+   }
+  ],
+  "title": "AI: 2025 Stack Overflow Developer Survey",
+  "type": "webpage",
+  "_apa": "Stack Overflow. (2025). *AI: 2025 Stack Overflow Developer Survey*. https://survey.stackoverflow.co/2025/ai",
+  "id": "StackOverflow2025"
  },
  {
   "issued": {
@@ -6652,83 +6798,6 @@
   "issued": {
    "date-parts": [
     [
-     2025
-    ]
-   ]
-  },
-  "DOI": "10.1145/3768165",
-  "URL": "https://doi.org/10.1145/3768165",
-  "author": [
-   {
-    "family": "Wang",
-    "given": "F."
-   },
-   {
-    "family": "Zhang",
-    "given": "Z."
-   },
-   {
-    "family": "Zhang",
-    "given": "X."
-   },
-   {
-    "family": "Wu",
-    "given": "Z."
-   },
-   {
-    "family": "Mo",
-    "given": "T."
-   },
-   {
-    "family": "Lu",
-    "given": "Q."
-   },
-   {
-    "family": "Wang",
-    "given": "W."
-   },
-   {
-    "family": "Li",
-    "given": "R."
-   },
-   {
-    "family": "Xu",
-    "given": "J."
-   },
-   {
-    "family": "Tang",
-    "given": "X."
-   },
-   {
-    "family": "He",
-    "given": "Q."
-   },
-   {
-    "family": "Ma",
-    "given": "Y."
-   },
-   {
-    "family": "Huang",
-    "given": "M."
-   },
-   {
-    "family": "Wang",
-    "given": "S."
-   }
-  ],
-  "title": "A comprehensive survey of small language models in the era of large language models: Techniques, enhancements, applications, collaboration with LLMs, and trustworthiness",
-  "type": "article-journal",
-  "container-title": "ACM Transactions on Intelligent Systems and Technology",
-  "volume": "16",
-  "issue": "6",
-  "page": "1-87",
-  "_apa": "Wang, F., Zhang, Z., Zhang, X., Wu, Z., Mo, T., Lu, Q., Wang, W., Li, R., Xu, J., Tang, X., He, Q., Ma, Y., Huang, M., & Wang, S. (2025). A comprehensive survey of small language models in the era of large language models: Techniques, enhancements, applications, collaboration with LLMs, and trustworthiness. *ACM Transactions on Intelligent Systems and Technology*, *16*(6), 1–87. https://doi.org/10.1145/3768165",
-  "id": "Wang2025"
- },
- {
-  "issued": {
-   "date-parts": [
-    [
      2024
     ]
    ]
@@ -6890,6 +6959,32 @@
   "publisher": "Neural Information Processing Systems Foundation",
   "_apa": "Xu, W., Liang, Z., Mei, K., Gao, H., Tan, J., & Zhang, Y. (2025). A-Mem: Agentic memory for LLM agents. In *Advances in Neural Information Processing Systems* (Vol. 38, pp. 20004–20031). Neural Information Processing Systems Foundation. https://doi.org/10.52202/085713-0593",
   "id": "Xu2025"
+ },
+ {
+  "issued": {
+   "date-parts": [
+    [
+     2026
+    ]
+   ]
+  },
+  "DOI": "10.48550/arXiv.2610.30571",
+  "URL": "https://doi.org/10.48550/arXiv.2610.30571",
+  "author": [
+   {
+    "family": "Xu",
+    "given": "X."
+   },
+   {
+    "family": "Wu",
+    "given": "W."
+   }
+  ],
+  "title": "Stale instruction files override the code in coding agents: A one-sentence fix",
+  "type": "article",
+  "publisher": "arXiv",
+  "_apa": "Xu, X., & Wu, W. (2026). *Stale instruction files override the code in coding agents: A one-sentence fix*. arXiv. https://doi.org/10.48550/arXiv.2610.30571",
+  "id": "Xu2026"
  },
  {
   "issued": {
@@ -7116,6 +7211,52 @@
   "issued": {
    "date-parts": [
     [
+     2026
+    ]
+   ]
+  },
+  "DOI": "10.48550/arXiv.2604.11088",
+  "URL": "https://doi.org/10.48550/arXiv.2604.11088",
+  "author": [
+   {
+    "family": "Zhang",
+    "given": "X."
+   },
+   {
+    "family": "Wang",
+    "given": "G."
+   },
+   {
+    "family": "Cui",
+    "given": "Y."
+   },
+   {
+    "family": "Qiu",
+    "given": "W."
+   },
+   {
+    "family": "Li",
+    "given": "Z."
+   },
+   {
+    "family": "Zhu",
+    "given": "B."
+   },
+   {
+    "family": "He",
+    "given": "P."
+   }
+  ],
+  "title": "Guardrails beat guidance: A large-scale study of rules, skills, and persistent configuration for coding agents",
+  "type": "article",
+  "publisher": "arXiv",
+  "_apa": "Zhang, X., Wang, G., Cui, Y., Qiu, W., Li, Z., Zhu, B., & He, P. (2026). *Guardrails beat guidance: A large-scale study of rules, skills, and persistent configuration for coding agents*. arXiv. https://doi.org/10.48550/arXiv.2604.11088",
+  "id": "Zhang2026"
+ },
+ {
+  "issued": {
+   "date-parts": [
+    [
      2025
     ]
    ]
@@ -7177,6 +7318,58 @@
   "publisher": "arXiv",
   "_apa": "Zhang, Y., Li, M., Long, D., Zhang, X., Lin, H., Yang, B., Xie, P., Yang, A., Liu, D., Lin, J., Huang, F., & Zhou, J. (2025). *Qwen3 Embedding: Advancing text embedding and reranking through foundation models*. arXiv. https://doi.org/10.48550/arXiv.2506.05176",
   "id": "Zhang2025"
+ },
+ {
+  "issued": {
+   "date-parts": [
+    [
+     2024
+    ]
+   ]
+  },
+  "DOI": "10.1145/3613904.3642385",
+  "URL": "https://doi.org/10.1145/3613904.3642385",
+  "author": [
+   {
+    "family": "Zhang",
+    "given": "Z."
+   },
+   {
+    "family": "Jia",
+    "given": "M."
+   },
+   {
+    "family": "Lee",
+    "given": "H.-P."
+   },
+   {
+    "family": "Yao",
+    "given": "B."
+   },
+   {
+    "family": "Das",
+    "given": "S."
+   },
+   {
+    "family": "Lerner",
+    "given": "A."
+   },
+   {
+    "family": "Wang",
+    "given": "D."
+   },
+   {
+    "family": "Li",
+    "given": "T."
+   }
+  ],
+  "title": "\"It's a fair game\", or is it? Examining how users navigate disclosure risks and benefits when using LLM-based conversational agents",
+  "type": "paper-conference",
+  "container-title": "Proceedings of the CHI Conference on Human Factors in Computing Systems",
+  "page": "1-26",
+  "publisher": "ACM",
+  "_apa": "Zhang, Z., Jia, M., Lee, H.-P., Yao, B., Das, S., Lerner, A., Wang, D., & Li, T. (2024). \"It's a fair game\", or is it? Examining how users navigate disclosure risks and benefits when using LLM-based conversational agents. In *Proceedings of the CHI Conference on Human Factors in Computing Systems* (pp. 1–26). ACM. https://doi.org/10.1145/3613904.3642385",
+  "id": "Zhang2024"
  },
  {
   "issued": {
