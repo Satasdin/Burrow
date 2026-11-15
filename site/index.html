@@ -23,7 +23,7 @@
       <a href="#ask">Ask</a><a href="#ledger">Ledger</a><a href="#programs">Programs</a><a href="#check">Check</a>
       <a href="https://github.com/Satasdin/Burrow/blob/burrow/docs/README.md">Docs</a><a href="https://github.com/Satasdin/Burrow">GitHub</a>
     </nav>
-    <a class="btn quiet" href="download.html">Download</a>
+    <a class="btn primary" href="https://github.com/Satasdin/Burrow/releases/latest/download/Burrow-macos-arm64.zip"><svg class="apple" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg>Download for Mac</a>
   </div>
 </header>
 
@@ -42,7 +42,54 @@
       <div class="rings" aria-hidden="true"></div>
       <div class="glow" aria-hidden="true"></div>
       <div class="arc" aria-hidden="true"></div>
-      <div class="window fade"><img src="media/app-ask.jpg" width="2000" height="1257" alt="Burrow answering a question: the vault's map lights up gold along the notes and code it read, beside the answer with its sources"></div>
+      <div class="window demo" id="demo" aria-label="Interactive demo of Burrow">
+        <div class="demo-bar">
+          <span class="lights"><i></i><i></i><i></i></span>
+          <span class="demo-title"><b>vault</b><small>59 notes, 37 files, 290 links</small></span>
+          <span class="demo-tab">Ask</span>
+          <span class="demo-badge">Live demo · real answers from the app</span>
+        </div>
+        <div class="demo-body">
+          <nav class="demo-rail" aria-label="Pages">
+            <button type="button" data-show="ask" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 5h14v10H10l-5 4z"/></svg><span>Ask</span></button>
+            <button type="button" data-show="ledger" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 19V9M10 19V5M15 19v-8M20 19V7"/></svg><span>Ledger</span></button>
+            <button type="button" data-show="programs" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8 7c6 0 4 10 8 10"/></svg><span>Programs</span></button>
+            <button type="button" data-show="map" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="6" r="2"/><circle cx="6" cy="17" r="2"/><circle cx="18" cy="16" r="2"/><path d="M11 8 7 15M13 8l4 6M8 17h8"/></svg><span>Map</span></button>
+          </nav>
+
+          <section class="demo-view demo-ask" data-view="ask">
+            <div class="demo-main">
+              <div class="demo-chips" aria-label="Try a question"></div>
+              <div class="demo-answer" aria-live="polite"></div>
+              <div class="demo-status" hidden><b></b><span>Reading the vault…</span></div>
+              <form class="demo-input"><input id="demo-q" type="text" placeholder="Ask your vault" aria-label="Ask your vault" autocomplete="off"><button type="submit" aria-label="Ask">↑</button></form>
+            </div>
+            <aside class="demo-side"><canvas data-graph="ask" aria-hidden="true"></canvas><p>What the model reads lights up here.</p></aside>
+          </section>
+
+          <section class="demo-view demo-ledger" data-view="ledger" hidden>
+            <div class="demo-main">
+              <div class="demo-head"><h4>Ledger</h4><span>7 commits on 3 branches</span></div>
+              <div class="demo-filters"><button type="button" data-branch="All" aria-pressed="true">All</button><button type="button" data-branch="Synced" aria-pressed="false">Synced</button><button type="button" data-branch="Team" aria-pressed="false">Team</button><button type="button" data-branch="main" aria-pressed="false">main</button></div>
+              <div class="demo-stats"><div><b class="demo-rules">6</b><span>rules in force, handed to every program</span></div><div><b>0</b><span>files changed under a decision</span></div><div><b>0</b><span>lines written to steer an AI</span></div></div>
+              <div class="demo-ledger-list"></div>
+            </div>
+          </section>
+
+          <section class="demo-view demo-programs-view" data-view="programs" hidden>
+            <div class="demo-main">
+              <div class="demo-head"><h4>Programs</h4><span>The AI programs on this Mac, and whether each will find this vault</span></div>
+              <div class="demo-progwrap"><div class="demo-programs"></div><div class="demo-flow" aria-hidden="true"></div><div class="demo-vault"><i></i><b>Notes</b><span>5 lookups today</span></div></div>
+              <div class="demo-connect"><span>Connect a program to see its setup line.</span><code></code></div>
+            </div>
+          </section>
+
+          <section class="demo-view demo-map" data-view="map" hidden>
+            <canvas data-graph="map" aria-label="The vault as a graph of notes and code, grouped by folder"></canvas>
+            <div class="demo-filter"><b>Filter</b><label><input type="checkbox" data-filter="notes" checked> Notes</label><label><input type="checkbox" data-filter="code" checked> Code and files</label></div>
+          </section>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -121,7 +168,7 @@
         <div><h3>Your say is final.</h3><p>Approving folders, sharing with a team and overriding a decision are yours alone.</p></div>
       </div>
       <div class="iconcard">
-        <img src="media/mark3d.jpg" alt="The Burrow mark in 3D: four strata with a light in the doorway, rendered in Blender">
+        <img src="media/icon-512.png" alt="The Burrow app icon">
         <h3>Burrow</h3>
         <p>Free for Mac.</p>
         <a class="btn primary big" href="https://github.com/Satasdin/Burrow/releases/latest/download/Burrow-macos-arm64.zip"><svg class="apple" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg>Download for Mac</a>
@@ -144,5 +191,6 @@
   </div>
 </footer>
 <script src="site.js"></script>
+<script src="demo.js"></script>
 </body>
 </html>
