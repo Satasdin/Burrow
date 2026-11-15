@@ -77,11 +77,15 @@ h1{font-size:clamp(42px,6vw,60px);letter-spacing:-1.2px}
 .trio div:last-child{border-bottom:0}
 .trio h3{font-size:24px;font-weight:600;margin:0;letter-spacing:-.01em}
 .trio p{font-size:22px;line-height:1.45;color:var(--dim);margin:6px 0 0}
-.iconcard{text-align:center}
-.iconcard img{width:min(256px,60%);margin:0 auto;filter:drop-shadow(0 30px 60px rgba(0,0,0,.6))}
-.iconcard .word{display:block;font-size:40px;font-weight:700;letter-spacing:-.03em;margin-top:44px}
-.iconcard p{font-size:24px;font-weight:500;margin:40px 0 0;line-height:1.35}
-.iconcard a{color:var(--link);text-decoration:none}
+/* in the icon's old place: the app itself, zoomed into the Map, with the name set as type */
+.appcard{text-align:center}
+.appshot{position:relative;width:min(340px,82%);aspect-ratio:1;margin:0 auto;border-radius:24px;overflow:hidden;background:#000;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08),0 30px 70px rgba(0,0,0,.6)}
+.appshot img{position:absolute;left:0;top:0;max-width:none;height:auto;width:calc(100% * 2000 / var(--cw));transform:translate(calc(var(--cx) * -100% / 2000),calc(var(--cy) * -100% / var(--ih)))}
+.appshot::after{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);pointer-events:none}
+.appcard .word{display:block;font-size:44px;font-weight:700;letter-spacing:-.045em;line-height:1;margin-top:44px}
+.appcard p{font-size:24px;font-weight:500;margin:28px 0 0;line-height:1.35}
+.appcard a{color:var(--link);text-decoration:none}
+.appcard a:hover{color:#c4b2ff}
 @media (max-width:860px){.yours{grid-template-columns:1fr}.trio{padding-left:0}.trio p{font-size:18px}}
 
 /* sections */
@@ -154,7 +158,8 @@ footer{margin-top:clamp(120px,14vw,190px);padding-bottom:calc(64px + env(safe-ar
 
 /* download page */
 .dlhero{text-align:center}
-.dlhero h1{margin-top:28px}
+.dlhero h1{margin-top:8px}
+.dlshot{margin:56px 0 0;border-radius:12px;overflow:hidden;box-shadow:inset 0 0 0 1px var(--line-2);max-height:560px;-webkit-mask:linear-gradient(180deg,#000 70%,transparent);mask:linear-gradient(180deg,#000 70%,transparent)}
 .dlhero .lede{margin-inline:auto}
 .dlhero .cta{justify-content:center}
 .under{color:var(--faint);font-size:15px;margin:16px auto 0;max-width:38em}
