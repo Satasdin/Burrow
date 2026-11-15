@@ -390,26 +390,6 @@
   "issued": {
    "date-parts": [
     [
-     2026
-    ]
-   ]
-  },
-  "URL": "https://docs.trychroma.com/reference/architecture/distributed",
-  "author": [
-   {
-    "literal": "Chroma"
-   }
-  ],
-  "title": "Distributed architecture",
-  "type": "webpage",
-  "container-title": "Chroma Docs",
-  "_apa": "Chroma. (2026). *Distributed architecture*. Chroma Docs. https://docs.trychroma.com/reference/architecture/distributed",
-  "id": "Chroma2026"
- },
- {
-  "issued": {
-   "date-parts": [
-    [
      2021
     ]
    ]
@@ -832,46 +812,6 @@
   "issued": {
    "date-parts": [
     [
-     2023
-    ]
-   ]
-  },
-  "URL": "https://proceedings.mlr.press/v202/kandpal23a.html",
-  "author": [
-   {
-    "family": "Kandpal",
-    "given": "N."
-   },
-   {
-    "family": "Deng",
-    "given": "H."
-   },
-   {
-    "family": "Roberts",
-    "given": "A."
-   },
-   {
-    "family": "Wallace",
-    "given": "E."
-   },
-   {
-    "family": "Raffel",
-    "given": "C."
-   }
-  ],
-  "title": "Large language models struggle to learn long-tail knowledge",
-  "type": "paper-conference",
-  "container-title": "Proceedings of the 40th International Conference on Machine Learning",
-  "volume": "202",
-  "page": "15696-15707",
-  "publisher": "PMLR",
-  "_apa": "Kandpal, N., Deng, H., Roberts, A., Wallace, E., & Raffel, C. (2023). Large language models struggle to learn long-tail knowledge. In *Proceedings of the 40th International Conference on Machine Learning* (Vol. 202, pp. 15696–15707). PMLR. https://proceedings.mlr.press/v202/kandpal23a.html",
-  "id": "Kandpal2023"
- },
- {
-  "issued": {
-   "date-parts": [
-    [
      2022
     ]
    ]
@@ -979,28 +919,6 @@
   "page": "47-56",
   "_apa": "Larman, C., & Basili, V. R. (2003). Iterative and incremental development: A brief history. *Computer*, *36*(6), 47–56. https://doi.org/10.1109/MC.2003.1204375",
   "id": "Larman2003"
- },
- {
-  "issued": {
-   "date-parts": [
-    [
-     2025,
-     5,
-     14
-    ]
-   ]
-  },
-  "URL": "https://www.letta.com/blog/memory-blocks",
-  "author": [
-   {
-    "literal": "Letta"
-   }
-  ],
-  "title": "Memory blocks: The key to agentic context management",
-  "type": "webpage",
-  "container-title": "Letta Blog",
-  "_apa": "Letta. (2025, May 14). *Memory blocks: The key to agentic context management*. Letta Blog. https://www.letta.com/blog/memory-blocks",
-  "id": "Letta2025"
  },
  {
   "issued": {
@@ -1122,50 +1040,6 @@
   "issued": {
    "date-parts": [
     [
-     2023
-    ]
-   ]
-  },
-  "DOI": "10.18653/v1/2023.acl-long.546",
-  "URL": "https://doi.org/10.18653/v1/2023.acl-long.546",
-  "author": [
-   {
-    "family": "Mallen",
-    "given": "A."
-   },
-   {
-    "family": "Asai",
-    "given": "A."
-   },
-   {
-    "family": "Zhong",
-    "given": "V."
-   },
-   {
-    "family": "Das",
-    "given": "R."
-   },
-   {
-    "family": "Khashabi",
-    "given": "D."
-   },
-   {
-    "family": "Hajishirzi",
-    "given": "H."
-   }
-  ],
-  "title": "When not to trust language models: Investigating effectiveness of parametric and non-parametric memories",
-  "type": "paper-conference",
-  "container-title": "Proceedings of the 61st Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)",
-  "page": "9802-9822",
-  "publisher": "Association for Computational Linguistics",
-  "_apa": "Mallen, A., Asai, A., Zhong, V., Das, R., Khashabi, D., & Hajishirzi, H. (2023). When not to trust language models: Investigating effectiveness of parametric and non-parametric memories. In *Proceedings of the 61st Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)* (pp. 9802–9822). Association for Computational Linguistics. https://doi.org/10.18653/v1/2023.acl-long.546",
-  "id": "Mallen2023"
- },
- {
-  "issued": {
-   "date-parts": [
-    [
      2026
     ]
    ]
@@ -1223,26 +1097,6 @@
   "genre": "Computer software",
   "_apa": "Ollama. (2026). *Ollama* [Computer software]. https://ollama.com",
   "id": "Ollama2026"
- },
- {
-  "issued": {
-   "date-parts": [
-    [
-     2024
-    ]
-   ]
-  },
-  "URL": "https://genai.owasp.org/resource/owasp-top-10-for-llm-applications-2025/",
-  "author": [
-   {
-    "literal": "OWASP Foundation"
-   }
-  ],
-  "title": "OWASP top 10 for LLM applications 2025",
-  "type": "webpage",
-  "container-title": "OWASP Gen AI Security Project",
-  "_apa": "OWASP Foundation. (2024). *OWASP top 10 for LLM applications 2025*. OWASP Gen AI Security Project. https://genai.owasp.org/resource/owasp-top-10-for-llm-applications-2025/",
-  "id": "OWASPFoundation2024"
  },
  {
   "issued": {

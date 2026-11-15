@@ -40,23 +40,28 @@ Figure 3.1 shows the incremental methodology as it was applied in this study. Ea
 
 ### 3.4.1 Planning
 
-Each increment began from the objectives and from the faults left by the previous one. The plan named the capability to add, the requirement it served, and the run that would show whether it worked.
+Each increment began with planning. The plan named the capability to be added, the specific objective it served, and the real run that would show whether it worked, and it took into account the faults left by the previous increment. In the third increment, for example, the plan was to let AI tools keep decisions, so the run chosen to judge it was a second coding session that had to respect a decision made in the first. Planning also set what would not be done in the increment, which kept each one short enough to finish and evaluate within about a week.
+
 
 ### 3.4.2 Analysis and Design
 
-The capability was analysed with UML use case, sequence and activity diagrams, and designed as classes and stored records within the existing architecture. Chapter 4 presents the resulting design.
+The capability was then analysed and designed with OOAD. Use case and sequence diagrams described who used the new capability and in what order the parts talked to each other, and an activity diagram described its flow where decisions branched, as in the check of a change. The design placed the capability as classes within the existing architecture, for instance a commit type within the Ledger, and fixed how it would be stored on disk. Chapter 4 presents the design that resulted from the five increments.
+
 
 ### 3.4.3 Implementation
 
-The engine was written in Swift as one package with no third-party dependency, with the desktop application in SwiftUI. Each change was committed with a message naming its decision, and each evaluation was run on a tagged build.
+The design was implemented in Swift as one package with no third-party dependency, with the desktop application in SwiftUI. Each change was committed to git with a message naming the design decision it carried out, so that the reason for every part of the code could be traced back to the run or review that caused it. When an evaluation was to be reported, the build it used was tagged, so that a result could always be matched with the code that produced it.
+
 
 ### 3.4.4 Testing
 
-Unit tests checked each type alone, integration tests drove the engine through the protocol and the command line with scripted clients, and system tests ran the requirements end to end. Positive, negative and boundary cases were included, together with security cases written by an independent automated review of each change.
+Testing was carried out at three levels. Unit tests checked each type on its own, integration tests drove the engine through its protocol server, hooks and command line with scripted clients, and system tests checked each requirement from end to end. The tests covered normal use, wrong input, boundary cases and hostile input, the last written after an independent automated security review of each change. Every test ran on each push to the repository, and a change was not kept until all of them passed.
+
 
 ### 3.4.5 Evaluation
 
-Each increment ended with runs of real AI tools on the fixture tasks, scored by their hidden tests and read in full. The results decided whether the capability stayed, changed or was taken out.
+Each increment ended with an evaluation using real AI tools, such as Claude Code and OpenCode with local models, on the tasks of the fixture project. Every run was scored by the project's hidden tests and its full transcript was read to rule out a tool finding the answer outside Burrow. The result decided whether the capability stayed, was changed or was removed, and any fault it exposed became part of the plan for the next increment.
+
 
 ## 3.5 System Analysis Diagrams
 
@@ -102,29 +107,35 @@ The deployment diagram shows the nodes on which the parts run and the connection
 
 ### 3.7.1 The Burrow Engine
 
-A Swift library that indexes a vault, keeps the Ledger, serves both through MCP, and checks changes against decisions.
+The main deliverable was the Burrow engine, a Swift library that indexes a person's vault, keeps the Ledger of decisions, serves both to AI tools through MCP, and checks changes to linked code against the decisions they touch.
+
 
 ### 3.7.2 The Programs and the Application
 
-The burrow command-line program, its MCP server, hooks and setup commands for coding tools, and the Burrow desktop application for macOS.
+The engine was delivered through the burrow command-line program, its MCP server, hooks and setup commands for coding tools such as Claude Code and OpenCode, and the Burrow desktop application for macOS, through which the person reviews what AI tools have kept.
+
 
 ### 3.7.3 The Evaluation Material
 
-The Matatu fixture with its tasks and hidden tests, the scripts that ran each evaluation, and the saved transcripts and results.
+The evaluation material comprised the Matatu fixture project with its tasks and hidden tests, the scripts that ran each evaluation, and the saved transcripts and results, all kept in the repository so that each run can be inspected and repeated.
+
 
 ### 3.7.4 Documentation
 
-This report, a README and user guide, the record of design decisions, and the repository with its tagged releases.
+The documentation comprised this report, a README and user guide in the repository, the record of design decisions made during the build, and the repository itself with its tagged releases.
+
 
 ## 3.8 Tools and Techniques
 
 ### 3.8.1 Swift and SwiftUI
 
-Swift was used for the engine and the programs, and SwiftUI for the desktop application, because both run natively on the target Mac and need no separate runtime.
+Swift was used to write the engine, the command-line program and the tests, and SwiftUI to build the desktop application. Both run natively on the target Mac without a separate runtime, which kept the system light and allowed it to be installed as a single program.
+
 
 ### 3.8.2 SQLite with FTS5
 
-SQLite stores the index as one file inside the vault, and its FTS5 extension ranks pieces by word match with BM25 (SQLite, 2026; Robertson & Zaragoza, 2009). No database server is needed.
+SQLite stored the index of the vault as a single file inside it, and its FTS5 extension ranked pieces of text by word match using the BM25 function (SQLite, 2026; Robertson & Zaragoza, 2009). No separate database server was needed, which suited a memory meant to live on the person's own computer.
+
 
 ### 3.8.3 Ollama and Local Models
 
@@ -140,4 +151,5 @@ Claude Code (Anthropic, 2026a), OpenCode, OpenClaw, Hermes Agent, n8n and the ll
 
 ### 3.8.6 Git and GitHub
 
-Git kept the history of the engine and of this report, and GitHub held the repository, ran the automated tests on each push, and published the releases.
+Git kept the history of the engine and of this report, and GitHub held the repository, ran the automated tests on every push and published the releases from which Burrow is installed.
+

@@ -149,14 +149,6 @@ SP  - 2993
 EP  - 3000
 ER  - 
 
-TY  - ELEC
-AU  - Chroma
-TI  - Distributed architecture
-PY  - 2026
-T2  - Chroma Docs
-UR  - https://docs.trychroma.com/reference/architecture/distributed
-ER  - 
-
 TY  - GEN
 AU  - Cobbe, K.
 AU  - Kosaraju, V.
@@ -317,22 +309,6 @@ T2  - The Twelfth International Conference on Learning Representations
 UR  - https://openreview.net/forum?id=VTF8yNQM66
 ER  - 
 
-TY  - CONF
-AU  - Kandpal, N.
-AU  - Deng, H.
-AU  - Roberts, A.
-AU  - Wallace, E.
-AU  - Raffel, C.
-TI  - Large language models struggle to learn long-tail knowledge
-PY  - 2023
-T2  - Proceedings of the 40th International Conference on Machine Learning
-VL  - 202
-PB  - PMLR
-UR  - https://proceedings.mlr.press/v202/kandpal23a.html
-SP  - 15696
-EP  - 15707
-ER  - 
-
 TY  - JOUR
 AU  - Keeling, M.
 TI  - The psychology of architecture decision records
@@ -380,15 +356,6 @@ SP  - 47
 EP  - 56
 ER  - 
 
-TY  - ELEC
-AU  - Letta
-TI  - Memory blocks: The key to agentic context management
-PY  - 2025
-DA  - 2025/05/14
-T2  - Letta Blog
-UR  - https://www.letta.com/blog/memory-blocks
-ER  - 
-
 TY  - CONF
 AU  - Lewis, P.
 AU  - Perez, E.
@@ -430,23 +397,6 @@ SP  - 157
 EP  - 173
 ER  - 
 
-TY  - CONF
-AU  - Mallen, A.
-AU  - Asai, A.
-AU  - Zhong, V.
-AU  - Das, R.
-AU  - Khashabi, D.
-AU  - Hajishirzi, H.
-TI  - When not to trust language models: Investigating effectiveness of parametric and non-parametric memories
-PY  - 2023
-T2  - Proceedings of the 61st Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)
-PB  - Association for Computational Linguistics
-DO  - 10.18653/v1/2023.acl-long.546
-UR  - https://doi.org/10.18653/v1/2023.acl-long.546
-SP  - 9802
-EP  - 9822
-ER  - 
-
 TY  - ELEC
 AU  - Model Context Protocol
 TI  - What is the Model Context Protocol (MCP)?
@@ -468,14 +418,6 @@ AU  - Ollama
 TI  - Ollama
 PY  - 2026
 UR  - https://ollama.com
-ER  - 
-
-TY  - ELEC
-AU  - OWASP Foundation
-TI  - OWASP top 10 for LLM applications 2025
-PY  - 2024
-T2  - OWASP Gen AI Security Project
-UR  - https://genai.owasp.org/resource/owasp-top-10-for-llm-applications-2025/
 ER  - 
 
 TY  - GEN
