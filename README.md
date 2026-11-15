@@ -8,6 +8,16 @@ Beside the files, Burrow keeps the **Ledger**: what AI sessions decided and why,
 
 Which Mac: the terminal version and the MCP server run on Apple silicon with macOS 14 or later. The desktop app needs macOS 26 or later; build it with `app/build.sh`, then open `app/build/Burrow.app`.
 
+## Documentation and skills
+
+- [docs/README.md](docs/README.md): every capability, where to use it, and the guides: getting started, day to day,
+  the app, connecting programs, the Ledger, the engine, the tool reference and security.
+- [skills/](skills/README.md): a skill pack that teaches an AI program to use Burrow well. In Claude Code:
+
+```
+/plugin install burrow --marketplace Satasdin/Burrow
+```
+
 ## Install
 
 The terminal version, from the [landing page](https://satasdin.github.io/Burrow/) or with:
