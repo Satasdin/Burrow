@@ -1,31 +1,31 @@
+Each requirement of Chapter 4 (November 2026 report) traced back to its specific objective and forward to the component that implements it, the test case that verifies it, and where its result is reported.
 
-Table T2 traces each requirement to the part that implements it and the test that verifies it.
-
-!tab Table T2: Traceability from requirement to component and test
-!widths 1.05,0.8,2.1,1.2,1.15
-| Requirement | Objective | Component | Test case | Result |
-| FR-01 | iii | Vault, Scanner, Chunker | TC-01 | Pass |
-| FR-02 | ii, iii | Retrieval, Index | TC-02 | Pass |
-| FR-03 | ii, iii | Retrieval | TC-03 | Pass |
-| FR-04 | ii | Engine.brief | TC-04, TC-05 | Pass |
-| FR-05 | ii | Skills, Engine.brief | TC-06 | Pass |
-| FR-06 | ii, v | Fit | TC-07 | Pass |
-| FR-07 | iii | Engine.engage | TC-08 | Pass |
-| FR-08 | ii | Engine.engage | TC-09 | Pass on the command line only |
-| FR-09 | ii | Engine.lessons, keep | TC-10 | Pass in the terminal chat |
-| FR-10 | iii | Engine.brief, BurrowMCP | TC-11 | Pass |
-| NFR-01 | iii | Ollama | Inspection | Pass |
-| NFR-02 | iii | Rebuildable index | TC-12 | Pass |
-| NFR-03 | iii | Asking, ProjectContent | Automated tests | Pass on the tools path |
-| NFR-04 | iv | Harness | Table 5.7 | Pass |
-| NFR-05 | iii | Database | Inspection | Pass |
-| NFR-06 | iii | Swift package | 212 automated tests | Pass on one machine |
-| DR-01 | iii | Vault, linked folders | TC-18 | Pass |
-| DR-02 | iii | Database, Index | TC-19 | Pass |
-| DR-03 | ii | keep | TC-10 | Pass |
-| DR-04 | iv | Harness | TC-20 | Pass |
-| IR-01 | iii | Mac app, conversation page | TC-08 | Pass |
-| IR-02 | iii | Ollama, VaultTools | TC-21 | Pass |
-| IR-03 | iii | BurrowMCP | TC-11 | Pass |
-| IR-04 | iii | Vault | TC-22 | Pass |
-
+!tab Table R1: Traceability from requirement to component and test
+!widths 0.75,0.6,2.2,0.7,1.2
+| Requirement | Objective | Component (source) | Test case | Result |
+| FR-01 | iv | BurrowCore: Vault.swift, Index.swift, Scanner.swift | TC-01 | Section 5.4.1 |
+| FR-02 | iv, v | BurrowCore: Retrieval.swift; BurrowTools: VaultTools.swift | TC-02 | Section 5.5.3 |
+| FR-03 | iv | BurrowTools: Ledger.swift, LedgerTools.swift | TC-03 | Section 5.4.2 |
+| FR-04 | iv, v | BurrowMCP: MCPServer.swift; BurrowTools: LedgerTools.swift | TC-04 | Section 5.4.4 |
+| FR-05 | iv, v | BurrowTools: LedgerRelevance.swift | TC-05 | Section 5.5.3 |
+| FR-06 | iv, v | BurrowTools: Ledger.swift (resume), Midway.swift, Sessions.swift | TC-06 | Section 5.5.5 |
+| FR-07 | iv | BurrowTools: Ledger.swift (staleness, confirm, revert) | TC-07 | Section 5.4.2 |
+| FR-08 | iv | BurrowTools: Ledger.swift (overlapping), LedgerTools.swift | TC-08 | Section 5.5.4 |
+| FR-09 | iv, v | BurrowTools: Verdict.swift, DecisionChecks.swift, Gate.swift, Hooks.swift, ConnectPlugins.swift | TC-09 | Section 5.5.6 |
+| FR-10 | iv, v | BurrowTools: Fold.swift, Hooks.swift | TC-10 | Section 5.5.5 |
+| FR-11 | iv | BurrowCore: Teams.swift; BurrowTools: TeamLedger.swift, TeamPending.swift, TeamTools.swift | TC-11 | Section 5.4.7 |
+| FR-12 | iv | app: the Ledger page, Watch panel and Programs page | TC-12 | Section 5.4 |
+| NFR-01 | iv | BurrowCore: Ollama.swift (127.0.0.1 by default) | TC-13 | Section 5.2.1 |
+| NFR-02 | iv | BurrowTools: Ledger.swift (commit named with link(2)) | TC-14 | Section 5.4.2 |
+| NFR-03 | v | trials/stress/concurrent.py | TC-14 | Section 5.5.7 |
+| NFR-04 | iv | BurrowTools: Steering.swift, Secrets.swift | TC-15 | Section 5.4.6 |
+| NFR-05 | iv | BurrowCore: LinkApprovals.swift; BurrowTools: PersonPresence.swift | TC-16 | Section 5.4.7 |
+| NFR-06 | iv | Package.swift; .github/workflows/tests.yml | TC-17 | Section 5.6.1 |
+| DR-01 | iv | BurrowCore: SafeRead.swift, Vault.swift | TC-18 | Section 5.4.1 |
+| DR-02 | iv | BurrowTools: Ledger.swift (LedgerCommit) | TC-03 | Section 5.4.2 |
+| DR-03 | v | trials/ (tasks and hidden tests outside the vault) | TC-19 | Section 5.3.2 |
+| DR-04 | iv | BurrowCore: Index.swift | TC-20 | Section 5.4.1 |
+| IR-01 | iv | BurrowMCP: MCPServer.swift | TC-21 | Section 5.4.3 |
+| IR-02 | iv | BurrowTools: Connect.swift, ConnectPlugins.swift; burrow: ConnectCommand.swift | TC-22 | Section 5.4.3 |
+| IR-03 | iv | BurrowCore: Retrieval.swift (words alone) | TC-23 | Section 5.6.2 |
+| IR-04 | iv | The vault format: plain Markdown with [[links]] | TC-24 | Section 5.4.1 |

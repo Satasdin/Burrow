@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Turns the verified APA list (chapters4/7-references.md) into reference-manager files:
+"""Turns the verified APA list (chapters5/7-references.md) into reference-manager files:
 burrow-references.json (CSL-JSON), burrow-references.ris and burrow-references.bib.
 Author lists that APA shortens with an ellipsis are completed from the arXiv record of the same paper."""
 import json, re, sys, urllib.request, uuid
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-SRC = HERE.parent / "chapters4" / "7-references.md"
+SRC = HERE.parent / "chapters5" / "7-references.md"
 CACHE = HERE / "arxiv-authors.json"
 MONTHS = {m: i + 1 for i, m in enumerate("January February March April May June July August September October November December".split())}
 AUTHOR = re.compile(r"\s*(?P<family>[^,&]+?), (?P<given>(?:[A-ZÀ-Ý]\.(?:-[A-Za-z]\.)?\s?)+)(?:,|$|\s&|\s\.)")

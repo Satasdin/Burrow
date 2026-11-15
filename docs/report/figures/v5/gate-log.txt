@@ -1,0 +1,22 @@
+== a harmless helper added to matcher.py, the file the decision rests on
+burrow: passes: the change leaves the parts these decisions rest on as they were.
+commit exit 0
+
+== Gemma 4 12B's change: a fallback that matches by phone and amount
+You changed 1 file:  matatu/matatu/payments/matcher.py
+
+Decisions earlier sessions kept on these files or the files they import:
+- 20261112-214056-002e [decision] reconcile_statement matches a statement line to a ticket by
+  its account reference and nothing else. [...] Because: Finance meeting, 3 June [...] On Easter
+  Monday 31 tickets on route 46 were marked paid against the wrong passengers [...]
+  Rejected: Matching on phone number and amount [...] (written by claude-opus-5-5 in claude-code)
+
+Burrow's verdict:
+- 20261112-214056-002e: your change BREAKS it. The check set for this decision failed
+  (forbid: \.phone\s*==|==\s*\w+\.phone).
+  matatu/matatu/payments/matcher.py: +  if t.phone == line.phone and t.fare_kes == line.amount_kes ...
+
+burrow: commit refused. This change breaks a decision: the check set for it failed (above).
+Seeing it does not let it through: fix the change. Only you can override it, in your own
+terminal: burrow decision override <vault> <decision id>
+commit exit 1

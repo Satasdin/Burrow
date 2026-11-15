@@ -1,7 +1,7 @@
 #!/bin/zsh
 # Rebuilds the report end to end and refreshes the showcase folder.
 #   docs/report/rebuild.sh
-# 1. builds Burrow_Report_Word.docx from chapters4/
+# 1. builds Burrow_Report_Word.docx from chapters5/
 # 2. opens it in Word, updates every field and list, exports check-word.pdf, closes it
 # 3. copies both to the submission names
 # 4. refreshes ~/FINAL YEAR PROJECT (report, app, terminal program, installer)

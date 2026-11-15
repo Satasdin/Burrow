@@ -16,3 +16,11 @@ Retrieved on 10 November 2026.
 | fig3-1-incremental.png | Figure 3.1 | Drawn for this report by `chapters2/make_figures.py`, after the proposal's Figure 3.1, with the increments as built. |
 
 The repository links for Figures 2.3 to 2.5 are where the proposal says the images came from; the proposal PDF does not record exact URLs, so confirm them before submission.
+
+## Added 15 November 2026 for the November report
+
+| File | Used as | Source |
+|---|---|---|
+| fig2-zep-graphiti.png | Zep and Graphiti | Last frame of https://github.com/getzep/graphiti/raw/main/images/graphiti-graph-intro.gif (Graphiti README), unchanged. |
+| fig2-adr-aws.png | Architecture decision records | https://docs.aws.amazon.com/prescriptive-guidance/latest/architectural-decision-records/ ("Using an ADR to validate software component changes"), transparent background flattened to white, scaled 3×. Kunce and Goby (2022). |
+| fig2-agent-readme.png | Context files | Figure 1 of Chatlatanagulchai et al. (2025), https://arxiv.org/html/2511.12884v2/agent.md.sample.png, unchanged. |

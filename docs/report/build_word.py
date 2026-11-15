@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Prepares the report text for Word: chapters4/*.md placed on the Strathmore template with Word's own features.
+"""Prepares the report text for Word: chapters5/*.md placed on the Strathmore template with Word's own features.
 
 What this file sets up, and Word then updates and lays out:
 - body text in the Body Text style (Times New Roman 12, justified, 1.5 lines, space after each paragraph);
@@ -28,7 +28,7 @@ from build import EQUATIONS, mel, cell_borders, repeat_header, keep_row_whole, s
 HERE = Path(__file__).parent
 TEMPLATE = HERE / "template.docx"
 OUT = HERE / "Burrow_Report_Word.docx"
-CHAPTERS = HERE / "chapters4"
+CHAPTERS = HERE / "chapters5"
 FRONT = ["0-front.md"]
 BODY = ["1-introduction.md", "2-literature.md", "3-methodology.md", "4-design.md", "5-implementation.md", "6-conclusions.md"]
 BACK = ["7-references.md"]  # appendices (8-appendices.md) left out for now, at the student's request
@@ -73,7 +73,7 @@ class Library:
         if names.lower().endswith("data protection act"):
             return next(i for i in self.items if i["title"] == "Data Protection Act")
         initial = None
-        m = re.match(r"([A-Z])\. (.+)", names)
+        m = re.match(r"([A-Z])\. (?:[A-Z]\. )*(.+)", names)
         if m: initial, names = m.group(1), m.group(2)
         first = re.split(r",| et al\.| and | & ", names)[0].strip()
         found = [i for i in self.by_year.get(number, []) if lead(i) == first]
@@ -110,7 +110,7 @@ class Library:
         self.records.append(record)
         return tag
 
-NAME = r"(?:[A-Z]\. )?[A-ZÀ-Ý][\w’'\-À-ÿ.]*(?: [A-Z][\w\-]+)*"
+NAME = r"(?:[A-Z]\. )*[A-ZÀ-Ý][\w’'\-À-ÿ.]*(?: [A-Z][\w\-]+)*"
 NARRATIVE = re.compile(r"((?:the )?Data Protection Act|" + NAME + r"(?:, " + NAME + r")*,? (?:et al\.|and " + NAME + r")|" + NAME + r") \((\d{4}[a-z]?)\)")
 PAREN = re.compile(r"\(([^()]*?\b(?:19|20)\d{2}[a-z]?)\)")
 PIECE = re.compile(r"^(.+?),? (\d{4}[a-z]?)$")
@@ -175,7 +175,7 @@ def library_try(library, names, year):
     if names.lower().endswith("data protection act"):
         return next(i for i in library.items if i["title"] == "Data Protection Act")
     initial = None
-    m = re.match(r"([A-Z])\. (.+)", names)
+    m = re.match(r"([A-Z])\. (?:[A-Z]\. )*(.+)", names)
     if m: initial, names = m.group(1), m.group(2)
     first = re.split(r",| et al\.| and | & ", names)[0].strip()
     found = [i for i in library.by_year.get(number, []) if lead(i) == first]
