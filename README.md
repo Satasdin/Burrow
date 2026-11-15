@@ -52,18 +52,18 @@ ollama pull qwen3-embedding:0.6b
 ## Quick start
 
 ```bash
-burrow vault new ~/Notes                 # any folder of Markdown; an Obsidian vault works as it is
-burrow link ~/Notes ~/code/my-project    # link a code folder, read-only
-burrow connect claude-code ~/Notes       # shows what it would change; add --write to set it up
+burrow vault new ~/Notes                # make a folder of notes a vault
+burrow link ~/Notes ~/code/my-project   # link a code folder, read-only
+burrow connect claude-code ~/Notes      # show the setup; --write applies it
 ```
 
-Then ask your AI about your own material. It searches with `burrow_find`, picks up earlier work with `burrow_resume`,
+Any folder of Markdown works, an Obsidian vault as it is. Then ask your AI about your own material. It searches with `burrow_find`, picks up earlier work with `burrow_resume`,
 keeps decisions with `burrow_commit` and checks its changes with `burrow_check`.
 [Getting started](docs/getting-started.md) walks through it.
 
 ## What's inside
 
-| | |
+| Part | What it does |
 | --- | --- |
 | **Vault** | Notes, PDFs, Word documents and images, with code folders linked read-only. Search by words and by meaning, with file and line. |
 | **Engine** | Decides whether the vault is needed, fits what it shows to the model, and checks what the answer cites. |
@@ -74,7 +74,7 @@ keeps decisions with `burrow_commit` and checks its changes with `burrow_check`.
 
 ## Documentation
 
-| | |
+| Guide | For |
 | --- | --- |
 | [Getting started](docs/getting-started.md) | install, a first vault, connecting your first program |
 | [Day to day](docs/day-to-day.md) | asking, keeping decisions, picking up tomorrow, teams, several vaults |
@@ -98,7 +98,7 @@ app/build.sh                # the desktop app, at app/build/Burrow.app
 
 ## Repository
 
-| Folder | |
+| Folder | Holds |
 | --- | --- |
 | `Sources/` | the engine (`BurrowCore`), the Ledger, sessions, check and teams (`BurrowTools`), the MCP server and the `burrow` program |
 | `Tests/` | the automated tests |
