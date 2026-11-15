@@ -271,21 +271,6 @@ EP  - 130213
 ER  - 
 
 TY  - CONF
-AU  - Chevalier, A.
-AU  - Wettig, A.
-AU  - Ajith, A.
-AU  - Chen, D.
-TI  - Adapting language models to compress contexts
-PY  - 2023
-T2  - Proceedings of the 2023 Conference on Empirical Methods in Natural Language Processing
-PB  - Association for Computational Linguistics
-DO  - 10.18653/v1/2023.emnlp-main.232
-UR  - https://doi.org/10.18653/v1/2023.emnlp-main.232
-SP  - 3829
-EP  - 3846
-ER  - 
-
-TY  - CONF
 AU  - Chhikara, P.
 AU  - Khant, D.
 AU  - Aryan, S.
@@ -471,20 +456,6 @@ PY  - 2026
 PB  - arXiv
 DO  - 10.48550/arXiv.2607.02770
 UR  - https://doi.org/10.48550/arXiv.2607.02770
-ER  - 
-
-TY  - CPAPER
-AU  - Ge, T.
-AU  - Hu, J.
-AU  - Wang, L.
-AU  - Wang, X.
-AU  - Chen, S.-Q.
-AU  - Wei, F.
-TI  - In-context autoencoder for context compression in a large language model
-PY  - 2024
-T2  - International Conference on Learning Representations (ICLR 2024)
-DO  - 10.48550/arXiv.2307.06945
-UR  - https://doi.org/10.48550/arXiv.2307.06945
 ER  - 
 
 TY  - GEN
@@ -1295,17 +1266,6 @@ SP  - 75
 EP  - 105
 ER  - 
 
-TY  - ELEC
-AU  - Hong, K.
-AU  - Troynikov, A.
-AU  - Huber, J.
-TI  - Context rot: How increasing input tokens impacts LLM performance
-PY  - 2025
-DA  - 2025/07/14
-T2  - Chroma
-UR  - https://www.trychroma.com/research/context-rot
-ER  - 
-
 TY  - JOUR
 AU  - Hou, X.
 AU  - Zhao, Y.
@@ -1520,22 +1480,6 @@ SP  - 7036
 EP  - 7050
 ER  - 
 
-TY  - CONF
-AU  - Jiang, H.
-AU  - Wu, Q.
-AU  - Lin, C.-Y.
-AU  - Yang, Y.
-AU  - Qiu, L.
-TI  - LLMLingua: Compressing prompts for accelerated inference of large language models
-PY  - 2023
-T2  - Proceedings of the 2023 Conference on Empirical Methods in Natural Language Processing
-PB  - Association for Computational Linguistics
-DO  - 10.18653/v1/2023.emnlp-main.825
-UR  - https://doi.org/10.18653/v1/2023.emnlp-main.825
-SP  - 13358
-EP  - 13376
-ER  - 
-
 TY  - CPAPER
 AU  - Jin, B.
 AU  - Yoon, J.
@@ -1613,19 +1557,6 @@ DO  - 10.18653/v1/2020.emnlp-main.550
 UR  - https://doi.org/10.18653/v1/2020.emnlp-main.550
 SP  - 6769
 EP  - 6781
-ER  - 
-
-TY  - JOUR
-AU  - Keeling, M.
-TI  - The psychology of architecture decision records
-PY  - 2022
-JO  - IEEE Software
-VL  - 39
-IS  - 6
-DO  - 10.1109/MS.2022.3198195
-UR  - https://doi.org/10.1109/MS.2022.3198195
-SP  - 114
-EP  - 117
 ER  - 
 
 TY  - ELEC
@@ -2017,20 +1948,6 @@ SP  - 311
 EP  - 325
 ER  - 
 
-TY  - GEN
-AU  - Su, R.
-AU  - Bakhtin, A.
-AU  - Ahmad, N.
-AU  - Esposito, M.
-AU  - Lenarduzzi, V.
-AU  - Taibi, D.
-TI  - Evaluating large language models for detecting architectural decision violations
-PY  - 2026
-PB  - arXiv
-DO  - 10.48550/arXiv.2602.07609
-UR  - https://doi.org/10.48550/arXiv.2602.07609
-ER  - 
-
 TY  - JOUR
 AU  - Tang, A.
 AU  - Babar, M. A.
@@ -2158,16 +2075,6 @@ DO  - 10.52202/085713-0593
 UR  - https://doi.org/10.52202/085713-0593
 SP  - 20004
 EP  - 20031
-ER  - 
-
-TY  - GEN
-AU  - Xu, X.
-AU  - Wu, W.
-TI  - Stale instruction files override the code in coding agents: A one-sentence fix
-PY  - 2026
-PB  - arXiv
-DO  - 10.48550/arXiv.2610.30571
-UR  - https://doi.org/10.48550/arXiv.2610.30571
 ER  - 
 
 TY  - GEN

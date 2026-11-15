@@ -927,42 +927,6 @@
   "issued": {
    "date-parts": [
     [
-     2023
-    ]
-   ]
-  },
-  "DOI": "10.18653/v1/2023.emnlp-main.232",
-  "URL": "https://doi.org/10.18653/v1/2023.emnlp-main.232",
-  "author": [
-   {
-    "family": "Chevalier",
-    "given": "A."
-   },
-   {
-    "family": "Wettig",
-    "given": "A."
-   },
-   {
-    "family": "Ajith",
-    "given": "A."
-   },
-   {
-    "family": "Chen",
-    "given": "D."
-   }
-  ],
-  "title": "Adapting language models to compress contexts",
-  "type": "paper-conference",
-  "container-title": "Proceedings of the 2023 Conference on Empirical Methods in Natural Language Processing",
-  "page": "3829-3846",
-  "publisher": "Association for Computational Linguistics",
-  "_apa": "Chevalier, A., Wettig, A., Ajith, A., & Chen, D. (2023). Adapting language models to compress contexts. In *Proceedings of the 2023 Conference on Empirical Methods in Natural Language Processing* (pp. 3829–3846). Association for Computational Linguistics. https://doi.org/10.18653/v1/2023.emnlp-main.232",
-  "id": "Chevalier2023"
- },
- {
-  "issued": {
-   "date-parts": [
-    [
      2025
     ]
    ]
@@ -1456,49 +1420,6 @@
   "publisher": "arXiv",
   "_apa": "Gemma Team. (2026). *Gemma 4 technical report*. arXiv. https://doi.org/10.48550/arXiv.2607.02770",
   "id": "GemmaTeam2026"
- },
- {
-  "issued": {
-   "date-parts": [
-    [
-     2024
-    ]
-   ]
-  },
-  "DOI": "10.48550/arXiv.2307.06945",
-  "URL": "https://doi.org/10.48550/arXiv.2307.06945",
-  "author": [
-   {
-    "family": "Ge",
-    "given": "T."
-   },
-   {
-    "family": "Hu",
-    "given": "J."
-   },
-   {
-    "family": "Wang",
-    "given": "L."
-   },
-   {
-    "family": "Wang",
-    "given": "X."
-   },
-   {
-    "family": "Chen",
-    "given": "S.-Q."
-   },
-   {
-    "family": "Wei",
-    "given": "F."
-   }
-  ],
-  "title": "In-context autoencoder for context compression in a large language model",
-  "type": "speech",
-  "genre": "Paper presentation",
-  "event-title": "International Conference on Learning Representations (ICLR 2024)",
-  "_apa": "Ge, T., Hu, J., Wang, L., Wang, X., Chen, S.-Q., & Wei, F. (2024). *In-context autoencoder for context compression in a large language model* [Paper presentation]. International Conference on Learning Representations (ICLR 2024). https://doi.org/10.48550/arXiv.2307.06945",
-  "id": "Ge2024"
  },
  {
   "issued": {
@@ -4592,37 +4513,6 @@
   "issued": {
    "date-parts": [
     [
-     2025,
-     7,
-     14
-    ]
-   ]
-  },
-  "URL": "https://www.trychroma.com/research/context-rot",
-  "author": [
-   {
-    "family": "Hong",
-    "given": "K."
-   },
-   {
-    "family": "Troynikov",
-    "given": "A."
-   },
-   {
-    "family": "Huber",
-    "given": "J."
-   }
-  ],
-  "title": "Context rot: How increasing input tokens impacts LLM performance",
-  "type": "webpage",
-  "container-title": "Chroma",
-  "_apa": "Hong, K., Troynikov, A., & Huber, J. (2025, July 14). *Context rot: How increasing input tokens impacts LLM performance*. Chroma. https://www.trychroma.com/research/context-rot",
-  "id": "Hong2025"
- },
- {
-  "issued": {
-   "date-parts": [
-    [
      2026
     ]
    ]
@@ -5331,46 +5221,6 @@
   "issued": {
    "date-parts": [
     [
-     2023
-    ]
-   ]
-  },
-  "DOI": "10.18653/v1/2023.emnlp-main.825",
-  "URL": "https://doi.org/10.18653/v1/2023.emnlp-main.825",
-  "author": [
-   {
-    "family": "Jiang",
-    "given": "H."
-   },
-   {
-    "family": "Wu",
-    "given": "Q."
-   },
-   {
-    "family": "Lin",
-    "given": "C.-Y."
-   },
-   {
-    "family": "Yang",
-    "given": "Y."
-   },
-   {
-    "family": "Qiu",
-    "given": "L."
-   }
-  ],
-  "title": "LLMLingua: Compressing prompts for accelerated inference of large language models",
-  "type": "paper-conference",
-  "container-title": "Proceedings of the 2023 Conference on Empirical Methods in Natural Language Processing",
-  "page": "13358-13376",
-  "publisher": "Association for Computational Linguistics",
-  "_apa": "Jiang, H., Wu, Q., Lin, C.-Y., Yang, Y., & Qiu, L. (2023). LLMLingua: Compressing prompts for accelerated inference of large language models. In *Proceedings of the 2023 Conference on Empirical Methods in Natural Language Processing* (pp. 13358–13376). Association for Computational Linguistics. https://doi.org/10.18653/v1/2023.emnlp-main.825",
-  "id": "Jiang2023"
- },
- {
-  "issued": {
-   "date-parts": [
-    [
      2025
     ]
    ]
@@ -5594,31 +5444,6 @@
   "publisher": "Association for Computational Linguistics",
   "_apa": "Karpukhin, V., Oğuz, B., Min, S., Lewis, P., Wu, L., Edunov, S., Chen, D., & Yih, W.-t. (2020). Dense passage retrieval for open-domain question answering. In *Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing (EMNLP)* (pp. 6769–6781). Association for Computational Linguistics. https://doi.org/10.18653/v1/2020.emnlp-main.550",
   "id": "Karpukhin2020"
- },
- {
-  "issued": {
-   "date-parts": [
-    [
-     2022
-    ]
-   ]
-  },
-  "DOI": "10.1109/MS.2022.3198195",
-  "URL": "https://doi.org/10.1109/MS.2022.3198195",
-  "author": [
-   {
-    "family": "Keeling",
-    "given": "M."
-   }
-  ],
-  "title": "The psychology of architecture decision records",
-  "type": "article-journal",
-  "container-title": "IEEE Software",
-  "volume": "39",
-  "issue": "6",
-  "page": "114-117",
-  "_apa": "Keeling, M. (2022). The psychology of architecture decision records. *IEEE Software*, *39*(6), 114–117. https://doi.org/10.1109/MS.2022.3198195",
-  "id": "Keeling2022"
  },
  {
   "issued": {
@@ -6727,48 +6552,6 @@
   "issued": {
    "date-parts": [
     [
-     2026
-    ]
-   ]
-  },
-  "DOI": "10.48550/arXiv.2602.07609",
-  "URL": "https://doi.org/10.48550/arXiv.2602.07609",
-  "author": [
-   {
-    "family": "Su",
-    "given": "R."
-   },
-   {
-    "family": "Bakhtin",
-    "given": "A."
-   },
-   {
-    "family": "Ahmad",
-    "given": "N."
-   },
-   {
-    "family": "Esposito",
-    "given": "M."
-   },
-   {
-    "family": "Lenarduzzi",
-    "given": "V."
-   },
-   {
-    "family": "Taibi",
-    "given": "D."
-   }
-  ],
-  "title": "Evaluating large language models for detecting architectural decision violations",
-  "type": "article",
-  "publisher": "arXiv",
-  "_apa": "Su, R., Bakhtin, A., Ahmad, N., Esposito, M., Lenarduzzi, V., & Taibi, D. (2026). *Evaluating large language models for detecting architectural decision violations*. arXiv. https://doi.org/10.48550/arXiv.2602.07609",
-  "id": "Su2026"
- },
- {
-  "issued": {
-   "date-parts": [
-    [
      2006
     ]
    ]
@@ -7107,32 +6890,6 @@
   "publisher": "Neural Information Processing Systems Foundation",
   "_apa": "Xu, W., Liang, Z., Mei, K., Gao, H., Tan, J., & Zhang, Y. (2025). A-Mem: Agentic memory for LLM agents. In *Advances in Neural Information Processing Systems* (Vol. 38, pp. 20004–20031). Neural Information Processing Systems Foundation. https://doi.org/10.52202/085713-0593",
   "id": "Xu2025"
- },
- {
-  "issued": {
-   "date-parts": [
-    [
-     2026
-    ]
-   ]
-  },
-  "DOI": "10.48550/arXiv.2610.30571",
-  "URL": "https://doi.org/10.48550/arXiv.2610.30571",
-  "author": [
-   {
-    "family": "Xu",
-    "given": "X."
-   },
-   {
-    "family": "Wu",
-    "given": "W."
-   }
-  ],
-  "title": "Stale instruction files override the code in coding agents: A one-sentence fix",
-  "type": "article",
-  "publisher": "arXiv",
-  "_apa": "Xu, X., & Wu, W. (2026). *Stale instruction files override the code in coding agents: A one-sentence fix*. arXiv. https://doi.org/10.48550/arXiv.2610.30571",
-  "id": "Xu2026"
  },
  {
   "issued": {
