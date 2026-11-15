@@ -56,4 +56,4 @@ case ":$PATH:" in
   *) echo "Add it to your path:  export PATH=\"$BIN_DIR:\$PATH\"" ;;
 esac
 command -v ollama >/dev/null 2>&1 || echo "Burrow reads with local models through Ollama: https://ollama.com"
-echo "Next:  ollama pull qwen3-embedding:0.6b  and a chat model, then  burrow index <folder> --vault"
+echo "Next:  ollama pull qwen3-embedding:0.6b  and a chat model, then  burrow vault new <folder>"
