@@ -18,6 +18,14 @@
     document.getElementById("install").textContent = tab.dataset.cmd;
   }));
 
+  const menu = document.querySelector(".menu"), sheet = document.getElementById("sitemenu");
+  if (menu && sheet) {
+    const set = (open) => { menu.setAttribute("aria-expanded", String(open)); sheet.hidden = !open; };
+    menu.addEventListener("click", () => set(sheet.hidden));
+    addEventListener("keydown", (e) => { if (e.key === "Escape" && !sheet.hidden) { set(false); menu.focus(); } });
+    matchMedia("(min-width: 861px)").addEventListener("change", (e) => { if (e.matches) set(false); });
+  }
+
   const head = document.querySelector("header");
   const mark = () => head && head.classList.toggle("scrolled", scrollY > 8);
   addEventListener("scroll", mark, {passive: true}); mark();

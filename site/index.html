@@ -26,8 +26,16 @@
     <div class="right">
       <a class="plain" href="https://github.com/Satasdin/Burrow">GitHub</a>
       <a class="btn" href="https://github.com/Satasdin/Burrow/releases/latest/download/Burrow-macos-arm64.zip"><svg class="apple" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg>Download for Mac</a>
+      <button class="menu" type="button" aria-expanded="false" aria-controls="sitemenu" aria-label="Menu"><i></i></button>
     </div>
   </div>
+  <nav class="sheet" id="sitemenu" aria-label="Site" hidden>
+    <a href="download.html">Download</a>
+    <a href="https://github.com/Satasdin/Burrow/blob/burrow/docs/README.md">Docs</a>
+    <a href="https://github.com/Satasdin/Burrow/tree/burrow/skills">Skills</a>
+    <a href="https://github.com/Satasdin/Burrow/blob/burrow/docs/security.md">Security</a>
+    <a href="https://github.com/Satasdin/Burrow">GitHub</a>
+  </nav>
 </header>
 
 <main>
@@ -42,21 +50,28 @@
     <div class="stage">
       <div class="window demo" id="demo" aria-label="Interactive demo of Burrow. Click around.">
         <div class="demo-bar">
-          <div class="demo-bar-l"><span class="lights"><i></i><i></i><i></i></span><span class="tb-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3.5" y="5" width="17" height="14" rx="2.5"/><path d="M9 5v14"/></svg></span></div>
-          <div class="demo-bar-c"><span class="tb-ico" aria-hidden="true">‹</span><span class="tb-ico dim" aria-hidden="true">›</span><span class="demo-title"><b>vault</b><small>59 notes · 37 files · 290 links</small></span></div>
-          <span class="tb-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="6"/><path d="m16 16 4 4"/></svg></span>
+          <div class="demo-bar-l"><span class="lights"><i></i><i></i><i></i></span><span class="tb-plus" aria-hidden="true">+ <small>⌄</small></span><span class="tb-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3.5" y="5" width="17" height="14" rx="2.5"/><path d="M9 5v14"/></svg></span></div>
+          <div class="demo-bar-c"><span class="tb-ico" aria-hidden="true">‹</span><span class="tb-ico dim" aria-hidden="true">›</span><span class="demo-title"><b>vault</b><small>59 notes, 37 files, 290 links</small></span></div>
+          <span class="demo-bar-r"><span class="tb-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="6"/><path d="m16 16 4 4"/></svg></span><span class="tb-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3.5" y="5" width="17" height="14" rx="2.5"/><path d="M15 5v14"/></svg></span></span>
         </div>
         <div class="demo-body">
           <nav class="demo-rail" aria-label="Pages">
-            <button type="button" data-show="ask" aria-selected="true" title="Ask"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 5h14v10H10l-5 4z"/></svg><span>Ask</span></button>
-            <button type="button" data-show="ledger" aria-selected="false" title="Ledger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 19V9M10 19V5M15 19v-8M20 19V7"/></svg><span>Ledger</span></button>
-            <button type="button" data-show="programs" aria-selected="false" title="Programs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8 7c6 0 4 10 8 10"/></svg><span>Programs</span></button>
-            <button type="button" data-show="map" aria-selected="false" title="Map"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="6" r="2"/><circle cx="6" cy="17" r="2"/><circle cx="18" cy="16" r="2"/><path d="M11 8 7 15M13 8l4 6M8 17h8"/></svg><span>Map</span></button>
+            <span class="r-deco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/></svg></span>
+            <span class="r-deco dot" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="5" cy="17" r="1.8"/><circle cx="12" cy="7" r="1.8"/><circle cx="19" cy="15" r="1.8"/><path d="M6.2 15.6 10.8 8.6M13.6 8.2l4.2 5.4M7 17.4l10-2" stroke-dasharray="1.6 2"/></svg></span>
+            <button type="button" data-show="ask" aria-selected="true" title="Ask"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 5.5h14v9.5H10l-5 4z"/></svg><span>Ask</span></button>
+            <button type="button" data-show="ledger" aria-selected="false" title="Ledger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 19V6.5M9 19V5M13.5 19V8l2.5-.8L19.5 19"/><path d="M4 19.5h16"/></svg><span>Ledger</span></button>
+            <span class="r-deco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="5" y="7" width="14" height="10" rx="2"/><path d="M8 7V4.5M12 7V4.5M16 7V4.5M8 19.5V17M12 19.5V17M16 19.5V17"/></svg></span>
+            <button type="button" data-show="programs" aria-selected="false" title="Programs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="4" width="7" height="7" rx="1.8"/><rect x="13" y="13" width="7" height="7" rx="1.8"/><path d="M7.5 11v2.5a3 3 0 0 0 3 3H13"/></svg><span>Programs</span></button>
+            <button type="button" data-show="map" aria-selected="false" title="Map"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="2.2"/><circle cx="12" cy="5" r="2.2"/><circle cx="12" cy="19" r="2.2"/><circle cx="6" cy="8.5" r="2.2"/><circle cx="18" cy="8.5" r="2.2"/><circle cx="6" cy="15.5" r="2.2"/><circle cx="18" cy="15.5" r="2.2"/></svg><span>Map</span></button>
+            <span class="r-fill" aria-hidden="true"></span>
+            <span class="r-deco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 9V6.5A2.5 2.5 0 1 0 6.5 9H17.5A2.5 2.5 0 1 0 15 6.5v11a2.5 2.5 0 1 0 2.5-2.5h-11A2.5 2.5 0 1 0 9 17.5z"/></svg></span>
+            <span class="r-deco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="5.5" width="16" height="14" rx="2.5"/><path d="M4 9.5h16M8 13h1M11.5 13h1M15 13h1M8 16h1M11.5 16h1"/></svg></span>
           </nav>
 
           <aside class="demo-tree" aria-label="Files in the vault">
+            <div class="tree-tools" aria-hidden="true"><span class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3.5 7.5a2 2 0 0 1 2-2h4l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/></svg></span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="6"/><path d="m16 16 4 4"/></svg></span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 4 7 20M17 4l-2 16M4.5 9h15M4 15h15"/></svg></span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7 4h10v16l-5-4-5 4z"/></svg></span><b></b><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M13 5H6.5A2.5 2.5 0 0 0 4 7.5v10A2.5 2.5 0 0 0 6.5 20h10a2.5 2.5 0 0 0 2.5-2.5V11"/><path d="m11 13 8-8"/></svg></span></div>
             <ul>
-              <li class="dir open"><span>Law</span>
+              <li class="dir open"><span><svg class="fold" viewBox="0 0 24 24" fill="none" stroke="#f08da0" stroke-width="1.6" aria-hidden="true"><path d="M3.5 7.5a2 2 0 0 1 2-2h4l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/></svg>Law</span>
                 <ul>
                   <li data-f="act-part-01-preliminary">act-part-01-preliminary</li>
                   <li data-f="act-part-02-office-of-the-data-commissioner">act-part-02-office-of-the-data-commissioner</li>
@@ -66,7 +81,7 @@
                   <li data-f="registration-regs-regulations-01-18">registration-regs-regulations-01-18</li>
                 </ul>
               </li>
-              <li class="dir open"><span>Project</span>
+              <li class="dir open"><span><svg class="fold" viewBox="0 0 24 24" fill="none" stroke="#7fb0ff" stroke-width="1.6" aria-hidden="true"><path d="M3.5 7.5a2 2 0 0 1 2-2h4l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/></svg>Project</span>
                 <ul>
                   <li data-f="DECISIONS">DECISIONS</li>
                   <li data-f="Retrieval.swift">Retrieval.swift</li>
@@ -75,49 +90,48 @@
                   <li data-f="Markdown.swift">Markdown.swift</li>
                 </ul>
               </li>
-              <li class="dir"><span>Software</span></li>
-              <li class="dir"><span>Skills</span></li>
-              <li>Home</li>
+              <li class="dir"><span><svg class="fold" viewBox="0 0 24 24" fill="none" stroke="#b79cff" stroke-width="1.6" aria-hidden="true"><path d="M3.5 7.5a2 2 0 0 1 2-2h4l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/></svg>Skills</span></li>
+              <li class="dir"><span><svg class="fold" viewBox="0 0 24 24" fill="none" stroke="#6fe0c0" stroke-width="1.6" aria-hidden="true"><path d="M3.5 7.5a2 2 0 0 1 2-2h4l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/></svg>Software</span></li>
             </ul>
           </aside>
 
           <div class="demo-center">
-            <div class="demo-tabs"><span class="d-tab dim">All</span><span class="d-tab on"><span class="demo-tab">Ask</span><i aria-hidden="true">×</i></span><span class="d-plus" aria-hidden="true">+</span></div>
+            <div class="demo-tabs"><span class="d-tab dim"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/></svg>All</span><span class="d-tab on"><span class="demo-tab">Ask</span><i aria-hidden="true">×</i></span><span class="d-plus" aria-hidden="true">+</span></div>
 
             <section class="demo-view demo-ask" data-view="ask">
               <div class="demo-main">
-                <div class="demo-chips" aria-label="Try a question"></div>
-                <div class="demo-answer" aria-live="polite"></div>
+                <div class="demo-answer" aria-live="polite"><div class="demo-empty"><b>Ask your vault</b><span>The model on this Mac reads only what Burrow finds, and shows you what it used.</span></div></div>
                 <div class="demo-status" hidden><b></b><span>Reading the vault…</span></div>
+                <div class="demo-chips" aria-label="Try a question"></div>
                 <form class="demo-input"><input id="demo-q" type="text" placeholder="Ask your vault" aria-label="Ask your vault" autocomplete="off"><button type="submit" aria-label="Ask">↑</button></form>
               </div>
-              <aside class="demo-side"><span class="pane-h">What the model read</span><canvas data-graph="ask" aria-hidden="true"></canvas></aside>
+              <aside class="demo-side"><canvas data-graph="ask" aria-hidden="true"></canvas><div class="demo-strip"><div class="marks"></div><span>What the model reads lights up here.</span></div></aside>
             </section>
 
             <section class="demo-view demo-ledger" data-view="ledger" hidden>
               <div class="demo-main">
-                <div class="demo-head"><h4>Ledger</h4><span>7 commits on 3 branches</span></div>
-                <div class="demo-filters"><button type="button" data-branch="All" aria-pressed="true">All</button><button type="button" data-branch="Synced" aria-pressed="false">Synced</button><button type="button" data-branch="Team" aria-pressed="false">Team</button><button type="button" data-branch="main" aria-pressed="false">main</button></div>
-                <div class="demo-stats"><div><b class="demo-rules">6</b><span>rules in force, handed to every program</span></div><div><b>0</b><span>files changed under a decision</span></div><div><b>0</b><span>lines written to steer an AI</span></div></div>
+                <div class="demo-head"><h4>Ledger</h4><span>7 commits on 3 branches</span><em class="demo-resume">Resume</em></div>
+                <div class="demo-filters"><button type="button" data-branch="All" aria-pressed="true">All</button><button type="button" data-branch="Synced" aria-pressed="false">Synced</button><button type="button" data-branch="Team" aria-pressed="false">Team</button><button type="button" data-branch="main" aria-pressed="false">main ·</button></div>
+                <div class="demo-stats"><div><p><b class="demo-rules">6</b> rules in force</p><span>Handed to every program that connects, on main</span></div><div><p><b>0</b> files changed</p><span>The linked code matches its last git commit</span></div><div><p><b>0</b> lines flagged</p><span>Nothing in the vault is written to steer an AI</span></div></div><h5 class="demo-today">Today</h5>
                 <div class="demo-ledger-list"></div>
               </div>
             </section>
 
             <section class="demo-view demo-programs-view" data-view="programs" hidden>
               <div class="demo-main">
-                <div class="demo-head"><h4>Programs</h4><span>The AI programs on this Mac, and whether each finds this vault</span></div>
-                <div class="demo-progwrap"><div class="demo-programs"></div><div class="demo-flow" aria-hidden="true"></div><div class="demo-vault"><i></i><b>Notes</b><span>5 lookups today</span></div></div>
+                <div class="demo-head"><h4>Programs</h4><span class="demo-progcount">1 set up for this vault · 1 active in the last 30 minutes</span></div>
+                <div class="demo-progwrap"><div class="demo-programs"></div><div class="demo-flow" aria-hidden="true"></div><div class="demo-vault"><i></i><b>vault</b><span>5 lookups today</span></div></div>
                 <div class="demo-connect"><span>Press Connect to see the line that sets it up.</span><code></code></div>
               </div>
             </section>
 
             <section class="demo-view demo-map" data-view="map" hidden>
               <canvas data-graph="map" aria-label="The vault as a graph of notes and code, grouped by folder"></canvas>
-              <div class="demo-filter"><b>Filter</b><label><input type="checkbox" data-filter="notes" checked> Notes</label><label><input type="checkbox" data-filter="code" checked> Code and files</label></div>
+              <div class="demo-filter"><b>Filter</b><label><input type="checkbox" data-filter="notes" checked> Notes</label><label><input type="checkbox" data-filter="code" checked> Code and files</label><label><input type="checkbox" data-filter="loose" checked> Unconnected</label></div>
             </section>
           </div>
         </div>
-        <div class="demo-foot-bar"><span><i></i><b class="demo-rules">6</b>rules in force</span><span>Live demo · real answers from the app</span></div>
+        <div class="demo-foot-bar"><span><i></i><b class="demo-rules">6</b>rules in force</span><span class="sb-r">37 files<i></i>59 notes<i></i>290 links<i></i>1 conversation</span></div>
       </div>
 
       <div class="term" aria-hidden="true">
@@ -133,6 +147,7 @@
 <span class="t-ok">⏺</span> burrow_check
   <span class="t-ok">⎿ unaffected</span></pre>
       </div>
+      <p class="stage-note">A live demo you can click. The questions, answers, files and decisions are the app's own; the terminal is an illustration of Claude Code using Burrow's tools.</p>
     </div>
   </section>
 
@@ -143,7 +158,7 @@
       <div><h3>Your decisions should last.</h3><p>What you settle with one model, and why, is handed to the next. Approving, sharing and overriding stay yours alone.</p></div>
     </div>
     <div class="iconcard">
-      <img src="media/icon-512.png" alt="The Burrow app icon" width="512" height="512">
+      <img src="media/icon-512.png" alt="The Burrow app icon" width="512" height="512" loading="lazy" decoding="async">
       <b class="word">Burrow</b>
       <p>Free for Mac.<br><a href="https://github.com/Satasdin/Burrow/releases/latest/download/Burrow-macos-arm64.zip">Download now</a></p>
     </div>
@@ -155,10 +170,10 @@
       <p>A model on your Mac answers from your notes, documents and code, and cites the file and line. Gemma 4 12B answered 9 of 120 questions about private material alone, and 102 with Burrow.</p>
     </div>
     <div class="cards">
-      <article class="card"><h3>Ask</h3><p>A question goes to the closest notes and code. The answer names the file and line it came from.</p><div class="shot"><img src="media/app-ask.jpg" loading="lazy" width="2000" height="1257" alt="Ask in Burrow: an answer citing a file and line, and the notes it read"></div></article>
-      <article class="card"><h3>Ledger</h3><p>Every decision made with an AI, with its reason and what was turned down. Every program that connects is handed it.</p><div class="shot"><img src="media/app-ledger.jpg" loading="lazy" width="2000" height="1522" alt="The Ledger: decisions with their reasons and who kept each"></div></article>
-      <article class="card"><h3>Programs</h3><p>Which AI tools reach your vault and what each read today. One command connects another.</p><div class="shot"><img src="media/app-programs.jpg" loading="lazy" width="2000" height="1257" alt="The Programs page with OpenCode connected to the vault"></div></article>
-      <article class="card"><h3>Map</h3><p>Your notes and code as one graph, the way your models see it. An Obsidian vault works as it is.</p><div class="shot"><img src="media/app-map.jpg" loading="lazy" width="2000" height="1257" alt="The map of a vault: notes and code as a graph, grouped by folder"></div></article>
+      <article class="card"><h3>Ask</h3><p>A question goes to the closest notes and code. The answer names the file and line it came from.</p><div class="shot" style="--cx:1010;--cy:100;--cw:990;--ih:1257"><img src="media/app-ask.jpg" decoding="async" loading="lazy" width="2000" height="1257" alt="Ask in Burrow: an answer citing a file and line, and the notes it read"></div></article>
+      <article class="card"><h3>Ledger</h3><p>Every decision made with an AI, with its reason and what was turned down. Every program that connects is handed it.</p><div class="shot" style="--cx:480;--cy:170;--cw:1000;--ih:1522"><img src="media/app-ledger.jpg" decoding="async" loading="lazy" width="2000" height="1522" alt="The Ledger: decisions with their reasons and who kept each"></div></article>
+      <article class="card"><h3>Programs</h3><p>Which AI tools reach your vault and what each read today. One command connects another.</p><div class="shot" style="--cx:400;--cy:140;--cw:1150;--ih:1257"><img src="media/app-programs.jpg" decoding="async" loading="lazy" width="2000" height="1257" alt="The Programs page with OpenCode connected to the vault"></div></article>
+      <article class="card"><h3>Map</h3><p>Your notes and code as one graph, the way your models see it. An Obsidian vault works as it is.</p><div class="shot" style="--cx:390;--cy:125;--cw:1180;--ih:1257"><img src="media/app-map.jpg" decoding="async" loading="lazy" width="2000" height="1257" alt="The map of a vault: notes and code as a graph, grouped by folder"></div></article>
     </div>
   </section>
 
