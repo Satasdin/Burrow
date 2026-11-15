@@ -227,12 +227,16 @@ public enum Outline {
             if let match = fromImport.firstMatch(in: statement, range: range) {
                 let module = group(match, 1)
                 let names = group(match, 2).trimmingCharacters(in: CharacterSet(charactersIn: "() \\"))
-                return names.split(separator: ",").compactMap { part in
-                    let words = part.split(whereSeparator: { $0 == " " || $0 == "\n" }).map(String.init).filter { $0 != "(" && $0 != ")" && $0 != "\\" }
-                    guard let original = words.first, !original.isEmpty else { return nil }
-                    let local = words.count >= 3 && words[1] == "as" ? words[2] : original
-                    return (local, module + "." + original)
+                // Written as a loop with typed steps: the closure form took older compilers too long to type-check.
+                var bound: [(String, String)] = []
+                for part in names.split(separator: ",") {
+                    let pieces: [Substring] = part.split(whereSeparator: { (c: Character) -> Bool in c == " " || c == "\n" })
+                    let words: [String] = pieces.map { String($0) }.filter { (w: String) -> Bool in w != "(" && w != ")" && w != "\\" }
+                    guard let original = words.first, !original.isEmpty else { continue }
+                    let local: String = words.count >= 3 && words[1] == "as" ? words[2] : original
+                    bound.append((local, module + "." + original))
                 }
+                return bound
             }
             if let match = plainImport.firstMatch(in: statement, range: range) {
                 return group(match, 1).split(separator: ",").compactMap { part in
