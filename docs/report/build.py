@@ -23,7 +23,7 @@ BODY = ["1-introduction.md", "2-literature.md", "3-methodology.md", "4-design.md
 BACK = ["7-references.md", "8-appendices.md"]
 PROJECT_TYPE = "[Internal Project]"
 
-TITLE = "Burrow: A Local Vault That Gives Local and Cloud Language Models One Shared Memory"
+TITLE = "Burrow: A Local Vault Giving Local and Cloud Language Models One Shared Memory of Knowledge and Decisions"
 # The chapters revised from the approved proposal live in chapters2. The rejected first rewrite stays in chapters.
 CHAPTERS = HERE / "chapters3"
 INLINE = re.compile(r"(\[PENDING:.*?\]|\*\*\*.+?\*\*\*|\*\*.+?\*\*|\*.+?\*|`.+?`)")
