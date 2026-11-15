@@ -60,7 +60,7 @@
       ctx.lineWidth = .6;
       for (const [a, b] of edges) {
         const A = nodes[a], B = nodes[b]; if (!visible(A) || !visible(B)) continue;
-        ctx.strokeStyle = "rgba(160,150,200,.10)"; ctx.beginPath(); ctx.moveTo(A.x * w, A.y * h); ctx.lineTo(B.x * w, B.y * h); ctx.stroke();
+        ctx.strokeStyle = "rgba(200,200,200,.10)"; ctx.beginPath(); ctx.moveTo(A.x * w, A.y * h); ctx.lineTo(B.x * w, B.y * h); ctx.stroke();
       }
       for (const n of nodes) {
         n.lit += (n.target - n.lit) * .08;
@@ -70,26 +70,26 @@
         ctx.beginPath(); ctx.arc(n.x * w, n.y * h, n.s, 0, 7); ctx.fill();
         if (n.lit > .02) {
           const glow = ctx.createRadialGradient(n.x * w, n.y * h, 0, n.x * w, n.y * h, 16 * n.lit);
-          glow.addColorStop(0, `rgba(255,230,170,${.9 * n.lit})`); glow.addColorStop(1, "rgba(255,214,133,0)");
+          glow.addColorStop(0, `rgba(205,185,255,${.9 * n.lit})`); glow.addColorStop(1, "rgba(168,139,250,0)");
           ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(n.x * w, n.y * h, 16 * n.lit, 0, 7); ctx.fill();
-          ctx.fillStyle = `rgba(255,244,214,${n.lit})`; ctx.beginPath(); ctx.arc(n.x * w, n.y * h, 3.4, 0, 7); ctx.fill();
+          ctx.fillStyle = `rgba(255,255,255,${n.lit})`; ctx.beginPath(); ctx.arc(n.x * w, n.y * h, 3.4, 0, 7); ctx.fill();
         }
       }
       if (opts.lines) {
         lines += (lineTarget - lines) * .06;
         for (const {n} of litSet) {
           if (n.lit < .05) continue;
-          ctx.strokeStyle = `rgba(255,214,133,${.55 * n.lit * lines})`; ctx.lineWidth = 1.1;
+          ctx.strokeStyle = `rgba(168,139,250,${.5 * n.lit * lines})`; ctx.lineWidth = 1.1;
           ctx.beginPath(); ctx.moveTo(0, h * .98); ctx.lineTo(n.x * w, n.y * h); ctx.stroke();
         }
       }
-      ctx.font = "500 10.5px 'Geist Mono', ui-monospace, monospace"; ctx.textAlign = "center";
+      ctx.font = "600 10.5px ui-monospace, 'SF Mono', Menlo, monospace"; ctx.textAlign = "center";
       for (const [k, c] of Object.entries(CLUSTERS)) {
         ctx.fillStyle = hover === k ? "rgba(255,255,255,.9)" : `rgba(${c.color.join(",")},.62)`;
         ctx.fillText(c.label, c.cx * w, (c.cy - c.r - .04) * h);
       }
-      ctx.textAlign = "left"; ctx.font = "500 11px 'Geist', -apple-system, sans-serif";
-      for (const {n, label} of litSet) if (n.lit > .5 && w > 480) { ctx.fillStyle = `rgba(255,248,230,${n.lit})`; ctx.fillText(label.length > 30 ? label.slice(0, 29) + "…" : label, n.x * w + 8, n.y * h + 4); }
+      ctx.textAlign = "left"; ctx.font = "500 11px -apple-system, system-ui, sans-serif";
+      for (const {n, label} of litSet) if (n.lit > .5 && w > 480) { ctx.fillStyle = `rgba(240,240,240,${n.lit})`; ctx.fillText(label.length > 30 ? label.slice(0, 29) + "…" : label, n.x * w + 8, n.y * h + 4); }
     };
   }
   const draws = [];
@@ -100,6 +100,9 @@
   requestAnimationFrame(loop);
   const light = (set) => { nodes.forEach((n) => n.target = 0); litSet = set; lineTarget = set.length ? 1 : 0; set.forEach(({n}, i) => setTimeout(() => n.target = 1, still ? 0 : 140 * i)); };
 
+  // the files read light up in the file tree too
+  const tree = (used) => root.querySelectorAll(".demo-tree [data-f]").forEach((li) => li.classList.toggle("lit", used.includes(li.dataset.f)));
+
   // ---------------------------------------------------------------- views
   const views = root.querySelectorAll("[data-view]");
   const tabs = root.querySelectorAll("[data-show]");
@@ -107,7 +110,7 @@
     views.forEach((v) => v.hidden = v.dataset.view !== name);
     tabs.forEach((t) => t.setAttribute("aria-selected", String(t.dataset.show === name)));
     $(".demo-tab").textContent = name[0].toUpperCase() + name.slice(1);
-    if (name !== "ask") light([]);
+    if (name !== "ask") { light([]); tree([]); }
   }
   tabs.forEach((t) => t.addEventListener("click", () => { touched = true; show(t.dataset.show); }));
 
@@ -136,14 +139,14 @@
   const wait = (ms) => new Promise((r) => setTimeout(r, still ? 0 : ms));
   async function ask(i) {
     const id = ++run, item = QUESTIONS[i];
-    show("ask"); out.replaceChildren(); light([]);
+    show("ask"); out.replaceChildren(); light([]); tree([]);
     chips.querySelectorAll("button").forEach((b, j) => b.setAttribute("aria-pressed", String(j === i)));
     input.value = "";
     for (let k = 1; k <= item.q.length; k += still ? item.q.length : 2) { if (id !== run) return; input.value = item.q.slice(0, k); await wait(14); }
     const h = make("h4", "demo-q", item.q); out.appendChild(h);
     status.hidden = false; status.querySelector("span").textContent = item.lit === "none" ? "Deciding whether the vault is needed…" : "Reading the vault…";
     await wait(500); if (id !== run) return;
-    light(LIT[item.lit]); await wait(item.lit === "none" ? 300 : 900); if (id !== run) return;
+    light(LIT[item.lit]); tree(item.used); await wait(item.lit === "none" ? 300 : 900); if (id !== run) return;
     status.hidden = true;
     const p = make("p", "demo-text"); out.appendChild(p);
     for (const part of item.answer) {
@@ -197,7 +200,7 @@
       if (d.wrong) card.classList.add("wrong");
       list.appendChild(card);
     });
-    $(".demo-rules").textContent = 6 - DECISIONS.filter((d) => d.wrong).length;
+    root.querySelectorAll(".demo-rules").forEach((e) => e.textContent = 6 - DECISIONS.filter((d) => d.wrong).length);
   }
   root.querySelectorAll("[data-branch]").forEach((b) => b.addEventListener("click", () => {
     branch = b.dataset.branch; root.querySelectorAll("[data-branch]").forEach((x) => x.setAttribute("aria-pressed", String(x === b))); renderLedger();

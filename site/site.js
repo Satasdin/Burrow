@@ -18,6 +18,10 @@
     document.getElementById("install").textContent = tab.dataset.cmd;
   }));
 
+  const head = document.querySelector("header");
+  const mark = () => head && head.classList.toggle("scrolled", scrollY > 8);
+  addEventListener("scroll", mark, {passive: true}); mark();
+
   const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const hero = document.querySelector(".stage video");
   if (hero && still) { hero.removeAttribute("autoplay"); hero.pause(); hero.controls = true; }
