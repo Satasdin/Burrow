@@ -3,77 +3,85 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Download Burrow for macOS</title>
+<title>Download Burrow for Mac</title>
 <meta name="description" content="Install Burrow on your Mac, or have your AI agent install it for you.">
+<meta name="theme-color" content="#08070e">
 <link rel="icon" href="media/icon-64.png" type="image/png">
 <link rel="apple-touch-icon" href="media/icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<nav>
-  <a class="mark" href="./" aria-label="Burrow home"><img src="mark.svg" alt="" width="30" height="30">Burrow</a>
-  <ul>
-    <li class="wide"><a href="https://github.com/Satasdin/Burrow">GitHub</a></li>
-    <li><a href="download.html">Download</a></li>
-    <li><a href="https://github.com/Satasdin/Burrow/blob/burrow/docs/README.md">Docs</a></li>
-    <li class="wide"><a href="./#film">Film</a></li>
-  </ul>
-</nav>
+<header>
+  <div class="wrap bar">
+    <a class="brand" href="./"><img src="media/icon-64.png" alt="">Burrow</a>
+    <nav class="pillnav" aria-label="Sections">
+      <a href="./#ask">Ask</a><a href="./#ledger">Ledger</a><a href="./#programs">Programs</a><a href="./#check">Check</a><a href="./#film">Film</a>
+      <a href="https://github.com/Satasdin/Burrow/blob/burrow/docs/README.md">Docs</a><a href="https://github.com/Satasdin/Burrow">GitHub</a>
+    </nav>
+    <a class="btn quiet" href="download.html">Download</a>
+  </div>
+</header>
 
-<main>
+<main class="wrap">
   <section class="hero">
-    <h1>Download Burrow</h1>
-    <p>Get started by installing Burrow, or have your agent install it for you. A Mac with Apple silicon: macOS 14 or
-      later for the program, macOS 26 or later for the app.</p>
+    <img src="media/icon-512.png" alt="" width="120" height="120" style="width:120px;margin:0 auto;filter:drop-shadow(0 16px 50px rgba(124,92,255,.5))">
+    <h1 style="font-size:clamp(36px,5.6vw,58px)">Download Burrow</h1>
+    <p class="lede">Install it yourself, or have your agent do it. A Mac with Apple silicon: macOS 14 or later for the program, macOS 26 or later for the app.</p>
   </section>
 
-  <section class="block">
-    <div class="row">
-      <h2>Install</h2>
-      <div class="tabs" role="tablist" aria-label="What to install">
-        <button role="tab" aria-selected="true" data-cmd="curl -fsSL https://github.com/Satasdin/Burrow/releases/latest/download/install.sh | sh -s -- --app">App and terminal</button>
-        <button role="tab" aria-selected="false" data-cmd="curl -fsSL https://github.com/Satasdin/Burrow/releases/latest/download/install.sh | sh">Terminal only</button>
+  <div class="dl">
+    <section>
+      <div class="row">
+        <h2>Install</h2>
+        <div class="tabs" role="tablist" aria-label="What to install">
+          <button role="tab" aria-selected="true" data-cmd="curl -fsSL https://github.com/Satasdin/Burrow/releases/latest/download/install.sh | sh -s -- --app">App and terminal</button>
+          <button role="tab" aria-selected="false" data-cmd="curl -fsSL https://github.com/Satasdin/Burrow/releases/latest/download/install.sh | sh">Terminal only</button>
+        </div>
       </div>
-    </div>
-    <div class="cmd"><code id="install">curl -fsSL https://github.com/Satasdin/Burrow/releases/latest/download/install.sh | sh -s -- --app</code><button type="button" data-copy aria-label="Copy the install command"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="5" y="5" width="9" height="9" rx="2"/><path d="M11 5V3.5A1.5 1.5 0 0 0 9.5 2h-6A1.5 1.5 0 0 0 2 3.5v6A1.5 1.5 0 0 0 3.5 11H5"/></svg></button></div>
-    <div class="under"><a href="https://github.com/Satasdin/Burrow/releases/latest">Download manually</a></div>
-    <p class="fine">The installer checks every file against its SHA-256 checksum and stops if one does not match.</p>
-  </section>
+      <div class="cmd"><code id="install">curl -fsSL https://github.com/Satasdin/Burrow/releases/latest/download/install.sh | sh -s -- --app</code><button type="button" data-copy aria-label="Copy the install command"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="5" y="5" width="9" height="9" rx="2"/><path d="M11 5V3.5A1.5 1.5 0 0 0 9.5 2h-6A1.5 1.5 0 0 0 2 3.5v6A1.5 1.5 0 0 0 3.5 11H5"/></svg></button></div>
+      <p class="note">The installer checks every file against its SHA-256 checksum and stops if one doesn't match. Or <a href="https://github.com/Satasdin/Burrow/releases/latest">download it from GitHub</a>.</p>
+    </section>
 
-  <section class="block">
-    <div class="row"><h2>Building with an agent?</h2></div>
-    <div class="cmd"><code>Set up Burrow so my AI programs share one memory on this Mac. Follow https://github.com/Satasdin/Burrow/blob/burrow/skills/burrow-setup/SKILL.md</code><button type="button" data-copy aria-label="Copy the prompt"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="5" y="5" width="9" height="9" rx="2"/><path d="M11 5V3.5A1.5 1.5 0 0 0 9.5 2h-6A1.5 1.5 0 0 0 2 3.5v6A1.5 1.5 0 0 0 3.5 11H5"/></svg></button></div>
-    <details><summary>Show full prompt</summary><pre>Set up Burrow so my AI programs share one memory on this Mac. Follow https://github.com/Satasdin/Burrow/blob/burrow/skills/burrow-setup/SKILL.md
+    <section>
+      <h2>Building with an agent?</h2>
+      <div class="cmd"><code>Set up Burrow so my AI programs share one memory on this Mac. Follow https://github.com/Satasdin/Burrow/blob/burrow/skills/burrow-setup/SKILL.md</code><button type="button" data-copy aria-label="Copy the prompt"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="5" y="5" width="9" height="9" rx="2"/><path d="M11 5V3.5A1.5 1.5 0 0 0 9.5 2h-6A1.5 1.5 0 0 0 2 3.5v6A1.5 1.5 0 0 0 3.5 11H5"/></svg></button></div>
+      <details><summary>Show full prompt</summary><pre>Set up Burrow so my AI programs share one memory on this Mac. Follow https://github.com/Satasdin/Burrow/blob/burrow/skills/burrow-setup/SKILL.md
 
 Install it with the command on the Burrow download page, pull the embedding model with Ollama, make ~/Notes a vault, and show me what `burrow connect` would change for the programs I use. Approving folders, writing settings and anything Burrow says only I can do: give me the exact command and wait for me.</pre></details>
-  </section>
+    </section>
 
-  <section class="block">
-    <div class="row"><h2>Teach your agent to use it</h2></div>
-    <div class="cmd"><code>/plugin install burrow --marketplace Satasdin/Burrow</code><button type="button" data-copy aria-label="Copy the plugin command"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="5" y="5" width="9" height="9" rx="2"/><path d="M11 5V3.5A1.5 1.5 0 0 0 9.5 2h-6A1.5 1.5 0 0 0 2 3.5v6A1.5 1.5 0 0 0 3.5 11H5"/></svg></button></div>
-    <p class="fine">Five skills for Claude Code: carry work on, keep decisions, answer a held change, set up. Other programs: <a href="https://github.com/Satasdin/Burrow/blob/burrow/skills/AGENTS.md">paste AGENTS.md</a> into their instructions.</p>
-  </section>
+    <section>
+      <h2>Teach your agent to use it</h2>
+      <div class="cmd"><code>/plugin install burrow --marketplace Satasdin/Burrow</code><button type="button" data-copy aria-label="Copy the plugin command"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="5" y="5" width="9" height="9" rx="2"/><path d="M11 5V3.5A1.5 1.5 0 0 0 9.5 2h-6A1.5 1.5 0 0 0 2 3.5v6A1.5 1.5 0 0 0 3.5 11H5"/></svg></button></div>
+      <p class="note">Five skills for Claude Code: carry work on, keep decisions, answer a held change, set up. For other programs, <a href="https://github.com/Satasdin/Burrow/blob/burrow/skills/AGENTS.md">paste AGENTS.md</a> into their instructions.</p>
+    </section>
 
-  <section class="block">
-    <div class="row"><h2>Then</h2></div>
-    <ol class="steps">
-      <li>Pull the embedding model: <code>ollama pull qwen3-embedding:0.6b</code></li>
-      <li>Make a folder of notes a vault: <code>burrow vault new ~/Notes</code></li>
-      <li>Connect a program: <code>burrow connect claude-code ~/Notes</code></li>
-      <li>Read the <a href="https://github.com/Satasdin/Burrow/blob/burrow/docs/getting-started.md">getting started guide</a>.</li>
-    </ol>
-  </section>
+    <section>
+      <h2>Then</h2>
+      <ol class="steps">
+        <li><span>Pull the embedding model: <code>ollama pull qwen3-embedding:0.6b</code></span></li>
+        <li><span>Make a folder of notes a vault: <code>burrow vault new ~/Notes</code></span></li>
+        <li><span>Connect a program: <code>burrow connect claude-code ~/Notes</code></span></li>
+        <li><span>Read <a href="https://github.com/Satasdin/Burrow/blob/burrow/docs/getting-started.md">getting started</a>.</span></li>
+      </ol>
+    </section>
+  </div>
 </main>
 
 <footer>
-  <span>© 2026 Burrow · macOS, Apple silicon · runs on your Mac</span>
-  <nav>
-    <a href="https://github.com/Satasdin/Burrow/blob/burrow/docs/README.md">Docs</a>
-    <a href="https://github.com/Satasdin/Burrow/tree/burrow/skills">Skills</a>
-    <a href="https://github.com/Satasdin/Burrow/releases">Releases</a>
-    <a href="https://github.com/Satasdin/Burrow/blob/burrow/docs/security.md">Security</a>
-    <a href="https://github.com/Satasdin/Burrow">GitHub</a>
-  </nav>
+  <div class="wrap">
+    <span>© 2026 Burrow</span>
+    <nav aria-label="Footer">
+      <a href="download.html">Download</a>
+      <a href="https://github.com/Satasdin/Burrow/blob/burrow/docs/README.md">Docs</a>
+      <a href="https://github.com/Satasdin/Burrow/tree/burrow/skills">Skills</a>
+      <a href="https://github.com/Satasdin/Burrow/blob/burrow/docs/security.md">Security</a>
+      <a href="https://github.com/Satasdin/Burrow/releases">Releases</a>
+      <a href="https://github.com/Satasdin/Burrow">GitHub</a>
+    </nav>
+  </div>
 </footer>
 <script src="site.js"></script>
 </body>

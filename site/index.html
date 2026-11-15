@@ -5,96 +5,148 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Burrow · one memory for every AI you use</title>
 <meta name="description" content="Burrow keeps your notes, documents, code and the decisions made with your AI on your Mac, so local and cloud models share one memory.">
+<meta name="theme-color" content="#08070e">
 <link rel="icon" href="media/icon-64.png" type="image/png">
 <link rel="apple-touch-icon" href="media/icon-180.png">
 <meta property="og:title" content="Burrow">
 <meta property="og:description" content="One memory on your Mac that every AI model you use reads from and writes to.">
-<meta property="og:image" content="media/hero.jpg">
+<meta property="og:image" content="media/app-ask.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<nav>
-  <a class="mark" href="./" aria-label="Burrow home"><img src="mark.svg" alt="" width="30" height="30">Burrow</a>
-  <ul>
-    <li class="wide"><a href="https://github.com/Satasdin/Burrow">GitHub</a></li>
-    <li><a href="download.html">Download</a></li>
-    <li><a href="https://github.com/Satasdin/Burrow/blob/burrow/docs/README.md">Docs</a></li>
-    <li class="wide"><a href="#film">Film</a></li>
-  </ul>
-</nav>
+<header>
+  <div class="wrap bar">
+    <a class="brand" href="./"><img src="media/icon-64.png" alt="">Burrow</a>
+    <nav class="pillnav" aria-label="Sections">
+      <a href="#ask">Ask</a><a href="#ledger">Ledger</a><a href="#programs">Programs</a><a href="#check">Check</a><a href="#film">Film</a>
+      <a href="https://github.com/Satasdin/Burrow/blob/burrow/docs/README.md">Docs</a><a href="https://github.com/Satasdin/Burrow">GitHub</a>
+    </nav>
+    <a class="btn quiet" href="download.html">Download</a>
+  </div>
+</header>
 
 <main>
-  <section class="hero">
-    <h1>Burrow is one memory for every AI you use.</h1>
-    <p>Your notes, documents and code, and every decision you made with an AI and why, kept on your Mac. Local and cloud
-      models read it and write to it, so a private model knows what you know, and the next model picks up where the last
-      one stopped.</p>
-    <div class="actions">
-      <a class="pill" href="download.html">Get started</a>
-      <a class="pill ghost" href="#film">Watch the film</a>
+  <section class="hero wrap">
+    <span class="badge"><i></i>Free for Mac · runs on your Mac</span>
+    <h1>One memory for every AI you use</h1>
+    <p class="lede">Burrow keeps your notes, documents and code, and every decision you made with an AI and why. Local and cloud models read it and write to it, so a private model knows what you know, and the next one picks up where the last stopped.</p>
+    <div class="cta">
+      <a class="btn primary" href="download.html">Download for Mac</a>
+      <a class="btn quiet" href="#film">Watch the film</a>
     </div>
-    <div class="stage"><video src="media/hero.mp4" poster="media/hero.jpg" autoplay muted playsinline preload="auto" aria-label="The Burrow mark, four layers with a light in the doorway, assembling"></video></div>
-  </section>
+    <p class="under">macOS on Apple silicon. Nothing you keep leaves your Mac.</p>
 
-  <section class="stats" aria-label="Results">
-    <div><b>9 → 102</b><span>questions on your own material a local model answered, out of 120, without and with Burrow</span></div>
-    <div><b>9 of 9</b><span>later sessions kept an earlier decision once its reason was kept with it</span></div>
-    <div><b>3 of 3</b><span>times a different program picked up the work at the right step</span></div>
-  </section>
-  <p class="fine">Measured on one MacBook Pro with Gemma 4 12B and Claude, November 2026. The full method and every limit are in the <a href="https://github.com/Satasdin/Burrow/tree/burrow/docs">project report and docs</a>.</p>
-
-  <section class="works">
-    <h2>Works with the AI you already use</h2>
-    <div class="names">
-      <span>Claude Code</span><span>OpenCode</span><span>OpenClaw</span>
-      <span>Hermes Agent</span><span>n8n</span><span>Ollama</span>
-      <span>llama.cpp</span><span>LM Studio</span><span>Obsidian vaults</span>
+    <div class="rise">
+      <div class="rings" aria-hidden="true"></div>
+      <div class="glow" aria-hidden="true"></div>
+      <div class="arc" aria-hidden="true"></div>
+      <div class="window fade"><img src="media/app-ask.jpg" width="2000" height="1257" alt="Burrow answering a question: the vault's map lights up gold along the notes and code it read, beside the answer with its sources"></div>
     </div>
   </section>
 
-  <section class="sec">
-    <h2>See it work</h2>
-    <p>Rendered from the real app, real transcripts and real results.</p>
-    <div class="clips">
-      <figure class="clip"><video src="media/ask.mp4" poster="media/ask.jpg" muted loop playsinline preload="none"></video>
-        <figcaption><b>Ask your own files</b><span>A model on your Mac answers from your notes and shows every file it read.</span></figcaption></figure>
-      <figure class="clip"><video src="media/coding.mp4" poster="media/coding.jpg" muted loop playsinline preload="none"></video>
-        <figcaption><b>Decisions that last</b><span>Claude Code resumes, reads the decision and its reason, and checks its change before it says done.</span></figcaption></figure>
-      <figure class="clip"><video src="media/local.mp4" poster="media/local.jpg" muted loop playsinline preload="none"></video>
-        <figcaption><b>A local model, offline</b><span>Gemma in OpenCode saw the decision in 4 of 4 runs and kept it in 2. That is why Burrow checks the change too.</span></figcaption></figure>
-      <figure class="clip"><video src="media/agents.mp4" poster="media/agents.jpg" muted loop playsinline preload="none"></video>
-        <figcaption><b>Two agents, one Ledger</b><span>Each keeps its decisions on its own branch, and neither loses the other's.</span></figcaption></figure>
+  <section class="block wrap">
+    <p class="statement">Every AI starts each session knowing nothing about you. <span>A local model doesn't know your notes, and what you settled with one model never reaches the next. Burrow keeps all of it on your Mac, for every model you use.</span></p>
+    <div style="margin-top:56px">
+      <div class="label">Works with the AI you already use</div>
+      <div class="with"><span>Claude Code</span><span>OpenCode</span><span>OpenClaw</span><span>Hermes Agent</span><span>n8n</span><span>Ollama</span><span>llama.cpp</span><span>LM Studio</span><span>Obsidian vaults</span></div>
     </div>
   </section>
 
-  <section class="sec">
-    <h2>The app</h2>
-    <p>Your vault, the Ledger of what every AI decided, and the programs connected to it, in one window.</p>
-    <video class="wide-media" src="media/tour.mp4" poster="media/tour.jpg" muted loop playsinline preload="none"></video>
+  <section class="cap wrap" id="ask">
+    <div class="top">
+      <h2>Ask your own <em>material</em></h2>
+      <p>A model on your Mac answers from your notes, documents and code, and cites the file and line. <b>Gemma 4 12B answered 9 of 120 questions about private material alone, and 102 with Burrow.</b></p>
+    </div>
+    <div class="window"><img src="media/app-session.jpg" loading="lazy" width="2000" height="1257" alt="An OpenCode session with Gemma 4 12B: each search it made in Burrow and every file it read"></div>
+    <div class="fig"><span>FIG 01 · a local model in OpenCode, every lookup and file it read</span><span>Real app</span></div>
   </section>
 
-  <section class="sec" id="film">
-    <h2>The film</h2>
-    <p>Three minutes: why your AI forgets, what Burrow is, and how to use it.</p>
-    <video class="wide-media" src="media/film.mp4" poster="media/film.jpg" controls playsinline preload="none"></video>
+  <section class="cap wrap" id="ledger">
+    <div class="top">
+      <h2>Decisions that outlast the <em>chat</em></h2>
+      <p>When you settle something, your AI keeps it in the Ledger with its reason and what was turned down. Every model that connects is handed it. <b>Once reasons were kept, Claude Code kept an earlier decision in 9 of 9 sessions.</b></p>
+    </div>
+    <div class="window"><img src="media/app-ledger.jpg" loading="lazy" width="2000" height="1522" alt="The Ledger: decisions with their reasons, who kept each, and the rules in force"></div>
+    <div class="fig"><span>FIG 02 · the Ledger: each decision, its reason, and who kept it</span><span>Real app</span></div>
   </section>
 
-  <section class="sec">
-    <h2>Start in a minute</h2>
-    <div class="cmd"><code>curl -fsSL https://github.com/Satasdin/Burrow/releases/latest/download/install.sh | sh</code><button type="button" data-copy aria-label="Copy the install command"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="5" y="5" width="9" height="9" rx="2"/><path d="M11 5V3.5A1.5 1.5 0 0 0 9.5 2h-6A1.5 1.5 0 0 0 2 3.5v6A1.5 1.5 0 0 0 3.5 11H5"/></svg></button></div>
-    <div class="actions"><a class="pill" href="download.html">All the ways to install</a><a class="pill ghost" href="https://github.com/Satasdin/Burrow/blob/burrow/docs/getting-started.md">Getting started</a></div>
+  <section class="cap wrap" id="programs">
+    <div class="top">
+      <h2>Every program, one memory</h2>
+      <p>Connect Claude Code, OpenCode, OpenClaw, Hermes Agent or n8n with one command. A different model in a different program picks up where the last one stopped. <b>3 of 3 handovers continued the right step.</b></p>
+    </div>
+    <div class="pair">
+      <div class="card"><h3>Programs</h3><p>Which AI tools reach your vault, and what each read today.</p><div class="shot"><img src="media/app-programs.jpg" loading="lazy" width="2000" height="1257" alt="The Programs page with OpenCode connected to the vault"></div></div>
+      <div class="card"><h3>Map</h3><p>Your notes and code as one graph, the way your models see it.</p><div class="shot"><img src="media/app-map.jpg" loading="lazy" width="2000" height="1257" alt="The map of a vault: notes and code as a graph, grouped by folder"></div></div>
+    </div>
+  </section>
+
+  <section class="cap wrap" id="check">
+    <div class="top">
+      <h2>Checked before it's <em>done</em></h2>
+      <p>A model can read a decision and still break it. Burrow checks every change against the decisions it touches, inside Claude Code, OpenCode, OpenClaw, Hermes Agent and git, and holds a change that breaks one.</p>
+    </div>
+    <div class="window"><img src="media/gate.jpg" loading="lazy" width="1885" height="1041" alt="The git pre-commit hook letting a harmless change through and refusing one that breaks the payment decision"></div>
+    <div class="fig"><span>FIG 03 · git's pre-commit hook refusing a change that breaks a decision</span><span>Real output</span></div>
+
+    <div class="grid">
+      <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 6.5h16M4 12h16M4 17.5h9"/></svg><h4>Plain files</h4><p>Your vault stays Markdown in a folder. An Obsidian vault works as it is.</p></div>
+      <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><h4>Nothing leaves</h4><p>Burrow calls no cloud model. Search and answers run on your Mac.</p></div>
+      <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.3 11 15.7 7M8.3 13l7.4 4"/></svg><h4>MCP</h4><p>Any program that speaks the Model Context Protocol connects.</p></div>
+      <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 4v16M4 12h16"/></svg><h4>Never deletes</h4><p>A decision is replaced or marked wrong by a later one. History stays.</p></div>
+      <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="9" cy="9" r="3"/><circle cx="16" cy="15" r="3"/><path d="M4 20c.8-3 3-5 5-5M20 4c-.8 3-3 5-5 5"/></svg><h4>Teams</h4><p>Share decisions through a git or synced folder, only after you approve.</p></div>
+      <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 5h14v10H9l-4 4z"/></svg><h4>Exact words</h4><p>Claude Code's requests and errors are kept word for word when it compacts.</p></div>
+      <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3 3 20h18z"/><path d="M12 10v4M12 17v.5"/></svg><h4>Steering flagged</h4><p>Text written to steer an AI is shown to you, never handed over as a rule.</p></div>
+      <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 12h6l2-5 2 10 2-5h4"/></svg><h4>Local models first</h4><p>Fits what it shows to what your model can read in time.</p></div>
+    </div>
+  </section>
+
+  <section class="cap wrap">
+    <div class="label">Measured on one MacBook Pro, November 2026</div>
+    <div class="nums">
+      <div class="num"><b>93<small>%</small></b><p>of the knowledge gap between Gemma 4 12B and a cloud model closed, on material neither had seen.</p></div>
+      <div class="num"><b>9<small> of 9</small></b><p>later Claude Code sessions kept an earlier decision once its reason was kept.</p></div>
+      <div class="num"><b>3<small> of 3</small></b><p>times a different program picked the work up at the right step.</p></div>
+    </div>
+    <p class="source">A small local model still broke a decision it had read in 2 of 4 runs, which is why Burrow checks changes too. Method and every limit: <a href="https://github.com/Satasdin/Burrow/tree/burrow/docs">the docs and project report</a>.</p>
+  </section>
+
+  <section class="cap wrap" id="film">
+    <div class="top"><h2>Three minutes, start to finish</h2><p>Why your AI forgets, what Burrow is, and how to use it, rendered from the real app and real runs.</p></div>
+    <div class="film"><video src="media/film.mp4" poster="media/film.jpg" controls playsinline preload="none"></video></div>
+  </section>
+
+  <section class="cap wrap">
+    <div class="yours">
+      <div class="trio">
+        <div><h3>Your memory is yours.</h3><p>It lives in a folder on your Mac, in files you can open without Burrow.</p></div>
+        <div><h3>Your AI is your choice.</h3><p>Local or cloud, any program that speaks MCP. Switch whenever you like and keep everything.</p></div>
+        <div><h3>Your say is final.</h3><p>Approving folders, sharing with a team and overriding a decision are yours alone.</p></div>
+      </div>
+      <div class="iconcard">
+        <img src="media/mark3d.jpg" alt="The Burrow mark in 3D: four strata with a light in the doorway, rendered in Blender">
+        <h3>Burrow</h3>
+        <p>Free for Mac.</p>
+        <a class="btn primary" href="download.html">Download now</a>
+      </div>
+    </div>
   </section>
 </main>
 
 <footer>
-  <span>© 2026 Burrow · macOS, Apple silicon · runs on your Mac</span>
-  <nav>
-    <a href="https://github.com/Satasdin/Burrow/blob/burrow/docs/README.md">Docs</a>
-    <a href="https://github.com/Satasdin/Burrow/tree/burrow/skills">Skills</a>
-    <a href="https://github.com/Satasdin/Burrow/releases">Releases</a>
-    <a href="https://github.com/Satasdin/Burrow/blob/burrow/docs/security.md">Security</a>
-    <a href="https://github.com/Satasdin/Burrow">GitHub</a>
-  </nav>
+  <div class="wrap">
+    <span>© 2026 Burrow</span>
+    <nav aria-label="Footer">
+      <a href="download.html">Download</a>
+      <a href="https://github.com/Satasdin/Burrow/blob/burrow/docs/README.md">Docs</a>
+      <a href="https://github.com/Satasdin/Burrow/tree/burrow/skills">Skills</a>
+      <a href="https://github.com/Satasdin/Burrow/blob/burrow/docs/security.md">Security</a>
+      <a href="https://github.com/Satasdin/Burrow/releases">Releases</a>
+      <a href="https://github.com/Satasdin/Burrow">GitHub</a>
+    </nav>
+  </div>
 </footer>
 <script src="site.js"></script>
 </body>
