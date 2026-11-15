@@ -27,8 +27,8 @@ header{position:sticky;top:0;z-index:20;background:rgba(15,15,15,0);padding-top:
 header.scrolled{background:var(--bg);border-bottom-color:#262626}
 .bar{display:flex;align-items:center;gap:20px;height:90px;transition:height .25s cubic-bezier(.4,0,.2,1)}
 header.scrolled .bar{height:64px}
-.brand{display:flex;align-items:center;gap:9px;text-decoration:none;font-weight:700;font-size:20px;letter-spacing:-.02em}
-.brand img{width:26px;height:26px;border-radius:6px}
+/* the logo is the word itself, set like the headlines: system type, heavy and tight */
+.brand{display:inline-flex;align-items:center;text-decoration:none;font-weight:700;font-size:23px;line-height:1;letter-spacing:-.045em;color:#fff;padding:4px 0}
 .links{display:flex;gap:2px}
 .links a,.plain{font-size:14px;line-height:20px;font-weight:500;color:var(--dim);text-decoration:none;padding:8px 12px;border-radius:8px;transition:color .15s,background-color .15s}
 .links a:hover,.plain:hover{color:#fff;background:#262626}
