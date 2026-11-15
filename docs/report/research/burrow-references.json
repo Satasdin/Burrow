@@ -473,38 +473,6 @@
   "issued": {
    "date-parts": [
     [
-     2024
-    ]
-   ]
-  },
-  "DOI": "10.1145/3643916.3644413",
-  "URL": "https://doi.org/10.1145/3643916.3644413",
-  "author": [
-   {
-    "family": "Dhaouadi",
-    "given": "M."
-   },
-   {
-    "family": "Oakes",
-    "given": "B. J."
-   },
-   {
-    "family": "Famelis",
-    "given": "M."
-   }
-  ],
-  "title": "Rationale dataset and analysis for the commit messages of the Linux kernel out-of-memory killer",
-  "type": "paper-conference",
-  "container-title": "Proceedings of the 32nd IEEE/ACM International Conference on Program Comprehension",
-  "page": "415-425",
-  "publisher": "ACM",
-  "_apa": "Dhaouadi, M., Oakes, B. J., & Famelis, M. (2024). Rationale dataset and analysis for the commit messages of the Linux kernel out-of-memory killer. In *Proceedings of the 32nd IEEE/ACM International Conference on Program Comprehension* (pp. 415–425). ACM. https://doi.org/10.1145/3643916.3644413",
-  "id": "Dhaouadi2024"
- },
- {
-  "issued": {
-   "date-parts": [
-    [
      2026
     ]
    ]
@@ -666,37 +634,6 @@
   "page": "75-105",
   "_apa": "Hevner, A. R., March, S. T., Park, J., & Ram, S. (2004). Design science in information systems research. *MIS Quarterly*, *28*(1), 75–105. https://doi.org/10.2307/25148625",
   "id": "Hevner2004"
- },
- {
-  "issued": {
-   "date-parts": [
-    [
-     2025,
-     7,
-     14
-    ]
-   ]
-  },
-  "URL": "https://www.trychroma.com/research/context-rot",
-  "author": [
-   {
-    "family": "Hong",
-    "given": "K."
-   },
-   {
-    "family": "Troynikov",
-    "given": "A."
-   },
-   {
-    "family": "Huber",
-    "given": "J."
-   }
-  ],
-  "title": "Context rot: How increasing input tokens impacts LLM performance",
-  "type": "webpage",
-  "container-title": "Chroma",
-  "_apa": "Hong, K., Troynikov, A., & Huber, J. (2025, July 14). *Context rot: How increasing input tokens impacts LLM performance*. Chroma. https://www.trychroma.com/research/context-rot",
-  "id": "Hong2025"
  },
  {
   "issued": {
@@ -919,6 +856,28 @@
   "page": "47-56",
   "_apa": "Larman, C., & Basili, V. R. (2003). Iterative and incremental development: A brief history. *Computer*, *36*(6), 47–56. https://doi.org/10.1109/MC.2003.1204375",
   "id": "Larman2003"
+ },
+ {
+  "issued": {
+   "date-parts": [
+    [
+     2025,
+     5,
+     14
+    ]
+   ]
+  },
+  "URL": "https://www.letta.com/blog/memory-blocks",
+  "author": [
+   {
+    "literal": "Letta"
+   }
+  ],
+  "title": "Memory blocks: The key to agentic context management",
+  "type": "webpage",
+  "container-title": "Letta Blog",
+  "_apa": "Letta. (2025, May 14). *Memory blocks: The key to agentic context management*. Letta Blog. https://www.letta.com/blog/memory-blocks",
+  "id": "Letta2025"
  },
  {
   "issued": {
@@ -1237,41 +1196,6 @@
   "issued": {
    "date-parts": [
     [
-     2025,
-     9,
-     29
-    ]
-   ]
-  },
-  "URL": "https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents",
-  "author": [
-   {
-    "family": "Rajasekaran",
-    "given": "P."
-   },
-   {
-    "family": "Dixon",
-    "given": "E."
-   },
-   {
-    "family": "Ryan",
-    "given": "C."
-   },
-   {
-    "family": "Hadfield",
-    "given": "J."
-   }
-  ],
-  "title": "Effective context engineering for AI agents",
-  "type": "webpage",
-  "container-title": "Anthropic Engineering",
-  "_apa": "Rajasekaran, P., Dixon, E., Ryan, C., & Hadfield, J. (2025, September 29). *Effective context engineering for AI agents*. Anthropic Engineering. https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents",
-  "id": "Rajasekaran2025"
- },
- {
-  "issued": {
-   "date-parts": [
-    [
      2025
     ]
    ]
@@ -1305,42 +1229,6 @@
   "publisher": "arXiv",
   "_apa": "Rasmussen, P., Paliychuk, P., Beauvais, T., Ryan, J., & Chalef, D. (2025). *Zep: A temporal knowledge graph architecture for agent memory*. arXiv. https://doi.org/10.48550/arXiv.2501.13956",
   "id": "Rasmussen2025"
- },
- {
-  "issued": {
-   "date-parts": [
-    [
-     2016
-    ]
-   ]
-  },
-  "DOI": "10.1145/2884781.2884851",
-  "URL": "https://doi.org/10.1145/2884781.2884851",
-  "author": [
-   {
-    "family": "Rigby",
-    "given": "P. C."
-   },
-   {
-    "family": "Zhu",
-    "given": "Y. C."
-   },
-   {
-    "family": "Donadelli",
-    "given": "S. M."
-   },
-   {
-    "family": "Mockus",
-    "given": "A."
-   }
-  ],
-  "title": "Quantifying and mitigating turnover-induced knowledge loss: Case studies of Chrome and a project at Avaya",
-  "type": "paper-conference",
-  "container-title": "Proceedings of the 38th International Conference on Software Engineering",
-  "page": "1006-1016",
-  "publisher": "ACM",
-  "_apa": "Rigby, P. C., Zhu, Y. C., Donadelli, S. M., & Mockus, A. (2016). Quantifying and mitigating turnover-induced knowledge loss: Case studies of Chrome and a project at Avaya. In *Proceedings of the 38th International Conference on Software Engineering* (pp. 1006–1016). ACM. https://doi.org/10.1145/2884781.2884851",
-  "id": "Rigby2016"
  },
  {
   "issued": {
@@ -1717,54 +1605,6 @@
   "publisher": "arXiv",
   "_apa": "Xu, J., Li, Z., Chen, W., Wang, Q., Gao, X., Cai, Q., & Ling, Z. (2024). *On-device language models: A comprehensive review*. arXiv. https://doi.org/10.48550/arXiv.2409.00088",
   "id": "Xu2024"
- },
- {
-  "issued": {
-   "date-parts": [
-    [
-     2024
-    ]
-   ]
-  },
-  "DOI": "10.18653/v1/2024.emnlp-main.486",
-  "URL": "https://doi.org/10.18653/v1/2024.emnlp-main.486",
-  "author": [
-   {
-    "family": "Xu",
-    "given": "R."
-   },
-   {
-    "family": "Qi",
-    "given": "Z."
-   },
-   {
-    "family": "Guo",
-    "given": "Z."
-   },
-   {
-    "family": "Wang",
-    "given": "C."
-   },
-   {
-    "family": "Wang",
-    "given": "H."
-   },
-   {
-    "family": "Zhang",
-    "given": "Y."
-   },
-   {
-    "family": "Xu",
-    "given": "W."
-   }
-  ],
-  "title": "Knowledge conflicts for LLMs: A survey",
-  "type": "paper-conference",
-  "container-title": "Proceedings of the 2024 Conference on Empirical Methods in Natural Language Processing",
-  "page": "8541-8565",
-  "publisher": "Association for Computational Linguistics",
-  "_apa": "Xu, R., Qi, Z., Guo, Z., Wang, C., Wang, H., Zhang, Y., & Xu, W. (2024). Knowledge conflicts for LLMs: A survey. In *Proceedings of the 2024 Conference on Empirical Methods in Natural Language Processing* (pp. 8541–8565). Association for Computational Linguistics. https://doi.org/10.18653/v1/2024.emnlp-main.486",
-  "id": "Xu2024b"
  },
  {
   "issued": {

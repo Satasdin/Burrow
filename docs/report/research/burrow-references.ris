@@ -176,20 +176,6 @@ PB  - Laws of Kenya
 UR  - https://kenyalaw.org/akn/ke/act/2019/24/eng@2022-12-31
 ER  - 
 
-TY  - CONF
-AU  - Dhaouadi, M.
-AU  - Oakes, B. J.
-AU  - Famelis, M.
-TI  - Rationale dataset and analysis for the commit messages of the Linux kernel out-of-memory killer
-PY  - 2024
-T2  - Proceedings of the 32nd IEEE/ACM International Conference on Program Comprehension
-PB  - ACM
-DO  - 10.1145/3643916.3644413
-UR  - https://doi.org/10.1145/3643916.3644413
-SP  - 415
-EP  - 425
-ER  - 
-
 TY  - GEN
 AU  - Gemma Team
 TI  - Gemma 4 technical report
@@ -253,17 +239,6 @@ DO  - 10.2307/25148625
 UR  - https://doi.org/10.2307/25148625
 SP  - 75
 EP  - 105
-ER  - 
-
-TY  - ELEC
-AU  - Hong, K.
-AU  - Troynikov, A.
-AU  - Huber, J.
-TI  - Context rot: How increasing input tokens impacts LLM performance
-PY  - 2025
-DA  - 2025/07/14
-T2  - Chroma
-UR  - https://www.trychroma.com/research/context-rot
 ER  - 
 
 TY  - JOUR
@@ -354,6 +329,15 @@ DO  - 10.1109/MC.2003.1204375
 UR  - https://doi.org/10.1109/MC.2003.1204375
 SP  - 47
 EP  - 56
+ER  - 
+
+TY  - ELEC
+AU  - Letta
+TI  - Memory blocks: The key to agentic context management
+PY  - 2025
+DA  - 2025/05/14
+T2  - Letta Blog
+UR  - https://www.letta.com/blog/memory-blocks
 ER  - 
 
 TY  - CONF
@@ -470,18 +454,6 @@ SP  - 62980
 EP  - 63008
 ER  - 
 
-TY  - ELEC
-AU  - Rajasekaran, P.
-AU  - Dixon, E.
-AU  - Ryan, C.
-AU  - Hadfield, J.
-TI  - Effective context engineering for AI agents
-PY  - 2025
-DA  - 2025/09/29
-T2  - Anthropic Engineering
-UR  - https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents
-ER  - 
-
 TY  - GEN
 AU  - Rasmussen, P.
 AU  - Paliychuk, P.
@@ -493,21 +465,6 @@ PY  - 2025
 PB  - arXiv
 DO  - 10.48550/arXiv.2501.13956
 UR  - https://doi.org/10.48550/arXiv.2501.13956
-ER  - 
-
-TY  - CONF
-AU  - Rigby, P. C.
-AU  - Zhu, Y. C.
-AU  - Donadelli, S. M.
-AU  - Mockus, A.
-TI  - Quantifying and mitigating turnover-induced knowledge loss: Case studies of Chrome and a project at Avaya
-PY  - 2016
-T2  - Proceedings of the 38th International Conference on Software Engineering
-PB  - ACM
-DO  - 10.1145/2884781.2884851
-UR  - https://doi.org/10.1145/2884781.2884851
-SP  - 1006
-EP  - 1016
 ER  - 
 
 TY  - JOUR
@@ -653,24 +610,6 @@ PY  - 2024
 PB  - arXiv
 DO  - 10.48550/arXiv.2409.00088
 UR  - https://doi.org/10.48550/arXiv.2409.00088
-ER  - 
-
-TY  - CONF
-AU  - Xu, R.
-AU  - Qi, Z.
-AU  - Guo, Z.
-AU  - Wang, C.
-AU  - Wang, H.
-AU  - Zhang, Y.
-AU  - Xu, W.
-TI  - Knowledge conflicts for LLMs: A survey
-PY  - 2024
-T2  - Proceedings of the 2024 Conference on Empirical Methods in Natural Language Processing
-PB  - Association for Computational Linguistics
-DO  - 10.18653/v1/2024.emnlp-main.486
-UR  - https://doi.org/10.18653/v1/2024.emnlp-main.486
-SP  - 8541
-EP  - 8565
 ER  - 
 
 TY  - GEN
