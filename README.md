@@ -12,6 +12,7 @@ Which Mac: the terminal version and the MCP server run on Apple silicon with mac
 
 - [docs/README.md](docs/README.md): every capability, where to use it, and the guides: getting started, day to day,
   the app, connecting programs, the Ledger, the engine, the tool reference and security.
+- [BURROW.md](BURROW.md): every tool, command and page of Burrow in one file, for AI agents.
 - [skills/](skills/README.md): a skill pack that teaches an AI program to use Burrow well. In Claude Code:
 
 ```

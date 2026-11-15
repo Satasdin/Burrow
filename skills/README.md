@@ -10,8 +10,11 @@ well: when to resume, how to keep a decision the next model will keep to, and wh
 | [burrow-decisions](burrow-decisions/SKILL.md) | the person settles something, a decision overlaps or replaces another, or one is shared with a team |
 | [burrow-check](burrow-check/SKILL.md) | before calling a code change done, and when a Burrow hook or plugin holds a change |
 | [burrow-setup](burrow-setup/SKILL.md) | installing Burrow, opening a vault and connecting programs |
+| [burrow-local-models](burrow-local-models/SKILL.md) | a small local model answering from the vault, preparing a question for another model, reading a whole folder |
+| [burrow-vaults-and-teams](burrow-vaults-and-teams/SKILL.md) | results from another vault or a team, sharing a decision, a share waiting for approval |
 
-[AGENTS.md](AGENTS.md) is all five on one page, for programs that read an instructions file instead of skills.
+[AGENTS.md](AGENTS.md) is all seven on one page, for programs that read an instructions file instead of skills.
+[BURROW.md](../BURROW.md) maps every tool, command and page of Burrow in one file, for an agent that needs the whole picture.
 
 ## Installing
 

@@ -18,6 +18,7 @@ model, in any program, starts from what was settled.
 | [Security and privacy](security.md) | what stays on your Mac, and what Burrow defends against |
 | [Model working memory](kv.md) | keeping a llama.cpp model's cache on disk |
 | [Skills for agents](../skills/README.md) | the skill pack that teaches an AI program to use Burrow well |
+| [BURROW.md](../BURROW.md) | every tool, command and page in one file, for AI agents |
 
 ## Everything Burrow does
 

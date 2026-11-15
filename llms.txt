@@ -1,0 +1,11 @@
+# Burrow
+
+> One memory on a Mac that every AI model the person uses shares: their notes, documents and linked code, and a
+> Ledger of the decisions made with their models and why, reached by any program as an MCP server (`burrow mcp <vault>`).
+
+- [BURROW.md](https://github.com/Satasdin/Burrow/blob/burrow/BURROW.md): every MCP tool, terminal command and app page in one file
+- [Skills for agents](https://github.com/Satasdin/Burrow/tree/burrow/skills): how an agent should use Burrow
+- [AGENTS.md](https://github.com/Satasdin/Burrow/blob/burrow/skills/AGENTS.md): the skills on one page, for an instructions file
+- [Tool reference](https://github.com/Satasdin/Burrow/blob/burrow/docs/tools.md)
+- [Getting started](https://github.com/Satasdin/Burrow/blob/burrow/docs/getting-started.md)
+- [Security](https://github.com/Satasdin/Burrow/blob/burrow/docs/security.md)

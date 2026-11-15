@@ -56,6 +56,10 @@ Name the `files` it rests on and your `model`. Use `branch` for work that belong
 - **burrow-decisions**: keeping a decision so the next model keeps to it, and what to do when one overlaps another.
 - **burrow-check**: answering Burrow's verdicts and a held change.
 - **burrow-setup**: installing Burrow and connecting programs.
+- **burrow-local-models**: a small local model answering well, preparing questions, reading a whole folder.
+- **burrow-vaults-and-teams**: bridged vaults, a team's decisions, and sharing one.
+
+Every tool, command and app page is mapped in `BURROW.md` at the root of the Burrow repository.
 
 ## Older setups
 

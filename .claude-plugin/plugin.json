@@ -2,7 +2,7 @@
   "name": "burrow",
   "displayName": "Burrow",
   "description": "Skills for using Burrow, a private memory on your Mac that local and cloud models share: answer from your own notes and code, keep decisions with their reasons, carry work on between programs, and check changes against what was decided.",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "author": { "name": "Satasdin" },
   "homepage": "https://satasdin.github.io/Burrow/",
   "repository": "https://github.com/Satasdin/Burrow",
