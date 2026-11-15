@@ -10,10 +10,10 @@ Which Mac: the terminal version and the MCP server run on Apple silicon with mac
 
 ## Install
 
-The terminal version, from the [landing page](https://satasdin.github.io/CAMR/) or with:
+The terminal version, from the [landing page](https://satasdin.github.io/Burrow/) or with:
 
 ```bash
-curl -fsSL https://github.com/Satasdin/CAMR/releases/latest/download/install.sh | sh
+curl -fsSL https://github.com/Satasdin/Burrow/releases/latest/download/install.sh | sh
 ```
 
 Add `-s -- --app` after `sh` to install the desktop app as well.

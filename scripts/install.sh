@@ -1,10 +1,10 @@
 #!/bin/sh
 # Installs Burrow from its latest GitHub release.
-#   curl -fsSL https://github.com/Satasdin/CAMR/releases/latest/download/install.sh | sh
+#   curl -fsSL https://github.com/Satasdin/Burrow/releases/latest/download/install.sh | sh
 #   ... | sh -s -- --app     also installs the desktop application
 set -eu
 
-BASE="https://github.com/Satasdin/CAMR/releases/latest/download"
+BASE="https://github.com/Satasdin/Burrow/releases/latest/download"
 BIN_DIR="${BURROW_BIN_DIR:-$HOME/.local/bin}"
 WITH_APP=0
 for arg in "$@"; do

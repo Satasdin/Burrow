@@ -12,7 +12,7 @@ Show
 Sleep 1s
 Type "# 1. Install Burrow: one command, checksum-verified, from the GitHub release" Enter
 Sleep 1s
-Type "curl -fsSL https://github.com/Satasdin/CAMR/releases/latest/download/install.sh | sh" Enter
+Type "curl -fsSL https://github.com/Satasdin/Burrow/releases/latest/download/install.sh | sh" Enter
 Wait+Line@60s /\$$/
 Type "# 2. Index the vault: a folder of your own notes, documents and code" Enter
 Type "burrow index ~/BurrowDemo/Notes --vault" Enter

@@ -64,13 +64,13 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:12px 26px;justify-content:space-bet
 </head>
 <body>
 <div class="wrap">
-<nav><a class="mark" href="#"><i></i>Burrow</a><div><a class="opt" href="#install">Install</a><a href="https://github.com/Satasdin/CAMR/tree/burrow">GitHub</a></div></nav>
+<nav><a class="mark" href="#"><i></i>Burrow</a><div><a class="opt" href="#install">Install</a><a href="https://github.com/Satasdin/Burrow/tree/burrow">GitHub</a></div></nav>
 <header class="hero">
 <h1>Your local AI, with a memory.</h1>
 <p class="lede">Burrow keeps your notes, documents and code in a folder on your computer, and reads the right parts to the model you run yourself.</p>
 <div class="get">
-<a class="btn" href="https://github.com/Satasdin/CAMR/releases/latest/download/Burrow-macos-arm64.zip">Download for Mac</a>
-<div class="cmd"><code><b>curl</b> -fsSL https://github.com/Satasdin/CAMR/releases/latest/download/install.sh | sh</code><button type="button" data-copy="curl -fsSL https://github.com/Satasdin/CAMR/releases/latest/download/install.sh | sh">Copy</button></div>
+<a class="btn" href="https://github.com/Satasdin/Burrow/releases/latest/download/Burrow-macos-arm64.zip">Download for Mac</a>
+<div class="cmd"><code><b>curl</b> -fsSL https://github.com/Satasdin/Burrow/releases/latest/download/install.sh | sh</code><button type="button" data-copy="curl -fsSL https://github.com/Satasdin/Burrow/releases/latest/download/install.sh | sh">Copy</button></div>
 </div>
 <p class="small">macOS 14 or later, Apple silicon. Free. Nothing leaves your computer.</p>
 <div class="shot"><img src="img/graph-ask.jpg" width="2000" height="1257" alt="Burrow's map of a vault on black, with the ten notes and files read for an answer lit gold, and the answer with its sources beside it"></div>
@@ -80,15 +80,15 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:12px 26px;justify-content:space-bet
 <div><b>47 <span>→ 48</span></b><p>of 50 maths problems, because Burrow leaves your files out when they would not help</p></div>
 <div><b><span>0.06</span> s</b><p>is Burrow's own part of an answer. The rest is your model reading and writing</p></div>
 </div>
-<p class="note">Measured with Gemma 4 12B on a consumer laptop, on law, 2026 software notes and a private project. <a href="https://github.com/Satasdin/CAMR/tree/burrow/trials/results/gap-1">See every answer</a>.</p>
+<p class="note">Measured with Gemma 4 12B on a consumer laptop, on law, 2026 software notes and a private project. <a href="https://github.com/Satasdin/Burrow/tree/burrow/trials/results/gap-1">See every answer</a>.</p>
 <section class="part"><h2>Every answer shows what it read.</h2><p>Each statement names the file and line it came from, and the files light up on your map.</p><div class="shot"><img src="img/ask-law.jpg" width="2000" height="685" alt="A question on Kenyan data protection law answered with a cited file and line, the files used listed under it, and those files lit on a small map"></div></section>
 <section class="part"><h2>It knows when to leave your files alone.</h2><p>Burrow decides for each question whether your memory will help. A sum goes straight to the model.</p><div class="shot"><img src="img/ask-sum.jpg" width="2000" height="957" alt="A sum answered in Burrow with a line saying the vault was left out"></div></section>
 <section class="part"><h2>Your memory is just your files.</h2><p>Plain Markdown in a folder you own, joined by the links you already wrote. An Obsidian vault works as it is.</p><div class="shot"><img src="img/graph.jpg" width="2000" height="1257" alt="A vault drawn as clusters of stars on black, one colour for each folder"></div></section>
 <section class="part" id="install"><h2>Install it.</h2>
 <div class="install">
-<div class="card"><h3>Desktop app</h3><p>One click, then move Burrow to Applications.</p><a class="btn" href="https://github.com/Satasdin/CAMR/releases/latest/download/Burrow-macos-arm64.zip">Download for Mac</a><small>Burrow is not signed with Apple yet. On first open, macOS will stop it. Go to System Settings, Privacy &amp; Security, and choose Open Anyway. Or install the app with the Terminal command.</small></div>
+<div class="card"><h3>Desktop app</h3><p>One click, then move Burrow to Applications.</p><a class="btn" href="https://github.com/Satasdin/Burrow/releases/latest/download/Burrow-macos-arm64.zip">Download for Mac</a><small>Burrow is not signed with Apple yet. On first open, macOS will stop it. Go to System Settings, Privacy &amp; Security, and choose Open Anyway. Or install the app with the Terminal command.</small></div>
 <div class="card"><h3>Terminal</h3><p>Installs the burrow command. Add <code>--app</code> for the desktop app too.</p>
-<div class="cmd"><code><b>curl</b> -fsSL https://github.com/Satasdin/CAMR/releases/latest/download/install.sh | sh -s -- --app</code><button type="button" data-copy="curl -fsSL https://github.com/Satasdin/CAMR/releases/latest/download/install.sh | sh -s -- --app">Copy</button></div>
+<div class="cmd"><code><b>curl</b> -fsSL https://github.com/Satasdin/Burrow/releases/latest/download/install.sh | sh -s -- --app</code><button type="button" data-copy="curl -fsSL https://github.com/Satasdin/Burrow/releases/latest/download/install.sh | sh -s -- --app">Copy</button></div>
 <small>Each download is checked against its published checksum.</small></div>
 </div>
 <ol class="next">
@@ -99,7 +99,7 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:12px 26px;justify-content:space-bet
 </ol>
 </section>
 </div>
-<footer><div class="wrap"><span>Burrow</span><a href="https://github.com/Satasdin/CAMR/releases/latest">Releases</a></div></footer>
+<footer><div class="wrap"><span>Burrow</span><a href="https://github.com/Satasdin/Burrow/releases/latest">Releases</a></div></footer>
 <script>
 document.querySelectorAll("[data-copy]").forEach(function(b){b.addEventListener("click",function(){var t=b.dataset.copy;(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){b.textContent="Copied";setTimeout(function(){b.textContent="Copy"},1600)},function(){var r=document.createRange();r.selectNodeContents(b.previousElementSibling);var s=getSelection();s.removeAllRanges();s.addRange(r)})})});
 </script>

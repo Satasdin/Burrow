@@ -18,8 +18,8 @@ ditto -c -k --sequesterRsrc --keepParent app/build/Burrow.app "$out/Burrow-macos
 cp scripts/install.sh "$out/install.sh"
 (cd "$out" && shasum -a 256 burrow-macos-arm64.tar.gz Burrow-macos-arm64.zip install.sh > SHA256SUMS)
 
-gh release create "$tag" -R Satasdin/CAMR --target "$(git rev-parse HEAD)" --latest \
+gh release create "$tag" -R Satasdin/Burrow --target "$(git rev-parse HEAD)" --latest \
   --title "Burrow $version" \
-  --notes "Burrow for macOS 14 or later on Apple silicon. Install the terminal version with: curl -fsSL https://github.com/Satasdin/CAMR/releases/latest/download/install.sh | sh" \
+  --notes "Burrow for macOS 14 or later on Apple silicon. Install the terminal version with: curl -fsSL https://github.com/Satasdin/Burrow/releases/latest/download/install.sh | sh" \
   "$out/burrow-macos-arm64.tar.gz" "$out/Burrow-macos-arm64.zip" "$out/install.sh" "$out/SHA256SUMS"
 echo "published $tag"

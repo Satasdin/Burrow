@@ -4480,6 +4480,242 @@
   "issued": {
    "date-parts": [
     [
+     2025
+    ]
+   ]
+  },
+  "DOI": "10.48550/arXiv.2512.13564",
+  "URL": "https://doi.org/10.48550/arXiv.2512.13564",
+  "author": [
+   {
+    "family": "Hu",
+    "given": "Yuyang"
+   },
+   {
+    "family": "Liu",
+    "given": "Shichun"
+   },
+   {
+    "family": "Yue",
+    "given": "Yanwei"
+   },
+   {
+    "family": "Zhang",
+    "given": "Guibin"
+   },
+   {
+    "family": "Liu",
+    "given": "Boyang"
+   },
+   {
+    "family": "Zhu",
+    "given": "Fangyi"
+   },
+   {
+    "family": "Lin",
+    "given": "Jiahang"
+   },
+   {
+    "family": "Guo",
+    "given": "Honglin"
+   },
+   {
+    "family": "Dou",
+    "given": "Shihan"
+   },
+   {
+    "family": "Xi",
+    "given": "Zhiheng"
+   },
+   {
+    "family": "Jin",
+    "given": "Senjie"
+   },
+   {
+    "family": "Tan",
+    "given": "Jiejun"
+   },
+   {
+    "family": "Yin",
+    "given": "Yanbin"
+   },
+   {
+    "family": "Liu",
+    "given": "Jiongnan"
+   },
+   {
+    "family": "Zhang",
+    "given": "Zeyu"
+   },
+   {
+    "family": "Sun",
+    "given": "Zhongxiang"
+   },
+   {
+    "family": "Zhu",
+    "given": "Yutao"
+   },
+   {
+    "family": "Sun",
+    "given": "Hao"
+   },
+   {
+    "family": "Peng",
+    "given": "Boci"
+   },
+   {
+    "family": "Cheng",
+    "given": "Zhenrong"
+   },
+   {
+    "family": "Fan",
+    "given": "Xuanbo"
+   },
+   {
+    "family": "Guo",
+    "given": "Jiaxin"
+   },
+   {
+    "family": "Yu",
+    "given": "Xinlei"
+   },
+   {
+    "family": "Zhou",
+    "given": "Zhenhong"
+   },
+   {
+    "family": "Hu",
+    "given": "Zewen"
+   },
+   {
+    "family": "Huo",
+    "given": "Jiahao"
+   },
+   {
+    "family": "Wang",
+    "given": "Junhao"
+   },
+   {
+    "family": "Niu",
+    "given": "Yuwei"
+   },
+   {
+    "family": "Wang",
+    "given": "Yu"
+   },
+   {
+    "family": "Yin",
+    "given": "Zhenfei"
+   },
+   {
+    "family": "Hu",
+    "given": "Xiaobin"
+   },
+   {
+    "family": "Liao",
+    "given": "Yue"
+   },
+   {
+    "family": "Li",
+    "given": "Qiankun"
+   },
+   {
+    "family": "Wang",
+    "given": "Kun"
+   },
+   {
+    "family": "Zhou",
+    "given": "Wangchunshu"
+   },
+   {
+    "family": "Liu",
+    "given": "Yixin"
+   },
+   {
+    "family": "Cheng",
+    "given": "Dawei"
+   },
+   {
+    "family": "Zhang",
+    "given": "Qi"
+   },
+   {
+    "family": "Gui",
+    "given": "Tao"
+   },
+   {
+    "family": "Pan",
+    "given": "Shirui"
+   },
+   {
+    "family": "Zhang",
+    "given": "Yan"
+   },
+   {
+    "family": "Torr",
+    "given": "Philip"
+   },
+   {
+    "family": "Dou",
+    "given": "Zhicheng"
+   },
+   {
+    "family": "Wen",
+    "given": "Ji-Rong"
+   },
+   {
+    "family": "Huang",
+    "given": "Xuanjing"
+   },
+   {
+    "family": "Jiang",
+    "given": "Yu-Gang"
+   },
+   {
+    "family": "Yan",
+    "given": "Shuicheng"
+   }
+  ],
+  "title": "Memory in the age of AI agents",
+  "type": "article",
+  "publisher": "arXiv",
+  "_apa": "Hu, Y., Liu, S., Yue, Y., Zhang, G., Liu, B., Zhu, F., Lin, J., Guo, H., Dou, S., Xi, Z., Jin, S., Tan, J., Yin, Y., Liu, J., Zhang, Z., Sun, Z., Zhu, Y., Sun, H., Peng, B., . . . Yan, S. (2025). *Memory in the age of AI agents*. arXiv. https://doi.org/10.48550/arXiv.2512.13564",
+  "id": "Hu2025"
+ },
+ {
+  "issued": {
+   "date-parts": [
+    [
+     2025
+    ]
+   ]
+  },
+  "DOI": "10.48550/arXiv.2507.05257",
+  "URL": "https://doi.org/10.48550/arXiv.2507.05257",
+  "author": [
+   {
+    "family": "Hu",
+    "given": "Y."
+   },
+   {
+    "family": "Wang",
+    "given": "Y."
+   },
+   {
+    "family": "McAuley",
+    "given": "J."
+   }
+  ],
+  "title": "Evaluating memory in LLM agents via incremental multi-turn interactions",
+  "type": "article",
+  "publisher": "arXiv",
+  "_apa": "Hu, Y., Wang, Y., & McAuley, J. (2025). *Evaluating memory in LLM agents via incremental multi-turn interactions*. arXiv. https://doi.org/10.48550/arXiv.2507.05257",
+  "id": "Hu2025b"
+ },
+ {
+  "issued": {
+   "date-parts": [
+    [
      2026
     ]
    ]
@@ -4737,237 +4973,41 @@
   "issued": {
    "date-parts": [
     [
-     2025
+     2018
     ]
    ]
   },
-  "DOI": "10.48550/arXiv.2512.13564",
-  "URL": "https://doi.org/10.48550/arXiv.2512.13564",
+  "URL": "https://www.iso.org/standard/72089.html",
   "author": [
    {
-    "family": "Hu",
-    "given": "Yuyang"
-   },
-   {
-    "family": "Liu",
-    "given": "Shichun"
-   },
-   {
-    "family": "Yue",
-    "given": "Yanwei"
-   },
-   {
-    "family": "Zhang",
-    "given": "Guibin"
-   },
-   {
-    "family": "Liu",
-    "given": "Boyang"
-   },
-   {
-    "family": "Zhu",
-    "given": "Fangyi"
-   },
-   {
-    "family": "Lin",
-    "given": "Jiahang"
-   },
-   {
-    "family": "Guo",
-    "given": "Honglin"
-   },
-   {
-    "family": "Dou",
-    "given": "Shihan"
-   },
-   {
-    "family": "Xi",
-    "given": "Zhiheng"
-   },
-   {
-    "family": "Jin",
-    "given": "Senjie"
-   },
-   {
-    "family": "Tan",
-    "given": "Jiejun"
-   },
-   {
-    "family": "Yin",
-    "given": "Yanbin"
-   },
-   {
-    "family": "Liu",
-    "given": "Jiongnan"
-   },
-   {
-    "family": "Zhang",
-    "given": "Zeyu"
-   },
-   {
-    "family": "Sun",
-    "given": "Zhongxiang"
-   },
-   {
-    "family": "Zhu",
-    "given": "Yutao"
-   },
-   {
-    "family": "Sun",
-    "given": "Hao"
-   },
-   {
-    "family": "Peng",
-    "given": "Boci"
-   },
-   {
-    "family": "Cheng",
-    "given": "Zhenrong"
-   },
-   {
-    "family": "Fan",
-    "given": "Xuanbo"
-   },
-   {
-    "family": "Guo",
-    "given": "Jiaxin"
-   },
-   {
-    "family": "Yu",
-    "given": "Xinlei"
-   },
-   {
-    "family": "Zhou",
-    "given": "Zhenhong"
-   },
-   {
-    "family": "Hu",
-    "given": "Zewen"
-   },
-   {
-    "family": "Huo",
-    "given": "Jiahao"
-   },
-   {
-    "family": "Wang",
-    "given": "Junhao"
-   },
-   {
-    "family": "Niu",
-    "given": "Yuwei"
-   },
-   {
-    "family": "Wang",
-    "given": "Yu"
-   },
-   {
-    "family": "Yin",
-    "given": "Zhenfei"
-   },
-   {
-    "family": "Hu",
-    "given": "Xiaobin"
-   },
-   {
-    "family": "Liao",
-    "given": "Yue"
-   },
-   {
-    "family": "Li",
-    "given": "Qiankun"
-   },
-   {
-    "family": "Wang",
-    "given": "Kun"
-   },
-   {
-    "family": "Zhou",
-    "given": "Wangchunshu"
-   },
-   {
-    "family": "Liu",
-    "given": "Yixin"
-   },
-   {
-    "family": "Cheng",
-    "given": "Dawei"
-   },
-   {
-    "family": "Zhang",
-    "given": "Qi"
-   },
-   {
-    "family": "Gui",
-    "given": "Tao"
-   },
-   {
-    "family": "Pan",
-    "given": "Shirui"
-   },
-   {
-    "family": "Zhang",
-    "given": "Yan"
-   },
-   {
-    "family": "Torr",
-    "given": "Philip"
-   },
-   {
-    "family": "Dou",
-    "given": "Zhicheng"
-   },
-   {
-    "family": "Wen",
-    "given": "Ji-Rong"
-   },
-   {
-    "family": "Huang",
-    "given": "Xuanjing"
-   },
-   {
-    "family": "Jiang",
-    "given": "Yu-Gang"
-   },
-   {
-    "family": "Yan",
-    "given": "Shuicheng"
+    "literal": "International Organization for Standardization"
    }
   ],
-  "title": "Memory in the age of AI agents",
-  "type": "article",
-  "publisher": "arXiv",
-  "_apa": "Hu, Y., Liu, S., Yue, Y., Zhang, G., Liu, B., Zhu, F., Lin, J., Guo, H., Dou, S., Xi, Z., Jin, S., Tan, J., Yin, Y., Liu, J., Zhang, Z., Sun, Z., Zhu, Y., Sun, H., Peng, B., . . . Yan, S. (2025). *Memory in the age of AI agents*. arXiv. https://doi.org/10.48550/arXiv.2512.13564",
-  "id": "Hu2025"
+  "title": "Systems and software engineering — Life cycle processes — Requirements engineering",
+  "type": "webpage",
+  "container-title": "(ISO/IEC/IEEE Standard No. 29148:2018)",
+  "_apa": "International Organization for Standardization. (2018). *Systems and software engineering — Life cycle processes — Requirements engineering* (ISO/IEC/IEEE Standard No. 29148:2018). https://www.iso.org/standard/72089.html",
+  "id": "International2018"
  },
  {
   "issued": {
    "date-parts": [
     [
-     2025
+     2023
     ]
    ]
   },
-  "DOI": "10.48550/arXiv.2507.05257",
-  "URL": "https://doi.org/10.48550/arXiv.2507.05257",
+  "URL": "https://www.iso.org/standard/78176.html",
   "author": [
    {
-    "family": "Hu",
-    "given": "Y."
-   },
-   {
-    "family": "Wang",
-    "given": "Y."
-   },
-   {
-    "family": "McAuley",
-    "given": "J."
+    "literal": "International Organization for Standardization"
    }
   ],
-  "title": "Evaluating memory in LLM agents via incremental multi-turn interactions",
-  "type": "article",
-  "publisher": "arXiv",
-  "_apa": "Hu, Y., Wang, Y., & McAuley, J. (2025). *Evaluating memory in LLM agents via incremental multi-turn interactions*. arXiv. https://doi.org/10.48550/arXiv.2507.05257",
-  "id": "Hu2025b"
+  "title": "Systems and software engineering — Systems and software Quality Requirements and Evaluation (SQuaRE) — Product quality model",
+  "type": "webpage",
+  "container-title": "(ISO/IEC Standard No. 25010:2023)",
+  "_apa": "International Organization for Standardization. (2023). *Systems and software engineering — Systems and software Quality Requirements and Evaluation (SQuaRE) — Product quality model* (ISO/IEC Standard No. 25010:2023). https://www.iso.org/standard/78176.html",
+  "id": "International2023"
  },
  {
   "issued": {
@@ -5653,6 +5693,56 @@
   "issued": {
    "date-parts": [
     [
+     2024
+    ]
+   ]
+  },
+  "DOI": "10.48550/arXiv.2409.15790",
+  "URL": "https://doi.org/10.48550/arXiv.2409.15790",
+  "author": [
+   {
+    "family": "Lu",
+    "given": "Z."
+   },
+   {
+    "family": "Li",
+    "given": "X."
+   },
+   {
+    "family": "Cai",
+    "given": "D."
+   },
+   {
+    "family": "Yi",
+    "given": "R."
+   },
+   {
+    "family": "Liu",
+    "given": "F."
+   },
+   {
+    "family": "Zhang",
+    "given": "X."
+   },
+   {
+    "family": "Lane",
+    "given": "N. D."
+   },
+   {
+    "family": "Xu",
+    "given": "M."
+   }
+  ],
+  "title": "Small language models: Survey, measurements, and insights",
+  "type": "article",
+  "publisher": "arXiv",
+  "_apa": "Lu, Z., Li, X., Cai, D., Yi, R., Liu, F., Zhang, X., Lane, N. D., & Xu, M. (2024). *Small language models: Survey, measurements, and insights*. arXiv. https://doi.org/10.48550/arXiv.2409.15790",
+  "id": "Lu2024"
+ },
+ {
+  "issued": {
+   "date-parts": [
+    [
      2026
     ]
    ]
@@ -5704,56 +5794,6 @@
   "publisher": "Association for Computational Linguistics",
   "_apa": "Luo, J., Tian, Y., Cao, C., Luo, Z., Lin, H., Li, K., Kong, C., Yang, R., & Ma, J. (2026). From storage to experience: A survey on the evolution of LLM agent memory mechanisms. In *Findings of the Association for Computational Linguistics: ACL 2026* (pp. 41622–41652). Association for Computational Linguistics. https://doi.org/10.18653/v1/2026.findings-acl.2069",
   "id": "Luo2026"
- },
- {
-  "issued": {
-   "date-parts": [
-    [
-     2024
-    ]
-   ]
-  },
-  "DOI": "10.48550/arXiv.2409.15790",
-  "URL": "https://doi.org/10.48550/arXiv.2409.15790",
-  "author": [
-   {
-    "family": "Lu",
-    "given": "Z."
-   },
-   {
-    "family": "Li",
-    "given": "X."
-   },
-   {
-    "family": "Cai",
-    "given": "D."
-   },
-   {
-    "family": "Yi",
-    "given": "R."
-   },
-   {
-    "family": "Liu",
-    "given": "F."
-   },
-   {
-    "family": "Zhang",
-    "given": "X."
-   },
-   {
-    "family": "Lane",
-    "given": "N. D."
-   },
-   {
-    "family": "Xu",
-    "given": "M."
-   }
-  ],
-  "title": "Small language models: Survey, measurements, and insights",
-  "type": "article",
-  "publisher": "arXiv",
-  "_apa": "Lu, Z., Li, X., Cai, D., Yi, R., Liu, F., Zhang, X., Lane, N. D., & Xu, M. (2024). *Small language models: Survey, measurements, and insights*. arXiv. https://doi.org/10.48550/arXiv.2409.15790",
-  "id": "Lu2024"
  },
  {
   "issued": {
@@ -6107,6 +6147,26 @@
   "container-title": "Cognitect Blog",
   "_apa": "Nygard, M. (2011, November 15). *Documenting architecture decisions*. Cognitect Blog. https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions",
   "id": "Nygard2011"
+ },
+ {
+  "issued": {
+   "date-parts": [
+    [
+     2017
+    ]
+   ]
+  },
+  "URL": "https://www.omg.org/spec/UML/2.5.1",
+  "author": [
+   {
+    "literal": "Object Management Group"
+   }
+  ],
+  "title": "OMG Unified Modeling Language (OMG UML), version 2.5.1",
+  "type": "webpage",
+  "container-title": "(OMG Document No. formal/17-12-05)",
+  "_apa": "Object Management Group. (2017). *OMG Unified Modeling Language (OMG UML), version 2.5.1* (OMG Document No. formal/17-12-05). https://www.omg.org/spec/UML/2.5.1",
+  "id": "ObjectManagementGroup2017"
  },
  {
   "issued": {

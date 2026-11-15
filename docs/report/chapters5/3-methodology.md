@@ -80,41 +80,49 @@ The results of each evaluation fed the analysis of the next increment, so that a
 
 ## 3.5 System Analysis Diagrams
 
-Following OOAD, the requirements were analysed with four UML diagrams chosen from those suited to object-oriented analysis. Section 4.3 presents them.
+Following OOAD, the requirements were analysed with UML diagrams chosen from those suited to object-oriented analysis. Section 4.3 presents them.
 
 ### 3.5.1 Use Case Diagram
 
 The use case diagram identifies the actors, the person and the local and cloud AI programs that connect to the vault, and the goals each pursues, such as finding material, keeping a decision and resuming earlier work. It defines the boundary of the system.
 
-### 3.5.2 Sequence Diagram
+### 3.5.2 Sequence Diagrams
 
-The sequence diagram shows the order of messages between an AI program and Burrow during a session, from connecting and resuming earlier work to looking up material, changing code and having the change checked.
+The sequence diagrams show the order of messages between AI programs and Burrow: one session, from connecting and resuming earlier work to looking up material, changing code and having the change checked, and the hand-over of work from a cloud model in one program to a local model in another.
 
-### 3.5.3 Activity Diagram
+### 3.5.3 Activity Diagrams
 
-The activity diagram shows the flow of the check of new work, from a proposed change to the verdict for each decision it touches and the action that follows.
+The activity diagrams show two flows: the check of new work, from a proposed change to the verdict for each decision it touches, and the answering of a question from the person's material, from deciding whether the vault is needed to checking the answer's citations.
 
-### 3.5.4 Class Diagram
+### 3.5.4 State Machine Diagram
+
+The state machine diagram shows the states a decision passes through in the Ledger, from being kept with its reason to being replaced, marked wrong or marked to be checked again.
+
+### 3.5.5 Class Diagram
 
 The class diagram shows the objects of Burrow's engine, their attributes and responsibilities, and the relationships between them.
 
 ## 3.6 System Design Diagrams
 
-The design was captured in four diagrams that refine the analysis into a buildable system. Section 4.4 presents them.
+The design was captured in diagrams that refine the analysis into a buildable system. Section 4.4 presents them.
 
 ### 3.6.1 System Architecture
 
 The system architecture diagram shows the layers of Burrow, from the AI programs that connect to it and the interfaces they connect through, to the engine and the stores on disk.
 
-### 3.6.2 Logical Database Schema
+### 3.6.2 Component Diagram
+
+The component diagram shows the parts of the Swift package with the interfaces they provide and require, and how every front end shares one engine.
+
+### 3.6.3 Logical Database Schema
 
 The logical database schema shows the entities that Burrow stores, with their keys and relationships, covering the record of decisions, sessions and the index of the vault.
 
-### 3.6.3 Wireframes
+### 3.6.4 Wireframes and Screen Flow
 
-The wireframes show the main pages of the desktop application in which the person reads the vault, reviews the decisions that models have kept and connects AI programs.
+The wireframes show the main pages of the desktop application in which the person reads and asks the vault, reviews the decisions that models have kept and connects AI programs, and the screen flow joins them into the journey of a first use.
 
-### 3.6.4 Deployment Diagram
+### 3.6.5 Deployment Diagram
 
 The deployment diagram shows where each part of Burrow runs: on the person's laptop beside the local model service, with cloud models reached over the internet by the programs that use them.
 
@@ -135,6 +143,10 @@ The knowledge questions with their answer keys, the Matatu fixture with its task
 ### 3.7.4 System Documentation
 
 This report, and the project repository with its user guide and record of design decisions, sufficient for another person to install Burrow and reproduce the results.
+
+### 3.7.5 Release and Project Website
+
+An installable release of Burrow on GitHub, with an installer that checks each download against its checksum, and a project website on GitHub Pages that links to the release, the user guide and the source.
 
 ## 3.8 Tools and Techniques
 

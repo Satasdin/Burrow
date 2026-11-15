@@ -354,7 +354,7 @@ def deployment():
     s.text(547, 236, "Team remote:\ndecisions shared\nafter approval", size=6.8)
     s.line([(436, 356), (468, 356), (468, 240), (480, 240)], "open", dashed=True)
     node(s, 480, 316, 134, 112, "«cloud» GitHub")
-    s.text(547, 382, "Releases: the\nprogram and the\napp, downloaded once", size=6.8)
+    s.text(547, 380, "Releases: the program,\nthe app and a\nchecksummed installer\nPages: project site\nover HTTPS", size=6.5)
     s.save()
 
 
@@ -464,7 +464,243 @@ def wire_programs():
     s.save()
 
 
-ALL = (use_cases, sequence_session, activity_check, classes, architecture, schema, deployment, wire_ledger, wire_watch, wire_programs)
+# ---------------------------------------------------------------- added 15 November 2026
+
+def activity_answer():
+    """The knowledge path: how a question about the person's material is answered from the vault."""
+    s = Sheet("activity_answer", 626, 760)
+    s.rect(4, 6, 618, 748, z=1)
+    s.line([(170, 6), (170, 754)])
+    s.line([(470, 6), (470, 754)])
+    s.line([(4, 28), (622, 28)])
+    for x, words in [(87, "Person or AI program"), (320, "Burrow engine"), (546, "Ollama, on this Mac")]:
+        s.text(x, 17, words, weight="bold", size=8.2)
+    A, B, C = 87, 320, 546
+    s.start(A, 46)
+    act(s, A, 92, "Ask a question about\nthe person's material", w=150)
+    s.line([(A, 53), (A, 73)], "fill")
+    act(s, B, 92, "Decide: does the question\nneed the vault?", w=200)
+    s.line([(A + 75, 92), (B - 100, 92)], "fill")
+    s.diamond(B, 146)
+    s.line([(B, 111), (B, 131)], "fill")
+    s.text(B + 20, 138, "[no: reasoning or general]", size=SMALL, ha="left")
+    s.text(B - 8, 172, "[yes]", size=SMALL, ha="right")
+    # No vault: straight to the model.
+    s.line([(B + 15, 146), (612, 146), (612, 470), (601, 470)], "fill")
+    act(s, C, 206, "Embed the\nquestion", w=110)
+    act(s, B, 206, "Rank pieces by words and\nby meaning; merge the two", w=200)
+    s.line([(B, 161), (B, 187)], "fill")
+    s.line([(C - 55, 206), (B + 100, 206)], "fill", dashed=True)
+    s.text(C - 61, 196, "vector", size=SMALL, ha="right")
+    s.diamond(B, 262)
+    s.line([(B, 225), (B, 247)], "fill")
+    s.text(B + 20, 254, "[closest files are code]", size=SMALL, ha="left")
+    act(s, B + 50, 312, "Follow links one step", w=150, h=30)
+    s.line([(B + 15, 262), (B + 50, 262), (B + 50, 297)], "fill")
+    s.line([(B - 15, 262), (B - 110, 262), (B - 110, 352), (B - 100, 352)], "fill")
+    s.text(B - 104, 280, "[notes and\ndocuments]", size=SMALL, ha="left")
+    act(s, B, 352, "Add the decisions that fit,\nwith their reasons", w=200)
+    s.line([(B + 50, 327), (B + 50, 333)], "fill")
+    act(s, B, 410, "Fit the excerpts to the model's\nmeasured budget, with file:line", w=210)
+    s.line([(B, 371), (B, 391)], "fill")
+    act(s, C, 470, "Answer from the\nexcerpts, citing\nfile:line", w=110, h=50)
+    s.line([(B + 105, 410), (C, 410), (C, 445)], "fill")
+    s.text(606, 300, "[no]", size=SMALL, ha="right")
+    act(s, B, 540, "Check every cited file:line\nagainst what was shown", w=200)
+    s.line([(C, 495), (C, 540), (B + 100, 540)], "fill")
+    s.diamond(B, 600)
+    s.line([(B, 559), (B, 585)], "fill")
+    s.text(B + 20, 592, "[a place not shown]", size=SMALL, ha="left")
+    s.text(B - 20, 592, "[all shown]", size=SMALL, ha="right")
+    act(s, B + 50, 660, "Ask once more with a correction;\nkeep the better-grounded answer", w=184, h=40)
+    s.line([(B + 15, 600), (B + 50, 600), (B + 50, 640)], "fill")
+    act(s, A, 660, "Read the answer, its\nsources and the decision\nline: what was read, why", w=150, h=50)
+    s.line([(B - 15, 600), (A, 600), (A, 635)], "fill")
+    s.line([(B - 42, 660), (A + 75, 660)], "fill")
+    s.stop(A, 728)
+    s.line([(A, 685), (A, 719)], "fill")
+    s.save()
+
+
+def states_decision():
+    """The life of a decision in the Ledger."""
+    s = Sheet("states_decision", 626, 420)
+    s.start(20, 72)
+    s.diamond(90, 72)
+    s.line([(27, 72), (75, 72)], "fill")
+    s.text(48, 58, "kept with\na reason", size=6.6)
+    # In force.
+    s.rounded(280, 44, 140, 56, "In force\nhanded to every program", radius=9, size=7.4)
+    s.line([(105, 72), (280, 72)], "fill")
+    s.text(190, 64, "[no overlap]", size=6.6)
+    # Overlap.
+    s.rounded(30, 150, 150, 50, "Refused once\nthe overlapping decision\nshown with its reason", radius=9, size=7.0)
+    s.line([(90, 87), (90, 150)], "fill")
+    s.text(96, 118, "[overlaps one\nin force]", size=6.4, ha="left")
+    s.line([(180, 160), (226, 160), (226, 84), (280, 84)], "fill")
+    s.text(220, 126, "supersedes,\nor alongside", size=6.4, ha="right")
+    s.rounded(30, 262, 150, 50, "Unresolved\nboth shown to programs\nand to the person", radius=9, size=7.0)
+    s.line([(105, 200), (105, 262)], "fill")
+    s.text(111, 231, "[kept again without\nsaying which holds]", size=6.4, ha="left")
+    s.line([(180, 274), (262, 274), (262, 96), (280, 96)], "fill")
+    s.text(186, 254, "person: Keep\nnewer or both", size=6.4, ha="left")
+    # Check again.
+    s.rounded(280, 262, 140, 56, "Check again\na file it rests on\nhas changed", radius=9, size=7.2)
+    s.line([(334, 100), (334, 262)], "fill")
+    s.text(340, 150, "[a file it\nrests on\nchanges]", size=6.4, ha="left")
+    s.line([(396, 262), (396, 100)], "fill")
+    s.text(402, 214, "Still Right:\na confirmation\nis kept", size=6.4, ha="left")
+    # Retired.
+    s.rounded(480, 18, 112, 48, "Replaced\nby a newer decision", radius=9, size=7.0)
+    s.rounded(480, 140, 112, 48, "Marked wrong\nby a correction", radius=9, size=7.0)
+    s.line([(420, 60), (480, 46)], "fill")
+    s.text(448, 38, "superseded", size=6.4)
+    s.line([(420, 90), (480, 158)], "fill")
+    s.text(470, 106, "Mark Wrong", size=6.4, ha="right", back=True)
+    s.line([(420, 290), (536, 290), (536, 188)], "fill")
+    s.text(478, 282, "Mark Wrong", size=6.4)
+    s.stop(612, 42)
+    s.line([(592, 42), (603, 42)], "fill")
+    s.stop(612, 164)
+    s.line([(592, 164), (603, 164)], "fill")
+    s.note(18, 344, 300, 56, "No commit is ever changed or deleted. Replaced and\nMarked wrong are later commits that retire the decision,\nso the history stays readable and a program is told why.", size=6.6)
+    s.save()
+
+
+def sequence_handover():
+    """Work carried from a cloud model in one program to a local model in another."""
+    s = Sheet("sequence_handover", 626, 640)
+    P, CC, B, L, OC = 50, 166, 318, 450, 574
+    _lifelines(s, [(P, ":Person"), (CC, ":Claude Code\n(cloud model)"), (B, ":burrow\nMCP and hooks"), (L, ":Ledger and\nfolds"),
+                   (OC, ":OpenCode\n(Gemma, local)")], 630, half=44)
+    for x, a, b in [(CC, 58, 250), (B, 76, 110), (L, 90, 106), (B, 160, 190), (B, 214, 244), (L, 228, 242), (OC, 300, 600),
+                    (B, 318, 344), (B, 368, 420), (L, 382, 404), (B, 498, 530)]:
+        s.rect(x - 4, a, 8, b - a, z=4)
+    _message(s, P, CC - 4, 62, "\"handle unmatched payments\"")
+    _message(s, CC + 4, B - 4, 80, "burrow_commit(decision, because, rejected)")
+    _message(s, B + 4, L - 4, 94, "commit")
+    _message(s, B - 4, CC + 4, 108, "kept as <id>", True)
+    _self(s, CC, 122, "work on; the context fills", drop=16)
+    _message(s, CC + 4, B - 4, 164, "PreCompact hook")
+    _self(s, B, 170, "fold: requests, reasons,\nerrors, word for word", drop=18)
+    _message(s, CC + 4, B - 4, 218, "SessionEnd hook")
+    _message(s, B + 4, L - 4, 232, "handoff: where it stopped")
+    _message(s, P, OC - 4, 290, "\"carry on where Claude stopped\"")
+    _message(s, OC - 4, B + 4, 322, "first tool call")
+    _message(s, B + 4, OC - 4, 342, "result, with the decisions in force, once", True)
+    _message(s, OC - 4, B + 4, 372, "burrow_resume")
+    _message(s, B + 4, L - 4, 386, "plan, handoff, fold")
+    _message(s, L - 4, B + 4, 402, "", True)
+    _message(s, B + 4, OC - 4, 418, "where it stopped, the error, the constraint", True)
+    s.line([(OC - 4, 440), (OC - 30, 440), (OC - 30, 470), (OC - 4, 470)], "fill")
+    s.text(OC - 36, 455, "continue the right step,\nkeeping the decision", ha="right", size=7.2, back=True)
+    _message(s, OC - 4, B + 4, 502, "burrow_check")
+    _message(s, B + 4, OC - 4, 528, "verdict per decision", True)
+    _message(s, OC - 4, P, 590, "done, with the decision kept", True)
+    s.save()
+
+
+def _lollipop(s, x, y, words, left=True):
+    from matplotlib.patches import Circle
+    s.ax.add_patch(Circle((x, y), 5, facecolor="white", edgecolor=INK, lw=0.8, zorder=5))
+    s.text(x + (-8 if left else 8), y - 11, words, size=6.4, ha="right" if left else "left")
+
+
+def components():
+    """UML component view of the Swift package and what plugs into it."""
+    from matplotlib.patches import Arc
+    s = Sheet("components", 626, 470)
+
+    def comp(x, y, w, h, name, note=""):
+        component(s, x, y, w, h, f"«component»\n{name}" + (f"\n{note}" if note else ""))
+
+    def socket(x, y):
+        s.ax.add_patch(Arc((x, y), 14, 14, theta1=90, theta2=270, edgecolor=INK, lw=0.8, zorder=5))
+
+    # Outside programs.
+    s.rect(8, 10, 176, 40, "AI programs\n(Claude Code, OpenCode, n8n…)", size=6.8)
+    s.rect(224, 10, 176, 40, "Hooks and plugins\n(Stop, PreCompact, pre-commit,\nOpenCode, OpenClaw, Hermes)", size=6.4)
+    s.rect(440, 10, 178, 40, "The person", size=7.2)
+    # Front ends.
+    comp(8, 104, 176, 60, "BurrowMCP", "MCP server, stdio")
+    comp(224, 104, 176, 60, "burrow", "command line, chat, TUI")
+    comp(440, 104, 178, 60, "Burrow.app", "desktop application")
+    s.line([(96, 50), (96, 80)]); socket(96, 84); _lollipop(s, 96, 92, "MCP tools (JSON-RPC)", left=False)
+    s.line([(96, 97), (96, 104)])
+    s.line([(312, 50), (312, 80)]); socket(312, 84); _lollipop(s, 312, 92, "burrow check, connect", left=False)
+    s.line([(312, 97), (312, 104)])
+    s.line([(529, 50), (529, 104)], "open", dashed=True); s.text(535, 76, "uses", size=6.4, ha="left")
+    # Engine.
+    comp(70, 214, 486, 74, "BurrowTools", "VaultTools · Ledger · AskLedger · sessions and folds · check and verdicts · guards · teams")
+    for x in (96, 312, 529):
+        s.line([(x, 164), (x, 214)], "open", dashed=True)
+    s.text(316, 190, "«use» VaultTools", size=6.4, ha="left")
+    comp(70, 330, 486, 70, "BurrowCore", "vault and index · retrieval · engine · citations · link approvals · bridges · Ollama client")
+    s.line([(313, 288), (313, 330)], "open", dashed=True); s.text(319, 309, "«use» Vault", size=6.4, ha="left")
+    # Stores and the local model service.
+    s.rect(70, 428, 220, 34, "Files: vault, .burrow (index, Ledger, sessions),\nBurrow's own folder, team folder", size=6.4)
+    s.rect(336, 428, 220, 34, "Ollama at 127.0.0.1\n(embeddings; local answers)", size=6.6)
+    s.line([(180, 400), (180, 428)], "open", dashed=True)
+    s.line([(446, 400), (446, 428)], "open", dashed=True)
+    s.text(452, 414, "HTTP, loopback", size=6.2, ha="left")
+    s.save()
+
+
+def wire_ask():
+    s = Sheet("wire_ask", 626, 420)
+    _chrome(s, 404, "All")
+    s.rect(42, 34, 400, 22)
+    s.text(52, 45, "Graph     Ask ×     +", ha="left", size=6.8)
+    s.text(56, 76, "The question, as the person asked it", ha="left", weight="bold", size=8.4)
+    s.text(56, 104, "The answer, in the model's words, with each claim followed by its place:\n(Law/act-part-02.md:71)  and a decision used, by its label:  [Ledger 2026…-a355]", ha="left", size=6.8)
+    s.rect(52, 128, 380, 22)
+    s.text(60, 139, "⚙  Decision line: read the vault or not, which files led, the method used", ha="left", size=6.6)
+    s.rect(52, 158, 380, 22, dashed=True)
+    s.text(60, 169, "⚠  Shown only if a cited place was not among what the model read", ha="left", size=6.6)
+    s.text(56, 196, "Used", ha="left", weight="bold", size=7.2)
+    for i in range(5):
+        y = 212 + 18 * i
+        s.dot(62, y)
+        s.text(72, y, "file read, in the order it was used          note · code · Ledger", ha="left", size=6.6)
+    s.text(56, 318, "Seconds taken, on this Mac      Keep as Note      What Should Burrow Remember?", ha="left", size=6.6)
+    s.rect(42, 336, 400, 54)
+    s.text(52, 352, "Ask about this vault…", ha="left", size=7.0, style="italic")
+    s.text(432, 378, "model ▾   Ask", ha="right", size=6.6)
+    s.rect(450, 34, 168, 238)
+    s.text(534, 150, "Map of the vault:\nthe files read light up", size=6.8, style="italic")
+    s.rect(450, 280, 168, 30)
+    s.text(534, 295, "▮▮▮▮▮  Read N notes and files", size=6.6)
+    s.save()
+
+
+def screen_flow():
+    """A person's first hour with Burrow, from install to a decision reviewed."""
+    s = Sheet("screen_flow", 626, 430)
+    boxes = [(8, 20, "Install\none command, or\nthe app from Releases"), (164, 20, "Open a vault\nchoose a folder of\nMarkdown notes"),
+             (320, 20, "Index builds\nprogress; words first,\nmeaning when ready"), (476, 20, "Link a code folder\nread-only"),
+             (476, 150, "Approve the folder\nonly the person,\non this Mac"), (320, 150, "Programs page\nConnect Claude Code,\nOpenCode, n8n…"),
+             (164, 150, "Work in the AI program\ndecisions kept with\nreasons; changes checked"), (8, 150, "Ledger and Watch\nStill Right, Mark Wrong,\nKeep newer or both"),
+             (8, 290, "Ask the vault\nanswers with sources"), (164, 290, "Share with a team\nheld until the\nperson approves")]
+    w, h = 142, 64
+    for x, y, words in boxes:
+        s.rounded(x, y, w, h, words, radius=8, size=6.9)
+    for a, b in [((150, 52), (164, 52)), ((306, 52), (320, 52)), ((462, 52), (476, 52)), ((547, 84), (547, 150)),
+                 ((476, 182), (462, 182)), ((320, 182), (306, 182)), ((164, 182), (150, 182))]:
+        s.line([a, b], "fill")
+    s.line([(79, 214), (79, 290)], "fill")
+    s.line([(150, 214), (235, 290)], "fill")
+    s.text(200, 246, "a decision\nto share", size=6.4, ha="left")
+    # Alternative paths.
+    s.note(320, 290, 140, 52, "Ollama not running:\nsearch goes on by words;\nthe app says so", size=6.4)
+    s.line([(391, 84), (391, 110), (469, 110), (469, 300), (460, 300)], dashed=True, lw=0.6)
+    s.note(476, 290, 142, 52, "Folder not approved:\nnothing in it is read,\nand the vault says why", size=6.4)
+    s.line([(547, 214), (547, 290)], dashed=True, lw=0.6)
+    s.note(8, 380, 290, 40, "A change that breaks a decision is held in the AI program\nuntil it is undone or the person overrides it.", size=6.4)
+    s.save()
+
+
+ALL = (use_cases, sequence_session, activity_check, classes, architecture, schema, deployment, wire_ledger, wire_watch, wire_programs,
+       activity_answer, states_decision, sequence_handover, components, wire_ask, screen_flow)
 
 if __name__ == "__main__":
     wanted = set(sys.argv[1:])

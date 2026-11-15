@@ -1249,6 +1249,72 @@ DO  - 10.48550/arXiv.2404.06654
 UR  - https://doi.org/10.48550/arXiv.2404.06654
 ER  - 
 
+TY  - GEN
+AU  - Hu, Yuyang
+AU  - Liu, Shichun
+AU  - Yue, Yanwei
+AU  - Zhang, Guibin
+AU  - Liu, Boyang
+AU  - Zhu, Fangyi
+AU  - Lin, Jiahang
+AU  - Guo, Honglin
+AU  - Dou, Shihan
+AU  - Xi, Zhiheng
+AU  - Jin, Senjie
+AU  - Tan, Jiejun
+AU  - Yin, Yanbin
+AU  - Liu, Jiongnan
+AU  - Zhang, Zeyu
+AU  - Sun, Zhongxiang
+AU  - Zhu, Yutao
+AU  - Sun, Hao
+AU  - Peng, Boci
+AU  - Cheng, Zhenrong
+AU  - Fan, Xuanbo
+AU  - Guo, Jiaxin
+AU  - Yu, Xinlei
+AU  - Zhou, Zhenhong
+AU  - Hu, Zewen
+AU  - Huo, Jiahao
+AU  - Wang, Junhao
+AU  - Niu, Yuwei
+AU  - Wang, Yu
+AU  - Yin, Zhenfei
+AU  - Hu, Xiaobin
+AU  - Liao, Yue
+AU  - Li, Qiankun
+AU  - Wang, Kun
+AU  - Zhou, Wangchunshu
+AU  - Liu, Yixin
+AU  - Cheng, Dawei
+AU  - Zhang, Qi
+AU  - Gui, Tao
+AU  - Pan, Shirui
+AU  - Zhang, Yan
+AU  - Torr, Philip
+AU  - Dou, Zhicheng
+AU  - Wen, Ji-Rong
+AU  - Huang, Xuanjing
+AU  - Jiang, Yu-Gang
+AU  - Yan, Shuicheng
+TI  - Memory in the age of AI agents
+PY  - 2025
+PB  - arXiv
+DO  - 10.48550/arXiv.2512.13564
+UR  - https://doi.org/10.48550/arXiv.2512.13564
+ER  - 
+
+TY  - GEN
+AU  - Hu, Y.
+AU  - Wang, Y.
+AU  - McAuley, J.
+TI  - Evaluating memory in LLM agents via incremental multi-turn interactions
+PY  - 2025
+PB  - arXiv
+DO  - 10.48550/arXiv.2507.05257
+UR  - https://doi.org/10.48550/arXiv.2507.05257
+ER  - 
+
 TY  - JOUR
 AU  - Huang, Wei-Chieh
 AU  - Zhang, Weizhi
@@ -1316,70 +1382,20 @@ JO  - Transactions on Machine Learning Research
 UR  - https://arxiv.org/abs/2602.06052
 ER  - 
 
-TY  - GEN
-AU  - Hu, Yuyang
-AU  - Liu, Shichun
-AU  - Yue, Yanwei
-AU  - Zhang, Guibin
-AU  - Liu, Boyang
-AU  - Zhu, Fangyi
-AU  - Lin, Jiahang
-AU  - Guo, Honglin
-AU  - Dou, Shihan
-AU  - Xi, Zhiheng
-AU  - Jin, Senjie
-AU  - Tan, Jiejun
-AU  - Yin, Yanbin
-AU  - Liu, Jiongnan
-AU  - Zhang, Zeyu
-AU  - Sun, Zhongxiang
-AU  - Zhu, Yutao
-AU  - Sun, Hao
-AU  - Peng, Boci
-AU  - Cheng, Zhenrong
-AU  - Fan, Xuanbo
-AU  - Guo, Jiaxin
-AU  - Yu, Xinlei
-AU  - Zhou, Zhenhong
-AU  - Hu, Zewen
-AU  - Huo, Jiahao
-AU  - Wang, Junhao
-AU  - Niu, Yuwei
-AU  - Wang, Yu
-AU  - Yin, Zhenfei
-AU  - Hu, Xiaobin
-AU  - Liao, Yue
-AU  - Li, Qiankun
-AU  - Wang, Kun
-AU  - Zhou, Wangchunshu
-AU  - Liu, Yixin
-AU  - Cheng, Dawei
-AU  - Zhang, Qi
-AU  - Gui, Tao
-AU  - Pan, Shirui
-AU  - Zhang, Yan
-AU  - Torr, Philip
-AU  - Dou, Zhicheng
-AU  - Wen, Ji-Rong
-AU  - Huang, Xuanjing
-AU  - Jiang, Yu-Gang
-AU  - Yan, Shuicheng
-TI  - Memory in the age of AI agents
-PY  - 2025
-PB  - arXiv
-DO  - 10.48550/arXiv.2512.13564
-UR  - https://doi.org/10.48550/arXiv.2512.13564
+TY  - ELEC
+AU  - International Organization for Standardization
+TI  - Systems and software engineering — Life cycle processes — Requirements engineering
+PY  - 2018
+T2  - (ISO/IEC/IEEE Standard No. 29148:2018)
+UR  - https://www.iso.org/standard/72089.html
 ER  - 
 
-TY  - GEN
-AU  - Hu, Y.
-AU  - Wang, Y.
-AU  - McAuley, J.
-TI  - Evaluating memory in LLM agents via incremental multi-turn interactions
-PY  - 2025
-PB  - arXiv
-DO  - 10.48550/arXiv.2507.05257
-UR  - https://doi.org/10.48550/arXiv.2507.05257
+TY  - ELEC
+AU  - International Organization for Standardization
+TI  - Systems and software engineering — Systems and software Quality Requirements and Evaluation (SQuaRE) — Product quality model
+PY  - 2023
+T2  - (ISO/IEC Standard No. 25010:2023)
+UR  - https://www.iso.org/standard/78176.html
 ER  - 
 
 TY  - JOUR
@@ -1631,6 +1647,22 @@ SP  - 32431
 EP  - 32454
 ER  - 
 
+TY  - GEN
+AU  - Lu, Z.
+AU  - Li, X.
+AU  - Cai, D.
+AU  - Yi, R.
+AU  - Liu, F.
+AU  - Zhang, X.
+AU  - Lane, N. D.
+AU  - Xu, M.
+TI  - Small language models: Survey, measurements, and insights
+PY  - 2024
+PB  - arXiv
+DO  - 10.48550/arXiv.2409.15790
+UR  - https://doi.org/10.48550/arXiv.2409.15790
+ER  - 
+
 TY  - CONF
 AU  - Luo, J.
 AU  - Tian, Y.
@@ -1649,22 +1681,6 @@ DO  - 10.18653/v1/2026.findings-acl.2069
 UR  - https://doi.org/10.18653/v1/2026.findings-acl.2069
 SP  - 41622
 EP  - 41652
-ER  - 
-
-TY  - GEN
-AU  - Lu, Z.
-AU  - Li, X.
-AU  - Cai, D.
-AU  - Yi, R.
-AU  - Liu, F.
-AU  - Zhang, X.
-AU  - Lane, N. D.
-AU  - Xu, M.
-TI  - Small language models: Survey, measurements, and insights
-PY  - 2024
-PB  - arXiv
-DO  - 10.48550/arXiv.2409.15790
-UR  - https://doi.org/10.48550/arXiv.2409.15790
 ER  - 
 
 TY  - CONF
@@ -1792,6 +1808,14 @@ PY  - 2011
 DA  - 2011/11/15
 T2  - Cognitect Blog
 UR  - https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions
+ER  - 
+
+TY  - ELEC
+AU  - Object Management Group
+TI  - OMG Unified Modeling Language (OMG UML), version 2.5.1
+PY  - 2017
+T2  - (OMG Document No. formal/17-12-05)
+UR  - https://www.omg.org/spec/UML/2.5.1
 ER  - 
 
 TY  - ELEC

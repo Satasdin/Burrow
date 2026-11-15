@@ -2,7 +2,7 @@
 
 ## 5.1 Introduction
 
-This chapter explains how the design of Chapter 4 was implemented, tested and evaluated, and addresses the third, fourth and fifth specific objectives. It describes the environment in which Burrow was built and run, the data used to evaluate it, and each module in the order of the architecture in Figure 4.5. It then sets out the test strategy, the test cases with the defects found and retested, and the evaluation of Burrow against its baselines, followed by the repository and the use of AI-assisted tools. The chapter ends with the evaluation results, their discussion and the limitations of the study.
+This chapter explains how the design of Chapter 4 was implemented, tested and evaluated, and addresses the third, fourth and fifth specific objectives. It describes the environment in which Burrow was built and run, the data used to evaluate it, and each module in the order of the architecture in Figure 4.8. It then sets out the test strategy, the test cases with the defects found and retested, and the evaluation of Burrow against its baselines, followed by the repository and the use of AI-assisted tools. The chapter ends with the evaluation results, their discussion and the limitations of the study.
 
 ## 5.2 Implementation Environment
 
@@ -119,7 +119,7 @@ A test case passed only when its observed result matched an expected result writ
 
 ### 5.5.2 Test Cases, Defects and Retesting
 
-All 553 automated tests, 530 XCTest and 23 Swift Testing tests, passed on the final build of 15 November 2026, and every push to the repository ran them again on the hosted machine. Table 5.4 shows the main system test cases, each traced to the requirement it verifies; the full record of 24 cases is in the repository (https://github.com/Satasdin/CAMR/blob/burrow/docs/evaluation/test-cases.md).
+All 553 automated tests, 530 XCTest and 23 Swift Testing tests, passed on the final build of 15 November 2026, and every push to the repository ran them again on the hosted machine. Table 5.4 shows the main system test cases, each traced to the requirement it verifies; the full record of 24 cases is in the repository (https://github.com/Satasdin/Burrow/blob/burrow/docs/evaluation/test-cases.md).
 
 !tab Table 5.4: System test cases and results
 !widths 0.6,1.0,1.7,1.55,1.55
@@ -192,7 +192,7 @@ The errors that remained fell into three kinds. Some were retrieval misses, such
 
 ## 5.6 Version Control and Implementation Evidence
 
-The source code, tests, evaluation material and this report are kept in the project repository (https://github.com/Satasdin/CAMR), with burrow as the default branch. The Sources folder holds the engine, divided into BurrowCore for the vault and its index and BurrowTools for the Ledger, sessions, the check and team sharing, together with the MCP server and the command-line program. The Tests folder holds the 553 automated tests, the app folder the desktop application, the trials folder the scripts, transcripts and results of every evaluation, and docs the user guide, the test record, the traceability record and this report with the scripts that build it. The README gives the problem, installation, build, test and use. Figure 5.11 shows the history of the repository.
+The source code, tests, evaluation material and this report are kept in the project repository (https://github.com/Satasdin/Burrow), with burrow as the default branch. The Sources folder holds the engine, divided into BurrowCore for the vault and its index and BurrowTools for the Ledger, sessions, the check and team sharing, together with the MCP server and the command-line program. The Tests folder holds the 553 automated tests, the app folder the desktop application, the trials folder the scripts, transcripts and results of every evaluation, and docs the user guide, the test record, the traceability record and this report with the scripts that build it. The README gives the problem, installation, build, test and use. Figure 5.11 shows the history of the repository.
 
 !fig figures/screens2/console-git.png | Figure 5.11: The history of the repository, its tags and its folders | 6.2
 
