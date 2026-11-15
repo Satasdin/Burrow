@@ -65,4 +65,4 @@ the text they came from is never touched.
 
 Through MCP with llama-server and Qwen3 4B, a conversation that opened with a 24,240-token pack started answering in
 5.3 s with the saved cache, against 37.7 s without it. No speculative decoding (n-gram lookup, a lookup table from the
-vault, a draft model) made writing faster on this Mac. See `trials/results/kv-1/REPORT.md` for the measurements.
+vault, a draft model) made writing faster on this Mac. The measurements are in [`trials/results/kv-1/REPORT.md`](https://github.com/Satasdin/Burrow/blob/docs/reports/trials/results/kv-1/REPORT.md) on the docs/reports branch.

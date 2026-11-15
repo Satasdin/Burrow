@@ -1,5 +1,7 @@
 # Decisions
 
+> Paths under `trials/`, `docs/report/`, `docs/demo/` and `design/` are on the [docs/reports branch](https://github.com/Satasdin/Burrow/tree/docs/reports), which keeps the project report and every evaluation's scripts, transcripts and results.
+
 Each entry says what was decided and why, so every choice can be defended. Newest last.
 
 **D-1. Swift only for the app and engine.** There is no Python to install, so another person can run it, as the course guide requires. The app and the test tool share one engine, so the tests measure what ships.

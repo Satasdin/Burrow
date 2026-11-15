@@ -1,5 +1,5 @@
 // An interactive, scripted Burrow window. Every question, answer, file name and decision below was taken from the
-// real app (its screenshots in docs/report/figures); nothing is generated here. Nothing is sent anywhere.
+// real app (its screenshots, kept with the project report); nothing is generated here. Nothing is sent anywhere.
 (() => {
   const root = document.getElementById("demo");
   if (!root) return;

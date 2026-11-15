@@ -1,9 +1,0 @@
-20261112-203021-a6f4  main  handoff  claude-code
-    claude-code stopped after 1 lookup and keeping 1 commit. Last: account reference matching decision suspense phone amount fallback
-    cites matatu/matatu/models.py, matatu/matatu/payments/__init__.py, matatu/matatu/payments/matcher.py, matatu/matatu/payments/provider.py, matatu/matatu/payments/reconcile.py
-20261112-203015-0896  main  decision  claude-opus-5-5
-    Task-04: account references are now compared ignoring case, spaces and punctuation, so `tkt 2345ab` matches TKT-2345AB. An exact match is tried first. If a typed reference could name more than one ticket, the line goes to suspense as `unknown reference`. Matching still uses the reference only, per the 3 June decision: phone and amount are never used to pick a ticket.
-    cites matatu/matatu/payments/matcher.py, matatu/tests/test_reconcile_reference_only.py
-20261112-202945-682e  main  handoff  opencode
-    opencode stopped after 11 lookups. Last: task-01
-    cites Law/registration-regs-schedules-fees-and-thresholds.md, Photos/ask-sum.jpg, Project/Defence plan.md, Project/Sources/BurrowTUI/App.swift, Project/Sources/BurrowTrial/Runner.swift

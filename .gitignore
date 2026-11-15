@@ -1,21 +1,17 @@
+# Swift and Xcode
 .build/
 .swiftpm/
-.DS_Store
 DerivedData/
 xcuserdata/
-.burrow/index.sqlite*
 app/build/
-trials/gap/work/
-trials/gap/.venv/
-trials/gap/_raw/
-trials/gap/fixture/store*/
-trials/gap/fixture/results*/
-__pycache__/
-docs/report/Burrow_Project_Report.docx
-~$*.docx
-trials/web/store/
-docs/report/figures/__pycache__/
-trials/connect/work/
-trials/ledger/work/
-docs/demo/clips/
+
+# Burrow's own store inside a vault
+.burrow/index.sqlite*
+
+# Editors, agents and the system
+.DS_Store
+.claude/
+.playwright-mcp/
 .scratch/
+__pycache__/
+~$*.docx

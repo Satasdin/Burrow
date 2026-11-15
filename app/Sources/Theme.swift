@@ -210,7 +210,7 @@ extension View {
 // MARK: The mark
 
 /// Burrow's mark (Ledger Strata, chosen 13 Nov 2026): one band per sky theme, Nebula to Tide, with a burrow dug through
-/// the lower two and a gold light at its end. Drawn from the brand master on a 100-unit grid (design/logo).
+/// the lower two and a gold light at its end. Drawn from the brand master on a 100-unit grid (design/logo on the docs/reports branch).
 struct BurrowMark: View {
     var size: CGFloat = 64
     /// One colour, for small sizes on light grounds; nil draws the four theme colours and the gold light.

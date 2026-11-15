@@ -1,1 +1,0 @@
-"""Selling and using tickets."""

@@ -1,5 +1,7 @@
 # Test cases and results
 
+> Paths under `trials/`, `docs/report/`, `docs/demo/` and `design/` are on the [docs/reports branch](https://github.com/Satasdin/Burrow/tree/docs/reports), which keeps the project report and every evaluation's scripts, transcripts and results.
+
 The full test record behind Section 5.6 of the report. Each case names the requirement it verifies; [traceability.md](traceability.md) traces each requirement to its component.
 
 The record below covers the November 2026 build (repository branch vault-app, 15 November). The automated tests named as evidence are in the Tests folder: 530 XCTest and 23 Swift Testing tests, all passing on 15 November 2026 (full log read). Section numbers refer to Chapter 5 of the report.

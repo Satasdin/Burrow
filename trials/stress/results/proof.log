@@ -1,58 +1,0 @@
-== 1. base
-
-Kept decision 20261112-214056-002e: reconcile_statement matches a statement line to a ticket by its account reference and nothing else. A line whose reference matches no ticket is added to suspen…
-base ready
-Rejected: Matching on phone number and amount: phone and fare repeat when a conductor pays for a group, causing the Easter Monday mispayments. Taking the ticket closest in time: the same guess with a smaller window.
-Because: Finance meeting, 3 June: until April a fallback matched an unknown reference to the open ticket with the same phone and amount from the last ten minutes. Conductors often pay from their own phone for a whole group, so one phone and fare repeat on a statement. On Easter Monday 31 tickets on route 46 were marked paid against the wrong passengers and those crews came up short at cash-up. Unmatched lines go to a person through suspense. Raising NotFound stopped the rest of the file being applied, forcing finance to split and re-upload statements.
-== 2. 4a, 32 x 50
-embedded 2 of 2   
-1600 1600 0 commit p50/p95 [0.003, 0.007] find [1.189, 1.573]
-== 3. Claude, session 2
-embedded 2 of 2   
-
-control 1: 46 s, decision 2/2, reversed 1/2
-embedded 2 of 2   
-
-control 2: 43 s, decision 2/2, reversed 1/2
-embedded 2 of 2   
-
-control 3: 34 s, decision 2/2, reversed 1/2
-embedded 2 of 2   
-
-control 4: 38 s, decision 2/2, reversed 1/2
-embedded 2 of 2   
-
-control 5: 36 s, decision 2/2, reversed 1/2
-embedded 2 of 2   
-
-control 6: 46 s, decision 2/2, reversed 1/2
-embedded 2 of 2   
-embedded 2 of 2   
-readme 1: 44 s, decision 2/2, reversed 1/2
-embedded 2 of 2   
-embedded 2 of 2   
-readme 2: 42 s, decision 2/2, reversed 1/2
-embedded 2 of 2   
-embedded 2 of 2   
-readme 3: 44 s, decision 2/2, reversed 1/2
-== 4. two agents at once
-{"run": "1", "seconds": 41, "A": "task=16/16 hidden=2/2", "B_luggage_tests": "4/4", "branches": ["luggage", "main"], "ledger": [["luggage", "decision", "Luggage charge: extras_for(raining, settings, bags=0) adds a quote line (\"luggage\", (bags "], ["luggage", "handoff", "claude-code stopped after 1 lookup and keeping 1 commit. Last: luggage bags charge extra\n\n"], ["main", "decision", "reconcile_statement matches a statement line to a ticket by its account reference and noth"], ["main", "handoff", "claude-code stopped after keeping 1 commit. Last: kept decision 20261112-214056-002e\n\nKept"], ["main", "decision", "ticket_for_line still matches on the account reference only, but compares it loosely: an e"], ["main", "handoff", "claude-code stopped after keeping 2 commits. Last: kept decision 20261112-214947-c22a\n\nKep"]], "handoffs_with_stray_files": [], "luggage_on_main": false, "resume_luggage_has_it": true}
-== 5. Gemma, new Burrow
-embedded 2 of 2   
-new 1: 216 s, task=6/6 hidden=0/2 | vault_search:reconcile_statement logic vault_read:matatu/matatu/models.py vault_read:matatu/matatu/payments/matcher burrow_resume vault_read:matatu/matatu/payments/matcher vault_read:matatu/matatu/models.py vault_search:test_mistyped_references_end_u
-embedded 2 of 2   
-new 2: 547 s, task=5/6 hidden=1/2 | vault_search:task-04.md vault_search:task-04.md vault_read:matatu/matatu/payments/reconci vault_read:matatu/matatu/payments/matcher burrow_resume vault_search:matcher.py vault_read:matatu/matatu/models.py vault_read:matatu/matatu/models.py vault_read:matatu/matatu/payments/matcher vault_read:matatu/matatu/payments/reconci vault_read:matatu/matatu/models.py vault_search:matatu/matatu/payments/reconci vault_read:matatu/matatu/models.py vault_read:matatu/matatu/payments/suspens burrow_resume vault_search:task-04.md vault_search:task-04.md vault_read:matatu/matatu/payments/matcher vault_read:matatu/matatu/payments/reconci burrow_resume vault_search:matcher.py vault_read:matatu/matatu/payments/matcher vault_search:test_mistyped_references_end_u vault_read:matatu/matatu/payments/reconci burrow_resume
-embedded 2 of 2   
-new 3: 321 s, task=6/6 hidden=2/2 | vault_search:task-04.md vault_read:matatu/matatu/payments/matcher vault_read:matatu/matatu/payments/reconci vault_read:matatu/matatu/models.py burrow_resume vault_read:matatu/matatu/payments/matcher vault_search:test_match
-embedded 2 of 2   
-new 4: 1134 s, task=6/6 hidden=2/2 | vault_search:task-04.md vault_search:task-04.md vault_search:reconcile_statement vault_search:reconcile_statement vault_read:matatu/matatu/payments/matcher vault_read:matatu/matatu/models.py vault_read:matatu/matatu/store/memory.py vault_read:matatu/matatu/payments/matcher vault_read:matatu/matatu/payments/reconci
-== 6. Gemma, Burrow before the fixes
-embedded 2 of 2   
-old 1: 623 s, task=6/6 hidden=2/2 | vault_search:task-04.md vault_search:task-04.md burrow_resume vault_read:matatu/matatu/payments/matcher vault_read:matatu/matatu/payments/reconci vault_read:matatu/tests/test_reconcile_ty vault_read:matatu/tests/test_reconcile_un
-embedded 2 of 2   
-old 2: 189 s, task=7/7 hidden=0/2 | vault_search:task-04.md
-embedded 2 of 2   
-old 3: 242 s, task=6/6 hidden=2/2 | burrow_resume burrow_check burrow_commit
-embedded 2 of 2   
-old 4: 351 s, task=7/7 hidden=0/2 | vault_search:task-04.md vault_search:task-04.md burrow_resume vault_search:matcher.py vault_read:matatu/matatu/models.py vault_read:matatu/matatu/models.py vault_read:matatu/matatu/payments/matcher vault_read:matatu/matatu/payments/matcher burrow_resume vault_read:matatu/matatu/payments/matcher vault_read:matatu/matatu/payments/reconci vault_read:matatu/tests/test_reconcile_un
-proof done

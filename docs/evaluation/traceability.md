@@ -1,5 +1,7 @@
 # Requirements traceability
 
+> Paths under `trials/`, `docs/report/`, `docs/demo/` and `design/` are on the [docs/reports branch](https://github.com/Satasdin/Burrow/tree/docs/reports), which keeps the project report and every evaluation's scripts, transcripts and results.
+
 Each requirement of Chapter 4 traced to the component that implements it and the test that verifies it.
 
 Each requirement of Chapter 4 (November 2026 report) traced back to its specific objective and forward to the component that implements it, the test case that verifies it, and where its result is reported.

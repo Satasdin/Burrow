@@ -1,5 +1,7 @@
 # Further results
 
+> Paths under `trials/`, `docs/report/`, `docs/demo/` and `design/` are on the [docs/reports branch](https://github.com/Satasdin/Burrow/tree/docs/reports), which keeps the project report and every evaluation's scripts, transcripts and results.
+
 Tables and trials that support Section 5.5 of the report but are not needed to follow it.
 
 
@@ -97,7 +99,7 @@ Before the engine's five steps were built, retrieval alone was tested at tag eva
 
 A small trial asked whether the on-device model can build something beside the cloud model. Three briefs for a single-file website were given to Gemma 4 12B and to Claude: a matatu fare splitter, a clinic queue board that survives a reload, and a landing page with a phone menu and a pricing toggle. Each page was scored in a real browser with the same fixed checks, 42 in all. Figure R1 shows the pages.
 
-![Figure R1: The same three briefs built by Gemma 4 12B alone, by Gemma with a skill and a note of known failures, and by Claude alone](../../docs/report/figures/v2/web-compare.png)
+![Figure R1: The same three briefs built by Gemma 4 12B alone, by Gemma with a skill and a note of known failures, and by Claude alone](https://raw.githubusercontent.com/Satasdin/Burrow/docs/reports/docs/report/figures/v2/web-compare.png)
 
 *Figure R1: The same three briefs built by Gemma 4 12B alone, by Gemma with a skill and a note of known failures, and by Claude alone*
 
