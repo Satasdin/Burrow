@@ -1,0 +1,15 @@
+$ git log --oneline -5 origin/burrow
+3a2bb86 README: table headers and shorter Quick start lines
+9121782 Repository cleaned: the report, evaluations, logo work and demo clips moved to the docs/reports branch; README rewritten
+9a25b6b Report: the repository's two branches, burrow for the software and docs/reports for the report and evaluations
+9003646 Report: the final build named as release burrow-v1.2.1, its install and tamper check, and its hosted test run
+aa15f10 Build on the hosted machine's older Swift: the import list parsed in typed steps; version 1.2.1
+
+$ git tag --list 'burrow-*' | paste -sd ' ' -
+burrow-evaluation-1 burrow-evaluation-2 burrow-v1.0.0 burrow-v1.1.0 burrow-v1.2.0 burrow-v1.2.1
+
+$ git ls-tree --name-only origin/burrow | paste -sd ' ' -
+.claude-plugin .github .gitignore BURROW.md DECISIONS.md Package.swift README.md Sources Tests app docs integrations llms.txt scripts site skills
+
+$ git ls-tree --name-only origin/docs/reports docs/report trials | paste -sd ' ' -
+docs/report trials

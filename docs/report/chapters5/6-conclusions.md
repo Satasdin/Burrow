@@ -1,23 +1,43 @@
 # Chapter 6:  Conclusions, Recommendations and Future Works
 
-## 6.1 Conclusions
+## 6.1 Introduction
 
-This project set out to design, develop and evaluate a local memory vault that gives local and cloud language models one shared memory of a person's knowledge and of the decisions made during AI-assisted work. The review of the literature showed that such decisions are lost because they are recorded by people after the fact, if at all, and because each AI tool starts from what its own program supplies, and that no existing memory both records decisions as they are made and checks new work against them. Burrow was built to fill that gap as a vault, a Ledger of decisions tied to the files they rest on, an MCP server with hooks and plugins, a check of new work, and a desktop application, all running on the person's own computer.
+This chapter closes the chain from the problem and objectives of Chapter 1 to Burrow and the evidence reported in Chapter 5. It states what the study established for each objective, recommends what should be done on the basis of those findings, and sets out the work that remains open. It introduces no new results.
 
-The evaluation showed that Burrow met these objectives. A local model with Burrow answered 102 of 120 questions on private material, against 9 alone and 75 with a vector database, and a decision worded unlike the task still reached the tool in 19 of 20 cases. Once its reason was kept with it, Claude Code kept to an earlier decision in every run, a different program carried earlier work on in every run instead of none, and every change that broke a decision was held before the work was reported as done. A small local model sometimes broke a decision it had read, which showed that memory delivers decisions reliably but that a check at the end is needed to make every tool keep them.
+## 6.2 Conclusions
 
-## 6.2 Recommendations
+Local language models can run privately on a person's own computer but do not know that person's material, and every model, local or cloud, starts each session without the decisions made with earlier ones. This project set out to give both kinds of model one shared memory, and built Burrow: a vault of the person's notes, documents and code with a Ledger of decisions tied to the files they rest on, served to any program through the Model Context Protocol, with a check of new work against those decisions and a desktop application, all running on the person's own Mac.
 
-Based on these findings, several recommendations can be made for people and developers who adopt this approach. First, AI tools should be made to record each decision together with its reason and the options that were rejected, not the decision alone. The evaluation showed that a decision without its reason could be kept in letter and defeated in purpose, while the same decision with its reason was kept in every run.
+On the first objective, the review found that memory for language models is tied to one agent or product, that the gap between local and cloud models had not been measured with a memory kept on the person's computer, that decisions are kept without their reasons or out of the models' reach, that what is recorded is not checked against later change, and that memories models write are not screened. These five gaps defined what Burrow had to do.
 
-Second, developers of AI programs should run a check of the work against recorded decisions before the work is reported as done, and should let that check hold the program until the person or the model has dealt with it. Memory alone did not stop a small model from breaking a decision, and whether a held change was then undone depended on the program around the model.
+On the second objective, Burrow was designed as one vault with a Ledger, an engine that decides whether the vault is needed and fits what it shows to the model, an MCP server shared by every program, and a check that judges each change against the decisions it touches, specified as 28 requirements in Chapter 4. On the third objective, the design was built as working software on one consumer laptop, every one of its 24 system test cases passed on the final build, and the defects found in real use were corrected and retested.
 
-Finally, developers of AI programs should pass the instructions of the memory servers they connect to on to their model. Two of the programs tested passed none of Burrow's connection instructions to their model, so the decisions reached it only after Burrow began sending them with the first tool result.
+On the fourth objective, Burrow narrowed most of the knowledge gap on the laptop: with it, Gemma 4 12B answered 102 of 120 questions on material no model had seen, against 9 alone and 75 with a vector database, closing 93% of the gap to a cloud model given the same vault, while leaving the vault out of every reasoning problem. Much of its edge over plain retrieval came from showing the model more of the vault, and on the smaller Qwen3.5 4B it did no better than plain retrieval.
 
-## 6.3 Future Works
+On the fifth objective, models that shared the vault kept decisions and carried work on once the reasons were kept with the decisions: Claude Code kept an earlier decision in 9 of 9 sessions, against 12 of 15 before, and a different program continued the right step in 3 of 3 runs, against none before. Memory, however, did not make every model obey: Gemma 4 12B received a decision with its reason in every run and still broke it in some, which only the check, holding the change and naming the decision, could address.
 
-Several directions remain open for extending this work. The most important is a comparison with a file of decisions kept by hand in the repository, which is the simplest alternative a developer would try. Running the same tasks with such a file in place of Burrow, with enough runs to tell a difference, would show what Burrow adds beyond it.
+The contribution of this project is a shared memory that holds a person's material and the decisions made with their models together with the reasons for them, kept on their own computer, readable by any local or cloud model through one protocol, and paired with a check that does not depend on the model choosing to keep what it read. These conclusions hold within the conditions tested: one Apple silicon laptop, chiefly two local models and one cloud model, mostly one fixture project with one business decision, between 3 and 30 runs per condition, and no users other than the developer.
 
-Another direction is to repeat the evaluation on several projects and kinds of decision, with more runs for each condition, since most results came from one fixture project and between 3 and 30 runs. A study with real users and small teams working in their own projects would show whether the Ledger and the check help them in practice and what they cost in attention.
+## 6.3 Recommendations
 
-Finally, Burrow could be extended beyond its present limits. Signing each shared decision cryptographically would make team use safer, and building Burrow for other operating systems would let the approach reach people who do not use a Mac. These extensions would move Burrow from a working study system towards a memory that larger teams could rely on.
+The recommendations below follow from the results and limitations of Chapter 5 and are listed by priority. The first two are essential safeguards for anyone who relies on AI tools to keep decisions; the rest are improvements.
+
+First, developers of AI coding tools and of memory systems for them should record every decision together with its reason and the options that were rejected, and should refuse a decision without a reason. Without the reason, Claude Code kept the letter of the payment decision and defeated its purpose in 3 of 15 sessions; with it, it kept the decision in 9 of 9.
+
+Second, teams and individuals who let AI tools change their code should run a check of each change against the recorded decisions before the work is reported as done, inside the AI program and in the version control hook, rather than rely on the model having read the decisions. A small local model broke a decision it had read with its reason, and only the check held that change.
+
+Third, developers of AI programs that connect to MCP servers should pass each server's instructions on to their model. Two of the programs tested passed none of Burrow's connection instructions on, and the decisions reached their models only once Burrow also sent them with the first tool result.
+
+Fourth, people who adopt Burrow should use it within the conditions that were evaluated: a local model of about 12 billion parameters for answers from their own material, with the check switched on whenever an AI tool changes code. For a model as small as Qwen3.5 4B, plain retrieval answered as well, so the engine should not be expected to add accuracy there.
+
+Finally, as an optional improvement, tools that flag text written to steer an AI should repeat the flag at the end of the work, when the model reports to the person. Repeating the flag raised the runs in which Claude Code told the person about planted text from 1 of 3 to 5 of 6.
+
+## 6.4 Future Works
+
+Three directions arise from the limitations of this study, in order of value.
+
+The most valuable is a controlled comparison with a file of decisions kept by hand in the repository, the simplest alternative a developer would try. The factor that would change is the memory given to the same tools on the same tasks: Burrow against a plain decisions file. It needs only the existing fixture and tasks, with at least 20 runs for each condition, and would be evaluated by the hidden decision tests and an exact paired test, so that it shows what Burrow adds beyond such a file.
+
+The second is a broader evaluation across several projects and kinds of decision, since most results here rest on one fixture project with one business decision and a few runs per condition. It needs fixtures from several domains, each with decisions of different kinds and hidden tests, and would be evaluated by the same decision tests with enough runs to give each result a confidence interval, showing whether the effect of keeping the reason holds beyond payments.
+
+The third is a study with real users and small teams working in their own projects over several weeks, since no person other than the developer used Burrow. It needs volunteers with Macs, the released build and a short task protocol, and would be evaluated by task completion, the problems met and the time spent on the Ledger and the check, showing whether the approach helps people in practice and what it costs them in attention. Cryptographic signing of team decisions and versions for other operating systems are extensions of the software rather than open research questions, and are left to later development.
