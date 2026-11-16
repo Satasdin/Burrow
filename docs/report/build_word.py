@@ -37,7 +37,7 @@ TEXT_WIDTH = 6.27
 MAX_FIGURE_HEIGHT = 7.7
 
 INLINE = re.compile(r"(\[PENDING[^\]]*\]|\*\*\*.+?\*\*\*|\*\*.+?\*\*|\*.+?\*|`.+?`)")
-XREF = re.compile(r"\b(Figure|Table|Equation) (A?\d+\.\d+)\b")
+XREF = re.compile(r"\b(Figure|Table|Equation) ([A-H]\.\d+|A?\d+\.\d+)\b")
 
 # ---------------------------------------------------------------- citations
 
@@ -318,6 +318,11 @@ class Writer:
         match = re.match(r"(\d+(?:\.\d+)+)\s+(.*)", words)
         text = f"{match.group(1)}\t{match.group(2)}" if match else words
         made = self.document.add_paragraph(text, style=f"Heading {level}")
+        if level == 4:
+            # The template's Heading 4 is blue and italic; set it like Heading 3 so the four levels read as one system.
+            for run in made.runs:
+                run.font.name = "Times New Roman"; run.font.size = Pt(12); run.font.bold = True
+                run.font.italic = False; run.font.color.rgb = RGBColor(0, 0, 0)
         if level == 1:
             made.paragraph_format.page_break_before = True
             self.in_appendix = words.startswith("Appendices")

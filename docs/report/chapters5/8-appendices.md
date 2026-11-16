@@ -1,13 +1,13 @@
 !landscape
 # Appendices
 
-## Appendix 1: Gantt Chart
+## Appendix A: Project Schedule and Gantt Chart
 
-Figure A1.1 shows the work carried out from March to November 2026, by workstream, with the course milestones, and Table A1.1 gives the milestones with their status. CAMR and Engram are earlier working names of the engine.
+Figure A.1 shows the work carried out from March to November 2026, by workstream, with the course milestones, and Table A.1 gives the milestones with their status. CAMR and Engram are earlier working names of the engine.
 
-!fig figures/gantt.png | Figure A1.1: Project work plan, March to November 2026 | 9.7
+!fig figures/gantt.png | Figure A.1: Project work plan, March to November 2026 | 9.7
 
-!tab Table A1.1: Course milestones and their status
+!tab Table A.1: Course milestones and their status
 !widths 0.5,3.6,1.1,1
 | No. | Task | Due date | Status |
 | 1 | Supervisor selection and allocation | 7 May 2026 | Done |
@@ -22,11 +22,11 @@ Figure A1.1 shows the work carried out from March to November 2026, by workstrea
 | 10 | Documentation | November 2026 | In progress |
 | 11 | Project final defence | 23 November 2026 | Pending |
 
-## Appendix 2: Feedback-Resolution Matrix
+## Appendix B: Feedback-Resolution Matrix
 
-Table A2.1 records the feedback received and how each item was resolved.
+Table B.1 records the feedback received and how each item was resolved.
 
-!tab Table A2.1: Feedback received and its resolution
+!tab Table B.1: Feedback received and its resolution
 !widths 1.8,0.9,1,2,0.6
 | Issue | Source | Affected section | Action | Status |
 | "Very hard to understand" | Sprint II review, 5 Nov 2026 | 2.6, 4.4 | The engine was rebuilt around plain files and five named steps, and the report describes it in standard terms | Done |
@@ -39,14 +39,14 @@ Table A2.1 records the feedback received and how each item was resolved.
 | Keep each chapter to its own part, and follow the lecturer's guide for the structure of Chapters 1 to 6 and the references | Supervisor, November 2026 | Chapters 3 to 6 | Chapter 3 names the methods and points to Chapter 4; build detail moved to Chapter 5; side trials moved to the repository's further results; Chapter 6 added | Done |
 | Abstract scored 2 of 3 (at most 200 words) | Written assessment, Ms. Eunice Manyasi, 30 June 2026 (37 of 40; "The document is well written") | Abstract | Rewritten last, from the final results, within 200 words | Done |
 | Problem statement scored 3 of 4 (background, clarity, gap, citations) | Written assessment, 30 June 2026 | 1.2 | The ideal, the reality and the gap stated with cited evidence, and the consequence quantified | Done |
-| Objectives scored 3 of 4 (SMART and linked to the problem) | Written assessment, 30 June 2026 | 1.3, 6.2 | Each objective now has a measured result and a verdict in Section 5.9 and Chapter 6 | Done |
-| The appendices and Chapter 5 are too long; some of it belongs on GitHub; show how the system works with a model | Review of the draft, 12 November 2026 | Chapter 5, appendices | The full test record, further results, traceability, user guide and extra screens moved to the repository and linked, leaving four appendices; Section 5.4.7 shows the workflows with a model from real runs | Done |
+| Objectives scored 3 of 4 (SMART and linked to the problem) | Written assessment, 30 June 2026 | 1.3, 6.2 | Each objective now has a measured result and a verdict in Section 5.5 and Chapter 6 | Done |
+| The appendices and Chapter 5 are too long; some of it belongs on GitHub; show how the system works with a model | Review of the draft, 12 November 2026 | Chapter 5, appendices | The full test record, further results, traceability, user guide and extra screens moved to the repository and linked, leaving four appendices; Section 5.3.1.7 shows the workflows with a model from real runs | Done |
 
-## Appendix 3: AI-Use Log
+## Appendix C: AI-Use Log
 
-Table A3.1 records the material use of AI in this project, by period. Full prompts and replies are kept in the Claude Code session records and transcripts. Recorded usage for that increment was US$464.29 for the main Claude Code session, US$10.64 for five helper sessions, and US$33.36 for Kimi.
+Table C.1 records the material use of AI in this project, by period. Full prompts and replies are kept in the Claude Code session records and transcripts. Recorded usage for that increment was US$464.29 for the main Claude Code session, US$10.64 for five helper sessions, and US$33.36 for Kimi.
 
-!tab Table A3.1: AI-use log
+!tab Table C.1: AI-use log
 !widths 0.85,1.0,1.75,1.2,1.4
 | Period (2026) | Tool and model | Used for | Retained output | Verification |
 | 29 Sep to 16 Oct | Claude Code (Claude Opus 5.5), one main and five helper sessions | First increment (CAMR): the engine, evaluation harness and app 0.2 to 0.4 written from the student's design; experiments run on cloud machines; figures; Chapter 5 and 6 drafts for that increment | Code, results files, releases v0.2.0 to v0.4.0 | 204 automated tests; a one-command replay recomputed 16 of 16 key results; 40 logged defects fixed and retested or reported open |
@@ -57,6 +57,6 @@ Table A3.1 records the material use of AI in this project, by period. Full promp
 | 12 Nov | Claude Code (Claude Opus 5.5) | The Programs page redesign, the GitHub test workflow and release, and the demonstration clips | Source, tests.yml, release burrow-v1.1.0, clips | The workflow's own runs; captures from real runs only |
 | [PENDING: date] | - | The student's own review and edits of this report | - | - |
 
-## Appendix 4: Similarity Report
+## Appendix D: Similarity Report
 
 [PENDING: the student to attach the one-page similarity report.]

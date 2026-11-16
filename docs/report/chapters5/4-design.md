@@ -6,7 +6,7 @@ This chapter presents the analysis and design of Burrow and addresses the second
 
 ## 4.2 System Requirements
 
-The system requirements identified for this project are presented in the following subsections, written following the guidance of ISO/IEC/IEEE 29148 (International Organization for Standardization, 2018). Each requirement has an identifier, names the specific objective it serves, and names the test case of Section 5.5.2 that verifies it. No time limit was set in advance, because no measurement existed to justify one; where speed matters, the requirement is to measure it.
+The system requirements identified for this project are presented in the following subsections, written following the guidance of ISO/IEC/IEEE 29148 (International Organization for Standardization, 2018). Each requirement has an identifier, names the specific objective it serves, and names the test case of Section 5.4.2 that verifies it. No time limit was set in advance, because no measurement existed to justify one; where speed matters, the requirement is to measure it.
 
 ### 4.2.1 Functional Requirements
 
@@ -75,14 +75,14 @@ Every requirement links back to a specific objective, named in Tables 4.1 to 4.4
 !tab Table 4.5: Traceability from requirements to diagrams, implementation and tests
 !widths 1.2,1.6,1.1,1.2,1.3
 | Module | Requirements | Diagrams | Implemented in | Verified by |
-| Vault and index | FR-01, FR-02, DR-01, DR-04, IR-03, IR-04 | Figures 4.1, 4.5, 4.7, 4.8 | Section 5.4.1 | TC-01, TC-02, TC-18, TC-20, TC-23, TC-24 |
-| Ledger | FR-03, FR-07, FR-08, NFR-02, DR-02 | Figures 4.6, 4.7, 4.10, 4.11 | Section 5.4.2 | TC-03, TC-07, TC-08, TC-14 |
-| Connection | FR-04, FR-05, IR-01, IR-02 | Figures 4.2, 4.3, 4.9, 4.13 | Section 5.4.3 | TC-04, TC-05, TC-21, TC-22 |
-| Check | FR-09 | Figures 4.2, 4.4 | Section 5.4.4 | TC-09 |
-| Sessions and handover | FR-06, FR-10, NFR-04 | Figures 4.3, 4.10 | Section 5.4.5 | TC-06, TC-10, TC-15 |
-| Team and approval | FR-11, NFR-05 | Figures 4.1, 4.15 | Section 5.4.6 | TC-11, TC-16 |
-| Desktop application | FR-12 | Figures 4.11 to 4.15 | Sections 5.4.1 to 5.4.3 | TC-12 |
-| Whole system and release | NFR-01, NFR-03, NFR-06, DR-03, IR-05, IR-06 | Figures 4.8, 4.16 | Sections 5.2 and 5.3 | TC-13, TC-14, TC-17, TC-19; release check |
+| Vault and index | FR-01, FR-02, DR-01, DR-04, IR-03, IR-04 | Figures 4.1, 4.5, 4.7, 4.8, 4.9 | Section 5.3.1.1 | TC-01, TC-02, TC-18, TC-20, TC-23, TC-24 |
+| Ledger | FR-03, FR-07, FR-08, NFR-02, DR-02 | Figures 4.6, 4.7, 4.11, 4.12 | Section 5.3.1.2 | TC-03, TC-07, TC-08, TC-14 |
+| Connection | FR-04, FR-05, IR-01, IR-02 | Figures 4.2, 4.3, 4.10, 4.14 | Section 5.3.1.3 | TC-04, TC-05, TC-21, TC-22 |
+| Check | FR-09 | Figures 4.2, 4.4, 4.13 | Section 5.3.1.4 | TC-09 |
+| Sessions and handover | FR-06, FR-10, NFR-04 | Figures 4.3, 4.11 | Section 5.3.1.5 | TC-06, TC-10, TC-15 |
+| Team and approval | FR-11, NFR-05 | Figures 4.1, 4.16 | Section 5.3.1.6 | TC-11, TC-16 |
+| Desktop application | FR-12 | Figures 4.12 to 4.16 | Sections 5.3.1.1 to 5.3.1.4 | TC-12 |
+| Whole system and release | NFR-01, NFR-03, NFR-06, DR-03, IR-05, IR-06 | Figures 4.8, 4.17 | Sections 5.2 and 5.3.2 | TC-13, TC-14, TC-17, TC-19; release check |
 
 ## 4.3 System Analysis Diagrams
 

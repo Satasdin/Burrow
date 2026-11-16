@@ -46,7 +46,7 @@ What is missing is a memory that serves both needs and is measured on a person's
 
 This causes real costs, in Kenya as elsewhere, where data sovereignty runs through the national AI strategy (Ogonjo, 2025). People send private material to cloud models because local models know too little, they explain the same reasons to each new model, and models bring back options that were already rejected, which adds work that developers already describe as their main frustration with AI tools (Stack Overflow, 2025). Burrow addresses this with one memory, kept on the person's laptop, that both local and cloud models read and write through MCP, and the study measures how far it narrows the gap and whether decisions carry between models.
 
-This work will help people who use AI models on private material, and people who use several models on the same work, by giving them a local model that knows their material and models that build on each other's decisions, while advancing research in retrieval-augmented generation and agent memory with a measured account of how far a shared local memory narrows the gap between local and cloud models.
+This work helps people who use AI models on private material, and people who use several models on the same work, by giving them a local model that knows their material and models that build on each other's decisions, while advancing research in retrieval-augmented generation and agent memory with a measured account of how far a shared local memory narrows the gap between local and cloud models.
 
 ## 1.6 Scope
 
