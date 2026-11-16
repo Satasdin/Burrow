@@ -699,8 +699,81 @@ def screen_flow():
     s.save()
 
 
+def engine_pipeline():
+    """The engine as a pipeline: what each step hands the next (Chapter 4, beside the architecture)."""
+    s = Sheet("engine_pipeline", 626, 312)
+    steps = ["Decide\nis the vault\nneeded?", "Find\nwords and\nmeaning, merged", "Fit\ncut to what\nthe model reads",
+             "Answer\nlocal or cloud\nmodel", "Check\nevery cited\nplace", "Learn\nkeep, with the\nperson's yes"]
+    w, gap, y, h = 88, 18, 110, 60
+    xs = [4 + i * (w + gap) for i in range(6)]
+    for x, words in zip(xs, steps):
+        s.rounded(x, y, w, h, words, radius=7, size=7.0)
+    hand = ["method,\nskill", "excerpts with\nfile and line,\nfitting decisions", "excerpts within\nthe fitted size\n(17,417 characters)",
+            "answer with\ncitations", "checked answer"]
+    for i, words in enumerate(hand):
+        a, b = xs[i] + w, xs[i + 1]
+        s.line([(a, y + h / 2), (b, y + h / 2)], "open")
+        s.text((a + b) / 2, y + h + 22, words, size=6.2)
+    # The question comes in; a question that needs no vault goes straight to the model.
+    s.text(xs[0], 30, "A question in the person's words", size=SMALL, style="italic", ha="left")
+    s.line([(xs[0] + w / 2, 40), (xs[0] + w / 2, y)], "open")
+    s.line([(xs[0] + w * 0.75, y), (xs[0] + w * 0.75, 70), (xs[3] + w / 2, 70), (xs[3] + w / 2, y)], "open", dashed=True)
+    s.text((xs[0] + xs[3] + w) / 2 + 30, 62, "vault not needed: a sum or a reasoning problem goes to the model alone", size=6.2, back=True)
+    # Check sends a bad citation back once.
+    s.line([(xs[4] + w / 2, y + h), (xs[4] + w / 2, y + h + 50), (xs[3] + 52, y + h + 50), (xs[3] + 52, y + h)], "open", dashed=True)
+    s.text(xs[3] + 60, y + h + 64, "asked again once if a\ncitation was not shown", size=6.2, ha="left", back=True)
+    # What the steps read from and write to.
+    stores = [(xs[1], "Index of the vault\nFTS5 and vectors"), (xs[2], "Ledger\ndecisions in force"),
+              (xs[3], "Model: Ollama,\nor the program's"), (xs[5], "Vault notes\nonly after a yes")]
+    for x, words in stores:
+        s.rect(x, 264, w, 40, words, size=6.6)
+    s.line([(xs[1] + 34, 264), (xs[1] + 34, y + h)], "open", dashed=True)
+    s.line([(xs[2] + w / 2, 264), (xs[2] + w / 2, 244), (xs[1] + 54, 244), (xs[1] + 54, y + h)], "open", dashed=True)
+    s.line([(xs[3] + 36, 264), (xs[3] + 36, y + h)], "open", dashed=True)
+    s.line([(xs[5] + w / 2, y + h), (xs[5] + w / 2, 264)], "open", dashed=True)
+    s.save()
+
+
+def evaluation_design():
+    """How the evaluations kept what was scored apart from what Burrow could read (Chapter 3)."""
+    s = Sheet("evaluation_design", 626, 400)
+    s.text(8, 12, "Held out: never in the vault, never used to set Burrow", ha="left", size=SMALL, style="italic")
+    held = [(8, "120 knowledge questions\nwith answer keys"), (164, "50 GSM8K reasoning\nproblems"), (320, "Matatu hidden tests\nand task briefs after\nsession 1"),
+            (476, "30 questions about\nan earlier session")]
+    for x, words in held:
+        s.rect(x, 22, 142, 42, words, dashed=True, size=6.8)
+    s.text(8, 90, "What Burrow could read", ha="left", size=SMALL, style="italic")
+    s.rect(8, 100, 298, 44, "Knowledge vault: 87 documents\nKenyan law, 2026 software docs, a project's notes", size=6.8)
+    s.rect(320, 100, 298, 44, "Fixed starting point, built by a script:\nMatatu linked; session 1 kept the payment decision", size=6.8)
+    # Knowledge route.
+    s.text(8, 166, "Same questions, six set-ups", size=SMALL, style="italic", ha="left")
+    setups = ["Model alone", "Plain retrieval", "Chroma vector\ndatabase", "Burrow engine", "Cloud alone", "Cloud with\nBurrow"]
+    for i, words in enumerate(setups):
+        x, y = 8 + (i % 3) * 100, 180 + (i // 3) * 40
+        s.rect(x, y, 94, 32, words, size=6.6)
+    s.line([(157, 144), (157, 180)], "open")
+    s.rect(8, 300, 298, 36, "Scored: answer contains every part of its key;\nfraction of the gap closed (Equation 3.1)", size=6.8)
+    s.line([(157, 260), (157, 300)], "open")
+    s.line([(77, 64), (77, 80), (2, 80), (2, 318), (8, 318)], "open", dashed=True)
+    s.text(6, 290, "keys", size=6.2, ha="left", back=True)
+    # Decision route.
+    s.text(320, 166, "Each condition, same start", size=SMALL, style="italic", ha="left")
+    conds = ["With Burrow\n(resume, check)", "Burrow before\nan improvement", "Nothing, session\ntools or transcript"]
+    for i, words in enumerate(conds):
+        s.rect(320 + i * 100, 180, 94, 40, words, size=6.6)
+    s.rect(320, 236, 298, 32, "Claude Code, OpenCode with Gemma 4 12B, OpenClaw, Hermes Agent", size=6.6)
+    s.line([(469, 144), (469, 180)], "open")
+    s.line([(469, 220), (469, 236)], "open")
+    s.rect(320, 300, 298, 36, "Scored: hidden decision tests pass; right next step\nwith its constraint; every transcript read", size=6.8)
+    s.line([(469, 268), (469, 300)], "open")
+    s.line([(391, 64), (391, 80), (624, 80), (624, 318), (618, 318)], "open", dashed=True)
+    s.text(620, 290, "tests", size=6.2, ha="right", back=True)
+    s.text(313, 370, "Thresholds were set on queries written for the purpose; one confounded run was set aside", size=SMALL, style="italic")
+    s.save()
+
+
 ALL = (use_cases, sequence_session, activity_check, classes, architecture, schema, deployment, wire_ledger, wire_watch, wire_programs,
-       activity_answer, states_decision, sequence_handover, components, wire_ask, screen_flow)
+       activity_answer, states_decision, sequence_handover, components, wire_ask, screen_flow, engine_pipeline, evaluation_design)
 
 if __name__ == "__main__":
     wanted = set(sys.argv[1:])

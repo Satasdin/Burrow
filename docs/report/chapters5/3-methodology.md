@@ -42,6 +42,10 @@ A value of zero means that the vault adds nothing, and a value of one means that
 
 Validity was protected in four ways. The questions, keys and hidden tests formed a held-out set that never appeared in the vault or in the tuning of Burrow, and every transcript was read to confirm that no model found an answer elsewhere. Each result was reported as a count with its sample size, and paired results were compared with an exact two-sided sign test, because each outcome is simply right or wrong. Time was measured in seconds on the target laptop. The exact version of every model and program was recorded, so that a change in a hosted model could be traced.
 
+Figure 3.1 shows how the evaluations kept what was scored apart from what Burrow could read. The questions, answer keys and hidden tests stayed outside the vault and outside the setting of Burrow, while the knowledge vault and the fixed starting point were all that Burrow and the models could reach.
+
+!fig figures/v5/evaluation_design.png | Figure 3.1: Design of the evaluations, with the held-out material kept apart from what Burrow could read | 6.2
+
 ## 3.3 System Development Methodology
 
 Burrow was developed with an iterative and incremental methodology from the Agile family. The system was built in five increments, each of which passed through analysis, design, building and evaluation and ended in a working build that was tested before the next increment began. The methodology was guided by the OOAD paradigm, which models a system as objects that hold their own data and behaviour and suits incremental methods, because each increment can add or refine objects without redesigning the rest.
@@ -54,9 +58,9 @@ OOAD was chosen as the paradigm because the memory is naturally a set of objects
 
 ## 3.4 Methodology Diagram
 
-Figure 3.1 shows the methodology as applied to Burrow: five increments between June and November 2026, each passing through analysis, design, building and evaluation, and each adding capability to the last. The first increment built the memory as plain Markdown files with a rebuildable index, search by words and by meaning, and the links between files. The second built the steps that give a local model knowledge from the vault and evaluated them on the knowledge questions. The third added the record of decisions, the MCP server through which models reach the vault, hooks for coding tools and the desktop application. The fourth tested the vault with real AI programs on the Matatu tasks and added what those runs required. The fifth strengthened the check of new work and the vault's security and added sharing within a team.
+Figure 3.2 shows the methodology as applied to Burrow: five increments between June and November 2026, each passing through analysis, design, building and evaluation, and each adding capability to the last. The first increment built the memory as plain Markdown files with a rebuildable index, search by words and by meaning, and the links between files. The second built the steps that give a local model knowledge from the vault and evaluated them on the knowledge questions. The third added the record of decisions, the MCP server through which models reach the vault, hooks for coding tools and the desktop application. The fourth tested the vault with real AI programs on the Matatu tasks and added what those runs required. The fifth strengthened the check of new work and the vault's security and added sharing within a team.
 
-!fig figures/v5/incremental.png | Figure 3.1: Incremental development methodology applied to Burrow, drawn by the author | 5.6
+!fig figures/v5/incremental.png | Figure 3.2: Incremental development methodology applied to Burrow, drawn by the author | 5.6
 
 ### 3.4.1 Analysis
 
@@ -108,7 +112,7 @@ The design was captured in diagrams that refine the analysis into a buildable sy
 
 ### 3.6.1 System Architecture
 
-The system architecture diagram shows the layers of Burrow, from the AI programs that connect to it and the interfaces they connect through, to the engine and the stores on disk.
+The system architecture diagram shows the layers of Burrow, from the AI programs that connect to it and the interfaces they connect through, to the engine and the stores on disk, together with a pipeline view of how the engine prepares a question for a model.
 
 ### 3.6.2 Component Diagram
 
