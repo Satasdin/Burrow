@@ -296,6 +296,7 @@ class Writer:
             shown = "(" + year
         tag = self.library.tag(items, shown, composite)
         sdt = OxmlElement("w:sdt"); pr = OxmlElement("w:sdtPr")
+        rpr = OxmlElement("w:rPr"); colour = OxmlElement("w:color"); colour.set(qn("w:val"), "000000"); rpr.append(colour); pr.append(rpr)
         t = OxmlElement("w:tag"); t.set(qn("w:val"), tag); pr.append(t)
         i = OxmlElement("w:id"); i.set(qn("w:val"), str(abs(hash(tag)) % 2000000000)); pr.append(i)
         ph = OxmlElement("w:placeholder"); dp = OxmlElement("w:docPart"); dp.set(qn("w:val"), "DefaultPlaceholder_-1854013440"); ph.append(dp); pr.append(ph)
@@ -555,6 +556,43 @@ def webextension(path, library):
             zout.writestr(info, data)
     shutil.move(work, path)
 
+GLOSSARY = (
+    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    '<w:glossaryDocument xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:docParts><w:docPart>'
+    '<w:docPartPr><w:name w:val="DefaultPlaceholder_-1854013440"/><w:category><w:name w:val="General"/>'
+    '<w:gallery w:val="placeholder"/></w:category><w:types><w:type w:val="bbPlcHdr"/></w:types>'
+    '<w:behaviors><w:behavior w:val="content"/></w:behaviors><w:guid w:val="{1CB153E6-3E3A-3544-9531-1CD1BC631236}"/></w:docPartPr>'
+    '<w:docPartBody><w:p><w:r><w:rPr><w:rStyle w:val="PlaceholderText"/></w:rPr><w:t>Click or tap here to enter text.</w:t></w:r></w:p>'
+    '</w:docPartBody></w:docPart></w:docParts></w:glossaryDocument>')
+
+def glossary(path):
+    """Adds the glossary part that defines Word's default placeholder. Mendeley Cite's citation and bibliography
+    controls name that placeholder; without it Word drops the reference on save and the controls lose their arrow."""
+    work = path.with_suffix(".tmp.docx")
+    with zipfile.ZipFile(path) as zin:
+        names = zin.namelist()
+        if "word/glossary/document.xml" in names: return
+        styles = zin.read("word/styles.xml")
+        with zipfile.ZipFile(work, "w", zipfile.ZIP_DEFLATED) as zout:
+            for info in zin.infolist():
+                data = zin.read(info.filename)
+                if info.filename == "[Content_Types].xml":
+                    text = data.decode("utf-8")
+                    extra = ('<Override PartName="/word/glossary/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.glossary+xml"/>'
+                             '<Override PartName="/word/glossary/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>')
+                    data = text.replace("</Types>", extra + "</Types>").encode("utf-8")
+                elif info.filename == "word/_rels/document.xml.rels":
+                    text = data.decode("utf-8")
+                    rel = '<Relationship Id="rIdGlossary1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/glossaryDocument" Target="glossary/document.xml"/>'
+                    data = text.replace("</Relationships>", rel + "</Relationships>").encode("utf-8")
+                zout.writestr(info, data)
+            zout.writestr("word/glossary/document.xml", GLOSSARY)
+            zout.writestr("word/glossary/styles.xml", styles)
+            zout.writestr("word/glossary/_rels/document.xml.rels",
+                          '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+                          '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>')
+    shutil.move(work, path)
+
 def main():
     document = docx.Document(str(TEMPLATE))
     body = document.element.body
@@ -591,6 +629,7 @@ def main():
     document.core_properties.author = "Ibrahim Sudheysi Ali"
     document.save(str(OUT))
     webextension(OUT, library)
+    glossary(OUT)
     cited = set(library.cited)
     (HERE / "research" / "cited-keys.json").write_text(json.dumps(sorted(cited), indent=1))
     print(OUT.name, OUT.stat().st_size, "bytes;", writer.words, "words of body text")
