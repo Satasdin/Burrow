@@ -101,6 +101,15 @@ public struct Ollama: Sendable {
         return (context, billions)
     }
 
+    /// Loads a chat model into memory with the window it will answer with, and answers nothing (D-114). The first
+    /// question after starting waited about 12 s for its first word, most of it loading the model; done while Burrow
+    /// opens, the person's question finds it loaded. The window must match the answer's, or Ollama loads it again.
+    public func warm(model: String, contextWords: Int) async throws {
+        let call = try request("api/chat", ["model": model, "messages": [] as [Any], "keep_alive": "30m", "options": ["num_ctx": contextWords]])
+        let (data, response) = try await Self.session().data(for: call)
+        try check(response, data)
+    }
+
     fileprivate func embed(model: String, inputs: [String]) async throws -> [[Float]] {
         // Every question needs the embedding model and it is small, so it is kept loaded between questions.
         // A piece is at most about 2,000 characters, so a 2,048-token window is enough. Left alone, Ollama loads

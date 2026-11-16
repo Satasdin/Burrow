@@ -169,8 +169,13 @@ struct Root: View {
             }
         }
         .onAppear {
-            if library.workspace == nil, let path = ProcessInfo.processInfo.environment["BURROW_VAULT"] {
+            guard library.workspace == nil else { return }
+            let environment = ProcessInfo.processInfo.environment
+            if let path = environment["BURROW_VAULT"] {
                 library.open(URL(fileURLWithPath: path))
+            } else if environment["BURROW_SNAPSHOT"] == nil || environment["BURROW_STATE_DIR"] != nil {
+                // A vault made in the terminal is opened, or listed, rather than asking for a folder again (D-114).
+                library.start()
             }
         }
     }
@@ -188,14 +193,16 @@ struct Welcome: View {
                     .font(.title3).foregroundStyle(.white.opacity(0.65))
                 Button("Open or Create a Vault…") { pickVault(library) }
                     .buttonStyle(.borderedProminent).controlSize(.extraLarge).padding(.top, 10)
-                if !library.recents.isEmpty {
+                if !library.choices.isEmpty {
                     // Many vaults are a folder called "vault" or "Notes", so each is named with the folders above it,
                     // and the full path is a line below: "vault" six times told them apart for nobody (14 November).
+                    // The list is the app's own recents and every vault the terminal made (D-114).
                     VStack(spacing: 10) {
-                        ForEach(library.recents, id: \.self) { path in
+                        Text("Your vaults").font(.caption.weight(.semibold)).foregroundStyle(.white.opacity(0.45)).textCase(.uppercase)
+                        ForEach(library.choices, id: \.self) { path in
                             Button { library.open(URL(fileURLWithPath: path)) } label: {
                                 VStack(spacing: 1) {
-                                    Text(Library.shortName(path, among: library.recents)).font(.body.weight(.medium))
+                                    Text(Library.shortName(path, among: library.choices)).font(.body.weight(.medium))
                                     Text((path as NSString).abbreviatingWithTildeInPath).font(.caption).foregroundStyle(.white.opacity(0.45))
                                 }
                             }

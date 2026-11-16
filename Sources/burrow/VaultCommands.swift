@@ -5,6 +5,8 @@ import Foundation
 let vaultUsage = """
 Several vaults, and how much Burrow keeps:
   burrow vault new <folder> [--name N] [--no-embed]               make a folder a vault and build its index
+  burrow vault list                                               the vaults and indexes Burrow has on this Mac, with their sizes
+  burrow vault remove <folder>                                    move a folder's Burrow index (.burrow) to the Trash; your files stay
   burrow bridge <vault> <other-vault> [--name N] [--notes-only | --with-ledger]
                                                                   let <vault> read <other-vault>, one way and read-only
   burrow bridge list <vault>
@@ -36,19 +38,32 @@ private func folderExists(_ path: String) -> Bool {
 private func existingVault(_ path: String?, _ what: String) throws -> Vault {
     guard let path else { throw Failure("\(what) needs a vault folder. Run burrow help for every command.") }
     guard folderExists(path) else { throw Failure("\(path) is not a folder") }
+    guard Vault.hasIndex(URL(fileURLWithPath: path)) else { throw Failure(Vault.notAVault(path)) }
     let vault = try Vault(project: URL(fileURLWithPath: path), everything: true)
     meetLinks(vault)
     return vault
 }
 
 private func newVault(_ options: Options) async throws {
+    switch options.positional.first {
+    case "list": return listIndexes()
+    case "remove": return try removeIndex(options.positional.dropFirst().first)
+    default: break
+    }
     guard options.positional.first == "new", options.positional.count > 1 else {
         throw Failure("make a vault with: burrow vault new <folder> [--name N]")
     }
     let path = options.positional[1]
     let url = URL(fileURLWithPath: path).standardizedFileURL
-    if FileManager.default.fileExists(atPath: url.appendingPathComponent(".burrow/index.sqlite").path) {
-        throw Failure("\(url.path) is a vault already. Open it with burrow tui \(url.path), or rebuild its index with burrow index \(url.path) --vault")
+    // Already a vault: said, and the setup carries on (exit 0), since what was asked for is already true (D-114).
+    if Vault.hasIndex(url) {
+        let vault = try Vault(project: url, everything: true)
+        KnownVaults.remember(vault)
+        LastVault.write(url.path)
+        meetLinks(vault)
+        let files = (try? vault.stats().files).map { ", \($0) files indexed" } ?? ""
+        print("\(url.path) is a vault already\(files); nothing was changed. Open it in the app, or with: burrow tui \(Printable.shellWord(url.path))")
+        return
     }
     if FileManager.default.fileExists(atPath: url.path), !folderExists(url.path) { throw Failure("\(url.path) is a file, not a folder") }
     let made = !FileManager.default.fileExists(atPath: url.path)
@@ -72,12 +87,60 @@ private func newVault(_ options: Options) async throws {
         }
     }
     KnownVaults.remember(vault)
+    // The app's first launch and `burrow` alone open this one (D-114).
+    LastVault.write(url.path)
     // A folder from someone else can already hold a list of linked folders; none of them was read (D-101).
     meetLinks(vault)
     let name = vault.config.value("vault.name").map { " called \($0)" } ?? ""
     print("\(made ? "made" : "opened") \(url.path) as a vault\(name): \(report.filesSeen) files indexed \(how).")
     print("Next: put notes in it, link a code folder (burrow link \(url.path) <folder>), or bridge it from another vault (burrow bridge <vault> \(url.path)).")
     if let stop = report.storageStop { throw Failure(stop.message) }
+}
+
+/// `burrow vault list`: every vault Burrow knows, and any index found near the top of the home folder that it doesn't
+/// (one an earlier Burrow made in a folder a program was started in), with sizes and how to remove each (D-114).
+private func listIndexes() {
+    let home = URL(fileURLWithPath: ProcessInfo.processInfo.environment["HOME"].flatMap { $0.isEmpty ? nil : $0 } ?? NSHomeDirectory())
+    let all = IndexPlaces.all(home: home)
+    let known = all.filter(\.known), stray = all.filter { !$0.known }
+    if known.isEmpty { print("Burrow knows no vaults on this Mac yet. Make one with: burrow vault new <folder>") }
+    else {
+        print("Vaults Burrow knows:")
+        for found in known { print("  \(Printable.clean(found.root))   \(ByteSize.format(Int(found.bytes)))") }
+    }
+    if !stray.isEmpty {
+        print("\nIndexes Burrow found that are not on its list (made in a folder no one chose as a vault?):")
+        for found in stray { print("  \(Printable.clean(found.root))   \(ByteSize.format(Int(found.bytes)))") }
+    }
+    if !all.isEmpty { print("\nTo remove one (your own files stay; the index goes to the Trash): burrow vault remove <folder>") }
+}
+
+/// `burrow vault remove <folder>`: the folder's `.burrow` goes to the Trash, so it can still be put back, and the folder
+/// leaves Burrow's list. The person's own files are never touched. Only in the person's own terminal, typing yes, since
+/// the index holds the vault's Ledger and conversations (D-104, D-114).
+private func removeIndex(_ path: String?) throws {
+    guard let path else { throw Failure("remove needs a folder: burrow vault remove <folder>") }
+    let url = URL(fileURLWithPath: path).standardizedFileURL
+    let store = url.appendingPathComponent(".burrow")
+    var isFolder: ObjCBool = false
+    guard FileManager.default.fileExists(atPath: store.path, isDirectory: &isFolder), isFolder.boolValue else {
+        KnownVaults.forget(root: url.path)
+        throw Failure("\(url.path) has no Burrow index (.burrow), so there is nothing to remove")
+    }
+    guard (try? FileManager.default.attributesOfItem(atPath: store.path)[.type] as? FileAttributeType) != .typeSymbolicLink else {
+        throw Failure("\(store.path) is a link, so Burrow left it alone")
+    }
+    let commits = ((try? FileManager.default.contentsOfDirectory(atPath: store.appendingPathComponent("ledger").path)) ?? []).count
+    try askThePerson([
+        "Move Burrow's index for \(Printable.clean(url.path)) to the Trash?",
+        "  \(Printable.clean(store.path))   \(ByteSize.format(Int(IndexPlaces.size(of: store))))"
+            + (commits > 0 ? "   (it holds this vault's Ledger and conversations)" : ""),
+        "Your own files in the folder are not touched. You can put it back from the Trash.",
+    ])
+    try FileManager.default.trashItem(at: store, resultingItemURL: nil)
+    KnownVaults.forget(root: url.path)
+    if LastVault.read().map({ Vault.realPath($0) == Vault.realPath(url.path) }) == true { try? FileManager.default.removeItem(at: LastVault.file()) }
+    print("moved \(store.path) to the Trash; \(url.path) is no longer a vault")
 }
 
 private func bridge(_ options: Options) throws {

@@ -55,33 +55,36 @@ struct Sidebar: View {
 }
 
 /// Obsidian's ribbon: one icon per place, the quick switcher and today's note at the foot. Red dots mark something to check.
+/// Each icon carries its page's name underneath: with icons alone a tester found the Ledger only when pointed at the
+/// "1 Ledger commit" in the status bar (16 November, D-114).
 struct Ribbon: View {
     let workspace: Workspace
 
     private var content: TabContent? { workspace.currentTab?.content }
 
     var body: some View {
-        VStack(spacing: 4) {
-            RibbonButton(icon: "square.grid.2x2", help: "Library (⌘1)", on: { if case .library = content { return true }; return false }()) { workspace.go(.library(.all)) }
-            RibbonButton(icon: "point.3.connected.trianglepath.dotted", help: "Conversations (⌘2)", on: { if case .conversations = content { return true }; if case .session = content { return true }; return false }(),
+        VStack(spacing: 2) {
+            RibbonButton(icon: "square.grid.2x2", label: "Library", help: "Library (⌘1)", on: { if case .library = content { return true }; return false }()) { workspace.go(.library(.all)) }
+            RibbonButton(icon: "point.3.connected.trianglepath.dotted", label: "Conversations", help: "Conversations (⌘2)", on: { if case .conversations = content { return true }; if case .session = content { return true }; return false }(),
                          dot: workspace.sessions.isEmpty ? nil : Night.conversation) { workspace.go(.conversations(nil)) }
-            RibbonButton(icon: "books.vertical", help: "Ledger (⌘5)", on: { if case .ledger = content { return true }; return false }(),
+            RibbonButton(icon: "books.vertical", label: "Ledger", help: "Ledger: the decisions AIs kept, with reasons (⌘5)", on: { if case .ledger = content { return true }; return false }(),
                          dot: workspace.ledger.stale.isEmpty && workspace.ledger.reverted.isEmpty ? nil : Night.stale) { workspace.go(.ledger(nil)) }
-            RibbonButton(icon: "memorychip", help: "Shelf (⌘3)", on: content == .shelf,
+            RibbonButton(icon: "memorychip", label: "Shelf", help: "Shelf (⌘3)", on: content == .shelf,
                          dot: workspace.shelf.contains { $0.stale != nil } ? Night.stale : nil) { workspace.go(.shelf) }
-            RibbonButton(icon: "app.connected.to.app.below.fill", help: "Programs (⌘4)", on: content == .programs) { workspace.go(.programs) }
-            RibbonButton(icon: "circle.hexagongrid", help: "Map (⇧⌘G)", on: content == .graph) { workspace.go(.graph) }
+            RibbonButton(icon: "app.connected.to.app.below.fill", label: "Programs", help: "Programs (⌘4)", on: content == .programs) { workspace.go(.programs) }
+            RibbonButton(icon: "circle.hexagongrid", label: "Map", help: "Map (⇧⌘G)", on: content == .graph) { workspace.go(.graph) }
             Spacer()
-            RibbonButton(icon: "command", help: "Quick switcher (⌘K)", on: workspace.paletteOpen) { workspace.paletteOpen = true }
-            RibbonButton(icon: "calendar", help: "Today's note (⇧⌘D)", on: false) { Task { await workspace.dailyNote() } }
+            RibbonButton(icon: "command", label: "Open", help: "Quick switcher (⌘K)", on: workspace.paletteOpen) { workspace.paletteOpen = true }
+            RibbonButton(icon: "calendar", label: "Today", help: "Today's note (⇧⌘D)", on: false) { Task { await workspace.dailyNote() } }
         }
         .padding(.top, 8).padding(.bottom, 30)   // clear of the status bar along the window's foot
-        .frame(width: 40)
+        .frame(width: 62)
     }
 }
 
 struct RibbonButton: View {
     let icon: String
+    var label: String? = nil
     let help: String
     let on: Bool
     var dot: Color? = nil
@@ -90,14 +93,22 @@ struct RibbonButton: View {
 
     var body: some View {
         Button(action: action) {
-            Image(systemName: icon).font(.system(size: 14, weight: on ? .semibold : .regular))
-                .frame(width: 30, height: 28)
-                .foregroundStyle(on ? Color.primary : Color.primary.opacity(0.5))
-                .background(on ? Color.primary.opacity(0.13) : hovering ? Color.primary.opacity(0.06) : .clear, in: .rect(cornerRadius: 6))
-                .overlay(alignment: .topTrailing) {
-                    if let dot { Circle().fill(dot).frame(width: 6, height: 6).shadow(color: dot, radius: 3).padding(3) }
+            VStack(spacing: 2) {
+                Image(systemName: icon).font(.system(size: 14, weight: on ? .semibold : .regular))
+                    .frame(width: 30, height: 22)
+                    .overlay(alignment: .topTrailing) {
+                        if let dot { Circle().fill(dot).frame(width: 6, height: 6).shadow(color: dot, radius: 3).offset(x: 2, y: -1) }
+                    }
+                if let label {
+                    Text(label).font(.system(size: 9, weight: on ? .semibold : .medium))
+                        .lineLimit(1).minimumScaleFactor(0.75)
                 }
-                .contentShape(Rectangle())
+            }
+            .padding(.vertical, 4)
+            .frame(width: 56)
+            .foregroundStyle(on ? Color.primary : Color.primary.opacity(0.55))
+            .background(on ? Color.primary.opacity(0.13) : hovering ? Color.primary.opacity(0.06) : .clear, in: .rect(cornerRadius: 6))
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .help(help)

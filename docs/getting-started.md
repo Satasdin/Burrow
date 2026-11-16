@@ -16,7 +16,11 @@ curl -fsSL https://github.com/Satasdin/Burrow/releases/latest/download/install.s
 ```
 
 Add `-s -- --app` after `sh` to install the desktop app as well. The installer downloads the latest release, checks
-each file against its SHA-256 checksum, and stops if one does not match. Then:
+each file against its SHA-256 checksum, and stops if one does not match. It puts `burrow` in `~/.local/bin` and, in a
+terminal, offers to add that folder to your PATH in `~/.zshrc`; it ends by saying whether your shell can find `burrow`,
+and if not, the exact line to add. An app installed this way opens straight away. Burrow isn't notarised by Apple, so
+an app downloaded with a browser (the DMG on the download page) is stopped the first time: open **System Settings ›
+Privacy & Security** and choose **Open Anyway**, once. Then:
 
 ```bash
 burrow --version

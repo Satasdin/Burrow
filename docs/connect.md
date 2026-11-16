@@ -91,8 +91,12 @@ the project's `.mcp.json`, shared with whoever uses the project). Claude Code th
 
 With `burrow connect claude-code ~/Notes --write` the server is added with `"alwaysLoad": true`, so Claude Code never
 defers Burrow's tools behind its tool search, and the hooks are added beside any you have: session start, compaction
-and session end keep a handoff in the Ledger, and Stop runs the gate (D-93). Close Claude Code first: it keeps
-`~/.claude.json` open and can write over a change made while it runs.
+and session end keep a handoff in the Ledger, and Stop runs the gate (D-93). Claude Code can stay open, even the
+session you are setting up from: when Claude Code's `claude` command is installed, Burrow adds the server with
+`claude mcp add-json`, which writes `~/.claude.json` the way Claude Code itself does, and checks the file afterwards
+(D-114). The server and hooks load when a session starts: type `/exit`, then `claude --continue` to pick up the same
+conversation with Burrow. Without the `claude` command Burrow writes the file itself, and then Claude Code must be
+closed first, since it keeps `~/.claude.json` open and can write over a change made while it runs.
 
 ## OpenCode
 

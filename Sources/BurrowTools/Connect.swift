@@ -51,8 +51,13 @@ public enum Connect {
         /// Burrow's own folder when it is not the usual one (`BURROW_STATE_DIR`): carried to the server and the gate, so
         /// both see the same linked-folder approvals the person gave.
         public var stateDir: String?
+        /// Claude Code's own `claude` command, when it is installed: the server is then added through it, which writes
+        /// ~/.claude.json the way a running Claude Code does, so Claude Code needn't be closed first (D-114).
+        public var claudeCommand: String?
 
-        public init(burrow: String, vault: String, home: URL, configHome: URL? = nil, hermesHome: URL? = nil, stateDir: String? = nil) {
+        public init(burrow: String, vault: String, home: URL, configHome: URL? = nil, hermesHome: URL? = nil, stateDir: String? = nil,
+                    claudeCommand: String? = nil) {
+            self.claudeCommand = claudeCommand
             self.burrow = burrow
             self.vault = vault
             self.home = home
@@ -72,6 +77,11 @@ public enum Connect {
         public let kind: Kind
         /// What changes, in plain lines; empty for a new file.
         public let shown: [String]
+        /// When set, the change is made by running this command (the program's own) rather than by writing the file;
+        /// the file is read afterwards to check it now says `after`'s part (D-114).
+        public var command: [String]? = nil
+        /// Run first when the program already has a setting of this name that must be replaced.
+        public var removeFirst: [String]? = nil
         public var changes: Bool { before != after }
     }
 
@@ -131,10 +141,17 @@ public enum Connect {
         let state = setup.home.appendingPathComponent(".claude.json")
         var server: [String: Any] = ["type": "stdio", "command": setup.burrow, "args": ["mcp", setup.vault], "alwaysLoad": true]
         if let env = serverEnvironment(setup) { server["env"] = env }
-        let servers = try mergedJSON(state, program: "Claude Code") { root in
+        var hadOther = false
+        var servers = try mergedJSON(state, program: "Claude Code") { root in
             var all = root["mcpServers"] as? [String: Any] ?? [:]
+            hadOther = all["burrow"] != nil
             all["burrow"] = server
             root["mcpServers"] = all
+        }
+        if let claude = setup.claudeCommand {
+            // Claude Code's own command, which takes the server as JSON, "alwaysLoad" included (checked with 2.1.322).
+            servers.command = [claude, "mcp", "add-json", "--scope", "user", "burrow", json(server).trimmingCharacters(in: .whitespacesAndNewlines)]
+            if hadOther { servers.removeFirst = [claude, "mcp", "remove", "burrow", "--scope", "user"] }
         }
         let settingsFile = setup.home.appendingPathComponent(".claude/settings.json")
         let command = Printable.shellWord(setup.burrow) + " hook claude " + Printable.shellWord(setup.vault)
@@ -157,8 +174,11 @@ public enum Connect {
             "Burrow as an MCP server for every project (user scope, in ~/.claude.json), as `claude mcp add --scope user` would add it.",
             "Burrow's tools always in view: \"alwaysLoad\": true keeps them out of Claude Code's tool search.",
             "The gate: Claude Code's Stop hook runs `burrow hook claude <vault> --gate`; a reply whose change rests on a decision not yet shown is held with the decisions (D-93). Session start, compaction and session end keep a handoff in the Ledger.",
-            "Close Claude Code before writing: it keeps ~/.claude.json open and can write over a change made while it runs.",
-        ], manual: nil)
+        ] + (setup.claudeCommand != nil ? [
+            "Claude Code can stay open, this session included: the server is added with Claude Code's own `claude mcp add-json`, which writes ~/.claude.json the way Claude Code does, and the hooks go in ~/.claude/settings.json, which Claude Code reads but does not hold open, read and written by Burrow in one step. They load when a session starts: type /exit, then run `claude --continue` to come back to the same conversation with Burrow.",
+        ] : [
+            "Close Claude Code before writing: it keeps ~/.claude.json open and can write over a change made while it runs. (With Claude Code's `claude` command on your PATH, Burrow adds the server through it instead, and Claude Code can stay open.)",
+        ]), manual: nil)
     }
 
     private static func openCode(_ setup: Setup) throws -> Plan {
@@ -364,10 +384,52 @@ public enum Connect {
             // The file as it was before Burrow first changed it: a later run never replaces that copy.
             let copy = change.path.appendingPathExtension("before-burrow")
             if change.before != nil, !files.fileExists(atPath: copy.path) { try files.copyItem(at: change.path, to: copy) }
+            if let command = change.command {
+                if let remove = change.removeFirst { _ = try run(remove, home: setup.home) }
+                let (status, output) = try run(command, home: setup.home)
+                // The program said what it did; the file must now say it too, or nothing is claimed.
+                let now = (try? String(contentsOf: change.path, encoding: .utf8)).flatMap { try? JSONSerialization.jsonObject(with: Data($0.utf8)) as? [String: Any] }
+                let wanted = (try? JSONSerialization.jsonObject(with: Data(change.after.utf8)) as? [String: Any]) ?? [:]
+                let key = "mcpServers"
+                guard status == 0, let got = (now?[key] as? [String: Any])?["burrow"] as? [String: Any],
+                      let want = (wanted[key] as? [String: Any])?["burrow"] as? [String: Any], NSDictionary(dictionary: got).isEqual(to: want) else {
+                    throw Refused(why: "`\(command.prefix(4).joined(separator: " "))` did not add the server (\(output.trimmingCharacters(in: .whitespacesAndNewlines))). Nothing else was written; close Claude Code and run this again, or add it by hand.")
+                }
+                said.append("added the burrow server with `\(URL(fileURLWithPath: command[0]).lastPathComponent) mcp add-json` (\(tilde(change.path.path, setup)))")
+                continue
+            }
             try Data(change.after.utf8).write(to: change.path, options: .atomic)
             said.append("wrote " + tilde(change.path.path, setup))
         }
         return said
+    }
+}
+
+extension Connect {
+    /// Runs a program's own command with HOME set to the home being connected, so it writes where the plan read.
+    static func run(_ arguments: [String], home: URL) throws -> (status: Int32, output: String) {
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: arguments[0])
+        process.arguments = Array(arguments.dropFirst())
+        var environment = ProcessInfo.processInfo.environment
+        environment["HOME"] = home.path
+        process.environment = environment
+        let pipe = Pipe()
+        process.standardOutput = pipe
+        process.standardError = pipe
+        process.standardInput = FileHandle.nullDevice
+        try process.run()
+        let data = pipe.fileHandleForReading.readDataToEndOfFile()
+        process.waitUntilExit()
+        return (process.terminationStatus, String(decoding: data, as: UTF8.self))
+    }
+
+    /// Claude Code's `claude` command: `BURROW_CLAUDE` when set, else the first on PATH or where its installer puts it.
+    public static func findClaude(environment: [String: String], home: URL) -> String? {
+        if let set = environment["BURROW_CLAUDE"] { return set.isEmpty ? nil : set }
+        let path = (environment["PATH"] ?? "").split(separator: ":").map { String($0) + "/claude" }
+        let usual = [".local/bin/claude", ".claude/local/claude"].map { home.appendingPathComponent($0).path } + ["/opt/homebrew/bin/claude", "/usr/local/bin/claude"]
+        return (path + usual).first { FileManager.default.isExecutableFile(atPath: $0) }
     }
 }
 

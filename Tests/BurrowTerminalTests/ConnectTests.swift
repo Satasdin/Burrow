@@ -19,6 +19,8 @@ final class ConnectTests: XCTestCase {
         try FileManager.default.createDirectory(at: vaultFolder, withIntermediateDirectories: true)
         try FileManager.default.createDirectory(at: home, withIntermediateDirectories: true)
         try "# Home\n".write(to: vaultFolder.appendingPathComponent("Home.md"), atomically: true, encoding: .utf8)
+        // A vault, as `burrow vault new` leaves it: connect refuses any other folder (D-114).
+        _ = try Vault(project: vaultFolder, everything: true)
     }
 
     override func tearDown() { try? FileManager.default.removeItem(at: top) }

@@ -159,7 +159,7 @@ extension Vault {
     /// Usage beside the limits. `ownFiles` walks the vault folder, so it is asked for only where it is shown.
     public func storageReport(ownFiles: Bool = false) throws -> StorageReport {
         let usage = try storageUsage()
-        let others = KnownVaults.list(in: stateFolder).filter { $0.store != store.path }
+        let others = KnownVaults.list(in: stateFolder).filter { Vault.realPath($0.store) != Vault.realPath(store.path) }
         let elsewhere = others.reduce(0) { $0 + StorageMeter.usage(of: URL(fileURLWithPath: $1.store)) }
         return StorageReport(usage: usage, limit: config.storageLimit, allVaults: usage.total + elsewhere, vaultCount: others.count + 1,
                              globalLimit: globalConfig.storageLimit, ownFiles: ownFiles ? StorageMeter.ownBytes(in: root, store: store) : nil)
@@ -186,7 +186,7 @@ struct StorageGuard {
         let vectors = (try? vault.count("vectors")) ?? 0
         fixed = StorageMeter.otherBytes(in: vault.store) + StorageMeter.vectorCacheBytes(count: vectors, dimension: vault.vectorDimension())
         if globalLimit != nil {
-            elsewhere = KnownVaults.list(in: vault.stateFolder).filter { $0.store != vault.store.path }
+            elsewhere = KnownVaults.list(in: vault.stateFolder).filter { Vault.realPath($0.store) != Vault.realPath(vault.store.path) }
                 .reduce(0) { $0 + StorageMeter.usage(of: URL(fileURLWithPath: $1.store)) }
         } else {
             elsewhere = 0

@@ -382,6 +382,20 @@ public struct Ledger: Sendable {
         return " CHECK AGAIN: \(changed.prefix(3).joined(separator: ", ")) changed since this was kept; check it still holds before relying on it."
     }
 
+    /// Where a commit handed to a new session came from (D-114). A tester's fresh session was handed decisions from an
+    /// earlier run on another project, with nothing to say so. Every such line now says when it was kept, and when none
+    /// of the files it rests on is in the vault any more, that it may be left over from earlier work.
+    public func origin(_ commit: LedgerCommit) -> String {
+        " Kept \(Self.when(commit.at)) by an earlier session." + leftOver(commit)
+    }
+
+    /// Empty, or a warning when none of the files a commit rests on is in the vault now.
+    public func leftOver(_ commit: LedgerCommit) -> String {
+        let cited = commit.cites.keys.sorted()
+        guard !cited.isEmpty, cited.allSatisfy({ read($0) == nil }) else { return "" }
+        return " LEFT OVER?: none of the files it rests on (\(cited.prefix(3).joined(separator: ", "))) is in this vault now, so it may come from earlier work on something else; ask the person before relying on it."
+    }
+
     /// Commits that were later marked wrong, by id.
     public func reverted() -> Set<String> { Set(all().compactMap(\.reverts)) }
 
@@ -516,14 +530,18 @@ public struct Ledger: Sendable {
             if let by = retired[commit.id] { text += by.kind == .decision ? " " + Self.retiredNote(by) : " MARKED WRONG, see the correction" }
             text += Self.unresolvedNote(open[commit.id] ?? [])
             text += Self.checkAgain(stale(commit))
+            if [.decision, .fact, .correction, .plan].contains(commit.kind) { text += leftOver(commit) }
             return text
         }
-        let header = note + "Ledger branch \(name): \(commits.count) commit\(commits.count == 1 ? "" : "s"), newest \(Self.when(commits[0].at)). This is what earlier sessions understood; it is not the code. Commits marked CHECK AGAIN rest on files that changed since."
+        // The count says what kinds it is made of, since handoffs, corrections and confirmations are not listed under
+        // "Latest commits": "2 commits" over one listed line read as a commit gone missing (16 November, D-114).
+        let header = note + "Ledger branch \(name): \(Self.kindCount(commits)), newest \(Self.when(commits[0].at)). This is what earlier sessions understood; it is not the code. Commits marked CHECK AGAIN rest on files that changed since."
         let plan = commits.first(where: { $0.kind == .plan && !wrong.contains($0.id) })
         let stop = commits.first(where: { $0.kind == .handoff })
         let inPlay = Set(commits.prefix(12).flatMap(\.cites.keys))
         let corrections = everything.filter { $0.kind == .correction && !$0.cites.keys.filter(inPlay.contains).isEmpty }.prefix(4)
-        let recent = Array(commits.filter { ![.handoff, .correction, .confirmation].contains($0.kind) }.prefix(6))
+        let listable = commits.filter { ![.handoff, .correction, .confirmation].contains($0.kind) }
+        let recent = Array(listable.prefix(6))
         var files: [String] = []
         for commit in commits.prefix(12) { for path in commit.cites.keys.sorted() where !files.contains(path) { files.append(path) } }
         // Commits are written by models and quote files, so they are data: kept inside one block whose own tags can't
@@ -549,7 +567,7 @@ public struct Ledger: Sendable {
             if !corrections.isEmpty { parts.append("Corrections on these files:\n" + corrections.map { line($0, step.line) }.joined(separator: "\n")) }
             let shown = recent.filter { !step.binding || [.decision, .fact].contains($0.kind) }.prefix(step.keep)
             if !shown.isEmpty {
-                let left = recent.count - shown.count
+                let left = listable.count - shown.count
                 parts.append("Latest commits:\n" + shown.map { line($0, step.line) }.joined(separator: "\n")
                              + (left > 0 ? "\n(\(left) more left out for length: burrow_log lists them.)" : ""))
             }
@@ -586,6 +604,18 @@ public struct Ledger: Sendable {
         // Only a budget too small for even two commits' reasons gets here.
         if inside.count > room { inside = String(inside.prefix(room - 1)) + "…" }
         return opening + inside + closing
+    }
+
+    /// "3 commits: 2 decisions, 1 handoff", in the order the kinds are declared; one kind alone is "1 fact".
+    static func kindCount(_ commits: [LedgerCommit]) -> String {
+        let parts = LedgerCommit.Kind.allCases.compactMap { kind -> String? in
+            let count = commits.filter { $0.kind == kind }.count
+            guard count > 0 else { return nil }
+            let word = kind == .code ? "code commit" : kind.rawValue
+            return "\(count) \(word)\(count == 1 ? "" : "s")"
+        }
+        let total = "\(commits.count) commit\(commits.count == 1 ? "" : "s")"
+        return parts.count > 1 ? total + " (" + parts.joined(separator: ", ") + ")" : total + " (" + (parts.first ?? "") + ")"
     }
 
     /// Text that can't open or close the Ledger's block, or a vault excerpt, from inside.

@@ -58,13 +58,7 @@ struct WatchPanel: View {
             : "\(held.counted("decision")) to check again: \(held == 1 ? "it rests" : "they rest") on files changed since"
     }
 
-    private var checkDetail: String {
-        guard let check, !check.changed.isEmpty else {
-            if let built = check?.buildOutput, !built.isEmpty { return "Only build output changed (\(built.count.counted("file")))" }
-            return "The linked code matches its last git commit"
-        }
-        return check.rules.isEmpty ? "No decision rests on them" : "\(check.rules.count.counted("decision")) to check them against"
-    }
+    private var checkDetail: String { CheckReport.tileDetail(check, linkedFolders: workspace.linked.count) }
 
     // MARK: Tiles
 

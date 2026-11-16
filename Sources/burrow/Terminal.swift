@@ -17,6 +17,8 @@ func openVault(_ path: String, store: String?, sayLinks: Bool = true) throws -> 
     guard FileManager.default.fileExists(atPath: path, isDirectory: &isFolder), isFolder.boolValue else {
         throw Failure("\(path) is not a folder")
     }
+    // Only a folder the person made a vault is opened; any other is refused before anything is written (D-114).
+    guard Vault.hasIndex(URL(fileURLWithPath: path), store: store.map { URL(fileURLWithPath: $0) }) else { throw Failure(Vault.notAVault(path)) }
     let vault = try Vault(project: URL(fileURLWithPath: path), store: store.map { URL(fileURLWithPath: $0) }, everything: true)
     meetLinks(vault, say: sayLinks)
     return vault
@@ -102,21 +104,11 @@ private func shownForApproval(_ state: LinkState) -> String {
     return "  \(Printable.clean(state.folder.name))   \(real)\(listed)\(state.exists ? "" : "   (folder not found)")"
 }
 
-/// Where the last-opened vault is remembered, so `burrow` alone can go back to it.
-private func stateFile() -> URL {
-    if let folder = ProcessInfo.processInfo.environment["BURROW_STATE_DIR"] {
-        return URL(fileURLWithPath: folder).appendingPathComponent("last-vault")
-    }
-    return FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("Burrow/last-vault")
-}
-
-/// This folder if it already has a Burrow index, or else the vault opened last. Never a folder Burrow hasn't been pointed at.
+/// This folder if it already has a Burrow index, or else the vault opened or made last. Never a folder Burrow hasn't been pointed at.
 private func defaultVault() -> String? {
     let here = FileManager.default.currentDirectoryPath
-    if FileManager.default.fileExists(atPath: here + "/.burrow/index.sqlite") { return here }
-    guard let saved = try? String(contentsOf: stateFile(), encoding: .utf8) else { return nil }
-    let path = saved.trimmingCharacters(in: .whitespacesAndNewlines)
-    return FileManager.default.fileExists(atPath: path) ? path : nil
+    if Vault.hasIndex(URL(fileURLWithPath: here)) { return here }
+    return LastVault.read().flatMap { Vault.hasIndex(URL(fileURLWithPath: $0)) ? $0 : nil }
 }
 
 private func runFullScreen(_ folder: String, store: String?, model: String) throws {
@@ -127,8 +119,7 @@ private func runFullScreen(_ folder: String, store: String?, model: String) thro
     _ = try openVault(folder, store: store)
     do {
         let app = try TerminalApp(vaultFolder: url, store: store.map { URL(fileURLWithPath: $0) }, modelName: model)
-        try? FileManager.default.createDirectory(at: stateFile().deletingLastPathComponent(), withIntermediateDirectories: true)
-        try? url.path.write(to: stateFile(), atomically: true, encoding: .utf8)
+        LastVault.write(url.path)
         app.run()
     } catch let problem as TerminalApp.Failure {
         throw Failure(problem.description)
@@ -203,6 +194,9 @@ func runTerminalCommand(_ arguments: [String]) async throws -> Bool {
         var settings = ChatSession.Settings()
         settings.alwaysSearchFirst = !options.flags.contains("--tools-only")
         let backend = OllamaChat(model: model)
+        // Loaded while the vault is read and the first question typed, with the window chat answers in (D-114).
+        let window = backend.contextWords
+        Task.detached { try? await Ollama().warm(model: model, contextWords: window) }
         await ChatREPL(session: ChatSession(tools: tools, backend: backend, settings: settings), tools: tools, backend: backend).run()
     case "link":
         guard options.positional.count > 1 else { throw Failure("link needs a code folder") }

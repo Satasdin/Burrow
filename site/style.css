@@ -188,6 +188,13 @@ code.inl{font:.9em var(--mono);color:var(--ink)}
 .steps li::before{counter-increment:s;content:counter(s);font:600 13px var(--sans);color:var(--ink);background:var(--card);border-radius:8px;height:28px;display:flex;align-items:center;justify-content:center}
 .steps code{font:14px var(--mono);color:var(--ink);background:var(--card);padding:2px 7px;border-radius:6px;overflow-wrap:anywhere}
 .steps a{color:var(--link);text-decoration:none}
+.dl h3{font-size:18px;font-weight:600;margin:36px 0 6px}
+.dl .route .cta{display:flex;justify-content:flex-start;margin:0}
+.dl .tag{display:inline-block;vertical-align:middle;margin-left:8px;font:600 12px var(--sans);color:#6beba8;background:rgba(107,235,168,.12);border-radius:999px;padding:4px 10px;letter-spacing:0}
+.steps.small{margin-top:18px}
+.steps.small li{font-size:15.5px}
+.steps b,.dl .note b{color:var(--ink);font-weight:600}
+.dl .route .dlshot{margin-top:40px}
 
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}
 

@@ -111,7 +111,11 @@ func run() async throws {
     guard let projectPath = options.positional.first else {
         throw Failure("\(command) needs a folder: burrow \(command) <folder>. Run burrow help for every command.")
     }
-    let vault = try Vault(project: URL(fileURLWithPath: projectPath), store: options.values["--store"].map { URL(fileURLWithPath: $0) }, everything: options.flags.contains("--vault"))
+    let projectURL = URL(fileURLWithPath: projectPath), storeURL = options.values["--store"].map { URL(fileURLWithPath: $0) }
+    // `index` is the one older command that makes an index where there was none: naming a folder to index is choosing it.
+    // Every other command reads an index that exists, and refuses any other folder before anything is written (D-114).
+    if command != "index", !Vault.hasIndex(projectURL, store: storeURL) { throw Failure(Vault.notAVault(projectPath)) }
+    let vault = try Vault(project: projectURL, store: storeURL, everything: options.flags.contains("--vault"))
     meetLinks(vault)
     let ollama = Ollama()
     let text = options.positional.dropFirst().first

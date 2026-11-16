@@ -46,8 +46,12 @@ func runConnectCommand(_ arguments: [String]) throws -> Bool {
     let hermesHome = home == nil ? environment["HERMES_HOME"].flatMap { $0.isEmpty ? nil : URL(fileURLWithPath: $0) } : nil
     let setup = Connect.Setup(burrow: URL(fileURLWithPath: running).resolvingSymlinksInPath().path,
                               vault: Vault.realPath(vaultURL.path), home: homeURL, configHome: configHome, hermesHome: hermesHome,
-                              stateDir: environment["BURROW_STATE_DIR"])
+                              stateDir: environment["BURROW_STATE_DIR"],
+                              claudeCommand: program == .claudeCode ? Connect.findClaude(environment: environment, home: homeURL) : nil)
     let plan = Connect.plan(program, setup)
+    // A program connected to a folder that isn't a vault would have its server refuse it (D-114): said now, not later.
+    // A path Burrow won't put in settings at all is said first, as before.
+    if plan.refusal == nil, !Vault.hasIndex(vaultURL) { throw Failure(Vault.notAVault(Printable.clean(positional[1]))) }
     print(Connect.describe(plan, setup))
     fflush(stdout)
     if let refusal = plan.refusal { throw Failure((write ? "nothing was written: " : "") + refusal) }
@@ -67,6 +71,8 @@ func runConnectCommand(_ arguments: [String]) throws -> Bool {
     let answer = readLine(strippingNewline: true)?.trimmingCharacters(in: .whitespaces).lowercased()
     guard answer == "yes" else { throw Failure("nothing was written") }
     for line in try Connect.apply(plan, setup) { print(line) }
-    print("Done. Start \(program.name) again so it loads Burrow and the gate.")
+    print(program == .claudeCode && setup.claudeCommand != nil
+          ? "Done. Claude Code loads Burrow when a session starts: in a session that is open now, type /exit and run claude --continue to carry on with Burrow."
+          : "Done. Start \(program.name) again so it loads Burrow and the gate.")
     return true
 }

@@ -21,20 +21,27 @@ say why it needs them, and wait.
 ## Steps
 
 1. **Install.** `curl -fsSL https://github.com/Satasdin/Burrow/releases/latest/download/install.sh | sh`
-   (add `-s -- --app` after `sh` for the desktop app). The installer checks each download's SHA-256 and stops if one
-   does not match. Check with `burrow --version`.
+   (add `-s -- --app` after `sh` for the desktop app; installed this way it opens without macOS's Open Anyway step).
+   The installer checks each download's SHA-256 and stops if one does not match. Run by you, with no terminal, it
+   doesn't change the person's PATH: if its last lines say the shell can't find `burrow`, give the person the line it
+   prints, and use `~/.local/bin/burrow` meanwhile. Check with `burrow --version`.
 2. **Models.** Burrow needs Ollama for search by meaning: `ollama pull qwen3-embedding:0.6b`. A local chat model is
    only needed for Burrow's own Ask and chat, for example `ollama pull qwen3:4b-instruct-2507-q4_K_M`. Without Ollama,
    search still works by words.
 3. **A vault.** Any folder of Markdown notes works, an Obsidian vault as it is:
-   `burrow vault new ~/Notes` (or **Open or Create a Vault…** in the app). It builds the index.
+   `burrow vault new ~/Notes` (or **Open or Create a Vault…** in the app). It builds the index. Burrow builds an
+   index only in a folder made a vault this way: every other command refuses any other folder, so never point one at
+   the folder you happen to be in. `burrow vault list` shows every index on the Mac; the person removes a stray one
+   with `burrow vault remove <folder>` in their own terminal.
 4. **Code folders.** `burrow link ~/Notes ~/code/project` links a folder read-only and approves it. This one needs
    the person's own terminal.
 5. **Connect each program.** `burrow connect <program> ~/Notes` prints exactly what it would change for
    `claude-code`, `opencode`, `openclaw`, `hermes` or `n8n`: Burrow as an MCP server, its tools kept in view, and the
    gate that checks code changes. The person runs it again with `--write` in their own terminal and types yes. The
    app's **Programs** page does the same with a button. For Claude Code, `burrow hook install claude ~/Notes` prints
-   the hooks that hand over the Ledger at session start and keep the session's words at compaction.
+   the hooks that hand over the Ledger at session start and keep the session's words at compaction. Claude Code
+   needn't be closed: the person runs `--write` in their own terminal while this session stays open, then types
+   `/exit` here and runs `claude --continue` to come back with Burrow loaded.
 6. **Check it works.** `burrow find ~/Notes "something they wrote about"` shows what a model would read. In the
    connected program, a new session's first Burrow tool result carries the decisions in force.
 

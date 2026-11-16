@@ -38,6 +38,13 @@ actor Engine {
     func remember() { KnownVaults.remember(vault) }
 
     func map() throws -> ProjectMap { try vault.projectMap() }
+
+    /// Loads the answering model while the vault opens, with the window Ask will use, so the first question doesn't wait
+    /// for it (D-114). Measuring a model the first time loads it too; both happen here rather than on the first question.
+    func warm(model: String) async {
+        let profile = await vault.profile(for: model, ollama: ollama)
+        try? await ollama.warm(model: model, contextWords: profile.windowTokens)
+    }
     func ledger() -> LedgerState {
         let ledger = Ledger(vault: vault)
         let commits = ledger.log(limit: 2_000)
@@ -366,6 +373,7 @@ final class Workspace {
             let found = try await ollama.models().filter { !$0.lowercased().contains("embed") }.sorted()
             models = found
             if !found.contains(model), let first = found.first { model = first }
+            if found.contains(model) { let chosen = model; Task.detached { [engine] in await engine.warm(model: chosen) } }
             warning = nil
             try await embed()
         } catch {
@@ -1041,6 +1049,20 @@ final class Library {
     var workspace: Workspace?
     var recents: [String] = UserDefaults.standard.stringArray(forKey: "recentVaults") ?? []
     var failure: String?
+    /// The vaults the welcome screen offers: the app's recents, then every vault Burrow knows on this Mac (D-114).
+    var choices: [String] = []
+
+    init() { choices = recents }
+
+    /// On launch with no vault open: the terminal's vault is opened if the app has never opened one, else every known
+    /// vault is listed. The app used to show only its own recents, so a vault made with `burrow vault new` was invisible.
+    func start() {
+        let known = KnownVaults.list().map(\.root)
+        switch StartingVault.choose(recents: recents, last: LastVault.read(), known: known) {
+        case let .open(path): choices = [path]; open(URL(fileURLWithPath: path))
+        case let .pick(paths): choices = paths
+        }
+    }
 
     func open(_ folder: URL) {
         let environment = ProcessInfo.processInfo.environment
@@ -1054,6 +1076,7 @@ final class Library {
             if environment["BURROW_SNAPSHOT"] == nil {
                 recents = [folder.path] + recents.filter { $0 != folder.path }
                 UserDefaults.standard.set(Array(recents.prefix(8)), forKey: "recentVaults")
+                LastVault.write(folder.path)
             }
             opened.afterFirstRead = { Self.applyCheckHooks(opened, environment) }
             Task { await opened.open() }

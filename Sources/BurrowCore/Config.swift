@@ -175,7 +175,9 @@ public enum KnownVaults {
 
     public static func list(in folder: URL = BurrowPlaces.stateFolder) -> [Entry] {
         let all = (try? JSONDecoder().decode([Entry].self, from: Data(contentsOf: file(in: folder)))) ?? []
-        return all.filter { FileManager.default.fileExists(atPath: $0.store) }
+        var seen = Set<String>()
+        // A list written before entries were compared as real paths can name one vault twice; it is counted once.
+        return all.filter { FileManager.default.fileExists(atPath: $0.store) && seen.insert(Vault.realPath($0.store)).inserted }
     }
 
     /// Adds a vault to the list. Never fails loudly: a list that can't be written only leaves the global count short.
@@ -184,7 +186,9 @@ public enum KnownVaults {
         let folder = vault.stateFolder
         var all = list(in: folder)
         let entry = Entry(root: vault.root.path, store: vault.store.path)
-        guard !all.contains(where: { $0.store == entry.store }) else { return }
+        // Compared as real paths: /tmp/x and /private/tmp/x, or a folder reached through a link, are one vault (D-114).
+        let real = Vault.realPath(entry.store)
+        guard !all.contains(where: { Vault.realPath($0.store) == real }) else { return }
         all.append(entry)
         try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         let encoder = JSONEncoder()

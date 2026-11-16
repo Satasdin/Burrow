@@ -463,9 +463,11 @@ extension VaultTools {
             // is never among them (D-80); it is still in the Ledger, flagged where it is shown.
             // Each carries its id, so a model can name the one a new decision supersedes (D-94).
             .map { (id: $0.id, line: "- [\($0.kind.rawValue)] \($0.stated(within: 900)) (\($0.byline), rests on \($0.cites.keys.sorted().prefix(3).joined(separator: ", ")), \($0.id))"
-                + Ledger.unresolvedNote(open[$0.id] ?? []) + Ledger.checkAgain(stale($0))) }
+                + Ledger.unresolvedNote(open[$0.id] ?? []) + Ledger.checkAgain(stale($0)), commit: $0) }
             // Checked as rendered: author, program and cited paths are model-supplied too.
             .filter { Steering.lines(in: $0.line).isEmpty }
+            // Burrow's own words on where it came from (D-114), added after the check, which is for what models wrote.
+            .map { (id: $0.id, line: $0.line + ledger.origin($0.commit)) }
             .prefix(limit)
             .filter { !leavingOut($0.id) }
         // A bridge made --with-ledger hands over that vault's decisions in force too, labelled with it (D-97).
@@ -521,5 +523,18 @@ extension VaultTools {
         } catch {
             return "could not keep a handoff: \(error)"
         }
+    }
+}
+
+extension CheckReport {
+    /// The line under the Ledger's "files changed" tile. With no code folder linked there is no git commit to compare
+    /// against, so it says that, not that the code "matches its last git commit" (a tester's empty vault, 16 November, D-114).
+    public static func tileDetail(_ check: CheckReport?, linkedFolders: Int) -> String {
+        guard let check, !check.changed.isEmpty else {
+            if let built = check?.buildOutput, !built.isEmpty { return "Only build output changed (\(built.count) file\(built.count == 1 ? "" : "s"))" }
+            return linkedFolders == 0 ? "No code folder is linked, so there are no code changes to check"
+                                      : "The linked code matches its last git commit"
+        }
+        return check.rules.isEmpty ? "No decision rests on them" : "\(check.rules.count) decision\(check.rules.count == 1 ? "" : "s") to check them against"
     }
 }

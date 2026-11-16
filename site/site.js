@@ -15,8 +15,13 @@
   const tabs = document.querySelectorAll(".tabs button");
   tabs.forEach((tab) => tab.addEventListener("click", () => {
     tabs.forEach((t) => t.setAttribute("aria-selected", String(t === tab)));
-    document.getElementById("install").textContent = tab.dataset.cmd;
+    document.getElementById("installcmd").textContent = tab.dataset.cmd;
   }));
+
+  // A download from another site gives the page no sign it started, and Safari first asks whether to allow downloads
+  // from this site; a tester saw nothing happen (16 November). So the page says what should happen and what to do if not.
+  const dmg = document.getElementById("getdmg"), started = document.getElementById("started");
+  if (dmg && started) dmg.addEventListener("click", () => { started.hidden = false; });
 
   const menu = document.querySelector(".menu"), sheet = document.getElementById("sitemenu");
   if (menu && sheet) {

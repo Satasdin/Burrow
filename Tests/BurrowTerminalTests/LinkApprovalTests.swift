@@ -356,6 +356,8 @@ final class LinkApprovalTests: XCTestCase {
     }
 
     func testAVaultLinkedWithTheCommandLineNeedsNoOtherStep() throws {
+        // The folder is made a vault first: `link` no longer makes one of whatever folder it is given (D-114).
+        XCTAssertEqual(try burrow(["vault", "new", home.path, "--no-embed"]).status, 0)
         // Linking approves, so it is asked in the person's terminal too (D-104).
         let link = try BurrowBinary.inTerminal(["link", home.path, top.appendingPathComponent("Code").path], state: state, answer: "yes")
         XCTAssertEqual(link.status, 0, link.out)
