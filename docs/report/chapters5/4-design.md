@@ -30,17 +30,17 @@ Table 4.1 lists the functional requirements. FR-01 and FR-02 cover the person's 
 
 ### 4.2.2 Non-Functional Requirements
 
-Table 4.2 lists the non-functional requirements. They cover privacy, durability, speed under load, safety, the person's control and portability, the characteristics of the ISO/IEC 25010 product quality model that matter for a memory kept on the person's own computer (International Organization for Standardization, 2023).
+Table 4.2 lists the non-functional requirements. They cover privacy, durability, speed under load, safety, the person's control and portability, the characteristics of the ISO/IEC 25010 product quality model that matter for a memory kept on the person's own computer (International Organization for Standardization, 2023). Each is classed by the quality characteristic of that model it addresses.
 
 !tab Table 4.2: Non-functional requirements
-!widths 0.75,4.1,0.8,0.75
-| ID | Requirement | Objective | Verified by |
-| NFR-01 | Privacy: the system shall send the person's material only to the local model service at the loopback address, and shall call no cloud model. | ii, iii | TC-13 |
-| NFR-02 | Durability: no Ledger commit shall ever be overwritten or deleted, including when many programs keep decisions at the same second. | ii, iii | TC-14 |
-| NFR-03 | Speed: the time to keep a decision and to search shall be measured with many programs writing at once, and reported. | iv, v | TC-14 |
-| NFR-04 | Safety: text in the vault written to steer an AI shall be shown to the person and never handed over as a rule, and secrets shall be removed from what Burrow keeps of a session. | ii, iii | TC-15 |
-| NFR-05 | Control: following a linked folder, sharing with a team and overriding a broken decision shall need the person, and shall be refused when asked by an AI program. | ii, iii | TC-16 |
-| NFR-06 | Portability: the system shall build as one Swift package with no third-party dependency, and its tests shall run with one command on every push. | ii, iii | TC-17 |
+!widths 0.7,2.75,1.25,0.85,0.85
+| ID | Requirement | Quality characteristic | Objective | Verified by |
+| NFR-01 | Privacy: the system shall send the person's material only to the local model service at the loopback address, and shall call no cloud model. | Security | ii, iii | TC-13 |
+| NFR-02 | Durability: no Ledger commit shall ever be overwritten or deleted, including when many programs keep decisions at the same second. | Reliability | ii, iii | TC-14 |
+| NFR-03 | Speed: the time to keep a decision and to search shall be measured with many programs writing at once, and reported. | Performance efficiency | iv, v | TC-14 |
+| NFR-04 | Safety: text in the vault written to steer an AI shall be shown to the person and never handed over as a rule, and secrets shall be removed from what Burrow keeps of a session. | Safety | ii, iii | TC-15 |
+| NFR-05 | Control: following a linked folder, sharing with a team and overriding a broken decision shall need the person, and shall be refused when asked by an AI program. | Security | ii, iii | TC-16 |
+| NFR-06 | Portability: the system shall build as one Swift package with no third-party dependency, and its tests shall run with one command on every push. | Flexibility | ii, iii | TC-17 |
 
 ### 4.2.3 Data Requirements
 
@@ -155,6 +155,17 @@ Figure 4.9 shows the same system as UML components with the interfaces they prov
 !fig figures/v5/components.png | Figure 4.9: Component diagram of Burrow | 6.2
 
 Every front end, the MCP server, the command line and the desktop application, uses the same VaultTools interface of BurrowTools, which in turn uses BurrowCore's vault; nothing depends upwards, so the engine can be tested without any front end. The only outward dependencies are the files on disk and the local model service at the loopback address. Hooks and plugins in other programs do not link Burrow's code at all: they call the command line, which keeps them working across Burrow's releases.
+
+The interface every program meets is the MCP server. Table 4.6 gives its contract for the five tools a program is shown by default: what each takes, what it returns and whether it writes. The seventeen further tools that a program can be shown on request follow the same pattern and are listed in the repository's tool reference.
+
+!tab Table 4.6: Interface contract of the MCP server's default tools
+!widths 1.15,1.9,2.55,0.75
+| Tool | Takes | Returns | Writes |
+| burrow_find | A query in plain words; optionally a folder | Excerpts with file and line, a line saying how much the vault holds on it, and the decisions that fit the request | No |
+| burrow_read | A path; optionally the first line and how many lines | The file with line numbers, and the decisions on it and on the files it imports or is imported by | No |
+| burrow_resume | Optionally a branch | The plan, where the last session stopped and what it was in the middle of, corrections and the latest decisions | No |
+| burrow_commit | A kind and a message; for a decision its reason, and optionally what was rejected, the files, a check and the decision it replaces | The identifier it was kept as, or a refusal naming an overlapping decision in force | Adds only |
+| burrow_check | Nothing | The change in linked code beside each decision resting on it, with a verdict: unaffected, affected, unprovable or breaks | No |
 
 ### 4.4.3 Logical Database Schema
 
