@@ -32,29 +32,14 @@ With Burrow, a local model answered 102 of the 120 knowledge questions, against 
 
 ADR - Architecture Decision Record
 AI - Artificial Intelligence
-API - Application Programming Interface
 BM25 - Best Matching 25
-DR - Data Requirement
 DSR - Design Science Research
-FR - Functional Requirement
 FTS5 - Full-Text Search version 5 (SQLite)
-GB - Gigabyte
-GPT - Generative Pre-trained Transformer
 GSM8K - Grade School Math 8K
-HTTPS - Hypertext Transfer Protocol Secure
-ID - Identifier
-IEC - International Electrotechnical Commission
-IEEE - Institute of Electrical and Electronics Engineers
-IR - Interface and Integration Requirement
-ISO - International Organization for Standardization
 JSON - JavaScript Object Notation
 JSON-RPC - JSON Remote Procedure Call
-KB - Kilobyte
 MCP - Model Context Protocol
-NFR - Non-Functional Requirement
 OOAD - Object-Oriented Analysis and Design
 RAG - Retrieval-Augmented Generation
-SHA-256 - Secure Hash Algorithm with a 256-bit digest
 SSD - Solid-State Drive
-TC - Test Case
 UML - Unified Modeling Language
