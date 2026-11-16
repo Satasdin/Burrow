@@ -62,6 +62,8 @@ Figure 3.2 shows the methodology as applied to Burrow: five increments between J
 
 !fig figures/v5/incremental.png | Figure 3.2: Incremental development methodology applied to Burrow, drawn by the author | 5.6
 
+The schedule of the increments against the course milestones is given in Appendix A.
+
 ### 3.4.1 Analysis
 
 In this stage, the needs to be met by the increment were identified and prioritised. Requirements were worked backwards from the specific objectives and from the measurements that the evaluation needed, and were informed by secondary sources: the literature reviewed in Chapter 2, the documentation of the AI programs to be connected, and the MCP specification. In later increments they also came from the Sprint II review and from faults seen in real runs, so that each capability maps either to an experiment or to the person using the system. The analysis diagrams are introduced in Section 3.5.
@@ -80,7 +82,7 @@ In this stage, the increment was tested and measured before the next began. Unit
 
 ### 3.4.5 Iteration and Final Evaluation
 
-The results of each evaluation fed the analysis of the next increment, so that a weakness found in one round became a requirement in the following one. After the fifth increment, the build used for each experiment was fixed, and the full experiments were run on it. The final evaluation judged whether Burrow met the fourth and fifth specific objectives by the measures of Section 3.2.4, documented every result with its logs and transcripts, and recorded the remaining limits as the basis for further development.
+The results of each evaluation fed the analysis of the next increment, so that a weakness found in one round became a requirement in the following one. After the fifth increment, the build used for each experiment was fixed, and the full experiments were run on it. The final evaluation judged whether Burrow met the fourth and fifth specific objectives by the measures of Section 3.2.4, documented every result with its logs and transcripts, and recorded the remaining limits as the basis for further development. Feedback from the supervisor, the Sprint II review and the written assessment of the proposal was handled in the same way, and Appendix B records each item and how it was resolved.
 
 ## 3.5 System Analysis Diagrams
 

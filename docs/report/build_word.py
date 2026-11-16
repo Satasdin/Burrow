@@ -31,7 +31,7 @@ OUT = HERE / "Burrow_Report_Word.docx"
 CHAPTERS = HERE / "chapters5"
 FRONT = ["0-front.md"]
 BODY = ["1-introduction.md", "2-literature.md", "3-methodology.md", "4-design.md", "5-implementation.md", "6-conclusions.md"]
-BACK = ["7-references.md"]  # appendices (8-appendices.md) left out for now, at the student's request
+BACK = ["7-references.md", "8-appendices.md"]
 REFS = json.loads((HERE / "research" / "burrow-references.json").read_text())
 TEXT_WIDTH = 6.27
 MAX_FIGURE_HEIGHT = 7.7
@@ -340,7 +340,7 @@ class Writer:
         self.inline(made, f"{marker}\t{words}")
 
     def caption(self, text, keep_next=False):
-        m = re.match(r"(Figure|Table|Equation) ((A?\d+)\.(\d+)): (.*)$", text)
+        m = re.match(r"(Figure|Table|Equation) ((A?\d+|[A-H])\.(\d+)): (.*)$", text)
         if not m: sys.exit("bad caption: " + text)
         kind, number, chapter, _, words = m.groups()
         made = self.document.add_paragraph(style="Caption")

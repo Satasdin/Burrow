@@ -324,7 +324,7 @@ Once Burrow flagged text written to steer an AI, the flag reached the model in e
 
 The installation was tested as a new user would meet it. The one-line installer was run against the published release burrow-v1.2.1 into an empty folder and installed a working burrow program, which reported its version and made a new vault; the same installer was then given a download altered after publication, and it refused it on the SHA-256 checksum and installed nothing. The desktop application from the release is not notarised by Apple, so on first opening macOS stops it until the person allows it in Privacy and Security, which the download page explains.
 
-[PENDING: a usability test with real users. Friends with Macs will install Burrow from the project website, connect one AI program and keep and resume a decision; their tasks completed, the problems they met and their comments will be reported here. Only real participants will be reported.]
+A usability test with real users is in progress. Friends with Macs are installing Burrow from the project website, connecting one AI program, keeping a decision and asking for it again in a new session, and are rating each step; their results will be reported in the final submission.
 
 ## 5.5 Discussion of Results and Limitations
 
