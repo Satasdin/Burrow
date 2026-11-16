@@ -14,7 +14,7 @@ On the second objective, Burrow was designed as one vault with a Ledger, an engi
 
 ### 6.1.3 The Software (Objective iii)
 
-On the third objective, the design was built as working software on one consumer laptop, every one of its 24 system test cases passed on the final build, and the defects found in real use were corrected and retested.
+On the third objective, the design was built as working software on one consumer laptop, every one of its 24 system test cases passed on the final build, the defects found in real use were corrected and retested, and three volunteers installed and used it on their own Macs.
 
 ### 6.1.4 The Knowledge Gap (Objective iv)
 
@@ -26,7 +26,7 @@ On the fifth objective, models that shared the vault kept decisions and carried 
 
 ### 6.1.6 Contribution and Boundaries
 
-The contribution of this project is a shared memory that holds a person's material and the decisions made with their models together with the reasons for them, kept on their own computer, readable by any local or cloud model through one protocol, and paired with a check that does not depend on the model choosing to keep what it read. These conclusions hold within the conditions tested: one Apple silicon laptop, chiefly two local models and one cloud model, mostly one fixture project with one business decision, between 3 and 30 runs per condition, and no users other than the developer.
+The contribution of this project is a shared memory that holds a person's material and the decisions made with their models together with the reasons for them, kept on their own computer, readable by any local or cloud model through one protocol, and paired with a check that does not depend on the model choosing to keep what it read. These conclusions hold within the conditions tested: one Apple silicon laptop, chiefly two local models and one cloud model, mostly one fixture project with one business decision, between 3 and 30 runs per condition, and a first usability test by three volunteers.
 
 ## 6.2 Recommendations
 
@@ -60,7 +60,7 @@ The second is a broader evaluation across several projects and kinds of decision
 
 ### 6.3.3 A Study with Real Users and Teams
 
-The third is a study with real users and small teams working in their own projects over several weeks, since no person other than the developer used Burrow. It needs volunteers with Macs, the released build and a short task protocol, and would be evaluated by task completion, the problems met and the time spent on the Ledger and the check, showing whether the approach helps people in practice and what it costs them in attention. Cryptographic signing of team decisions and versions for other operating systems are extensions of the software rather than open research questions, and are left to later development.
+The third is a study with real users and small teams working in their own projects over several weeks, since only three volunteers tried Burrow, once each and with their AI program's help. It needs volunteers with Macs, the released build and a short task protocol, and would be evaluated by task completion, the problems met and the time spent on the Ledger and the check, showing whether the approach helps people in practice and what it costs them in attention. Cryptographic signing of team decisions and versions for other operating systems are extensions of the software rather than open research questions, and are left to later development.
 
 # Author Oversight and Use of AI-Assisted Tools
 

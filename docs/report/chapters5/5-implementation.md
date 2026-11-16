@@ -324,7 +324,24 @@ Once Burrow flagged text written to steer an AI, the flag reached the model in e
 
 The installation was tested as a new user would meet it. The one-line installer was run against the published release burrow-v1.2.1 into an empty folder and installed a working burrow program, which reported its version and made a new vault; the same installer was then given a download altered after publication, and it refused it on the SHA-256 checksum and installed nothing. The desktop application from the release is not notarised by Apple, so on first opening macOS stops it until the person allows it in Privacy and Security, which the download page explains.
 
-A usability test with real users is in progress. Friends with Macs are installing Burrow from the project website, connecting one AI program, keeping a decision and asking for it again in a new session, and are rating each step; their results will be reported in the final submission.
+The usability test with real users is reported in Section 5.4.4.6.
+
+#### 5.4.4.6 Usability Test with Real Users
+
+Three volunteers tested the released build on their own Macs on 16 November 2026. Each gave the written test instructions to Claude Code on their Mac, which ran the commands and kept notes, while the volunteer did the steps that only a person may take, such as approving a program's settings in their own terminal, and gave their own ratings. The tasks were to install Burrow from the project website, download the models, make a vault from a few of their own notes, connect Claude Code, keep a decision with its reason, ask for it again in a new session, and ask the same question of a local model. Table 5.16 gives what happened at each step.
+
+!tab Table 5.16: Usability test on three volunteers' Macs
+!widths 1.15,1.75,1.75,1.75
+| Step | User A (M2, 8 GB) | User B (M5, 24 GB) | User C (M4, 24 GB) |
+| Install | Done with help: the first app download did not start; macOS blocked the app until Open Anyway was used | Done with help: macOS blocked the app; burrow was not on the terminal's path until it was added | Reused an earlier install; the app was not opened |
+| Models | Done with help: one download was cut off and a retry worked | Done alone: 7.7 GB in 11 min 24 s | Reused |
+| Vault and search | Right note first | Right note first | Best note second for one question |
+| Connect Claude Code | Done with help: Claude Code was closed and the setting written in the person's own terminal | Done with help, in the same way | Already connected |
+| Keep a decision | Kept with its reason; the person needed help to find the Ledger page, and the app first asked for a vault it already knew | Kept with its reason; the app did not make clear which vault to open | Kept with its reason; it replaced an earlier decision, which was retired |
+| Ask again in a new session | Decision and reason right | Decision and reason right | Decision and reason right |
+| Ask a local model | Not done | Right, citing the Ledger entry, in 14.1 s with Gemma 4 12B | Right, citing the Ledger entry, in 18.7 s from cold and 11.5 s warm with Gemma 4 12B |
+
+Every volunteer installed Burrow, connected Claude Code and kept a decision that a new session gave back with its reason, and both local-model answers were right. The recall was not a blind test, however: Burrow hands the decisions in force to every new session as designed, and in one run the session also read the notes file that held the decision. User B rated installing 3, connecting 4, the decision being remembered 4, the clarity of the application 3 and the likelihood of keeping it 4, each out of 5, and named macOS blocking the application on first opening as the most confusing moment and connecting without closing Claude Code as the first thing to change. User A did not reach the ratings, and User C asked their AI program to answer for them, so those answers are not reported as a person's. The problems the volunteers met were an application that is not notarised by Apple, an installer that did not put the program on every terminal's path, a connection step that needs Claude Code to be closed, an application that did not open the vault already known and whose Ledger page has no visible label, and a 1.2 GB index of the Downloads folder that Burrow built during setup, before any vault was chosen.
 
 ## 5.5 Discussion of Results and Limitations
 
@@ -332,7 +349,7 @@ The first two objectives were achieved before this chapter: the review in Chapte
 
 ### 5.5.1 Developing Burrow (Objective iii)
 
-The third objective was to develop the designed vault as working software on a consumer laptop. The output is Burrow, with its engine, MCP server, hooks, plugins and desktop application, and the criterion was that every requirement of Chapter 4 is met and verified. All 24 test cases passed on the final build, and the defects that real use exposed were corrected and retested (Table 5.7), so the evidence permits the conclusion that the design was built and runs on the laptop. It does not show that the desktop application suits other people, since no one other than the developer used it. The third objective was therefore achieved.
+The third objective was to develop the designed vault as working software on a consumer laptop. The output is Burrow, with its engine, MCP server, hooks, plugins and desktop application, and the criterion was that every requirement of Chapter 4 is met and verified. All 24 test cases passed on the final build, and the defects that real use exposed were corrected and retested (Table 5.7), so the evidence permits the conclusion that the design was built and runs on the laptop. A first test by three volunteers on their own Macs showed that people could install it, connect Claude Code, keep a decision and get it back in a new session, but each needed help where macOS or the application made a step hard: opening an application that is not notarised, a program not on the terminal's path, connecting while Claude Code was running, and finding the Ledger page. The third objective was therefore achieved.
 
 ### 5.5.2 Narrowing the Knowledge Gap (Objective iv)
 
@@ -344,7 +361,7 @@ The fifth objective was to evaluate whether models that share the vault keep dec
 
 ### 5.5.4 Limitations
 
-These results have limits, each with a likely effect on the findings. Each condition had between 3 and 30 runs, so only large differences can be told apart from chance, and the results on decisions rest mostly on one fixture project with one decision, so they may not hold for every kind of decision. Burrow was not compared with a file of decisions kept by hand in the repository, which is the simplest alternative, so what it adds beyond such a file is not measured. The later evaluations ran on the build of their day rather than one frozen build, so improvements and their evaluations were interleaved. The knowledge questions were written by agents from the same family as the cloud model, which may make them easier or harder than a person's own questions, and the cloud model could not be run at a fixed temperature. Finally, timings come from one laptop that other jobs sometimes shared, and no person other than the developer used the system, so its usability is not claimed.
+These results have limits, each with a likely effect on the findings. Each condition had between 3 and 30 runs, so only large differences can be told apart from chance, and the results on decisions rest mostly on one fixture project with one decision, so they may not hold for every kind of decision. Burrow was not compared with a file of decisions kept by hand in the repository, which is the simplest alternative, so what it adds beyond such a file is not measured. The later evaluations ran on the build of their day rather than one frozen build, so improvements and their evaluations were interleaved. The knowledge questions were written by agents from the same family as the cloud model, which may make them easier or harder than a person's own questions, and the cloud model could not be run at a fixed temperature. Finally, timings come from one laptop that other jobs sometimes shared, and usability rests on three volunteers, one of whom let their AI program answer the questions, in a test where the recall was not blind, so it indicates rather than measures how usable Burrow is.
 
 ## 5.6 Version Control and Implementation Evidence
 
