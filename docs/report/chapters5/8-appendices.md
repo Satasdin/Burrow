@@ -18,7 +18,7 @@ Figure A.1 shows the work carried out from March to November 2026, by workstream
 | 7 | Marking and revision of Chapters 1 to 3 | 31 July 2026 | Done |
 | 8 | Chapter 4: System Analysis and Design | 17 August 2026 | Done |
 | 9 | Sprint II review | 5 November 2026 | Done |
-| 10 | Documentation | November 2026 | In progress |
+| 10 | Documentation | November 2026 | Done |
 | 11 | Project final defence | 23 November 2026 | Pending |
 
 ## Appendix B: Feedback-Resolution Matrix

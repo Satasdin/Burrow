@@ -15,18 +15,18 @@ Table 4.1 lists the functional requirements. FR-01 and FR-02 cover the person's 
 !tab Table 4.1: Functional requirements
 !widths 0.75,4.1,0.8,0.75
 | ID | Requirement | Objective | Verified by |
-| FR-01 | The system shall index a vault of Markdown notes, documents and linked code folders, and re-index only the files that changed. | ii, iii | TC-01 |
-| FR-02 | The system shall rank pieces of the vault by word match and by meaning, and return excerpts with their file and line numbers. | ii, v | TC-02 |
-| FR-03 | The system shall keep a decision only with a reason, together with the options rejected, the files it rests on with a hash of each, and the program that kept it. | ii, iii | TC-03 |
-| FR-04 | The system shall hand the decisions in force to every program when it connects and again with its first tool result. | ii, v | TC-04 |
-| FR-05 | The system shall attach to a search or a read the decisions that fit the request, chosen by meaning and by the files returned. | ii, v | TC-05 |
-| FR-06 | The system shall give a program that resumes the plan, where the last session stopped, what it was in the middle of, and the latest decisions. | ii, v | TC-06 |
-| FR-07 | The system shall mark a decision to be checked again when a file it rests on changes, and let the person confirm it or mark it wrong. | ii, iii | TC-07 |
-| FR-08 | The system shall catch a new decision that overlaps one in force and ask whether it replaces it or stands beside it. | ii, iii | TC-08 |
-| FR-09 | The system shall judge a change to linked code against each decision it touches (breaks, affected, unaffected or unprovable) and hold a change that touches a decision until it has been shown, through its own tool, a coding tool's end-of-turn hook, a git pre-commit hook and plugins for other programs. | ii, v | TC-09 |
-| FR-10 | The system shall keep the exact words of a Claude Code session when it is compacted, and hand them back afterwards. | ii, v | TC-10 |
-| FR-11 | The system shall share a decision with a team folder only after the person approves it, signed with the person and the program. | ii, iii | TC-11 |
-| FR-12 | The desktop application shall show the Ledger, the Watch panel and the programs connected to the vault, and connect a program. | ii, iii | TC-12 |
+| FR-01 | The system indexes a vault of Markdown notes, documents and linked code folders, and re-indexes only the files that changed. | ii, iii | TC-01 |
+| FR-02 | The system ranks pieces of the vault by word match and by meaning, and returns excerpts with their file and line numbers. | ii, v | TC-02 |
+| FR-03 | The system keeps a decision only with a reason, together with the options rejected, the files it rests on with a hash of each, and the program that kept it. | ii, iii | TC-03 |
+| FR-04 | The system hands the decisions in force to every program when it connects and again with its first tool result. | ii, v | TC-04 |
+| FR-05 | The system attaches to a search or a read the decisions that fit the request, chosen by meaning and by the files returned. | ii, v | TC-05 |
+| FR-06 | The system gives a program that resumes the plan, where the last session stopped, what it was in the middle of, and the latest decisions. | ii, v | TC-06 |
+| FR-07 | The system marks a decision to be checked again when a file it rests on changes, and lets the person confirm it or mark it wrong. | ii, iii | TC-07 |
+| FR-08 | The system catches a new decision that overlaps one in force and asks whether it replaces it or stands beside it. | ii, iii | TC-08 |
+| FR-09 | The system judges a change to linked code against each decision it touches (breaks, affected, unaffected or unprovable) and holds a change that touches a decision until it has been shown, through its own tool, a coding tool's end-of-turn hook, a git pre-commit hook and plugins for other programs. | ii, v | TC-09 |
+| FR-10 | The system keeps the exact words of a Claude Code session when it is compacted, and hands them back afterwards. | ii, v | TC-10 |
+| FR-11 | The system shares a decision with a team folder only after the person approves it, signed with the person and the program. | ii, iii | TC-11 |
+| FR-12 | The desktop application shows the Ledger, the Watch panel and the programs connected to the vault, and connects a program. | ii, iii | TC-12 |
 
 ### 4.2.2 Non-Functional Requirements
 
@@ -35,12 +35,12 @@ Table 4.2 lists the non-functional requirements. They cover privacy, durability,
 !tab Table 4.2: Non-functional requirements
 !widths 0.7,2.75,1.25,0.85,0.85
 | ID | Requirement | Quality characteristic | Objective | Verified by |
-| NFR-01 | Privacy: the system shall send the person's material only to the local model service at the loopback address, and shall call no cloud model. | Security | ii, iii | TC-13 |
-| NFR-02 | Durability: no Ledger commit shall ever be overwritten or deleted, including when many programs keep decisions at the same second. | Reliability | ii, iii | TC-14 |
-| NFR-03 | Speed: the time to keep a decision and to search shall be measured with many programs writing at once, and reported. | Performance efficiency | iv, v | TC-14 |
-| NFR-04 | Safety: text in the vault written to steer an AI shall be shown to the person and never handed over as a rule, and secrets shall be removed from what Burrow keeps of a session. | Safety | ii, iii | TC-15 |
-| NFR-05 | Control: following a linked folder, sharing with a team and overriding a broken decision shall need the person, and shall be refused when asked by an AI program. | Security | ii, iii | TC-16 |
-| NFR-06 | Portability: the system shall build as one Swift package with no third-party dependency, and its tests shall run with one command on every push. | Flexibility | ii, iii | TC-17 |
+| NFR-01 | Privacy: the system sends the person's material only to the local model service at the loopback address, and calls no cloud model. | Security | ii, iii | TC-13 |
+| NFR-02 | Durability: no Ledger commit is ever overwritten or deleted, including when many programs keep decisions at the same second. | Reliability | ii, iii | TC-14 |
+| NFR-03 | Speed: the time to keep a decision and to search is measured with many programs writing at once, and reported. | Performance efficiency | iv, v | TC-14 |
+| NFR-04 | Safety: text in the vault written to steer an AI is shown to the person and never handed over as a rule, and secrets are removed from what Burrow keeps of a session. | Safety | ii, iii | TC-15 |
+| NFR-05 | Control: following a linked folder, sharing with a team and overriding a broken decision need the person, and are refused when asked by an AI program. | Security | ii, iii | TC-16 |
+| NFR-06 | Portability: the system builds as one Swift package with no third-party dependency, and its tests run with one command on every push. | Flexibility | ii, iii | TC-17 |
 
 ### 4.2.3 Data Requirements
 
@@ -49,10 +49,10 @@ Table 4.3 lists the data requirements: what the system reads, what it keeps, and
 !tab Table 4.3: Data requirements
 !widths 0.75,4.1,0.8,0.75
 | ID | Requirement | Objective | Verified by |
-| DR-01 | The input shall be plain Markdown files and linked code folders, which the system reads and never changes. | ii, iii | TC-18 |
-| DR-02 | Each Ledger commit shall be a readable Markdown file holding its identifier, branch, parent, kind, statement, reason, rejected options, author, program and the hashes of the files it cites. | ii, iii | TC-03 |
-| DR-03 | Evaluation tasks, answer keys and hidden tests shall be kept outside the vault, so that no answer can be read from the memory under test. | iv, v | TC-19 |
-| DR-04 | The index shall be rebuilt from the vault if it is deleted, with nothing lost. | ii, iii | TC-20 |
+| DR-01 | The input is plain Markdown files and linked code folders, which the system reads and never changes. | ii, iii | TC-18 |
+| DR-02 | Each Ledger commit is a readable Markdown file holding its identifier, branch, parent, kind, statement, reason, rejected options, author, program and the hashes of the files it cites. | ii, iii | TC-03 |
+| DR-03 | Evaluation tasks, answer keys and hidden tests are kept outside the vault, so that no answer can be read from the memory under test. | iv, v | TC-19 |
+| DR-04 | The index is rebuilt from the vault if it is deleted, with nothing lost. | ii, iii | TC-20 |
 
 ### 4.2.4 Interface and Integration Requirements
 
@@ -61,12 +61,12 @@ Table 4.4 lists the interface and integration requirements: how programs and peo
 !tab Table 4.4: Interface and integration requirements
 !widths 0.75,4.1,0.8,0.75
 | ID | Requirement | Objective | Verified by |
-| IR-01 | The MCP server shall exchange JSON-RPC messages over standard input and output, in both the initialise-first form of the protocol and its 2026 stateless form. | ii, iii | TC-21 |
-| IR-02 | One command shall set Burrow up in Claude Code, OpenCode, OpenClaw, Hermes Agent and n8n, keeping every other setting in each program's files. | ii, iii | TC-22 |
-| IR-03 | If the local model service cannot embed a request, search shall continue on words alone. | ii, iii | TC-23 |
-| IR-04 | The vault shall stay a folder that Obsidian can open, with links written between double square brackets. | ii, iii | TC-24 |
-| IR-05 | The program and the desktop application shall install with one command from the project's GitHub releases, and the installer shall refuse a download whose SHA-256 checksum does not match. | ii, iii | Release check |
-| IR-06 | A project website served over HTTPS from GitHub Pages shall link to the current release, the user guide and the source. | ii, iii | Release check |
+| IR-01 | The MCP server exchanges JSON-RPC messages over standard input and output, in both the initialise-first form of the protocol and its 2026 stateless form. | ii, iii | TC-21 |
+| IR-02 | One command sets Burrow up in Claude Code, OpenCode, OpenClaw, Hermes Agent and n8n, keeping every other setting in each program's files. | ii, iii | TC-22 |
+| IR-03 | If the local model service cannot embed a request, search continues on words alone. | ii, iii | TC-23 |
+| IR-04 | The vault stays a folder that Obsidian can open, with links written between double square brackets. | ii, iii | TC-24 |
+| IR-05 | The program and the desktop application install with one command from the project's GitHub releases, and the installer refuses a download whose SHA-256 checksum does not match. | ii, iii | Release check |
+| IR-06 | A project website served over HTTPS from GitHub Pages links to the current release, the user guide and the source. | ii, iii | Release check |
 
 ### 4.2.5 Requirements Traceability
 
