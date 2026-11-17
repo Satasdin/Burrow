@@ -34,8 +34,8 @@ ADR - Architecture Decision Record
 AI - Artificial Intelligence
 API - Application Programming Interface
 BM25 - Best Matching 25
+CAMR - Capability-Adaptive Memory Retrieval (the engine's earlier name)
 DR - Data Requirement
-DSR - Design Science Research
 FR - Functional Requirement
 FTS5 - Full-Text Search version 5 (SQLite)
 GB - Gigabyte
@@ -54,7 +54,10 @@ MCP - Model Context Protocol
 NFR - Non-Functional Requirement
 OOAD - Object-Oriented Analysis and Design
 RAG - Retrieval-Augmented Generation
+RETRO - Retrieval-Enhanced Transformer
 SHA-256 - Secure Hash Algorithm with a 256-bit digest
+SMART - Specific, Measurable, Achievable, Relevant and Time-bound
 SSD - Solid-State Drive
 TC - Test Case
 UML - Unified Modeling Language
+US$ - United States dollar

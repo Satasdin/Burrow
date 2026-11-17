@@ -495,8 +495,8 @@ class Writer:
                 self.toc(line[4:].strip()); i += 1
             elif line.startswith("***Keywords"):
                 made = self.body(line); i += 1
-            elif re.match(r"^[A-Z0-9][A-Za-z0-9-]* - ", line) and name.startswith("0-"):
-                made = self.document.add_paragraph(style="Body Text"); made.paragraph_format.space_after = Pt(2)
+            elif re.match(r"^[A-Z0-9][A-Za-z0-9$-]* - ", line) and name.startswith("0-"):
+                made = self.document.add_paragraph(style="Body Text"); made.paragraph_format.space_after = Pt(0)
                 made.paragraph_format.tab_stops.add_tab_stop(Inches(1.3))
                 short, _, long = line.partition(" - ")
                 made.add_run(short + "\t" + long); i += 1
