@@ -60,6 +60,6 @@ Table C.1 records the material use of AI in this project, by period. Full prompt
 
 ## Appendix D: Similarity Report
 
-Figure D.1 shows the Turnitin integrity overview of the proposal approved in June 2026: 12% overall similarity, with the bibliography filtered out. The similarity report of this report will be produced when it is submitted for final assessment.
+Figure D.1 shows the Turnitin integrity overview of the proposal approved in June 2026: 12% overall similarity, with the bibliography filtered out. This report itself is checked by Turnitin when it is submitted for final assessment.
 
 !fig figures/similarity-proposal.png | Figure D.1: Turnitin integrity overview of the approved proposal, June 2026 | 6.2
