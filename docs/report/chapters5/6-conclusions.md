@@ -14,7 +14,7 @@ On the second objective, Burrow was designed as one vault with a Ledger, an engi
 
 ### 6.1.3 The Software (Objective iii)
 
-On the third objective, the design was built as working software on one consumer laptop, every one of its 24 system test cases passed on the final build, the defects found in real use were corrected and retested, and three volunteers installed and used it on their own Macs.
+On the third objective, the design was built as working software on one consumer laptop, every one of its 24 system test cases passed on the final build, the defects found in real use were corrected and retested, and three volunteers installed and used it on their own Macs; the problems they met were corrected in the releases that followed.
 
 ### 6.1.4 The Knowledge Gap (Objective iv)
 
