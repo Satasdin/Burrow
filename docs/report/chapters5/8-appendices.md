@@ -1,4 +1,3 @@
-!landscape
 # Appendices
 
 ## Appendix A: Project Schedule and Gantt Chart

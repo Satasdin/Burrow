@@ -325,7 +325,10 @@ class Writer:
                 run.font.name = "Times New Roman"; run.font.size = Pt(12); run.font.bold = True
                 run.font.italic = False; run.font.color.rgb = RGBColor(0, 0, 0)
         if level == 1:
-            made.paragraph_format.page_break_before = True
+            # After a list, the list's own last paragraph starts the new page instead (see toc), so a list that fills
+            # its last page doesn't leave a blank page before this heading.
+            made.paragraph_format.page_break_before = not getattr(self, "after_toc", False)
+            self.after_toc = False
             self.in_appendix = words.startswith("Appendices")
         if level == 2 and self.in_appendix:
             self.appendix_count += 1
@@ -402,8 +405,9 @@ class Writer:
                 self.inline(body, f"**{words}**" if r == 0 else words, size=11)
                 if r == 0: shade(cell, "E7E6E6")
         repeat_header(table.rows[0])
-        # a short table stays on one page; a long one at least keeps its heading with its first rows
-        last_kept = len(rows) - 1 if len(rows) <= 13 else 2
+        # the caption and heading row stay with the first rows; the rest may run on to the next page (heading repeated),
+        # so a table that doesn't fit never leaves a large gap in the chapter
+        last_kept = min(2, len(rows) - 1)
         for r in range(last_kept):
             for cell in table.rows[r].cells:
                 for para in cell.paragraphs: para.paragraph_format.keep_with_next = True
@@ -420,6 +424,11 @@ class Writer:
     def toc(self, instruction):
         made = self.document.add_paragraph(style="Body Text")
         add_field(made, instruction, "Update this field in Word.")
+        # Word leaves the field's end in a last, empty paragraph; kept tiny so a full list never spills it onto a
+        # blank page of its own before the next list.
+        made.paragraph_format.space_before = Pt(0); made.paragraph_format.space_after = Pt(0)
+        made.paragraph_format.line_spacing_rule = WD_LINE_SPACING.EXACTLY; made.paragraph_format.line_spacing = Pt(1)
+        made.paragraph_format.page_break_before = True; self.after_toc = True
 
     def bibliography(self, lines):
         sdt = OxmlElement("w:sdt"); pr = OxmlElement("w:sdtPr")
@@ -531,11 +540,18 @@ def styles(document):
         made.base_style = st[base]; font(made, 12)
     font(st["Table Text"], 11); set_spacing(st["Table Text"], 2, 2, 1.1)
     bib = st["Bibliography"]; set_spacing(bib, 0, 8, 1.5); bib.paragraph_format.left_indent = Inches(0.5); bib.paragraph_format.first_line_indent = Inches(-0.5)
-    tof = st["Table of Figures"]; set_spacing(tof, 0, 4, 1.15)
+    # Word fills the lists of figures, tables and equations with its built-in "table of figures" style (id
+    # TableofFigures); a style made here under another spelling is never used, so the lists came out single-spaced.
+    # Word knows that style only by its built-in name, all lower case: under "Table of Figures" Word saves ours as
+    # "Table of Figures1" and makes its own, unspaced one for the lists.
+    tof = st["Table of Figures"]
+    tof._element.name_val = "table of figures"
+    tof._element.attrib.pop(qn("w:customStyle"), None)   # marked custom, Word renames it and makes its own
+    tof.base_style = st["Normal"]; font(tof, 12); set_spacing(tof, 0, 0, 1.5)
     tof.paragraph_format.tab_stops.add_tab_stop(Inches(TEXT_WIDTH), alignment=2, leader=1)
     for style in st:
         if style.name.lower() in ("toc 1", "toc 2", "toc 3"):
-            font(style); set_spacing(style, 0, 3, 1.15)
+            font(style); set_spacing(style, 0, 0, 1.5)
 
 # ---------------------------------------------------------------- main
 

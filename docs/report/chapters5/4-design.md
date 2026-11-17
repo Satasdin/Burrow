@@ -118,7 +118,7 @@ Three verdicts let a change through: no decision rests on its files, it leaves t
 
 Figure 4.5 shows the other half of the vault: how a question about the person's material is answered, in lanes for the person or program asking, Burrow's engine and the local model service. It details FR-02 and the path measured under the fourth objective, and its scope is one question from asking to the answer with its sources.
 
-!fig figures/v5/activity_answer.png | Figure 4.5: Activity diagram of a question answered from the person's material | 6.0
+!fig figures/v5/activity_answer.png | Figure 4.5: Activity diagram of a question answered from the person's material | 5.0
 
 The first branch is the most consequential: a question that needs no material, such as a reasoning problem, goes to the model without the vault, because irrelevant excerpts are known to harm reasoning. When the vault is needed, words and meaning are ranked together, links are followed when the closest files are code, and the decisions that fit are added with their reasons, so that knowledge and decisions arrive in one place. The amount shown is fitted to what the model can read in time, and the answer's citations are checked against what was shown before it reaches the person, with one corrected retry when a cited place was not among the excerpts.
 
