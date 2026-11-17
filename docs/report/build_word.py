@@ -552,6 +552,16 @@ def styles(document):
     for style in st:
         if style.name.lower() in ("toc 1", "toc 2", "toc 3"):
             font(style); set_spacing(style, 0, 0, 1.5)
+            # one right-hand column of page numbers for every level (the template's stops differed by level)
+            tabs = style.paragraph_format.tab_stops
+            tabs.clear_all()
+            tabs.add_tab_stop(Inches(TEXT_WIDTH), alignment=2, leader=1)
+    # Heading 4 as a style, like Heading 3 (the template's was Liberation Sans 14 pt, italic and blue, set right only
+    # run by run, with no space after it).
+    try:
+        h4 = st["Heading 4"]; font(h4, 12, True); set_spacing(h4, 10, 6, 1.5); h4.paragraph_format.keep_with_next = True
+        h4.font.italic = False; h4.font.color.rgb = RGBColor(0, 0, 0)
+    except KeyError: pass
 
 # ---------------------------------------------------------------- main
 

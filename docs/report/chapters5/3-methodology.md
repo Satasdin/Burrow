@@ -60,7 +60,7 @@ OOAD was chosen as the paradigm because the memory is naturally a set of objects
 
 Figure 3.2 shows the methodology as applied to Burrow: five increments between June and November 2026, each passing through analysis, design, building and evaluation, and each adding capability to the last. The first increment built the memory as plain Markdown files with a rebuildable index, search by words and by meaning, and the links between files. The second built the steps that give a local model knowledge from the vault and evaluated them on the knowledge questions. The third added the record of decisions, the MCP server through which models reach the vault, hooks for coding tools and the desktop application. The fourth tested the vault with real AI programs on the Matatu tasks and added what those runs required. The fifth strengthened the check of new work and the vault's security and added sharing within a team.
 
-!fig figures/v5/incremental.png | Figure 3.2: Incremental development methodology applied to Burrow, drawn by the author | 5.6
+!fig figures/v5/incremental.png | Figure 3.2: Incremental development methodology applied to Burrow, drawn by the author | 4.4
 
 The schedule of the increments against the course milestones is given in Appendix A.
 

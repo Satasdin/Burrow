@@ -4,10 +4,10 @@
 
 Figure A.1 shows the work carried out from March to November 2026, by workstream, with the course milestones, and Table A.1 gives the milestones with their status. CAMR and Engram are earlier working names of the engine.
 
-!fig figures/gantt.png | Figure A.1: Project work plan, March to November 2026 | 8.6
+!fig figures/gantt.png | Figure A.1: Project work plan, March to November 2026 | 5.0
 
 !tab Table A.1: Course milestones and their status
-!widths 0.5,3.6,1.1,1
+!widths 0.5,3.0,1.7,1
 | No. | Task | Due date | Status |
 | 1 | Supervisor selection and allocation | 7 May 2026 | Done |
 | 2 | Document formatting and template creation | 8 May 2026 | Done |

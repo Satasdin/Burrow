@@ -21,7 +21,7 @@ OUT = HERE / "Burrow_Project_Report.docx"
 FRONT = ["0-front.md"]
 BODY = ["1-introduction.md", "2-literature.md", "3-methodology.md", "4-design.md", "5-implementation.md"]
 BACK = ["7-references.md", "8-appendices.md"]
-PROJECT_TYPE = "[Internal Project]"
+PROJECT_TYPE = "INTERNAL PROJECT"
 
 TITLE = "Burrow: A Local Vault Giving Local and Cloud Language Models One Shared Memory of Knowledge and Decisions"
 # The chapters revised from the approved proposal live in chapters2. The rejected first rewrite stays in chapters.
