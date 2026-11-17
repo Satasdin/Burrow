@@ -45,7 +45,8 @@ allows:
    [integrations/](../integrations).
 
 It never edits a file without showing the change first: a new file is printed whole, a changed settings file as the
-settings that change (`+` added, `~` changed). `--write` keeps each file it changes beside it as `.before-burrow`, and
+settings that change (`+` added, `~` changed). `--write` keeps each file it changes beside it, as `.before-burrow` the first time (the file as it was before
+Burrow, never replaced) and as `.before-burrow-<date>-<time>` every time (the file as it was just before that write), and
 only writes when run in a terminal by you: through a pipe, or from a program's own shell tool, it refuses. A settings
 file it can't read safely (JSON with comments, a YAML setting already set to something else) is left alone, and it says
 what to add by hand. If you use `BURROW_STATE_DIR`, it is carried into the settings so the server and the gate see the
@@ -71,7 +72,7 @@ The Programs page (⌘4) shows each program as a line running into the vault. It
 says whether it starts Burrow on this vault, on another vault, only from a project folder, or not at all. Hover a line
 to see the conversations, the last question and the files that program read most today; click it to open its
 conversations. **Connect** shows the setup line with this vault's path filled in, and for Claude Code, OpenCode and LM
-Studio, **Add for Me** writes it into the program's settings, keeping the old file beside it as `.before-burrow`.
+Studio, **Add for Me** writes it into the program's settings, keeping the old file beside it the same way.
 
 The lines the app gives use the full path of the `burrow` command. Programs opened from the Dock, such as LM Studio, do
 not get the shell's PATH, so a bare `burrow` would not start there. The app carries its own copy of the command and

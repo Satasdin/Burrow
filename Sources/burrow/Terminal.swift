@@ -44,8 +44,11 @@ func whyNotThePerson() -> String? {
 /// says a program connected to Burrow is the one running it (D-104, D-113).
 func inPersonsTerminal() -> Bool { whyNotThePerson() == nil }
 
-/// Said when a step only the person may take is run without a terminal (D-104).
-let needsThePerson = "only you can approve a linked folder: approve it in the Burrow app, or run this in your own terminal. It can't be done through a pipe or by a program you've connected to Burrow."
+/// Said when a step only the person may take is run without a terminal (D-104). Each step says what it is: a refusal
+/// that names another step (every yes-prompt once said "approve a linked folder") misleads the person (D-115).
+let needsThePerson = "only you can allow this: run it in your own terminal and type yes. It can't be done through a pipe or by a program you've connected to Burrow."
+/// The same for approving or linking a folder, which the Burrow app can also do.
+let linkNeedsThePerson = "only you can approve a linked folder: approve it in the Burrow app, or run this in your own terminal. It can't be done through a pipe or by a program you've connected to Burrow."
 
 /// The one call for every step only the person may take (D-113): throws `refusal`, with the reason, unless burrow is in
 /// the person's own terminal and nothing says an agent is running it.
@@ -88,8 +91,8 @@ func askForCode(_ action: String) throws {
 
 /// Shows the person what they are about to allow and waits for them to type yes. Throws for anything else. With
 /// `code`, the person first types the code Burrow showed outside the terminal (D-113); the typed yes is always last.
-func askThePerson(_ lines: [String], code action: String? = nil) throws {
-    try requireThePerson()
+func askThePerson(_ lines: [String], code action: String? = nil, refusal: String = needsThePerson) throws {
+    try requireThePerson(refusal)
     FileHandle.standardError.write(Data((lines.joined(separator: "\n") + "\n").utf8))
     if let action { try askForCode(action) }
     FileHandle.standardError.write(Data("Type yes to allow, anything else to stop: ".utf8))
@@ -205,7 +208,7 @@ func runTerminalCommand(_ arguments: [String]) async throws -> Bool {
         guard FileManager.default.fileExists(atPath: target.path, isDirectory: &isFolder), isFolder.boolValue else { throw Failure("\(target.path) is not a folder") }
         // Linking here approves the folder, so it needs the person in their own terminal too (D-104): otherwise a
         // connected program could link, and so approve, any folder on this Mac.
-        try requireThePerson()
+        try requireThePerson(linkNeedsThePerson)
         let real = Vault.realPath(target.path)
         let path = target.standardizedFileURL.path
         try askThePerson([
@@ -230,7 +233,7 @@ private func linkApprovals(_ action: String, _ words: [String], all: Bool, store
                                        : "link approve needs a vault folder: burrow link approve <vault> <folder>")
     }
     // Approving needs the person in their own terminal (D-104), checked before anything is opened.
-    if action == "approve" { try requireThePerson() }
+    if action == "approve" { try requireThePerson(linkNeedsThePerson) }
     let vault = try openVault(folder, store: store, sayLinks: false)
     // Everything printed from the vault's list is cleaned of control characters, since anyone who shared the vault could
     // have written it (D-104), and every suggested command quotes its words so a pasted path can't run anything.

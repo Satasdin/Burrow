@@ -136,7 +136,7 @@ private func removeIndex(_ path: String?) throws {
         "  \(Printable.clean(store.path))   \(ByteSize.format(Int(IndexPlaces.size(of: store))))"
             + (commits > 0 ? "   (it holds this vault's Ledger and conversations)" : ""),
         "Your own files in the folder are not touched. You can put it back from the Trash.",
-    ])
+    ], refusal: "only you can remove a vault's index: run this in your own terminal and type yes. It can't be done through a pipe or by a program you've connected to Burrow.")
     try FileManager.default.trashItem(at: store, resultingItemURL: nil)
     KnownVaults.forget(root: url.path)
     if LastVault.read().map({ Vault.realPath($0) == Vault.realPath(url.path) }) == true { try? FileManager.default.removeItem(at: LastVault.file()) }

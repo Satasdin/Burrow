@@ -309,6 +309,12 @@ final class ConnectTests: XCTestCase {
         XCTAssertEqual(rerun.status, 0, rerun.out)
         XCTAssertTrue(rerun.out.contains("~ mcp.burrow.codemode: true → false"), rerun.out)
         XCTAssertEqual(read(".config/opencode/opencode.json.before-burrow"), #"{"model": "ollama/gemma4:12b"}"#)
+        // ...and, every write, a dated copy of the file exactly as it was just before (D-115), named in what is said.
+        let folder = home.appendingPathComponent(".config/opencode")
+        let dated = try FileManager.default.contentsOfDirectory(atPath: folder.path).filter { $0.hasPrefix("opencode.json.before-burrow-") }.sorted()
+        XCTAssertEqual(dated.count, 2, "one per write: \(dated)")
+        XCTAssertEqual(read(".config/opencode/" + dated.last!), other, "the newest copy is the file as it was before this write")
+        XCTAssertTrue(rerun.out.contains("as it was in ~/.config/opencode/opencode.json.before-burrow-"), rerun.out)
 
         let unknown = try BurrowBinary.piped(["connect", "cursor", vault], state: state)
         XCTAssertEqual(unknown.status, 1)

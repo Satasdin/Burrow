@@ -87,6 +87,9 @@ final class TesterFixesTests: XCTestCase {
         let downloads = home.appendingPathComponent("Downloads")
         let piped = try BurrowBinary.piped(["vault", "remove", downloads.path], state: state, input: "yes\n")
         XCTAssertEqual(piped.status, 1)
+        // The refusal names this step, not another one (D-115: it said "approve a linked folder").
+        XCTAssertTrue(piped.err.contains("only you can remove a vault's index"), piped.err)
+        XCTAssertFalse(piped.err.contains("linked folder"), piped.err)
         XCTAssertTrue(FileManager.default.fileExists(atPath: downloads.appendingPathComponent(".burrow").path), "a program can't remove it")
         let declined = try BurrowBinary.inTerminal(["vault", "remove", downloads.path], state: state, answer: "no")
         XCTAssertEqual(declined.status, 1, declined.out)

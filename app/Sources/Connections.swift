@@ -1,4 +1,5 @@
 import AppKit
+import BurrowTools
 import Foundation
 
 /// Whether each program on this Mac is actually wired to this vault, read from the programs' own settings files.
@@ -192,11 +193,8 @@ enum Connections {
 
     private static func write(_ root: [String: Any], to file: URL) throws {
         try FileManager.default.createDirectory(at: file.deletingLastPathComponent(), withIntermediateDirectories: true)
-        if FileManager.default.fileExists(atPath: file.path) {
-            let copy = file.appendingPathExtension("before-burrow")
-            try? FileManager.default.removeItem(at: copy)
-            try FileManager.default.copyItem(at: file, to: copy)
-        }
+        // The same copies as `burrow connect` (D-115): the pre-Burrow file is never replaced, and this write gets its own.
+        try Connect.keepCopies(of: file)
         let data = try JSONSerialization.data(withJSONObject: root, options: [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes])
         try data.write(to: file, options: .atomic)
     }

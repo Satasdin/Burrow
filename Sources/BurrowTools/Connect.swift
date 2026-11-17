@@ -9,7 +9,8 @@ import Foundation
 ///
 /// Only `apply` writes. `plan` reads what is there and works out each file as it would be; `describe` says it in plain
 /// words with every change to an existing setting shown; `apply` writes, keeping each file it changes beside it as
-/// `.before-burrow` (the first time only, so it stays the file as it was before Burrow). The command asks the person
+/// `.before-burrow` (the first time only, so it stays the file as it was before Burrow) and, every time, as
+/// `.before-burrow-<date>-<time>`, the file as it was just before that write (D-115). The command asks the person
 /// before `apply` (Sources/burrow/ConnectCommand.swift).
 public enum Connect {
     public enum Program: String, CaseIterable, Sendable {
@@ -360,20 +361,44 @@ public enum Connect {
             case (.gate, nil):
                 out.append("\(path): new file, the gate (\(change.after.split(separator: "\n", omittingEmptySubsequences: false).count - 1) lines)")
             case (.gate, _):
-                out.append("\(path): replaced with this version of the gate (the old one is kept as .before-burrow)")
+                out.append("\(path): replaced with this version of the gate (the old one is kept beside it as \(backupNote))")
             case (.settings, nil):
                 out.append("\(path): new file")
                 out += change.after.split(separator: "\n", omittingEmptySubsequences: false).dropLast().map { "    " + $0 }
             case (.settings, _):
-                out.append("\(path): these settings change (the old file is kept as .before-burrow)")
+                out.append("\(path): these settings change (the file as it is now is kept beside it as \(backupNote))")
                 out += change.shown.map { "    " + $0 }
             }
         }
         return out.joined(separator: "\n")
     }
 
-    /// Writes every file that changes. An existing file is kept beside it as `.before-burrow` first, unless a copy from an
-    /// earlier run is already there. Returns what was done.
+    /// How the copies are named, for the plan's words: the exact name is only known when `apply` makes it.
+    static let backupNote = ".before-burrow-<date>-<time>"
+
+    /// Keeps `file` beside itself before Burrow changes it (D-115): as `.before-burrow` if no earlier run left one, so that
+    /// copy stays the file as it was before Burrow, and always as `.before-burrow-<yyyyMMdd-HHmmss>`, the file exactly as
+    /// it was before this write. A tester's only copy was from a week before, so undoing one write by it would have undone
+    /// a week of their own changes too. Returns the dated copy, nil when there was no file.
+    @discardableResult
+    public static func keepCopies(of file: URL, now: Date = Date()) throws -> URL? {
+        let files = FileManager.default
+        guard files.fileExists(atPath: file.path) else { return nil }
+        let first = file.appendingPathExtension("before-burrow")
+        if !files.fileExists(atPath: first.path) { try files.copyItem(at: file, to: first) }
+        let stamp = DateFormatter()
+        stamp.locale = Locale(identifier: "en_US_POSIX")
+        stamp.dateFormat = "yyyyMMdd-HHmmss"
+        let base = file.lastPathComponent + ".before-burrow-" + stamp.string(from: now)
+        var dated = file.deletingLastPathComponent().appendingPathComponent(base)
+        var n = 2
+        while files.fileExists(atPath: dated.path) { dated = file.deletingLastPathComponent().appendingPathComponent("\(base)-\(n)"); n += 1 }
+        try files.copyItem(at: file, to: dated)
+        return dated
+    }
+
+    /// Writes every file that changes. Each existing file is kept beside it first (`keepCopies`). Returns what was done,
+    /// naming each copy.
     @discardableResult
     public static func apply(_ plan: Plan, _ setup: Setup) throws -> [String] {
         if let refusal = plan.refusal { throw Refused(why: refusal) }
@@ -381,9 +406,8 @@ public enum Connect {
         let files = FileManager.default
         for change in plan.pending {
             try files.createDirectory(at: change.path.deletingLastPathComponent(), withIntermediateDirectories: true)
-            // The file as it was before Burrow first changed it: a later run never replaces that copy.
-            let copy = change.path.appendingPathExtension("before-burrow")
-            if change.before != nil, !files.fileExists(atPath: copy.path) { try files.copyItem(at: change.path, to: copy) }
+            let copy = change.before != nil ? try keepCopies(of: change.path) : nil
+            if let copy { said.append("kept \(tilde(change.path.path, setup)) as it was in \(tilde(copy.path, setup))") }
             if let command = change.command {
                 if let remove = change.removeFirst { _ = try run(remove, home: setup.home) }
                 let (status, output) = try run(command, home: setup.home)
