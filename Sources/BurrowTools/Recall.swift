@@ -19,7 +19,9 @@ public enum AutoRecall {
 
     /// What to hand back for `prompt`, or nil. `session` is the live session read from its transcript.
     public static func handBack(prompt: String, session: SessionText, kept: KeptStore, sessionID: String) -> (text: String, characters: Int)? {
-        guard prompt.trimmingCharacters(in: .whitespacesAndNewlines).count >= 8 else { return nil }
+        // Only what the person typed: a message the program itself puts in the person's turn (a <system-reminder>, a
+        // command's output) is not a question. On the author's Mac recall answered one with 1,243 characters (D-119).
+        guard SessionText.typed(prompt), prompt.trimmingCharacters(in: .whitespacesAndNewlines).count >= 8 else { return nil }
         var candidates: [Candidate] = []
         // The model saw only the head and tail of a kept output: the whole is out of its context.
         for entry in kept.entries(session: sessionID) {

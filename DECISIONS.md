@@ -396,6 +396,9 @@ D-119: What the real runs showed, and two fixes they led to (17 November). The e
   on every resume, even when the copy from the last start was still in the context. In run 1 that put 23 copies in the
   context of both Burrow arms. A resume now skips the head while the transcript holds one since the last compaction
   (`SessionHooks.stillHasHead`).
+- **Fix: recall answered the program's own messages.** On the author's Mac, recall answered a `<system-reminder>` that the
+  app put in the person's turn, with 1,243 characters. Recall now runs only on what the person typed, by the rule
+  transcripts are read with (`SessionText.typed`).
 - **Fix: a short number brought back noise.** "Route 46" brought back a log line holding "46 rows", so a number shorter
   than four digits no longer counts as a specific word for recall.
 - **Resume in another program.**

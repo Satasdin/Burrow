@@ -179,6 +179,8 @@ final class SessionContextTests: XCTestCase {
         XCTAssertLessThanOrEqual(found.characters, AutoRecall.most + 200)
         // Words still in the context ("ship") bring nothing back, nor does a message that matches nothing.
         XCTAssertNil(AutoRecall.handBack(prompt: "Did you ship it yet?", session: session, kept: p.kept, sessionID: "sess-1"))
+        // What the program puts in the person's turn is not a question, even when it holds matching words.
+        XCTAssertNil(AutoRecall.handBack(prompt: "<system-reminder>the deploy port 7431</system-reminder>", session: session, kept: p.kept, sessionID: "sess-1"))
         XCTAssertNil(AutoRecall.handBack(prompt: "What colour should the button be?", session: session, kept: p.kept, sessionID: "sess-1"))
     }
 
