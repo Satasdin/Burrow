@@ -527,15 +527,18 @@ def set_spacing(style, before=None, after=None, line=None, exact=False):
 KEVIN_TEMPLATE = HERE / "template-2026.docx"
 
 def course_styles(document):
-    """Copies the course template's own Kevin, Kevin Char and TOC Heading styles into the report, as they are there."""
+    """Carries the course template's style set into the report: every style the 2026 template defines that the report
+    lacks is copied as it is there (Kevin and Kevin Char, its watermark headings, among them), and its Kevin, Kevin Char
+    and TOC Heading replace any of the same name. Styles both share keep the report's look."""
     import copy as _copy
     source = docx.Document(str(KEVIN_TEMPLATE)).styles.element
     target = document.styles.element
-    for sid in ("Kevin", "KevinChar", "TOCHeading"):
-        made = source.find(f'{{{source.nsmap["w"]}}}style[@{{{source.nsmap["w"]}}}styleId="{sid}"]')
-        old = target.find(f'{{{target.nsmap["w"]}}}style[@{{{target.nsmap["w"]}}}styleId="{sid}"]')
-        if old is not None: target.remove(old)
-        target.append(_copy.deepcopy(made))
+    w = source.nsmap["w"]
+    have = {s.get(f"{{{w}}}styleId"): s for s in target.findall(f"{{{w}}}style")}
+    for made in source.findall(f"{{{w}}}style"):
+        sid = made.get(f"{{{w}}}styleId")
+        if sid in ("Kevin", "KevinChar", "TOCHeading") and sid in have: target.remove(have.pop(sid))
+        if sid not in have: target.append(_copy.deepcopy(made))
 
 def styles(document):
     st = document.styles
