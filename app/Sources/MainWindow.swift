@@ -145,6 +145,40 @@ struct MainWindow: View {
     }
 }
 
+/// The vault's home, the live map, always first in the tab row and never closed (D-121).
+struct HomeTab: View {
+    let workspace: Workspace
+    let underline: Namespace.ID
+    @State private var hovering = false
+    @AppStorage(SkyTheme.key) private var themeName = SkyTheme.standard.rawValue
+    private var theme: SkyTheme { SkyTheme(rawValue: themeName) ?? .standard }
+
+    var body: some View {
+        let active = workspace.isHome
+        HStack(spacing: 6) {
+            BurrowMark(size: 13).opacity(active ? 1 : 0.7)
+            Text("Home")
+        }
+        .font(.system(size: 12.5))
+        .padding(.horizontal, 10).frame(height: 28)
+        .background(active ? theme.accent.opacity(0.14) : hovering ? Color.primary.opacity(0.05) : .clear, in: .rect(cornerRadius: 7))
+        .overlay(alignment: .bottom) {
+            if active {
+                Capsule().fill(theme.accent).frame(height: 2).padding(.horizontal, 8).offset(y: 4)
+                    .shadow(color: theme.accent, radius: 4)
+                    .matchedGeometryEffect(id: "underline", in: underline)
+            }
+        }
+        .contentShape(Rectangle())
+        .onTapGesture { workspace.goHome() }
+        .onHover { hovering = $0 }
+        .help("The vault's live map (⇧⌘H)")
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Home")
+        .accessibilityAddTraits(active ? [.isButton, .isSelected] : .isButton)
+    }
+}
+
 struct TabStrip: View {
     let workspace: Workspace
     @Namespace private var underline
@@ -156,6 +190,7 @@ struct TabStrip: View {
             ScrollViewReader { scroller in
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 2) {
+                        HomeTab(workspace: workspace, underline: underline)
                         ForEach(workspace.tabs) { tab in
                             TabButton(workspace: workspace, tab: tab, underline: underline).id(tab.id).transition(.opacity)
                         }

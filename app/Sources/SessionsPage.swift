@@ -694,10 +694,16 @@ struct SessionSettingsStrip: View {
             pill("Steer", settings.steer)
             pill("Archive", settings.archive)
             Spacer(minLength: 10)
+            // A chosen drive that isn't plugged in is said plainly; sessions go to Burrow's own folder meanwhile (D-121).
+            if let drive = SessionArchive.chosenFolder(settings).flatMap(SessionArchive.missingDrive) {
+                Image(systemName: "externaldrive.badge.exclamationmark").foregroundStyle(Brand.amber).font(.system(size: 11))
+                Text("\(drive) not connected").foregroundStyle(Brand.amber).lineLimit(1).fixedSize()
+                    .help("Your archive folder is on \(drive), which isn't connected, so sessions are kept in Burrow's own folder until it is. Connect the drive, or choose another folder with burrow session settings archive-folder PATH.")
+            }
             Image(systemName: "archivebox").foregroundStyle(Night.faint).font(.system(size: 11))
             Text((archiveFolder as NSString).abbreviatingWithTildeInPath).lineLimit(1).truncationMode(.head).foregroundStyle(Night.dim)
                 .help(archiveFolder)
-            Text(archiveBytes.bytesText).foregroundStyle(Night.note.opacity(0.85)).monospacedDigit()
+            Text(archiveBytes.bytesText).foregroundStyle(Night.note.opacity(0.85)).monospacedDigit().fixedSize()
         }
         .font(.system(size: 11))
         .padding(.horizontal, 12).padding(.vertical, 8)
@@ -709,6 +715,7 @@ struct SessionSettingsStrip: View {
             Circle().fill(on ? WatchPanel.mint : Night.faint).frame(width: 5, height: 5)
             Text(title).foregroundStyle(on ? Night.note.opacity(0.9) : Night.faint)
         }
+        .fixedSize()
         .padding(.horizontal, 7).padding(.vertical, 2)
         .overlay { Capsule().strokeBorder(on ? WatchPanel.mint.opacity(0.35) : Night.line) }
         .help("\(title) is \(on ? "on" : "off")")

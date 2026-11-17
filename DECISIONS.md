@@ -442,3 +442,20 @@ the splash film and the Map are the same picture, sparks of light on black, and 
   and `Proposal.pdf`, the notes Haiku cited, and the conversations count went from 2 to 3.
 - **Left out on purpose.** Stock photos (the vault's map is the picture), a dashboard of cards, and motion anywhere
   but the splash landing and gold for reading.
+
+D-121: The gaps D-120 left, closed (18 November). The author asked for the known gaps to be fixed before the build is
+pushed.
+- **Home.** A Home tab with the B sits first in the tab row and is never closed; it and Go ▸ Home (⇧⌘H) go back to the
+  live map with every tab left open. Next and Previous Tab count Home as the place before the first tab.
+- **No title bar over the splash.** The start window has no toolbar, so hiding the toolbar left its title over the
+  film. The window's title and its three buttons are now hidden while the film plays and given back as they were.
+  Checked from inside the app on both windows: hidden during the film, back after.
+- **An archive on a drive that isn't connected.** The archive folder can be set to an external drive
+  (`/Volumes/<name>/…`). When that drive is missing, Burrow keeps sessions in its own folder instead of failing to
+  write them, and says so: the Sessions page shows "<name> not connected", and `burrow session settings` prints it.
+  The person's setting is left as they set it; only the person changes it. On the author's Mac the archive pointed at
+  `/Volumes/YourSSD`, so sessions had stopped being kept; the page now shows the 1.95 GB kept in Burrow's folder.
+- **Program icons by name too.** An app is also found as `/Applications/<Name>.app` (or in `~/Applications`), so LM
+  Studio, whose bundle id could not be checked on this Mac, still shows its icon when installed.
+- **The logo from the master file.** The B, the wordmark and the app icon are cut from the author's full-size
+  transparent PNG, in place of the smaller copy from the chat.

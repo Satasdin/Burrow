@@ -84,6 +84,9 @@ func runSessionCommand(_ arguments: [String]) throws -> Bool {
         let data = (try? JSONEncoder.pretty.encode(settings)) ?? Data()
         print(String(decoding: data, as: UTF8.self))
         print("Archive: \(SessionArchive.standard(settings: settings).folder.path)")
+        if let chosen = SessionArchive.chosenFolder(settings), let drive = SessionArchive.missingDrive(chosen) {
+            print("The drive \(drive) is not connected, so sessions are kept in Burrow's own folder until it is.")
+        }
     default:
         throw Failure(sessionUsage)
     }

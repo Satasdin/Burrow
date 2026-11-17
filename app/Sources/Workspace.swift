@@ -608,8 +608,14 @@ final class Workspace {
 
     func closeCurrentTab() { if let currentTab { close(currentTab) } }
 
+    /// Back to the vault's home, the live map, leaving every tab open (D-121).
+    func goHome() { activeTab = nil }
+    var isHome: Bool { currentTab == nil }
+
     func cycleTab(by step: Int) {
-        guard !tabs.isEmpty, let index = tabs.firstIndex(where: { $0.id == activeTab }) else { return }
+        guard !tabs.isEmpty else { return }
+        // Home counts as the place before the first tab.
+        guard let index = tabs.firstIndex(where: { $0.id == activeTab }) else { activeTab = (step > 0 ? tabs.first : tabs.last)?.id; return }
         activeTab = tabs[(index + step + tabs.count) % tabs.count].id
     }
 
@@ -811,7 +817,7 @@ final class Workspace {
             try await engine.trash(path)
             documents[path] = nil
             tabs.removeAll { if case let .file(open) = $0.content { return open == path || open.hasPrefix(path + "/") } else { return false } }
-            if !tabs.contains(where: { $0.id == activeTab }) { activeTab = tabs.last?.id }
+            if activeTab != nil, !tabs.contains(where: { $0.id == activeTab }) { activeTab = tabs.last?.id }
             await reload()
         }
     }

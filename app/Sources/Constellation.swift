@@ -23,12 +23,32 @@ enum ProgramApp {
 
     @MainActor private static var cache: [String: NSImage] = [:]
 
+    /// The app's name on disk, for when its bundle id is not the one we know (an older or newer build).
+    static func appName(client: String?) -> String? {
+        let name = (client ?? "").lowercased().replacingOccurrences(of: " ", with: "").replacingOccurrences(of: "-", with: "")
+        if name.contains("lmstudio") { return "LM Studio" }
+        if name.contains("ollama") { return "Ollama" }
+        if name.contains("codex") { return "Codex" }
+        if name.contains("claude") { return "Claude" }
+        return nil
+    }
+
     @MainActor static func icon(client: String?) -> NSImage? {
         for id in bundles(client: client) {
             if let known = cache[id] { return known }
             guard let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: id) else { continue }
             let icon = NSWorkspace.shared.icon(forFile: url.path)
             cache[id] = icon
+            return icon
+        }
+        guard let app = appName(client: client) else { return nil }
+        if let known = cache[app] { return known }
+        let home = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Applications").path
+        for folder in ["/Applications", home] {
+            let path = "\(folder)/\(app).app"
+            guard FileManager.default.fileExists(atPath: path) else { continue }
+            let icon = NSWorkspace.shared.icon(forFile: path)
+            cache[app] = icon
             return icon
         }
         return nil
@@ -223,6 +243,45 @@ struct SplashView: View {
         .accessibilityElement()
         .accessibilityLabel("Burrow")
         .accessibilityHint("Click to skip")
+    }
+}
+
+/// Hides the window's title bar and its buttons while the splash plays, and gives them back as they were after. The
+/// start window has no toolbar, so hiding the toolbar alone left its plain title bar over the film (D-121).
+struct SplashChrome: NSViewRepresentable {
+    let hidden: Bool
+
+    final class Coordinator {
+        var saved: (transparent: Bool, title: NSWindow.TitleVisibility, fullSize: Bool)?
+    }
+
+    func makeCoordinator() -> Coordinator { Coordinator() }
+    func makeNSView(context: Context) -> NSView { NSView() }
+
+    func updateNSView(_ view: NSView, context: Context) {
+        let coordinator = context.coordinator
+        let hidden = hidden
+        // The view is in its window only after this pass.
+        DispatchQueue.main.async {
+            guard let window = view.window else { return }
+            if hidden, coordinator.saved == nil {
+                coordinator.saved = (window.titlebarAppearsTransparent, window.titleVisibility, window.styleMask.contains(.fullSizeContentView))
+                window.titlebarAppearsTransparent = true
+                window.titleVisibility = .hidden
+                window.styleMask.insert(.fullSizeContentView)
+                buttons(window, hidden: true)
+            } else if !hidden, let saved = coordinator.saved {
+                coordinator.saved = nil
+                window.titlebarAppearsTransparent = saved.transparent
+                window.titleVisibility = saved.title
+                if !saved.fullSize { window.styleMask.remove(.fullSizeContentView) }
+                buttons(window, hidden: false)
+            }
+        }
+    }
+
+    private func buttons(_ window: NSWindow, hidden: Bool) {
+        for kind in [NSWindow.ButtonType.closeButton, .miniaturizeButton, .zoomButton] { window.standardWindowButton(kind)?.isHidden = hidden }
     }
 }
 

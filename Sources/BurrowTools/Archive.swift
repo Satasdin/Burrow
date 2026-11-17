@@ -30,9 +30,26 @@ public struct SessionArchive: Sendable {
     public init(folder: URL) { self.folder = folder }
 
     /// The archive the person's settings name, or Burrow's own folder.
+    /// A chosen folder on a drive that isn't connected is not written to: sessions are kept in Burrow's own folder until it
+    /// is, so none is lost, and the person's setting stays as they set it (D-121).
     public static func standard(settings: SessionSettings = .load(), state: URL = BurrowPlaces.stateFolder) -> SessionArchive {
-        if let chosen = settings.archiveFolder, !chosen.isEmpty { return SessionArchive(folder: URL(fileURLWithPath: (chosen as NSString).expandingTildeInPath)) }
+        if let chosen = chosenFolder(settings), missingDrive(chosen) == nil { return SessionArchive(folder: chosen) }
         return SessionArchive(folder: state.appendingPathComponent("sessions", isDirectory: true))
+    }
+
+    /// The folder the person chose, if any.
+    public static func chosenFolder(_ settings: SessionSettings) -> URL? {
+        guard let chosen = settings.archiveFolder, !chosen.isEmpty else { return nil }
+        return URL(fileURLWithPath: (chosen as NSString).expandingTildeInPath)
+    }
+
+    /// The name of the drive a folder sits on, when that drive is not connected: `/Volumes/<name>` is missing.
+    public static func missingDrive(_ folder: URL) -> String? {
+        let parts = folder.standardizedFileURL.pathComponents
+        guard parts.count >= 3, parts[1] == "Volumes" else { return nil }
+        let drive = URL(fileURLWithPath: "/Volumes").appendingPathComponent(parts[2])
+        var isFolder: ObjCBool = false
+        return FileManager.default.fileExists(atPath: drive.path, isDirectory: &isFolder) && isFolder.boolValue ? nil : parts[2]
     }
 
     func place(_ program: SessionText.Program, _ id: String) -> URL {

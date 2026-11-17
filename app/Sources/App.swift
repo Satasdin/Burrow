@@ -40,6 +40,7 @@ struct BurrowApp: App {
             Button("Programs") { workspace?.go(.programs) }.keyboardShortcut("4").disabled(workspace == nil)
             Button("Ledger") { workspace?.go(.ledger(nil)) }.keyboardShortcut("5").disabled(workspace == nil)
             Button("Sessions") { workspace?.go(.contextSessions) }.keyboardShortcut("6").disabled(workspace == nil)
+            Button("Home") { workspace?.goHome() }.keyboardShortcut("h", modifiers: [.command, .shift]).disabled(workspace == nil)
             Button("Map") { workspace?.go(.graph) }.keyboardShortcut("g", modifiers: [.command, .shift]).disabled(workspace == nil)
             Divider()
         }
@@ -185,6 +186,7 @@ struct Root: View {
         }
         // The film fills the whole window, title bar included.
         .toolbar(splash ? .hidden : .automatic, for: .windowToolbar)
+        .background(SplashChrome(hidden: splash))
         .onAppear {
             guard !Splash.shown, Splash.wanted else { return }
             Splash.shown = true

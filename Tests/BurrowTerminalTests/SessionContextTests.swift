@@ -251,6 +251,20 @@ final class SessionContextTests: XCTestCase {
 
     // MARK: Archive and resume
 
+    func testAnArchiveOnADriveThatIsNotConnectedKeepsSessionsInBurrowsOwnFolder() {
+        var settings = SessionSettings()
+        settings.archiveFolder = "/Volumes/NoSuchDrive-\(UUID().uuidString)/BurrowSessions"
+        let state = top.appendingPathComponent("state")
+        XCTAssertNotNil(SessionArchive.missingDrive(URL(fileURLWithPath: settings.archiveFolder!)))
+        XCTAssertEqual(SessionArchive.standard(settings: settings, state: state).folder, state.appendingPathComponent("sessions", isDirectory: true))
+        XCTAssertEqual(settings.archiveFolder?.hasPrefix("/Volumes/NoSuchDrive"), true, "the person's setting is left as they set it")
+
+        settings.archiveFolder = top.appendingPathComponent("chosen").path
+        XCTAssertNil(SessionArchive.missingDrive(URL(fileURLWithPath: settings.archiveFolder!)), "a folder not on /Volumes is never a missing drive")
+        XCTAssertEqual(SessionArchive.standard(settings: settings, state: state).folder.path, top.appendingPathComponent("chosen").path)
+        XCTAssertNil(SessionArchive.missingDrive(URL(fileURLWithPath: "/Volumes")), "the volumes folder itself is no drive")
+    }
+
     func testArchiveKeepsFindsAndResumesASession() throws {
         let archive = SessionArchive(folder: top.appendingPathComponent("archive"))
         let path = top.appendingPathComponent("sess-1.jsonl")
