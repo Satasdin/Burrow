@@ -1,0 +1,29 @@
+burrow chat  proj  ·  llama.cpp  ·  whole vault
+0 notes, 9 code files, words only
+/help for commands
+
+  loaded this session's saved working memory: 4041 tokens in 0.03 s
+
+› What is the deploy port, and who is the customer?
+The deploy port is 7431, and the customer is Wanjiku Logistics. 
+
+These facts were provided at the start of the session and are recorded in the session's initial facts.
+  0 tool calls, 1 rounds, 3797 prompt tokens (2802 of the first round's from cache), 1.3 s
+  working memory kept: 3837 tokens, 300.6 MB in 0.03 s
+
+› Which shard failed and what were the checksums?
+The shard that failed is `0x5F3A`. The expected checksum was `9c41`, and the actual checksum was `77e2`.
+
+This information is from the error log: `1236:2026-11-17T09:20:34 FATAL shard 0x5F3A checksum mismatch (expected 9c41 got 77e2)`. It appears in the output of `python3 tools/gen_report.py` and is also echoed in the logs.
+  0 tool calls, 1 rounds, 3857 prompt tokens (3837 of the first round's from cache), 1.7 s
+  working memory kept: 3973 tokens, 311.3 MB in 0.03 s
+
+› Which database did we choose and why?
+We chose **SQLite** for matched rows.  
+
+The reason is that the client's laptops are offline most of the day, making SQLite a more practical choice because it does not require a persistent, online database server.  
+
+This decision is recorded in a comment at the top of `ledgerly/reconcile.py`.
+  0 tool calls, 1 rounds, 3991 prompt tokens (3973 of the first round's from cache), 1.0 s
+  working memory kept: 4054 tokens, 317.6 MB in 0.06 s
+

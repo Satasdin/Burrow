@@ -30,7 +30,7 @@ final class LedgerMCPTests: XCTestCase {
         let line = await server.handle(#"{"jsonrpc":"2.0","id":2,"method":"tools/list"}"#)
         let reply = try JSONSerialization.jsonObject(with: XCTUnwrap(line).data(using: .utf8)!) as! [String: Any]
         let names = ((reply["result"] as! [String: Any])["tools"] as! [[String: Any]]).compactMap { $0["name"] as? String }
-        XCTAssertEqual(Set(names), ["burrow_find", "burrow_read", "burrow_resume", "burrow_commit", "burrow_check"])  // burrow_check joined the door in D-79
+        XCTAssertEqual(Set(names), ["burrow_find", "burrow_read", "burrow_resume", "burrow_commit", "burrow_check", "burrow_expand", "burrow_session"])  // burrow_check joined the door in D-79; expand and session in D-116, D-117
         let old = try await call("vault_search", #"{"query":"retry a failed charge"}"#)
         XCTAssertTrue(old.contains("\nTrust: "), old)
         XCTAssertTrue(old.contains("Retry"))

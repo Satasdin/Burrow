@@ -7,7 +7,8 @@ burrow: private project memory for local models
 
   burrow                            full-screen terminal view of the last vault, or this folder if it is one
   burrow tui   <vault-folder> [--model NAME] [--store DIR]
-  burrow chat  <vault-folder> [--model NAME] [--folder F] [--tools-only]
+  burrow chat  <vault-folder> [--model NAME] [--folder F] [--tools-only] [--resume SESSION] [--llama URL]
+               --resume hands the model an archived session (Claude Code, Codex); with --llama its working memory is kept on disk
   burrow mcp   <vault-folder> [--no-sessions] [--llama URL] [--tools door|full|classic]   MCP server on stdin and stdout; each connection is kept as a session.
                With --llama, what lookups return is also read into that llama.cpp server's cache, in the background
   burrow link  <vault-folder> <code-folder>                     link a folder and approve it on this Mac (in your own terminal, typing yes)
@@ -39,6 +40,8 @@ The Ledger, a git for what AIs understood:
 Connecting a program:
 \(connectUsage)
 
+\(sessionUsage)
+
 Add --store DIR to keep the memory somewhere other than <project>/.burrow.
 Add --vault to index a whole vault, where every Markdown file is a note.
 """
@@ -49,7 +52,7 @@ struct Options {
     var values: [String: String] = [:]
 
     init(_ arguments: [String]) throws {
-        let takesValue: Set<String> = ["--mode", "--model", "--kind", "--store", "--folder", "--characters", "--server", "--llama", "--part", "--window", "--tools", "--name"]
+        let takesValue: Set<String> = ["--mode", "--model", "--kind", "--store", "--folder", "--characters", "--server", "--llama", "--part", "--window", "--tools", "--name", "--resume"]
         var index = 0
         while index < arguments.count {
             let word = arguments[index]
@@ -99,6 +102,7 @@ func run() async throws {
     if try await runDecisionCommand(arguments) { return }
     if try await runVaultCommand(arguments) { return }
     if try runConnectCommand(arguments) { return }
+    if try runSessionCommand(arguments) { return }
     guard let command = arguments.first, !["help", "--help", "-h"].contains(command) else {
         print(usage)
         return

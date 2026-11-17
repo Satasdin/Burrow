@@ -41,6 +41,9 @@ actor Engine {
 
     /// Loads the answering model while the vault opens, with the window Ask will use, so the first question doesn't wait
     /// for it (D-114). Measuring a model the first time loads it too; both happen here rather than on the first question.
+    /// The one window a model answers with in the app (D-118).
+    func window(for model: String) async -> Int { await vault.profile(for: model, ollama: ollama).windowTokens }
+
     func warm(model: String) async {
         let profile = await vault.profile(for: model, ollama: ollama)
         try? await ollama.warm(model: model, contextWords: profile.windowTokens)
@@ -260,6 +263,8 @@ enum TabContent: Hashable {
     case shelf
     case programs
     case ledger(String?)
+    /// Live and recent Claude Code and Codex sessions, and what Burrow did for each one's context (D-116).
+    case contextSessions
 }
 
 struct Tab: Identifiable, Hashable {
@@ -549,6 +554,7 @@ final class Workspace {
         case .shelf: return "Shelf"
         case .programs: return "Programs"
         case let .ledger(branch): return branch.map { "Ledger · \($0)" } ?? "Ledger"
+        case .contextSessions: return "Sessions"
         }
     }
 
@@ -918,7 +924,8 @@ final class Workspace {
         let chosen = model
         Task {
             let brief = "The person asked: \(turn.question)\n\nThe assistant replied: \(turn.prose)"
-            let reply = try? await ollama.answerer(model: chosen).answer(system: Agent.notesSystem, user: Agent.notesPrompt(brief: brief)) { _ in }
+            let window = await engine.window(for: chosen)
+            let reply = try? await ollama.answerer(model: chosen, contextWords: window).answer(system: Agent.notesSystem, user: Agent.notesPrompt(brief: brief)) { _ in }
             turn.toRemember = NoteParser.parse(reply?.text ?? "")
             turn.remembering = false
         }
@@ -980,7 +987,10 @@ final class Workspace {
                     if prepared?.brief.route.mode == Mode.none { system = Asking.rules(for: words) }
                     system += "\n\n" + AskLedger.rule + " " + Self.codeCommentRule
                 }
-                let answerer = ollama.answerer(model: chosen, contextWords: prepared?.profile.windowTokens ?? 16384)
+                // The window the model was loaded with, whatever the question: another window loads it again and loses its
+                // cache (D-118). A change request used 16,384 and reloaded the model every time it followed a question.
+                let window = await engine.window(for: chosen)
+                let answerer = ollama.answerer(model: chosen, contextWords: window)
                 let result = try await answerer.answer(system: system, user: prompt) { word in
                     Task { @MainActor in turn.answer += word }
                 }
@@ -1144,6 +1154,7 @@ final class Library {
         case "shelf": workspace.go(.shelf)
         case "programs": workspace.go(.programs)
         case "ledger": workspace.go(.ledger(nil))
+        case "sessions": workspace.go(.contextSessions)
         case "documents": workspace.go(.library(.documents))
         case "none": workspace.tabs.forEach(workspace.close)
         default: break

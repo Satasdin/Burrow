@@ -1,0 +1,48 @@
+{
+ "arm": "A",
+ "run": "2",
+ "session": "ef3b6a82-5ddd-4287-9ea1-161c5f9cec85",
+ "quiz": [
+  {
+   "ask": "Quiz, answer from memory of this session, no tools needed: what is the deploy port?",
+   "answer": "The deploy port is **7431**.",
+   "right": true
+  },
+  {
+   "ask": "Quiz: who is the customer?",
+   "answer": "The customer is **Wanjiku Logistics**.",
+   "right": true
+  },
+  {
+   "ask": "Quiz: what is our error budget?",
+   "answer": "Our error budget is **0.3%**.",
+   "right": true
+  },
+  {
+   "ask": "Quiz: which function must never be renamed, and why?",
+   "answer": "`reconcile_batch` must never be renamed, because other teams import it. Renaming it would break their code.",
+   "right": true
+  },
+  {
+   "ask": "Quiz: which shard failed in the first gen_report run, and what were the expected and actual checksums?",
+   "answer": "Shard `0x5F3A` failed with a checksum mismatch. The expected checksum was `9c41` and the actual was `77e2`. The line was `2026-11-17T09:20:34 FATAL shard 0x5F3A checksum mismatch (expected 9c41 got 77e2)`.",
+   "right": true
+  },
+  {
+   "ask": "Quiz: which database did we choose for matched rows, and for what reason?",
+   "answer": "We chose **SQLite** over Postgres for matched rows, because the client's laptops are offline most of the day. The decision is recorded in a comment at the top of `ledgerly/reconcile.py`.",
+   "right": true
+  },
+  {
+   "ask": "Quiz: how many records did the gen_report SUMMARY line say were processed?",
+   "answer": "The SUMMARY line said **48,213** records were processed, with 1 fatal and 214 warnings: `SUMMARY processed 48213 records, 1 fatal, 214 warnings`.",
+   "right": true
+  },
+  {
+   "ask": "Quiz: what was the first change I asked you to make to parse_line?",
+   "answer": "You asked me to make `parse_line` strip spaces around the reference and uppercase it. The code is now `reference.strip().upper()`.",
+   "right": true
+  }
+ ],
+ "score": 8
+}

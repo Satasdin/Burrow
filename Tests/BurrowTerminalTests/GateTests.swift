@@ -284,7 +284,7 @@ final class GateTests: XCTestCase {
         let json = String(printed[printed.range(of: "{")!.lowerBound...])
         let settings = try JSONSerialization.jsonObject(with: Data(json.utf8)) as! [String: Any]
         let hooks = settings["hooks"] as! [String: Any]
-        XCTAssertEqual(Set(hooks.keys), ["SessionStart", "PreCompact", "SessionEnd", "Stop"])
+        XCTAssertEqual(Set(hooks.keys), ["SessionStart", "PreCompact", "SessionEnd", "Stop", "UserPromptSubmit", "PostCompact", "PostToolUse"])  // D-116
         let stop = (((hooks["Stop"] as! [[String: Any]])[0]["hooks"]) as! [[String: Any]])[0]
         let command = stop["command"] as! String
         XCTAssertTrue(command.hasSuffix(" --gate"), command)

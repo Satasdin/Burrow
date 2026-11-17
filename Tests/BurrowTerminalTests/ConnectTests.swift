@@ -318,7 +318,7 @@ final class ConnectTests: XCTestCase {
 
         let unknown = try BurrowBinary.piped(["connect", "cursor", vault], state: state)
         XCTAssertEqual(unknown.status, 1)
-        XCTAssertTrue(unknown.err.contains("Programs: claude-code, opencode, openclaw, hermes, n8n"), unknown.err)
+        XCTAssertTrue(unknown.err.contains("Programs: claude-code, codex, opencode, openclaw, hermes, n8n"), unknown.err)
     }
 
     /// Without --home, the home is $HOME, the one the programs read (Node's os.homedir, Python's ~, OpenCode), not the

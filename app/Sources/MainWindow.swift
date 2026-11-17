@@ -109,6 +109,8 @@ struct MainWindow: View {
             ProgramsPage(workspace: workspace)
         case let .ledger(branch):
             LedgerPage(workspace: workspace, branch: branch)
+        case .contextSessions:
+            SessionsPage(workspace: workspace)
         case nil:
             EmptyPage(workspace: workspace)
         }
@@ -196,6 +198,7 @@ struct TabButton: View {
         case .shelf: return "memorychip"
         case .programs: return "app.connected.to.app.below.fill"
         case .ledger: return "books.vertical"
+        case .contextSessions: return "gauge.with.dots.needle.33percent"
         }
     }
 

@@ -1,0 +1,48 @@
+{
+ "arm": "B",
+ "run": "2",
+ "session": "5d1050b6-427f-4e01-b012-753958a74380",
+ "quiz": [
+  {
+   "ask": "Quiz, answer from memory of this session, no tools needed: what is the deploy port?",
+   "answer": "The deploy port is **7431**.",
+   "right": true
+  },
+  {
+   "ask": "Quiz: who is the customer?",
+   "answer": "The customer is **Wanjiku Logistics**.",
+   "right": true
+  },
+  {
+   "ask": "Quiz: what is our error budget?",
+   "answer": "Our error budget is **0.3%**.",
+   "right": true
+  },
+  {
+   "ask": "Quiz: which function must never be renamed, and why?",
+   "answer": "`reconcile_batch` must never be renamed. It's the public function in `ledgerly/reconcile.py`, and other teams import it, so a rename would break their code.",
+   "right": true
+  },
+  {
+   "ask": "Quiz: which shard failed in the first gen_report run, and what were the expected and actual checksums?",
+   "answer": "Shard **0x5F3A** failed. The log line was:\n\n`2026-11-17T09:20:34 FATAL shard 0x5F3A checksum mismatch (expected 9c41 got 77e2)`\n\nThe expected checksum was **9c41** and the actual was **77e2**.",
+   "right": true
+  },
+  {
+   "ask": "Quiz: which database did we choose for matched rows, and for what reason?",
+   "answer": "We chose **SQLite** for matched rows, not Postgres. The reason is that the client's laptops are offline most of the day. The decision is recorded as a comment at the top of `ledgerly/reconcile.py`.",
+   "right": true
+  },
+  {
+   "ask": "Quiz: how many records did the gen_report SUMMARY line say were processed?",
+   "answer": "I can't answer that from memory. My notes from the session only have the SUMMARY line's warning count, which was 214. That didn't match the 182 WARN lines I counted. I don't have the processed-records figure, and I won't guess it.\n\nI can rerun `python3 tools/gen_report.py` and read the SUMMARY line if you'd like the real number.",
+   "right": false
+  },
+  {
+   "ask": "Quiz: what was the first change I asked you to make to parse_line?",
+   "answer": "The first change you asked for in `parse_line` was to strip spaces around the reference and uppercase it, and to show you the diff. The code now does `reference.strip().upper()`. It was your only change to that function.",
+   "right": true
+  }
+ ],
+ "score": 7
+}

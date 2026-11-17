@@ -205,21 +205,42 @@ private func runHook(_ kind: String, vault: Vault, gateOnly: Bool = false) throw
             return
         }
         if gateOnly { return }
-        let directory = URL(fileURLWithPath: event["cwd"] as? String ?? FileManager.default.currentDirectoryPath)
-        guard let place = Hooks.place(for: directory, vaultRoot: vault.root, linked: vault.linkedFolders()) else {
-            logToStandardError("hook: \(directory.path) is not in the vault or a linked folder; nothing kept")
+        // The live session's context (D-116, D-117): these work wherever the session runs, in the vault or not, because
+        // they keep the session's own words in Burrow's folder and never touch the vault.
+        if let reply = SessionHooks.handle(event) {
+            if !reply.isEmpty { print(reply) }
             return
         }
-        switch event["hook_event_name"] as? String ?? "" {
+        let directory = URL(fileURLWithPath: event["cwd"] as? String ?? FileManager.default.currentDirectoryPath)
+        let name = event["hook_event_name"] as? String ?? ""
+        guard let place = Hooks.place(for: directory, vaultRoot: vault.root, linked: vault.linkedFolders()) else {
+            // Outside the vault: the session is still kept and, before compacting, the summary still steered.
+            if name == "PreCompact" { print(SessionHooks.steer(event, fold: nil)) }
+            if name == "SessionStart", let advice = SessionHooks.resumeAdvice(event) { print(SessionHooks.merge(advice: advice, into: nil)) }
+            logToStandardError("hook: \(directory.path) is not in the vault or a linked folder; nothing kept in the Ledger")
+            return
+        }
+        switch name {
         case "SessionStart":
             // After a compaction the session's folds come back with the Ledger's head (D-102); any other start is as before.
+            let reply: String
             if event["source"] as? String == "compact", let session = event["session_id"] as? String {
-                print(Folds.sessionStartAfterCompact(ledger: ledger, place: place, folds: FoldStore(vault: vault).folds(session: session)))
+                reply = Folds.sessionStartAfterCompact(ledger: ledger, place: place, folds: FoldStore(vault: vault).folds(session: session))
+            } else if ["resume", "fork"].contains(event["source"] as? String ?? ""),
+                      let path = event["transcript_path"] as? String, let text = try? String(contentsOfFile: path, encoding: .utf8),
+                      SessionHooks.stillHasHead(transcript: text) {
+                // The head handed over at an earlier start is still in the context (D-116).
+                reply = ""
             } else {
-                print(Hooks.sessionStart(ledger: ledger, place: place))
+                reply = Hooks.sessionStart(ledger: ledger, place: place)
             }
-        case let name where name == "PreCompact" || name == "SessionEnd" || name == "Stop":
-            guard let path = event["transcript_path"] as? String, let text = try? String(contentsOfFile: path, encoding: .utf8) else { return }
+            // A resume whose cache has expired: what it will cost, and the lighter way back (D-117).
+            print(SessionHooks.merge(advice: SessionHooks.resumeAdvice(event), into: reply))
+        case "PreCompact", "SessionEnd", "Stop":
+            guard let path = event["transcript_path"] as? String, let text = try? String(contentsOfFile: path, encoding: .utf8) else {
+                if name == "PreCompact" { print(SessionHooks.steer(event, fold: nil)) }
+                return
+            }
             let transcript = Hooks.readTranscript(text)
             if let named = Hooks.nameConversation(SessionStore(vault: vault), transcript: transcript) { logToStandardError("named conversation \(named)") }
             let session = event["session_id"] as? String ?? "unknown"
@@ -229,6 +250,8 @@ private func runHook(_ kind: String, vault: Vault, gateOnly: Bool = false) throw
             do { folded = try FoldStore(vault: vault).fold(transcript: text, path: path, session: session, event: name, branch: place.branch) }
             catch { logToStandardError("hook: could not keep a fold: \(error)") }
             if let folded { logToStandardError("kept fold \(folded.id) (\(folded.messages) messages)") }
+            // Claude Code adds what PreCompact prints to the summary's instructions (D-116).
+            if name == "PreCompact" { print(SessionHooks.steer(event, fold: folded?.id, transcript: text)) }
             let made = try Hooks.checkpoint(ledger: ledger, place: place, transcript: transcript,
                                             session: session, event: name, folded: folded)
             for commit in made { logToStandardError("kept \(commit.kind.rawValue) \(commit.id) on \(commit.branch)") }
@@ -277,10 +300,8 @@ private func installHook(_ kind: String, vault folder: String, store: String? = 
     switch kind {
     case "claude":
         let command = "\(burrow) hook claude \(quoted)"
-        let entry: [String: Any] = ["hooks": [["type": "command", "command": command, "timeout": 10]]]
-        // Stop runs the gate only (D-93): a handoff at the end of every turn would bury the Ledger.
-        let stop: [String: Any] = ["hooks": [["type": "command", "command": command + " --gate", "timeout": 30]]]
-        let settings: [String: Any] = ["hooks": ["SessionStart": [entry], "PreCompact": [entry], "SessionEnd": [entry], "Stop": [stop]]]
+        // The same entries `burrow connect claude-code` writes, the session's context hooks included (D-116).
+        let settings: [String: Any] = ["hooks": Connect.addHooks([:], Connect.hookEntries(command, sessionEnd: 10, postToolUse: true))]
         let data = try JSONSerialization.data(withJSONObject: settings, options: [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes])
         print("Add this to ~/.claude/settings.json (or the project's .claude/settings.json), merged with any hooks already there:\n")
         print(String(data: data, encoding: .utf8) ?? "")

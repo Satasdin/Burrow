@@ -72,6 +72,8 @@ struct Ribbon: View {
             RibbonButton(icon: "memorychip", label: "Shelf", help: "Shelf (⌘3)", on: content == .shelf,
                          dot: workspace.shelf.contains { $0.stale != nil } ? Night.stale : nil) { workspace.go(.shelf) }
             RibbonButton(icon: "app.connected.to.app.below.fill", label: "Programs", help: "Programs (⌘4)", on: content == .programs) { workspace.go(.programs) }
+            RibbonButton(icon: "gauge.with.dots.needle.33percent", label: "Sessions", help: "Sessions: live Claude Code and Codex sessions, and what Burrow kept out of their context (⌘6)",
+                         on: content == .contextSessions) { workspace.go(.contextSessions) }
             RibbonButton(icon: "circle.hexagongrid", label: "Map", help: "Map (⇧⌘G)", on: content == .graph) { workspace.go(.graph) }
             Spacer()
             RibbonButton(icon: "command", label: "Open", help: "Quick switcher (⌘K)", on: workspace.paletteOpen) { workspace.paletteOpen = true }

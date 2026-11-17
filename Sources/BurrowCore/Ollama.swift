@@ -9,6 +9,9 @@ public struct ChatResult: Sendable {
     /// How long the model spent reading the prompt and writing the answer, as the model runner reports them.
     public var promptSeconds: Double = 0
     public var answerSeconds: Double = 0
+    /// Prompt tokens the runner did not read again because its cache already held them (Ollama's prompt_eval_cached_count,
+    /// llama.cpp's cache_n): the start of this prompt matched the start of the one before (D-118).
+    public var cachedTokens: Int = 0
 
     public init(text: String, secondsToFirstWord: Double, totalSeconds: Double, promptTokens: Int, answerTokens: Int,
                 promptSeconds: Double = 0, answerSeconds: Double = 0) {
@@ -129,7 +132,9 @@ public struct Ollama: Sendable {
         // Qwen3 can ignore "think": false, and then reasons at length before answering. This is its own off switch.
         let content = model.lowercased().contains("qwen3") ? user + "\n\n/no_think" : user
         let call = try request("api/chat", [
-            "model": model, "stream": true, "think": false,
+            // Kept loaded for 30 minutes, with the same window every time: a model unloaded, or loaded again with another
+            // window, loses its cache, and a 4,600-token prompt read from it took 0.05 s against 2.93 s (D-118).
+            "model": model, "stream": true, "think": false, "keep_alive": "30m",
             "messages": [["role": "system", "content": system], ["role": "user", "content": content]],
             "options": ["temperature": 0, "seed": 7, "num_ctx": contextWords, "num_predict": longestAnswer],
         ])
@@ -141,6 +146,7 @@ public struct Ollama: Sendable {
         var answerTokens = 0
         var promptSeconds = 0.0
         var answerSeconds = 0.0
+        var cached = 0
         let (bytes, response) = try await Self.session().bytes(for: call)
         if let http = response as? HTTPURLResponse, http.statusCode != 200 {
             throw OllamaError(description: "Ollama answered \(http.statusCode) for model \(model). Is it installed?")
@@ -163,11 +169,14 @@ public struct Ollama: Sendable {
                 answerTokens = part["eval_count"] as? Int ?? 0
                 promptSeconds = (part["prompt_eval_duration"] as? Double ?? 0) / 1e9
                 answerSeconds = (part["eval_duration"] as? Double ?? 0) / 1e9
+                cached = part["prompt_eval_cached_count"] as? Int ?? 0
             }
         }
         let total = Date().timeIntervalSince(started)
-        return ChatResult(text: Thinking.visible(text), secondsToFirstWord: firstWord ?? total, totalSeconds: total,
-                          promptTokens: promptTokens, answerTokens: answerTokens, promptSeconds: promptSeconds, answerSeconds: answerSeconds)
+        var result = ChatResult(text: Thinking.visible(text), secondsToFirstWord: firstWord ?? total, totalSeconds: total,
+                                promptTokens: promptTokens, answerTokens: answerTokens, promptSeconds: promptSeconds, answerSeconds: answerSeconds)
+        result.cachedTokens = cached
+        return result
     }
 
     private func check(_ response: URLResponse, _ data: Data) throws {

@@ -1,0 +1,7 @@
+attempt 1 wall 6.18 s
+attempt 2 wall 4.38 s
+total 622920
+drwxr-xr-x  4 p3wrky  wheel        128 Nov 17 16:52 .
+drwxr-xr-x  8 p3wrky  wheel        256 Nov 17 16:52 ..
+-rw-r--r--  1 p3wrky  wheel  317639924 Nov 17 16:52 chat-session-3a9523af-faae-48a4-bbfc-828c545a-4bb6c041.bin
+-rw-r--r--  1 p3wrky  wheel        465 Nov 17 16:52 shelf.json

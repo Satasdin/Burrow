@@ -15,10 +15,13 @@ public struct ModelReply: @unchecked Sendable {
     public let text: String
     public let toolCalls: [ModelToolCall]
     public let promptTokens: Int
-    public init(text: String, toolCalls: [ModelToolCall], promptTokens: Int = 0) {
+    /// Prompt tokens the runner took from its cache instead of reading again (D-118).
+    public var cachedTokens: Int = 0
+    public init(text: String, toolCalls: [ModelToolCall], promptTokens: Int = 0, cachedTokens: Int = 0) {
         self.text = text
         self.toolCalls = toolCalls
         self.promptTokens = promptTokens
+        self.cachedTokens = cachedTokens
     }
 }
 
@@ -74,7 +77,9 @@ public struct OllamaChat: ChatBackend {
 
     public func reply(messages: [[String: Any]], tools: [[String: Any]]?, onWord: @escaping (String) -> Void) async throws -> ModelReply {
         var body: [String: Any] = [
-            "model": model, "stream": true, "think": false, "messages": messages,
+            // A conversation is sent whole each turn, so its start matches the turn before and the runner reads only what is
+            // new, as long as the model stays loaded with the same window (D-118).
+            "model": model, "stream": true, "think": false, "messages": messages, "keep_alive": "30m",
             "options": ["temperature": 0, "seed": 7, "num_ctx": contextWords, "num_predict": 2048],
         ]
         if let tools { body["tools"] = tools }
@@ -94,6 +99,7 @@ public struct OllamaChat: ChatBackend {
         var text = ""
         var calls: [ModelToolCall] = []
         var promptTokens = 0
+        var cached = 0
         for try await line in bytes.lines {
             guard let data = line.data(using: .utf8), let part = try JSONSerialization.jsonObject(with: data) as? [String: Any] else { continue }
             if let problem = part["error"] as? String { throw ChatProblem(description: problem) }
@@ -110,14 +116,86 @@ public struct OllamaChat: ChatBackend {
                     calls.append(ModelToolCall(name: name, arguments: Self.arguments(function["arguments"])))
                 }
             }
-            if part["done"] as? Bool == true { promptTokens = part["prompt_eval_count"] as? Int ?? 0 }
+            if part["done"] as? Bool == true {
+                promptTokens = part["prompt_eval_count"] as? Int ?? 0
+                cached = part["prompt_eval_cached_count"] as? Int ?? 0
+            }
         }
-        return ModelReply(text: text, toolCalls: calls, promptTokens: promptTokens)
+        return ModelReply(text: text, toolCalls: calls, promptTokens: promptTokens, cachedTokens: cached)
     }
 
     private static func arguments(_ value: Any?) -> [String: Any] {
         if let object = value as? [String: Any] { return object }
         if let text = value as? String, let data = text.data(using: .utf8), let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any] { return object }
         return [:]
+    }
+}
+
+/// A llama.cpp server's OpenAI-style chat, on one slot, so the conversation's working memory can be saved after each
+/// reply and loaded again when it is resumed (D-118). Not streamed: the reply comes whole.
+public struct LlamaChat: ChatBackend {
+    public let model: String
+    public let base: URL
+    public let slot: Int
+
+    public init(base: URL, model: String = "llama.cpp", slot: Int = 0) {
+        self.base = base
+        self.model = model
+        self.slot = slot
+    }
+
+    /// Ollama's message form, which ChatSession writes, in OpenAI's: tool calls carry ids and their arguments as text.
+    static func openAI(_ messages: [[String: Any]]) -> [[String: Any]] {
+        var out: [[String: Any]] = []
+        var pending: [String] = []
+        var number = 0
+        for message in messages {
+            var copy = message
+            if let calls = message["tool_calls"] as? [[String: Any]] {
+                copy["tool_calls"] = calls.map { call -> [String: Any] in
+                    number += 1
+                    let id = "call\(number)"
+                    pending.append(id)
+                    let function = call["function"] as? [String: Any] ?? [:]
+                    let arguments = function["arguments"].flatMap { try? JSONSerialization.data(withJSONObject: $0) }.flatMap { String(data: $0, encoding: .utf8) } ?? "{}"
+                    return ["id": id, "type": "function", "function": ["name": function["name"] ?? "", "arguments": arguments]]
+                }
+            }
+            if message["role"] as? String == "tool" {
+                copy.removeValue(forKey: "tool_name")
+                copy["tool_call_id"] = pending.isEmpty ? "call\(number)" : pending.removeFirst()
+            }
+            out.append(copy)
+        }
+        return out
+    }
+
+    public func reply(messages: [[String: Any]], tools: [[String: Any]]?, onWord: @escaping (String) -> Void) async throws -> ModelReply {
+        var body: [String: Any] = ["messages": Self.openAI(messages), "stream": false, "temperature": 0, "seed": 7, "max_tokens": 2048,
+                                   "id_slot": slot, "cache_prompt": true]
+        if let tools { body["tools"] = tools }
+        var request = URLRequest(url: base.appendingPathComponent("v1/chat/completions"))
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        request.timeoutInterval = 900
+        let (data, response) = try await URLSession.shared.data(for: request)
+        let root = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] ?? [:]
+        if let http = response as? HTTPURLResponse, http.statusCode != 200 {
+            throw ChatProblem(description: "llama.cpp answered \(http.statusCode): \(String(decoding: data.prefix(300), as: UTF8.self))")
+        }
+        let message = ((root["choices"] as? [[String: Any]])?.first?["message"] as? [String: Any]) ?? [:]
+        var filter = ThinkFilter()
+        let text = filter.add(message["content"] as? String ?? "")
+        if !text.isEmpty { onWord(text) }
+        let calls = (message["tool_calls"] as? [[String: Any]] ?? []).compactMap { raw -> ModelToolCall? in
+            guard let function = raw["function"] as? [String: Any], let name = function["name"] as? String else { return nil }
+            var arguments: [String: Any] = [:]
+            if let text = function["arguments"] as? String, let parsed = try? JSONSerialization.jsonObject(with: Data(text.utf8)) as? [String: Any] { arguments = parsed }
+            return ModelToolCall(name: name, arguments: arguments)
+        }
+        let usage = root["usage"] as? [String: Any] ?? [:]
+        let timings = root["timings"] as? [String: Any] ?? [:]
+        return ModelReply(text: text, toolCalls: calls, promptTokens: usage["prompt_tokens"] as? Int ?? 0, cachedTokens: timings["cache_n"] as? Int ?? 0)
     }
 }
