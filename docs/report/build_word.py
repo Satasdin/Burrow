@@ -544,7 +544,7 @@ def styles(document):
     body = st["Body Text"]; font(body); set_spacing(body, 0, 8, 1.5)
     body.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
     body.paragraph_format.widow_control = True
-    h1 = st["Heading 1"]; font(h1, 14, True); set_spacing(h1, 0, 14, 1.5); h1.paragraph_format.keep_with_next = True
+    h1 = st["Heading 1"]; font(h1, 12, True); set_spacing(h1, 0, 14, 1.5); h1.paragraph_format.keep_with_next = True
     h2 = st["Heading 2"]; font(h2, 12, True); set_spacing(h2, 14, 6, 1.5); h2.paragraph_format.keep_with_next = True
     h3 = st["Heading 3"]; font(h3, 12, True); set_spacing(h3, 10, 6, 1.5); h3.paragraph_format.keep_with_next = True
     for h in (h2, h3):
