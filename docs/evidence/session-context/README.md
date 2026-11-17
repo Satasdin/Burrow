@@ -26,6 +26,25 @@ from the session's own memory and, in C, from Burrow's recall and tools.
 | A | 2 | 4 | 62,538 | 472,609 | 3,488,589 | 34.59 | 8/8 |
 | B | 2 | 4 | 62,680 | 472,231 | 3,536,572 | 36.28 | 7/8 |
 | C | 2 | 2 | 69,756 | 136,416 | 2,892,163 | 21.29 | 8/8 |
+| A | 3 | 3 | 73,374 | 367,416 | 3,084,930 | 29.32 | 8/8 |
+| B | 3 | 4 | 63,089 | 471,571 | 3,640,284 | 36.84 | 8/8 |
+| C | 3 | 1 | 66,278 | 85,738 | 2,976,758 | 17.18 | 8/8 |
+
+Run 3 repeats run 2 (`script-raw.json`, same three arms) as a second round. B runs the 1.2.3 binary kept as
+`~/.local/bin/burrow-1.2.3.bak`.
+
+**Two rounds of the raw-output script (runs 2 and 3), averaged.**
+
+| Arm | Compactions | Tool output the model saw | Billed tokens | Cost |
+|---|---|---|---|---|
+| A, Claude Code alone | 3.5 | 419,999 chars | 3.29 M | $31.96 |
+| B, Burrow 1.2.3 | 4.0 | 471,901 chars | 3.59 M | $36.56 |
+| C, this branch | 1.5 (−57 %) | 111,077 chars (−74 %) | 2.93 M (−11 %) | $19.24 (−40 %) |
+
+C beat A in both rounds on compactions (2 against 4, then 1 against 3), on tool output seen and on cost. The billed-token
+gain was smaller in round two: 2.98 M against 3.08 M, −3 %. Most of the cost saving comes from fewer compactions, because
+each one writes the context to the cache again at the higher cache-write price. Quiz scores in round two: 8/8 for all
+three arms.
 
 The run 1 costs include asking the quiz again after a fix to the harness, at a later time, when the cache had expired.
 
@@ -76,6 +95,5 @@ A 4,600-token prompt sent twice was read in 2.93 s, then 0.05 s, with 4,590 toke
 
 ## Not done
 
-- No second repetition of run 2. It would cost about $90 for all three arms.
 - No competitor plugin (context-mode) as an arm: it was not approved for download.
 - No test of keeping Anthropic's cache warm.

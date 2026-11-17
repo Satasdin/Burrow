@@ -305,6 +305,168 @@
   "burrow_steered": 0
  },
  {
+  "arm": "A",
+  "run": "3",
+  "session": "26d915d5-9443-4717-9426-7194ae16f6a4",
+  "requests": 70,
+  "compactions": 3,
+  "compaction_detail": [
+   {
+    "trigger": "auto",
+    "pre": 73544,
+    "post": 5042,
+    "after_request": 16
+   },
+   {
+    "trigger": "auto",
+    "pre": 76697,
+    "post": 19857,
+    "after_request": 42
+   },
+   {
+    "trigger": "auto",
+    "pre": 65410,
+    "post": 16091,
+    "after_request": 54
+   }
+  ],
+  "context_peak": 73374,
+  "context_final": 49648,
+  "context_series": [
+   17460,
+   17707,
+   18296,
+   18487,
+   19898,
+   20274,
+   20566,
+   20938,
+   21084,
+   44519,
+   44900,
+   45135,
+   46918,
+   47355,
+   47522,
+   73374,
+   21180,
+   21826,
+   22157,
+   22505,
+   22704,
+   22927,
+   23112,
+   23376,
+   30092,
+   30522,
+   30902,
+   54337,
+   54700,
+   54897,
+   56778,
+   57409,
+   58171,
+   58389,
+   58656,
+   58993,
+   59406,
+   59972,
+   60310,
+   61811,
+   62096,
+   62301,
+   47803,
+   48130,
+   48341,
+   48719,
+   50505,
+   50841,
+   50966,
+   51706,
+   51958,
+   53370,
+   54429,
+   55135,
+   46014,
+   46328,
+   46525,
+   48417,
+   49062,
+   49699,
+   50397,
+   51376,
+   49224,
+   49251,
+   49284,
+   49318,
+   49407,
+   49475,
+   49586,
+   49648
+  ],
+  "tool_result_characters_in_transcript": 367416,
+  "billed_tokens": {
+   "input": 196,
+   "cache_read": 2833104,
+   "cache_write": 235576,
+   "output": 16054
+  },
+  "billed_total": 3084930,
+  "cost_usd": 29.3238,
+  "seconds": 429.1,
+  "errors": 0,
+  "quiz_score": 8,
+  "quiz_total": 8,
+  "quiz": [
+   {
+    "ask": "Quiz, answer from memory of this session, no tools needed: what is the deploy port?",
+    "right": true,
+    "answer": "The deploy port is **7431**."
+   },
+   {
+    "ask": "Quiz: who is the customer?",
+    "right": true,
+    "answer": "The customer is **Wanjiku Logistics**."
+   },
+   {
+    "ask": "Quiz: what is our error budget?",
+    "right": true,
+    "answer": "Your error budget is **0.3%**."
+   },
+   {
+    "ask": "Quiz: which function must never be renamed, and why?",
+    "right": true,
+    "answer": "`reconcile_batch` must never be renamed, because other teams import it. Renaming it would break their code. I've kept its name and signature unchanged through every edit this session."
+   },
+   {
+    "ask": "Quiz: which shard failed in the first gen_report run, and what were the expected and actual checksums?",
+    "right": true,
+    "answer": "Shard **0x5F3A** failed its checksum. The expected checksum was **9c41** and the actual was **77e2**."
+   },
+   {
+    "ask": "Quiz: which database did we choose for matched rows, and for what reason?",
+    "right": true,
+    "answer": "We chose **SQLite** over Postgres for matched rows, because the client's laptops are offline most of the day. A local file-based database keeps working without a network connection. That decision is recorded as a comment at the top of `ledgerly/reconcile.py`."
+   },
+   {
+    "ask": "Quiz: how many records did the gen_report SUMMARY line say were processed?",
+    "right": true,
+    "answer": "The SUMMARY line said it processed **48213 records**, with **1 fatal** and **214 warnings**."
+   },
+   {
+    "ask": "Quiz: what was the first change I asked you to make to parse_line?",
+    "right": true,
+    "answer": "You asked me to make `parse_line` **strip spaces around the reference and uppercase it**, and to show you the diff. The change is `reference.strip().upper()` in `ledgerly/parse.py`."
+   }
+  ],
+  "burrow_kept_or_shortened": 0,
+  "burrow_characters_kept_out": 0,
+  "burrow_recalls": 0,
+  "burrow_recalled_characters": 0,
+  "burrow_expanded": 0,
+  "burrow_steered": 0
+ },
+ {
   "arm": "B",
   "run": "1",
   "session": "3ce42976-1030-439c-a5f1-e13681ead3f7",
@@ -616,6 +778,177 @@
   "burrow_steered": 0
  },
  {
+  "arm": "B",
+  "run": "3",
+  "session": "f883e06c-d770-4355-9671-92d3e16bbf4f",
+  "requests": 73,
+  "compactions": 4,
+  "compaction_detail": [
+   {
+    "trigger": "auto",
+    "pre": 67244,
+    "post": 20936,
+    "after_request": 16
+   },
+   {
+    "trigger": "auto",
+    "pre": 70710,
+    "post": 17589,
+    "after_request": 27
+   },
+   {
+    "trigger": "auto",
+    "pre": 73999,
+    "post": 21890,
+    "after_request": 43
+   },
+   {
+    "trigger": "auto",
+    "pre": 73364,
+    "post": 18178,
+    "after_request": 57
+   }
+  ],
+  "context_peak": 63089,
+  "context_final": 54992,
+  "context_series": [
+   17906,
+   18709,
+   19298,
+   19906,
+   21316,
+   21836,
+   22683,
+   23473,
+   23845,
+   24603,
+   48038,
+   48649,
+   49761,
+   51546,
+   51968,
+   52848,
+   49427,
+   50276,
+   50647,
+   51505,
+   51613,
+   51771,
+   51864,
+   52570,
+   59266,
+   59603,
+   60435,
+   48180,
+   48452,
+   49251,
+   51071,
+   51719,
+   52155,
+   53077,
+   53969,
+   54922,
+   55268,
+   55669,
+   55915,
+   56800,
+   58233,
+   58731,
+   59603,
+   50972,
+   51815,
+   53228,
+   53446,
+   54238,
+   56024,
+   56364,
+   57121,
+   57831,
+   58752,
+   60166,
+   60920,
+   61854,
+   63089,
+   49337,
+   49557,
+   50347,
+   52182,
+   52949,
+   54030,
+   56066,
+   56126,
+   54590,
+   54617,
+   54650,
+   54683,
+   54772,
+   54838,
+   54933,
+   54992
+  ],
+  "tool_result_characters_in_transcript": 471571,
+  "billed_tokens": {
+   "input": 162,
+   "cache_read": 3335974,
+   "cache_write": 286730,
+   "output": 17418
+  },
+  "billed_total": 3640284,
+  "cost_usd": 36.8408,
+  "seconds": 468.9,
+  "errors": 0,
+  "quiz_score": 8,
+  "quiz_total": 8,
+  "quiz": [
+   {
+    "ask": "Quiz, answer from memory of this session, no tools needed: what is the deploy port?",
+    "right": true,
+    "answer": "The deploy port is **7431**."
+   },
+   {
+    "ask": "Quiz: who is the customer?",
+    "right": true,
+    "answer": "The customer is **Wanjiku Logistics**."
+   },
+   {
+    "ask": "Quiz: what is our error budget?",
+    "right": true,
+    "answer": "The error budget is **0.3%**."
+   },
+   {
+    "ask": "Quiz: which function must never be renamed, and why?",
+    "right": true,
+    "answer": "`reconcile_batch` must never be renamed, because other teams import it. It's the public function in `ledgerly/reconcile.py`, so a rename would break their code."
+   },
+   {
+    "ask": "Quiz: which shard failed in the first gen_report run, and what were the expected and actual checksums?",
+    "right": true,
+    "answer": "Shard **0x5F3A** failed with a checksum mismatch. It expected **9c41** and got **77e2**."
+   },
+   {
+    "ask": "Quiz: which database did we choose for matched rows, and for what reason?",
+    "right": true,
+    "answer": "We chose **SQLite** over Postgres for matched rows, because the client's laptops are offline most of the day. The decision is recorded in a comment at the top of `ledgerly/reconcile.py`."
+   },
+   {
+    "ask": "Quiz: how many records did the gen_report SUMMARY line say were processed?",
+    "right": true,
+    "answer": "The SUMMARY line said **48,213** records processed, with 1 fatal and 214 warnings."
+   },
+   {
+    "ask": "Quiz: what was the first change I asked you to make to parse_line?",
+    "right": true,
+    "answer": "You asked me to make `parse_line` **strip spaces around the reference and uppercase it**, and to show you the diff. The change is `reference = reference.strip().upper()` in `ledgerly/parse.py`."
+   }
+  ],
+  "burrow_kept_or_shortened": 0,
+  "burrow_characters_kept_out": 0,
+  "burrow_recalls": 0,
+  "burrow_recalled_characters": 0,
+  "burrow_expanded": 0,
+  "burrow_steered": 0
+ },
+ {
   "arm": "C",
   "run": "1",
   "session": "3a9523af-faae-48a4-bbfc-828c545a7133",
@@ -912,5 +1245,160 @@
   "burrow_recalled_characters": 14233,
   "burrow_expanded": 21,
   "burrow_steered": 2
+ },
+ {
+  "arm": "C",
+  "run": "3",
+  "session": "61609185-cbd0-4519-984d-3a68bc8b358c",
+  "requests": 75,
+  "compactions": 1,
+  "compaction_detail": [
+   {
+    "trigger": "auto",
+    "pre": 67378,
+    "post": 8782,
+    "after_request": 51
+   }
+  ],
+  "context_peak": 66278,
+  "context_final": 44631,
+  "context_series": [
+   17935,
+   18285,
+   18874,
+   19076,
+   21502,
+   21980,
+   22103,
+   22567,
+   24852,
+   25309,
+   25683,
+   25861,
+   29428,
+   29728,
+   29961,
+   32491,
+   32949,
+   33607,
+   33951,
+   34208,
+   36685,
+   36914,
+   37507,
+   37777,
+   38162,
+   38300,
+   38496,
+   38648,
+   38797,
+   41294,
+   41594,
+   41886,
+   42131,
+   46125,
+   46398,
+   48934,
+   50967,
+   51582,
+   52335,
+   52582,
+   53390,
+   54518,
+   57083,
+   57255,
+   57995,
+   60829,
+   61160,
+   62881,
+   63214,
+   63545,
+   66278,
+   28658,
+   30316,
+   30539,
+   31079,
+   31621,
+   34031,
+   34992,
+   35375,
+   35773,
+   36690,
+   40257,
+   40481,
+   41036,
+   41964,
+   42528,
+   44425,
+   41427,
+   41454,
+   41861,
+   42126,
+   42719,
+   43653,
+   44075,
+   44631
+  ],
+  "tool_result_characters_in_transcript": 85738,
+  "billed_tokens": {
+   "input": 188,
+   "cache_read": 2832602,
+   "cache_write": 124533,
+   "output": 19435
+  },
+  "billed_total": 2976758,
+  "cost_usd": 17.1799,
+  "seconds": 383.4,
+  "errors": 0,
+  "quiz_score": 8,
+  "quiz_total": 8,
+  "quiz": [
+   {
+    "ask": "Quiz, answer from memory of this session, no tools needed: what is the deploy port?",
+    "right": true,
+    "answer": "The deploy port is **7431**."
+   },
+   {
+    "ask": "Quiz: who is the customer?",
+    "right": true,
+    "answer": "The customer is **Wanjiku Logistics**."
+   },
+   {
+    "ask": "Quiz: what is our error budget?",
+    "right": true,
+    "answer": "Our error budget is **0.3%**."
+   },
+   {
+    "ask": "Quiz: which function must never be renamed, and why?",
+    "right": true,
+    "answer": "`reconcile_batch` must never be renamed. It's a public function in `ledgerly/reconcile.py`, and other teams import it, so a rename would break their code."
+   },
+   {
+    "ask": "Quiz: which shard failed in the first gen_report run, and what were the expected and actual checksums?",
+    "right": true,
+    "answer": "The failing shard was **`0x5F3A`**. The expected checksum was **`9c41`** and the actual one was **`77e2`**. The line reads: `FATAL shard 0x5F3A checksum mismatch (expected 9c41 got 77e2)`.\n\nI couldn't see this in the first run itself. Claude Code cut that output at about 30,000 characters, before the FATAL line. I only found it later, in the full report saved to a file. It's at line 1236 of 2,202,"
+   },
+   {
+    "ask": "Quiz: which database did we choose for matched rows, and for what reason?",
+    "right": true,
+    "answer": "We chose **SQLite**, not Postgres, for storing matched rows. The reason is that the client's laptops are offline most of the day. I recorded this as a comment at the top of `ledgerly/reconcile.py`."
+   },
+   {
+    "ask": "Quiz: how many records did the gen_report SUMMARY line say were processed?",
+    "right": true,
+    "answer": "The SUMMARY line said **48,213 records** processed, with 1 fatal and 214 warnings: `SUMMARY processed 48213 records, 1 fatal, 214 warnings`.\n\nThat line is hardcoded in `tools/gen_report.py`, so it isn't a real count of the run. The report actually has 182 `WARN` lines."
+   },
+   {
+    "ask": "Quiz: what was the first change I asked you to make to parse_line?",
+    "right": true,
+    "answer": "The first change you asked for was to make `parse_line` strip spaces around the reference and uppercase it. You also asked me to show the diff.\n\nThe change is one line in `ledgerly/parse.py`. It went from `\"reference\": reference` to `\"reference\": reference.strip().upper()`."
+   }
+  ],
+  "burrow_kept_or_shortened": 13,
+  "burrow_characters_kept_out": 371840,
+  "burrow_recalls": 12,
+  "burrow_recalled_characters": 9748,
+  "burrow_expanded": 13,
+  "burrow_steered": 1
  }
 ]

@@ -1,0 +1,72 @@
+{"at":"2026-11-17T14:11:31Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":161788,"shown":26167,"tool":"SessionEnd"}
+{"at":"2026-11-17T14:11:41Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":180089,"shown":28394,"tool":"SessionEnd"}
+{"at":"2026-11-17T14:11:46Z","handle":"k1fba43","kind":"kept","label":"python3 tools/gen_report.py .","original":30000,"shown":4178,"tool":"Bash"}
+{"at":"2026-11-17T14:11:56Z","handle":"k1fba43","kind":"expanded","label":"checksum","original":0,"shown":77,"tool":"burrow_expand"}
+{"at":"2026-11-17T14:11:58Z","handle":"k1fba43","kind":"expanded","label":"FAIL","original":0,"shown":73,"tool":"burrow_expand"}
+{"at":"2026-11-17T14:11:59Z","handle":"k1fba43","kind":"expanded","label":"ERROR","original":0,"shown":74,"tool":"burrow_expand"}
+{"at":"2026-11-17T14:11:59Z","handle":"k1fba43","kind":"expanded","label":"expected","original":0,"shown":77,"tool":"burrow_expand"}
+{"at":"2026-11-17T14:12:03Z","handle":"k1fba43","kind":"expanded","label":"440-486","original":0,"shown":3161,"tool":"burrow_expand"}
+{"at":"2026-11-17T14:12:09Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":292486,"shown":39945,"tool":"SessionEnd"}
+{"at":"2026-11-17T14:12:17Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":309386,"shown":41819,"tool":"SessionEnd"}
+{"at":"2026-11-17T14:12:21Z","kind":"shortened","label":"/private/tmp/claude-501/-Users-p3wrky-Developer-burrow--claude-worktrees-session-memory-324f48/1f1bd66f-4ea0-4d18-a04f-8e841082c516/scratchpad/proof/C3/proj/data/fixtures.py","original":36377,"shown":5086,"tool":"Read"}
+{"at":"2026-11-17T14:12:32Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":354713,"shown":48606,"tool":"SessionEnd"}
+{"at":"2026-11-17T14:12:35Z","handle":"k0382d3","kind":"kept","label":"python3 tools/run_checks.py","original":29999,"shown":3391,"tool":"Bash"}
+{"at":"2026-11-17T14:12:37Z","handle":"k0382d3","kind":"expanded","label":"FAIL","original":0,"shown":73,"tool":"burrow_expand"}
+{"at":"2026-11-17T14:12:37Z","handle":"k0382d3","kind":"expanded","label":"error","original":0,"shown":74,"tool":"burrow_expand"}
+{"at":"2026-11-17T14:12:38Z","handle":"k0382d3","kind":"expanded","label":"fail","original":0,"shown":73,"tool":"burrow_expand"}
+{"at":"2026-11-17T14:12:40Z","handle":"k0382d3","kind":"expanded","label":"Traceback","original":0,"shown":78,"tool":"burrow_expand"}
+{"at":"2026-11-17T14:12:41Z","handle":"k0382d3","kind":"expanded","label":"580-585","original":0,"shown":378,"tool":"burrow_expand"}
+{"at":"2026-11-17T14:12:44Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":407837,"shown":53838,"tool":"SessionEnd"}
+{"at":"2026-11-17T14:12:50Z","kind":"shortened","label":"/private/tmp/claude-501/-Users-p3wrky-Developer-burrow--claude-worktrees-session-memory-324f48/1f1bd66f-4ea0-4d18-a04f-8e841082c516/scratchpad/proof/C3/proj/ledgerly/rules.py","original":47601,"shown":4458,"tool":"Read"}
+{"at":"2026-11-17T14:12:55Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":449582,"shown":58148,"tool":"SessionEnd"}
+{"at":"2026-11-17T14:13:06Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":482363,"shown":62169,"tool":"SessionEnd"}
+{"at":"2026-11-17T14:13:18Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":509309,"shown":64725,"tool":"SessionEnd"}
+{"at":"2026-11-17T14:13:25Z","handle":"kc900cd","kind":"kept","label":"python3 tools/gen_report.py | grep WARN | head -400","original":11232,"shown":4011,"tool":"Bash"}
+{"at":"2026-11-17T14:13:35Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":561769,"shown":71975,"tool":"SessionEnd"}
+{"at":"2026-11-17T14:13:42Z","kind":"shortened","label":"/private/tmp/claude-501/-Users-p3wrky-Developer-burrow--claude-worktrees-session-memory-324f48/1f1bd66f-4ea0-4d18-a04f-8e841082c516/scratchpad/proof/C3/proj/data/fixtures.py","original":36377,"shown":5086,"tool":"Read"}
+{"at":"2026-11-17T14:13:47Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":615445,"shown":75744,"tool":"SessionEnd"}
+{"at":"2026-11-17T14:13:51Z","handle":"k21e29c","kind":"kept","label":"python3 tools/run_checks.py --verbose","original":29999,"shown":3391,"tool":"Bash"}
+{"at":"2026-11-17T14:13:58Z","handle":"k21e29c","kind":"expanded","label":"(9","original":0,"shown":1919,"tool":"burrow_expand"}
+{"at":"2026-11-17T14:14:04Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":661489,"shown":82158,"tool":"SessionEnd"}
+{"at":"2026-11-17T14:14:11Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":684878,"shown":85001,"tool":"SessionEnd"}
+{"at":"2026-11-17T14:14:20Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":708356,"shown":87277,"tool":"SessionEnd"}
+{"at":"2026-11-17T14:14:20Z","kind":"recalled","label":"Run: python3 tools/gen_report.py and tell me how many warnings shard-07 had. Run","original":0,"shown":1226,"tool":"UserPromptSubmit"}
+{"at":"2026-11-17T14:14:25Z","handle":"k21acb7","kind":"kept","label":"python3 tools/gen_report.py","original":30000,"shown":4178,"tool":"Bash"}
+{"at":"2026-11-17T14:14:31Z","handle":"k21acb7","kind":"expanded","label":"WARN shard-07","original":0,"shown":82,"tool":"burrow_expand"}
+{"at":"2026-11-17T14:14:40Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":762100,"shown":95274,"tool":"SessionEnd"}
+{"at":"2026-11-17T14:14:46Z","kind":"shortened","label":"/private/tmp/claude-501/-Users-p3wrky-Developer-burrow--claude-worktrees-session-memory-324f48/1f1bd66f-4ea0-4d18-a04f-8e841082c516/scratchpad/proof/C3/proj/ledgerly/rules.py","original":47601,"shown":4458,"tool":"Read"}
+{"at":"2026-11-17T14:14:50Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":812290,"shown":100591,"tool":"SessionEnd"}
+{"at":"2026-11-17T14:14:55Z","handle":"k860a13","kind":"kept","label":"cat data/fixtures.py | head -1500","original":30000,"shown":2831,"tool":"Bash"}
+{"at":"2026-11-17T14:15:02Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":854334,"shown":105799,"tool":"SessionEnd"}
+{"at":"2026-11-17T14:15:08Z","handle":"k816a8a","kind":"kept","label":"python3 tools/run_checks.py","original":29999,"shown":3391,"tool":"Bash"}
+{"at":"2026-11-17T14:15:11Z","handle":"k816a8a","kind":"expanded","label":"31-100","original":0,"shown":3827,"tool":"burrow_expand"}
+{"at":"2026-11-17T14:15:11Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":884938,"shown":108369,"tool":"PreCompact"}
+{"at":"2026-11-17T14:15:11Z","kind":"steered","label":"auto","original":0,"shown":2454,"tool":"PreCompact"}
+{"at":"2026-11-17T14:15:42Z","kind":"compacted","label":"auto","original":0,"shown":12627,"tool":"PostCompact"}
+{"at":"2026-11-17T14:15:52Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":1128541,"shown":141789,"tool":"SessionEnd"}
+{"at":"2026-11-17T14:15:52Z","kind":"recalled","label":"Write a small test for summarise in tests/test_reconcile.py and run it.","original":0,"shown":900,"tool":"UserPromptSubmit"}
+{"at":"2026-11-17T14:16:05Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":1157274,"shown":145075,"tool":"SessionEnd"}
+{"at":"2026-11-17T14:16:06Z","kind":"recalled","label":"Run: python3 tools/gen_report.py | tail -600 and summarise what the last 600 lin","original":0,"shown":680,"tool":"UserPromptSubmit"}
+{"at":"2026-11-17T14:16:10Z","handle":"k5fa5b4","kind":"kept","label":"python3 tools/gen_report.py | tail -600","original":29999,"shown":4176,"tool":"Bash"}
+{"at":"2026-11-17T14:16:30Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":1217206,"shown":153596,"tool":"SessionEnd"}
+{"at":"2026-11-17T14:16:31Z","kind":"recalled","label":"Read data/fixtures.py once more and count fixtures on route 111 that are paid. U","original":0,"shown":562,"tool":"UserPromptSubmit"}
+{"at":"2026-11-17T14:16:35Z","kind":"shortened","label":"/private/tmp/claude-501/-Users-p3wrky-Developer-burrow--claude-worktrees-session-memory-324f48/1f1bd66f-4ea0-4d18-a04f-8e841082c516/scratchpad/proof/C3/proj/data/fixtures.py","original":36377,"shown":5086,"tool":"Read"}
+{"at":"2026-11-17T14:16:41Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":1266628,"shown":160161,"tool":"SessionEnd"}
+{"at":"2026-11-17T14:16:42Z","kind":"recalled","label":"Run: python3 tools/run_checks.py | tail -800 and tell me the check numbers that ","original":0,"shown":737,"tool":"UserPromptSubmit"}
+{"at":"2026-11-17T14:16:54Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":1292431,"shown":164061,"tool":"SessionEnd"}
+{"at":"2026-11-17T14:17:09Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":1321367,"shown":169370,"tool":"SessionEnd"}
+{"at":"2026-11-17T14:17:10Z","kind":"recalled","label":"Quiz, answer from memory of this session, no tools needed: what is the deploy po","original":0,"shown":727,"tool":"UserPromptSubmit"}
+{"at":"2026-11-17T14:17:16Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":1371693,"shown":172176,"tool":"SessionEnd"}
+{"at":"2026-11-17T14:17:20Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":1382180,"shown":172854,"tool":"SessionEnd"}
+{"at":"2026-11-17T14:17:21Z","kind":"recalled","label":"Quiz: what is our error budget?","original":0,"shown":727,"tool":"UserPromptSubmit"}
+{"at":"2026-11-17T14:17:24Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":1396835,"shown":173710,"tool":"SessionEnd"}
+{"at":"2026-11-17T14:17:25Z","kind":"recalled","label":"Quiz: which function must never be renamed, and why?","original":0,"shown":349,"tool":"UserPromptSubmit"}
+{"at":"2026-11-17T14:17:29Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":1411149,"shown":174588,"tool":"SessionEnd"}
+{"at":"2026-11-17T14:17:30Z","kind":"recalled","label":"Quiz: which shard failed in the first gen_report run, and what were the expected","original":0,"shown":1078,"tool":"UserPromptSubmit"}
+{"at":"2026-11-17T14:17:34Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":1428194,"shown":175861,"tool":"SessionEnd"}
+{"at":"2026-11-17T14:17:35Z","kind":"recalled","label":"Quiz: which database did we choose for matched rows, and for what reason?","original":0,"shown":1421,"tool":"UserPromptSubmit"}
+{"at":"2026-11-17T14:17:39Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":1446425,"shown":177283,"tool":"SessionEnd"}
+{"at":"2026-11-17T14:17:40Z","kind":"recalled","label":"Quiz: how many records did the gen_report SUMMARY line say were processed?","original":0,"shown":569,"tool":"UserPromptSubmit"}
+{"at":"2026-11-17T14:17:44Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":1462016,"shown":178474,"tool":"SessionEnd"}
+{"at":"2026-11-17T14:17:45Z","kind":"recalled","label":"Quiz: what was the first change I asked you to make to parse_line?","original":0,"shown":772,"tool":"UserPromptSubmit"}
+{"at":"2026-11-17T14:17:49Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":1478356,"shown":179630,"tool":"SessionEnd"}

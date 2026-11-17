@@ -385,8 +385,12 @@ D-119: What the real runs showed, and two fixes they led to (17 November). The e
   | Burrow 1.2.3 | 4 | 472,231 characters | 3.54 M | $36.28 | 7/8 |
   | This branch | 2 | 136,416 characters (−71 %) | 2.89 M (−17 %) | $21.29 (−38 %) | 8/8 |
 
-  The quiz did not separate the arms: Claude Code's own summary kept most planted values. With one run each, no claim is
-  made about recall from it.
+  A second round (run 3, same script) gave the same picture. Claude Code alone: 3 compactions, 367,416 characters, $29.32,
+  8/8. Burrow 1.2.3: 4 compactions, $36.84, 8/8. This branch: 1 compaction, 85,738 characters, $17.18, 8/8. Averaged over
+  the two rounds, against Claude Code alone, this branch had 57 % fewer compactions, 74 % less tool output in the context,
+  11 % fewer billed tokens and 40 % lower cost. Most of the cost saving is the cache rewrite each compaction costs. The
+  quiz did not separate the arms: Claude Code's own summary kept most planted values, so no claim about recall is made
+  from it.
 - **Results, run 1.** The model chose how to run things and mostly grepped files, so Claude Code alone never compacted.
 - **Fix: the Ledger's head handed over on every resume (D-64).** Burrow's SessionStart hook handed over the Ledger's head
   on every resume, even when the copy from the last start was still in the context. In run 1 that put 23 copies in the
