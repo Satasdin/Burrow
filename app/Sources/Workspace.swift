@@ -312,7 +312,8 @@ final class Workspace {
     var simVersion = 0
 
     // The window.
-    var tabs: [Tab] = [Tab(content: .library(.all))]
+    /// None at first: a vault opens on its home, the live map (D-120).
+    var tabs: [Tab] = []
     var activeTab: UUID?
     var documents: [String: Document] = [:]
     var sidebarMode = SidebarMode.files
@@ -497,6 +498,7 @@ final class Workspace {
         let linkedNames = Set(linked.map(\.name))
         await Task.detached { sim.load(newMap, linked: linkedNames) }.value
         simVersion += 1
+        saveSnapshot()
     }
 
     private func reloadUnchangedDocuments() {

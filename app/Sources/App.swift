@@ -160,14 +160,35 @@ func pickLinkedFolder(_ workspace: Workspace) {
 
 struct Root: View {
     let library: Library
+    @State private var splash = false
 
     var body: some View {
-        Group {
-            if let workspace = library.workspace {
-                MainWindow(library: library, workspace: workspace).id(workspace.folder)
-            } else {
-                Welcome(library: library)
+        ZStack {
+            Group {
+                if let workspace = library.workspace {
+                    MainWindow(library: library, workspace: workspace).id(workspace.folder)
+                } else {
+                    StartPage(library: library)
+                }
             }
+            // The splash plays once per launch, over whatever opens beneath it, and its sparks land as that page's map.
+            if splash {
+                SplashView {
+                    guard splash else { return }
+                    Splash.endedAt = Date()
+                    withAnimation(.easeOut(duration: 0.6)) { splash = false }
+                    NotificationCenter.default.post(name: Splash.ended, object: nil)
+                }
+                .transition(.opacity)
+                .zIndex(1)
+            }
+        }
+        // The film fills the whole window, title bar included.
+        .toolbar(splash ? .hidden : .automatic, for: .windowToolbar)
+        .onAppear {
+            guard !Splash.shown, Splash.wanted else { return }
+            Splash.shown = true
+            splash = true
         }
         .onAppear {
             guard library.workspace == nil else { return }
@@ -182,45 +203,9 @@ struct Root: View {
     }
 }
 
-struct Welcome: View {
-    let library: Library
-
-    var body: some View {
-        ZStack {
-            Color.black.ignoresSafeArea()
-            VStack(spacing: 18) {
-                Text("Burrow").font(.system(size: 46, weight: .semibold)).tracking(-0.8).foregroundStyle(.white)
-                Text("A vault for everything you know, read by a model on this Mac.")
-                    .font(.title3).foregroundStyle(.white.opacity(0.65))
-                Button("Open or Create a Vault…") { pickVault(library) }
-                    .buttonStyle(.borderedProminent).controlSize(.extraLarge).padding(.top, 10)
-                if !library.choices.isEmpty {
-                    // Many vaults are a folder called "vault" or "Notes", so each is named with the folders above it,
-                    // and the full path is a line below: "vault" six times told them apart for nobody (14 November).
-                    // The list is the app's own recents and every vault the terminal made (D-114).
-                    VStack(spacing: 10) {
-                        Text("Your vaults").font(.caption.weight(.semibold)).foregroundStyle(.white.opacity(0.45)).textCase(.uppercase)
-                        ForEach(library.choices, id: \.self) { path in
-                            Button { library.open(URL(fileURLWithPath: path)) } label: {
-                                VStack(spacing: 1) {
-                                    Text(Library.shortName(path, among: library.choices)).font(.body.weight(.medium))
-                                    Text((path as NSString).abbreviatingWithTildeInPath).font(.caption).foregroundStyle(.white.opacity(0.45))
-                                }
-                            }
-                            .buttonStyle(.link).help(path)
-                        }
-                    }
-                    .padding(.top, 10)
-                }
-                if let failure = library.failure { Text(failure).foregroundStyle(.red) }
-            }
-        }
-    }
-}
-
 struct SettingsView: View {
     let library: Library
-    @AppStorage(SkyTheme.key) private var themeName = SkyTheme.nebula.rawValue
+    @AppStorage(SkyTheme.key) private var themeName = SkyTheme.standard.rawValue
 
     var body: some View {
         Form {

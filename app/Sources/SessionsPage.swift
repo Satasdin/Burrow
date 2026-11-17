@@ -39,7 +39,7 @@ struct SessionsPage: View {
         let live = model.rows.filter(\.isLive).count
         let saved = model.rows.reduce(0) { $0 + $1.totals.savedTokens }
         return HStack(alignment: .firstTextBaseline, spacing: 14) {
-            Text("Sessions").font(.system(size: 28, weight: .bold)).tracking(-0.4)
+            Text("Sessions").font(.system(size: 28, weight: .bold)).fontWidth(.expanded).tracking(-0.4)
             Text("\(live) live · \(model.rows.count.counted("session")) · \(saved.tokensText) tokens kept out by Burrow")
                 .foregroundStyle(Night.dim).monospacedDigit().contentTransition(.numericText())
             Spacer()
@@ -352,7 +352,7 @@ struct ContextSessionRowView: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 7) {
                 if row.isLive { LiveDot(colour: row.tint) }
-                Image(systemName: row.program?.symbol ?? "questionmark.circle").font(.system(size: 11)).foregroundStyle(row.tint)
+                ProgramIcon(client: row.program?.rawValue, symbol: row.program?.symbol ?? "questionmark.circle", colour: row.tint, size: 16)
                 Text(row.program?.title ?? "Unknown program").font(.system(size: 11.5, weight: .medium)).foregroundStyle(row.tint)
                 if let folder = row.folder { Text(folder).font(.system(size: 11.5)).foregroundStyle(Night.dim).lineLimit(1) }
                 Spacer(minLength: 4)
@@ -451,7 +451,7 @@ struct ContextSessionDetail: View {
     private var header: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 8) {
-                Image(systemName: row.program?.symbol ?? "questionmark.circle").foregroundStyle(row.tint)
+                ProgramIcon(client: row.program?.rawValue, symbol: row.program?.symbol ?? "questionmark.circle", colour: row.tint, size: 20)
                 Text(row.program?.title ?? "Unknown program").font(.system(size: 12.5, weight: .semibold)).foregroundStyle(row.tint)
                 if row.isLive { LiveDot(colour: row.tint); Text("live").font(.system(size: 11.5, weight: .medium)).foregroundStyle(WatchPanel.mint) }
                 Text(row.short).font(.system(size: 11.5, design: .monospaced)).foregroundStyle(Night.faint).textSelection(.enabled)

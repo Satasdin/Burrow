@@ -21,7 +21,7 @@ struct ConversationsPage: View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 28) {
                 HStack(alignment: .firstTextBaseline, spacing: 12) {
-                    Text(program?.name ?? "Conversations").font(.system(size: 28, weight: .bold)).tracking(-0.4)
+                    Text(program?.name ?? "Conversations").font(.system(size: 28, weight: .bold)).fontWidth(.expanded).tracking(-0.4)
                     Text("\(workspace.sessions(for: program).count) kept by Burrow").foregroundStyle(Night.dim).monospacedDigit()
                 }
                 HStack(spacing: 8) {
@@ -71,7 +71,7 @@ struct SessionCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 8) {
-                Image(systemName: record.program.symbol).foregroundStyle(record.program.colour).frame(width: 20)
+                ProgramIcon(client: record.client ?? record.program.clientWord, symbol: record.program.symbol, colour: record.program.colour, size: 20)
                 Text(record.program.name).font(.system(size: 13, weight: .semibold))
                 if let model = record.turns.last?.model, model != "unnamed", !model.isEmpty { Text(model).font(.system(size: 11.5)).foregroundStyle(Night.faint).lineLimit(1) }
                 Spacer()
@@ -141,7 +141,7 @@ struct SessionPage: View {
             if let record {
                 VStack(alignment: .leading, spacing: 18) {
                     HStack(spacing: 10) {
-                        Image(systemName: record.program.symbol).font(.system(size: 20)).foregroundStyle(record.program.colour)
+                        ProgramIcon(client: record.client ?? record.program.clientWord, symbol: record.program.symbol, colour: record.program.colour, size: 30)
                         VStack(alignment: .leading, spacing: 2) {
                             Text(record.program.name).font(.system(size: 24, weight: .bold)).tracking(-0.3)
                             Text("\(record.started.formatted(date: .abbreviated, time: .shortened)) · \(record.lookupCount.counted("lookup")) · \(Set(record.filesInPlay.map { $0.components(separatedBy: ":").first ?? $0 }).count.counted("file")) read\(record.models.isEmpty ? "" : " · " + record.models.joined(separator: ", "))")
@@ -331,7 +331,7 @@ struct ShelfPage: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
                 HStack(alignment: .firstTextBaseline, spacing: 12) {
-                    Text("Shelf").font(.system(size: 28, weight: .bold)).tracking(-0.4)
+                    Text("Shelf").font(.system(size: 28, weight: .bold)).fontWidth(.expanded).tracking(-0.4)
                     Text("\(workspace.shelf.count.counted("saved cache")) · \(total.bytesText)").foregroundStyle(Night.dim).monospacedDigit()
                 }
                 if workspace.shelf.isEmpty {

@@ -88,7 +88,7 @@ struct ProgramsPage: View {
         let connected = programs.filter { links[$0]?.isLinked == true }.count
         let active = programs.filter { FlowMap.active(workspace, $0) }.count
         return HStack(alignment: .firstTextBaseline, spacing: 14) {
-            Text("Programs").font(.system(size: 28, weight: .bold)).tracking(-0.4)
+            Text("Programs").font(.system(size: 28, weight: .bold)).fontWidth(.expanded).tracking(-0.4)
             Text("\(connected) set up for this vault · \(active) active in the last 30 minutes").foregroundStyle(Night.dim).monospacedDigit()
             Spacer()
             Button { Task { await refresh() } } label: { Image(systemName: "arrow.clockwise") }
@@ -338,7 +338,7 @@ struct FlowMap: View {
         let lit = used || link?.isLinked == true || link?.state == .serving
         let focus = hovered == nil && !hoverVault ? true : hovered == program
         return HStack(spacing: 10) {
-            Image(systemName: program.symbol).font(.system(size: 13)).frame(width: 22).foregroundStyle(lit ? program.colour : Night.faint)
+            ProgramIcon(client: program.clientWord, symbol: program.symbol, colour: lit ? program.colour : Night.faint, size: 22).opacity(lit ? 1 : 0.45)
             VStack(alignment: .leading, spacing: 1) {
                 Text(program.name).font(.system(size: 13.5, weight: .semibold)).foregroundStyle(lit ? Night.note : Night.dim)
                 Text(link?.label ?? " ").font(.system(size: 10.5)).foregroundStyle(link?.isLinked == true ? program.colour.opacity(0.9) : Night.faint)
@@ -464,9 +464,8 @@ struct ProgramRow: View {
         let active = FlowMap.active(workspace, program)
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 12) {
-                Image(systemName: program.symbol).font(.system(size: 15)).frame(width: 30, height: 30)
-                    .foregroundStyle(records.isEmpty && link?.isLinked != true ? Night.faint : program.colour)
-                    .background(program.colour.opacity(records.isEmpty ? 0.04 : 0.12), in: .rect(cornerRadius: 8))
+                ProgramIcon(client: program.clientWord, symbol: program.symbol, colour: records.isEmpty && link?.isLinked != true ? Night.faint : program.colour, size: 30)
+                    .opacity(records.isEmpty && link?.isLinked != true ? 0.5 : 1)
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(spacing: 8) {
                         Text(program.name).font(.system(size: 14, weight: .semibold))

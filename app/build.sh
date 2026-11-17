@@ -10,6 +10,8 @@ cp "$(swift build -c release --show-bin-path)/Burrow" "$bundle/Contents/MacOS/Bu
 cp Info.plist "$bundle/Contents/Info.plist"
 mkdir -p "$bundle/Contents/Resources"
 cp Resources/AppIcon.icns "$bundle/Contents/Resources/AppIcon.icns"
+# The logo, the B and the splash film (D-120).
+cp Resources/Brand/* "$bundle/Contents/Resources/"
 # The burrow command rides inside the app, so the Programs page can point every program at a full path that exists.
 (cd .. && swift build -c release --product burrow)
 mkdir -p "$bundle/Contents/Resources/bin"

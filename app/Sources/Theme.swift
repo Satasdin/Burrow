@@ -83,6 +83,8 @@ enum SkyTheme: String, CaseIterable, Identifiable {
     case nebula, aurora, ember, tide
 
     static let key = "burrow.skyTheme"
+    /// Ember, the logo's colour, unless the person picked another (D-120).
+    static let standard = SkyTheme.ember
     var id: String { rawValue }
 
     var name: String {
@@ -98,7 +100,7 @@ enum SkyTheme: String, CaseIterable, Identifiable {
         switch self {
         case .nebula: return Color(red: 0.66, green: 0.55, blue: 1.00)
         case .aurora: return Color(red: 0.35, green: 0.92, blue: 0.70)
-        case .ember: return Color(red: 1.00, green: 0.55, blue: 0.42)
+        case .ember: return Color(red: 1.00, green: 0.48, blue: 0.10)
         case .tide: return Color(red: 0.38, green: 0.72, blue: 1.00)
         }
     }
@@ -108,20 +110,20 @@ enum SkyTheme: String, CaseIterable, Identifiable {
         switch self {
         case .nebula: return (Color(red: 0.42, green: 0.22, blue: 0.85), Color(red: 0.10, green: 0.45, blue: 0.80))
         case .aurora: return (Color(red: 0.05, green: 0.60, blue: 0.45), Color(red: 0.20, green: 0.30, blue: 0.75))
-        case .ember: return (Color(red: 0.80, green: 0.25, blue: 0.20), Color(red: 0.65, green: 0.35, blue: 0.10))
+        case .ember: return (Color(red: 0.85, green: 0.30, blue: 0.05), Color(red: 0.55, green: 0.14, blue: 0.05))
         case .tide: return (Color(red: 0.10, green: 0.35, blue: 0.85), Color(red: 0.05, green: 0.60, blue: 0.70))
         }
     }
 
-    static var current: SkyTheme { SkyTheme(rawValue: UserDefaults.standard.string(forKey: key) ?? "") ?? .nebula }
+    static var current: SkyTheme { SkyTheme(rawValue: UserDefaults.standard.string(forKey: key) ?? "") ?? .standard }
 }
 
 /// The ground of every dark page: near-black with two soft glows that drift, and a sparse field of stars that twinkle.
 /// It stays still when Reduce Motion is on, and it never takes a click.
 struct NightSky: View {
-    @AppStorage(SkyTheme.key) private var themeName = SkyTheme.nebula.rawValue
+    @AppStorage(SkyTheme.key) private var themeName = SkyTheme.standard.rawValue
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    private var theme: SkyTheme { SkyTheme(rawValue: themeName) ?? .nebula }
+    private var theme: SkyTheme { SkyTheme(rawValue: themeName) ?? .standard }
 
     private static let stars: [(x: CGFloat, y: CGFloat, r: CGFloat, phase: Double)] = {
         var seed: UInt64 = 0x9E3779B97F4A7C15
@@ -209,32 +211,52 @@ extension View {
 
 // MARK: The mark
 
-/// Burrow's mark (Ledger Strata, chosen 13 Nov 2026): one band per sky theme, Nebula to Tide, with a burrow dug through
-/// the lower two and a gold light at its end. Drawn from the brand master on a 100-unit grid (design/logo on the docs/reports branch).
+/// The logo files that ride inside the app (build.sh copies app/Resources/Brand). Missing ones are nil, so a bare
+/// `swift run` still opens, without the pictures.
+enum Brand {
+    static let b = image("burrow-b")
+    static let wordmark = image("burrow-wordmark")
+    static var splash: URL? { Bundle.main.url(forResource: "splash", withExtension: "mp4") }
+    /// The logo's two ends: the B runs from amber at the top to red at the bottom.
+    static let amber = Color(red: 1.00, green: 0.67, blue: 0.00)
+    static let flame = Color(red: 1.00, green: 0.24, blue: 0.07)
+
+    private static func image(_ name: String) -> NSImage? {
+        Bundle.main.url(forResource: name, withExtension: "png").flatMap(NSImage.init(contentsOf:))
+    }
+}
+
+/// Burrow's mark: the orange B of the logo (D-120). It replaced the Ledger Strata bands drawn here before.
 struct BurrowMark: View {
     var size: CGFloat = 64
-    /// One colour, for small sizes on light grounds; nil draws the four theme colours and the gold light.
-    var ink: Color? = nil
-
-    private static let bands: [(y: CGFloat, colour: Color)] = [
-        (14, Color(red: 0.659, green: 0.549, blue: 1.0)), (32, Color(red: 0.349, green: 0.922, blue: 0.702)),
-        (50, Color(red: 1.0, green: 0.549, blue: 0.420)), (68, Color(red: 0.380, green: 0.722, blue: 1.0)),
-    ]
 
     var body: some View {
-        Canvas { context, canvas in
-            let unit = canvas.width / 100
-            context.scaleBy(x: unit, y: unit)
-            let tunnel = Path(ellipseIn: CGRect(x: 30, y: 48, width: 40, height: 40)).union(Path(CGRect(x: 30, y: 68, width: 40, height: 14)))
-            for band in Self.bands {
-                let shape = Path(roundedRect: CGRect(x: 12, y: band.y, width: 76, height: 12), cornerRadius: 4).subtracting(tunnel)
-                context.fill(shape, with: .color(ink ?? band.colour))
-            }
-            if ink == nil {
-                context.fill(Path(ellipseIn: CGRect(x: 45, y: 67, width: 10, height: 10)), with: .color(Theme.gold))
+        Group {
+            if let b = Brand.b {
+                Image(nsImage: b).resizable().interpolation(.high).aspectRatio(contentMode: .fit)
+            } else {
+                Text("B").font(.system(size: size * 0.8, weight: .black)).fontWidth(.expanded)
+                    .foregroundStyle(LinearGradient(colors: [Brand.amber, Brand.flame], startPoint: .top, endPoint: .bottom))
             }
         }
         .frame(width: size, height: size)
+        .accessibilityLabel("Burrow")
+    }
+}
+
+/// The logo with its name: the B and BURROW, as the splash ends.
+struct BurrowWordmark: View {
+    var height: CGFloat = 44
+
+    var body: some View {
+        Group {
+            if let wordmark = Brand.wordmark {
+                Image(nsImage: wordmark).resizable().interpolation(.high).aspectRatio(contentMode: .fit)
+            } else {
+                Text("BURROW").font(.system(size: height * 0.8, weight: .heavy)).fontWidth(.expanded).foregroundStyle(.white)
+            }
+        }
+        .frame(height: height)
         .accessibilityLabel("Burrow")
     }
 }

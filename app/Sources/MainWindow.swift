@@ -5,9 +5,9 @@ struct MainWindow: View {
     let library: Library
     @Bindable var workspace: Workspace
     @State private var showInspector = true
-    @AppStorage(SkyTheme.key) private var themeName = SkyTheme.nebula.rawValue
+    @AppStorage(SkyTheme.key) private var themeName = SkyTheme.standard.rawValue
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    private var theme: SkyTheme { SkyTheme(rawValue: themeName) ?? .nebula }
+    private var theme: SkyTheme { SkyTheme(rawValue: themeName) ?? .standard }
 
     private var subtitle: String {
         if let progress = workspace.progress { return progress }
@@ -112,7 +112,7 @@ struct MainWindow: View {
         case .contextSessions:
             SessionsPage(workspace: workspace)
         case nil:
-            EmptyPage(workspace: workspace)
+            HomePage(workspace: workspace)
         }
     }
 
@@ -184,8 +184,8 @@ struct TabButton: View {
     let tab: Tab
     let underline: Namespace.ID
     @State private var hovering = false
-    @AppStorage(SkyTheme.key) private var themeName = SkyTheme.nebula.rawValue
-    private var theme: SkyTheme { SkyTheme(rawValue: themeName) ?? .nebula }
+    @AppStorage(SkyTheme.key) private var themeName = SkyTheme.standard.rawValue
+    private var theme: SkyTheme { SkyTheme(rawValue: themeName) ?? .standard }
 
     private var active: Bool { workspace.activeTab == tab.id }
     private var icon: String {
@@ -228,34 +228,6 @@ struct TabButton: View {
             Button("Close Tab") { workspace.close(tab) }
             Button("Close Other Tabs") { workspace.tabs.filter { $0 != tab }.forEach(workspace.close) }
         }
-    }
-}
-
-struct EmptyPage: View {
-    let workspace: Workspace
-    @AppStorage(SkyTheme.key) private var themeName = SkyTheme.nebula.rawValue
-    private var theme: SkyTheme { SkyTheme(rawValue: themeName) ?? .nebula }
-
-    var body: some View {
-        ZStack {
-            NightSky()
-            VStack(spacing: 18) {
-                BurrowMark(size: 96).shadow(color: Theme.gold.opacity(0.35), radius: 18)
-                Text(workspace.name).font(.system(size: 30, weight: .bold)).foregroundStyle(Night.note)
-                if let stats = workspace.stats {
-                    Text("\(stats.allFiles.formatted()) files · \(stats.notes.formatted()) notes · \(workspace.ledger.commits.count.counted("Ledger commit"))")
-                        .font(.system(size: 13)).foregroundStyle(Night.dim).monospacedDigit()
-                }
-                HStack(spacing: 10) {
-                    Button { Task { await workspace.newNote() } } label: { Label("New Note", systemImage: "square.and.pencil") }
-                    Button { workspace.paletteOpen = true } label: { Label("Quick Open", systemImage: "magnifyingglass") }
-                    Button { workspace.go(.library(.all)) } label: { Label("Library", systemImage: "square.grid.2x2") }
-                    Button { workspace.go(.ledger(nil)) } label: { Label("Ledger", systemImage: "books.vertical") }
-                }
-                .controlSize(.large)
-            }
-        }
-        .environment(\.colorScheme, .dark)
     }
 }
 

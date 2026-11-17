@@ -8,8 +8,8 @@ struct Palette: View {
     @State private var selected = 0
     @FocusState private var focused: Bool
     @Namespace private var highlight
-    @AppStorage(SkyTheme.key) private var themeName = SkyTheme.nebula.rawValue
-    private var theme: SkyTheme { SkyTheme(rawValue: themeName) ?? .nebula }
+    @AppStorage(SkyTheme.key) private var themeName = SkyTheme.standard.rawValue
+    private var theme: SkyTheme { SkyTheme(rawValue: themeName) ?? .standard }
 
     private struct Item: Identifiable {
         let id: String

@@ -412,3 +412,33 @@ D-119: What the real runs showed, and two fixes they led to (17 November). The e
   - every meter event;
   - the lines to resume it in Claude Code, Codex or `burrow chat`.
   It reads the meter and transcripts again every 4 seconds while open, and the settings strip is read-only for now.
+
+D-120: The app's look is built on the vault's own map, with the new B logo (17 November). The author found the app well
+founded but weak to look at, starting with the first page. He chose the direction from a plan with real renders (A1, B1, C1):
+the splash film and the Map are the same picture, sparks of light on black, and gold already means "a model read this".
+- **The logo.** The orange-to-red B with BURROW, from the author's own file, replaces the Ledger Strata bands and the
+  violet crystal tried the same day. The app icon is the B on black with an ember glow. `BurrowMark` shows the B.
+  The files are in `app/Resources/Brand`, and `build.sh` copies them into the app.
+- **The splash.** The author's film, sped to 5 seconds and silent, plays once per launch over whatever opens, title bar
+  included. A click skips it; with Reduce Motion it is the still wordmark for a second. When it ends, the stars of the
+  page beneath fly in from the middle as gold sparks and settle in their folders' colours (`Landing`).
+- **The start window.** The wordmark, one line on what Burrow is, Open the last vault, New Vault, Open Folder, and the
+  vaults Burrow knows, with vaults in temporary folders left off. The last vault's map is drawn beside them from a
+  small copy saved each time a vault is read (`MapSnapshot`, `app-maps` in Burrow's folder). Launch still opens the
+  last vault straight away when there is one (D-114); the start window shows otherwise.
+- **The vault's home is the live map.** A vault opens with no tab, on its map. The notes a connected program looked
+  up in the last ten minutes glow gold, with a trail to that program's line in the corner ("Claude Code is reading ·
+  11 notes · 7 seconds ago"). It reads the lookups Burrow already records (`TrailStep.files`, `.at`), and the app
+  already reloads sessions when a program writes one. Notes a decision in force rests on wear a green ring, amber when
+  that file changed since, red for text written to steer AI: the Watch panel's three states, on the map and on the Map
+  page.
+- **Programs show their own icons.** Burrow asks macOS for the icon of the installed app (Claude, Codex, Ollama, LM
+  Studio), so it bundles no one else's logo, and a program whose app isn't installed keeps its symbol.
+- **Ember is the default theme**, tuned to the logo's orange; the other three stay in Settings. Page titles use the
+  system font's expanded width, after the wordmark.
+- **Proved by using it.** On the author's Mac, a real `claude -p` (its haiku model) asked the Notes vault about matching
+  payments to tickets and the defence plan through `burrow mcp`, while the app was open on that vault. Within seconds
+  the app showed "Claude Code is reading · 11 notes", gold trails to `reconcile.py`, `matcher.py`, `Defence plan.md`
+  and `Proposal.pdf`, the notes Haiku cited, and the conversations count went from 2 to 3.
+- **Left out on purpose.** Stock photos (the vault's map is the picture), a dashboard of cards, and motion anywhere
+  but the splash landing and gold for reading.

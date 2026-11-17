@@ -279,6 +279,10 @@ struct GraphControls: View {
 struct GraphCanvas: View {
     let workspace: Workspace
     let compact: Bool
+    /// The vault's home (D-120): what connected programs read lights up gold, with a trail to the program.
+    var live = false
+    /// When the splash's sparks began landing as this map's stars.
+    var landing: Date? = nil
     @State private var scale: CGFloat = 1
     @State private var offset = CGSize.zero
     @State private var pinchStart: CGFloat?
@@ -318,7 +322,12 @@ struct GraphCanvas: View {
     var body: some View {
         // The sim isn't observable, so a new map has to say so here.
         let _ = workspace.simVersion
-        return TimelineView(.animation(minimumInterval: 1 / 45, paused: !(workspace.isAsking || (sim.isMoving && !reduceMotion) || dragNode != nil))) { time in
+        // Programs' reads and the Ledger move the picture too.
+        let _ = (workspace.sessions.count, workspace.ledger.commits.count, workspace.ledger.stale.count)
+        let arrival = landing.map { Landing(start: $0, count: sim.nodes.count) }
+        let landingNow = !reduceMotion && (arrival?.isRunning(at: Date()) ?? false)
+        let freshRead = live && !reduceMotion && (workspace.programReads(within: 20).first != nil)
+        return TimelineView(.animation(minimumInterval: 1 / 45, paused: !(workspace.isAsking || (sim.isMoving && !reduceMotion) || dragNode != nil || landingNow || freshRead))) { time in
             Canvas { context, size in
                 if !compact { sim.step() }
                 sim.withPositions { draw(&context, size, time: time.date.timeIntervalSinceReferenceDate) }
@@ -427,6 +436,19 @@ struct GraphCanvas: View {
     private func draw(_ context: inout GraphicsContext, _ size: CGSize, time: Double) {
         guard !sim.nodes.isEmpty else { return }
         let view = camera(size)
+        let now = Date(timeIntervalSinceReferenceDate: time)
+        let arrival = reduceMotion ? nil : landing.map { Landing(start: $0, count: sim.nodes.count) }.flatMap { $0.isRunning(at: now) ? $0 : nil }
+        let middle = CGPoint(x: size.width / 2, y: size.height / 2)
+        func pos(_ i: Int) -> CGPoint {
+            let spot = view.screen(sim.x[i], sim.y[i])
+            guard let arrival else { return spot }
+            let p = arrival.progress(i, at: now)
+            let spark = Landing.spark(i, around: middle, reach: min(size.width, size.height) * 0.35)
+            return CGPoint(x: spark.x + (spot.x - spark.x) * p, y: spark.y + (spot.y - spark.y) * p)
+        }
+        let reads = live ? workspace.programReads(now: now) : []
+        let programLit = Set(reads.flatMap(\.paths).compactMap { sim.index[$0] })
+        let marks = compact ? [:] : workspace.ledgerMarks
         let shown = sim.nodes.indices.filter(visible)
         let reached = Set(workspace.lit.prefix(workspace.litCount).compactMap { sim.index[$0] })
         let reading = workspace.readingNow.flatMap { sim.index[$0] }
@@ -441,31 +463,31 @@ struct GraphCanvas: View {
 
         var faint = Path()
         for edge in sim.edges.prefix(9000) where shownSet.contains(edge.a) && shownSet.contains(edge.b) {
-            faint.move(to: view.screen(sim.x[edge.a], sim.y[edge.a]))
-            faint.addLine(to: view.screen(sim.x[edge.b], sim.y[edge.b]))
+            faint.move(to: pos(edge.a))
+            faint.addLine(to: pos(edge.b))
         }
         glow.stroke(faint, with: .color(.white.opacity(quiet ? 0.03 : 0.1)), lineWidth: 0.7)
 
         if let focus {
             var bright = Path()
             for other in beside where shownSet.contains(other) {
-                bright.move(to: view.screen(sim.x[focus], sim.y[focus]))
-                bright.addLine(to: view.screen(sim.x[other], sim.y[other]))
+                bright.move(to: pos(focus))
+                bright.addLine(to: pos(other))
             }
             glow.stroke(bright, with: .color(sim.colour(sim.nodes[focus].group).opacity(0.8)), lineWidth: 1.1)
         }
         var trail = Path()
         for link in workspace.litLinks {
             guard let a = sim.index[link.from], let b = sim.index[link.to], reached.contains(a), reached.contains(b) else { continue }
-            trail.move(to: view.screen(sim.x[a], sim.y[a]))
-            trail.addLine(to: view.screen(sim.x[b], sim.y[b]))
+            trail.move(to: pos(a))
+            trail.addLine(to: pos(b))
         }
         glow.stroke(trail, with: .color(Theme.gold.opacity(0.9)), lineWidth: 1.4)
 
         let growth = max(0.75, min(1.9, sqrt(scale)))
         let halos = shown.count < 2500
         for i in shown {
-            let spot = view.screen(sim.x[i], sim.y[i])
+            let spot = pos(i)
             guard area.contains(spot) else { continue }
             let node = sim.nodes[i]
             let isLit = reached.contains(i) || i == focus || i == here
@@ -473,6 +495,9 @@ struct GraphCanvas: View {
             var radius = (1.8 + min(5.5, sqrt(CGFloat(node.degree)) * 0.8)) * growth * (compact ? 0.72 : 1)
             var colour = sim.colour(node.group)
             if reached.contains(i) || (i == here && !compact) { colour = Theme.gold; radius += 1.4 }
+            if programLit.contains(i) { colour = Theme.gold; radius += 1.2 }
+            // A star still in flight from the splash is a gold spark.
+            if let arrival, arrival.progress(i, at: now) < 1 { colour = Theme.gold }
             if i == reading { radius += 1.8 * (1 + sin(time * 9)) }
             if halos {
                 let halo = radius * (isLit ? 7 : 4)
@@ -484,16 +509,39 @@ struct GraphCanvas: View {
             glow.fill(Path(ellipseIn: CGRect(x: spot.x - heart, y: spot.y - heart, width: heart * 2, height: heart * 2)), with: .color(.white.opacity(0.9 * strength)))
         }
 
+        // The newest program's reads, each with a trail down to its line in the corner (ReadingChips).
+        if let newest = reads.first, arrival == nil {
+            let fresh = now.timeIntervalSince(newest.last) < 20
+            let anchor = CGPoint(x: 45, y: size.height - 44 - CGFloat(min(reads.count, 3) - 1) * 52)
+            var trails = Path()
+            for path in newest.paths {
+                guard let i = sim.index[path], shownSet.contains(i) else { continue }
+                let end = pos(i)
+                trails.move(to: anchor)
+                trails.addQuadCurve(to: end, control: CGPoint(x: (anchor.x + end.x) / 2 + 60, y: min(anchor.y, end.y) - 40))
+            }
+            let beat = fresh ? 0.35 + 0.25 * (1 + sin(time * 4)) / 2 : 0.28
+            glow.stroke(trails, with: .color(Theme.gold.opacity(beat)), lineWidth: 1.3)
+        }
+        for (path, mark) in marks {
+            guard let i = sim.index[path], shownSet.contains(i) else { continue }
+            let spot = pos(i)
+            guard area.contains(spot) else { continue }
+            let ring = (1.8 + min(5.5, sqrt(CGFloat(sim.nodes[i].degree)) * 0.8)) * growth + 6
+            context.stroke(Path(ellipseIn: CGRect(x: spot.x - ring, y: spot.y - ring, width: ring * 2, height: ring * 2)), with: .color(mark.colour), lineWidth: 1.8)
+        }
+
         guard !compact else { return }
         var named = reached
         if let focus { named.insert(focus); named.formUnion(beside) }
         if let here { named.insert(here) }
-        if view.zoom > 2 || shown.count < 40 { named.formUnion(shown.filter { area.contains(view.screen(sim.x[$0], sim.y[$0])) }) }
-        func matters(_ i: Int) -> Bool { reached.contains(i) || i == focus || i == here }
+        if view.zoom > 2 || shown.count < 40 { named.formUnion(shown.filter { area.contains(pos($0)) }) }
+        named.formUnion(programLit)
+        func matters(_ i: Int) -> Bool { reached.contains(i) || programLit.contains(i) || i == focus || i == here }
         var taken: [CGRect] = []
         let ranked = named.filter(shownSet.contains).sorted { (matters($0) ? 1 : 0, sim.nodes[$0].degree, $1) > (matters($1) ? 1 : 0, sim.nodes[$1].degree, $0) }
         for i in ranked.prefix(260) {
-            let spot = view.screen(sim.x[i], sim.y[i])
+            let spot = pos(i)
             guard area.contains(spot) else { continue }
             let name = sim.nodes[i].name.count > 34 ? String(sim.nodes[i].name.prefix(33)) + "…" : sim.nodes[i].name
             let start = CGPoint(x: spot.x + 11, y: spot.y)
