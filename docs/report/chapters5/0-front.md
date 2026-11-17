@@ -1,4 +1,4 @@
-# Acknowledgment
+# Acknowledgement
 
 First and foremost, I thank God for the guidance, strength, and good health that carried me through this work. I am sincerely grateful to my supervisor, Mr. Tiberius Tabulu, for his steady guidance, patience, and constructive feedback, which shaped the direction of this project from the proposal to the finished system. I also thank the faculty of the School of Computing and Engineering Sciences at Strathmore University for the foundation they have given me. Finally, I am deeply thankful to my family and friends for their encouragement and unwavering support throughout this journey.
 
