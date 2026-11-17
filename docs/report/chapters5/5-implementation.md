@@ -356,7 +356,7 @@ The corrections were then tried on the author's Mac as a volunteer would meet th
 | Finding the Ledger page | Found only when pointed to it | Each icon in the side bar is named |
 | Decisions from earlier, unrelated work | Handed to a new session with nothing to say so | Each is dated and flagged LEFT OVER? when none of its files remain, which the new session in this check showed for two old decisions |
 
-These checks were run by the author on one Mac and not yet by new volunteers, so they show that the corrections work rather than how much easier Burrow now is to use.
+These checks were run by the author on one Mac, not by new volunteers, so they show that the corrections work rather than how much easier Burrow now is to use.
 
 ## 5.5 Discussion of Results and Limitations
 
@@ -364,7 +364,7 @@ The first two objectives were achieved before this chapter: the review in Chapte
 
 ### 5.5.1 Developing Burrow (Objective iii)
 
-The third objective was to develop the designed vault as working software on a consumer laptop. The output is Burrow, with its engine, MCP server, hooks, plugins and desktop application, and the criterion was that every requirement of Chapter 4 is met and verified. All 24 test cases passed on the final build, and the defects that real use exposed were corrected and retested (Table 5.7), so the evidence permits the conclusion that the design was built and runs on the laptop. A first test by three volunteers on their own Macs showed that people could install it, connect Claude Code, keep a decision and get it back in a new session, but each needed help where macOS or the application made a step hard: opening an application that is not notarised, a program not on the terminal's path, connecting while Claude Code was running, and finding the Ledger page. Each of these was corrected in releases burrow-v1.2.2 and burrow-v1.2.3 and checked on the author's Mac (Table 5.17): the application installed by the one-line command opened without a warning, and Claude Code was connected while it was running. The corrected releases have not yet been tried by new volunteers. The third objective was therefore achieved.
+The third objective was to develop the designed vault as working software on a consumer laptop. The output is Burrow, with its engine, MCP server, hooks, plugins and desktop application, and the criterion was that every requirement of Chapter 4 is met and verified. All 24 test cases passed on the final build, and the defects that real use exposed were corrected and retested (Table 5.7), so the evidence permits the conclusion that the design was built and runs on the laptop. A first test by three volunteers on their own Macs showed that people could install it, connect Claude Code, keep a decision and get it back in a new session, but each needed help where macOS or the application made a step hard: opening an application that is not notarised, a program not on the terminal's path, connecting while Claude Code was running, and finding the Ledger page. Each of these was corrected in releases burrow-v1.2.2 and burrow-v1.2.3 and checked on the author's Mac (Table 5.17): the application installed by the one-line command opened without a warning, and Claude Code was connected while it was running. The corrected releases were checked by the author, not by new volunteers. The third objective was therefore achieved.
 
 ### 5.5.2 Narrowing the Knowledge Gap (Objective iv)
 

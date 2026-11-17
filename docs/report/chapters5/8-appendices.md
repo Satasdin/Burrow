@@ -19,7 +19,6 @@ Figure A.1 shows the work carried out from March to November 2026, by workstream
 | 8 | Chapter 4: System Analysis and Design | 17 August 2026 | Done |
 | 9 | Sprint II review | 5 November 2026 | Done |
 | 10 | Documentation | November 2026 | Done |
-| 11 | Project final defence | 23 November 2026 | Pending |
 
 ## Appendix B: Feedback-Resolution Matrix
 
@@ -60,6 +59,6 @@ Table C.1 records the material use of AI in this project, by period. Full prompt
 
 ## Appendix D: Similarity Report
 
-Figure D.1 shows the Turnitin integrity overview of the proposal approved in June 2026: 12% overall similarity, with the bibliography filtered out. This report itself is checked by Turnitin when it is submitted for final assessment.
+Figure D.1 shows the Turnitin integrity overview of the proposal approved in June 2026: 12% overall similarity, with the bibliography filtered out.
 
 !fig figures/similarity-proposal.png | Figure D.1: Turnitin integrity overview of the approved proposal, June 2026 | 6.2

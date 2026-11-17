@@ -27,7 +27,7 @@ MILESTONES = [
     ("Chapter 5 draft and app 0.4", D(2026,10,16)),
     ("Sprint II review", D(2026,11,5)),
     ("Burrow 1.0 released", D(2026,11,10)),
-    ("Final defence", D(2026,11,23)),
+    ("Burrow 1.2.3 and final report", D(2026,11,17)),
 ]
 LANES = [
     ("Proposal", "#1D4ED8", [
@@ -63,11 +63,10 @@ LANES = [
         ("Chapters 5 and 6", D(2026,9,28), D(2026,10,16)),
         ("Chapters 4 to 6 to the guide", D(2026,11,3), D(2026,11,5)),
         ("Report rebuilt", D(2026,11,10), D(2026,11,17)),
-        ("Corrections", D(2026,11,13), D(2026,11,21)),
-        ("Defence preparation", D(2026,11,17), D(2026,11,23))]),
+        ("Corrections and final report", D(2026,11,13), D(2026,11,17))]),
 ]
 
-START, END = D(2026,3,1), D(2026,12,1)
+START, END = D(2026,3,1), D(2026,11,20)
 ZOOM_FROM, ZOOM = D(2026,11,1), 4          # November, the busiest month, is drawn at four times the scale
 FIG_W, LEFT_IN, RIGHT_IN = 9.7, 1.28, 0.12
 AX_W = FIG_W - LEFT_IN - RIGHT_IN
@@ -141,7 +140,7 @@ d, k = START, 0
 while d < END:
     nxt = (d.replace(day=28) + timedelta(days=4)).replace(day=1)
     if k % 2 == 0: ax.axvspan(x(d), x(nxt), ymin=0, ymax=1 - (HEAD - 0.1) / total, color="#F1F5F9", lw=0, zorder=0)
-    ax.text((x(d) + x(nxt)) / 2, HEAD * 0.55, d.strftime("%B") + ("  (four times the scale)" if d == ZOOM_FROM else ""), ha="center", va="center", fontsize=9, color=SOFT)
+    ax.text((x(d) + x(nxt)) / 2, HEAD * 0.55, d.strftime("%B") + (" (×4 scale)" if d == ZOOM_FROM else ""), ha="center", va="center", fontsize=9, color=SOFT)
     ax.plot([x(d), x(d)], [HEAD - 0.1, total], color=GRID, lw=0.6, zorder=0.5)
     d, k = nxt, k + 1
 ax.plot([0, DAYS], [HEAD - 0.1, HEAD - 0.1], color=FAINT, lw=0.8, zorder=1)

@@ -632,7 +632,7 @@ def main():
     kind._p.getparent().replace(kind._p, copy.deepcopy(paragraphs[7]._p))
     set_text(document.paragraphs[4], PROJECT_TYPE)
     set_text(paragraphs[33], paragraphs[33].text.replace("the proposal contains", "the report contains").replace("made in the proposal itself", "made in the report itself"))
-    set_text(paragraphs[41], paragraphs[41].text.replace("The proposal of", "The project report of"))
+    set_text(paragraphs[41], paragraphs[41].text.replace("The proposal of", "The project report of").replace("approved by Tiberius Tabulu", "approved by Mr. Tiberius Tabulu"))
     section_mark = children[81]
     tail = children[-1]
     for element in children[44:]:
