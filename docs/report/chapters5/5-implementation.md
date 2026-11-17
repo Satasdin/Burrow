@@ -71,7 +71,7 @@ Burrow combines a software system with an AI component, so this section follows 
 
 ### 5.3.1 Implemented Modules, Integration and User Workflows
 
-Burrow was built as six modules in one Swift package, in the order of the architecture in Figure 4.8. Its data are kept as files: the vault's notes and documents, an SQLite index beside them, and the Ledger as one Markdown file per commit, as the logical schema in Figure 4.11 describes. Each module below is traced to the requirements it implements.
+Burrow was built as six modules in one Swift package, in the order of the architecture in Figure 4.8. Its data are kept as files: the vault's notes and documents, an SQLite index beside them, and the Ledger as one Markdown file per commit, as the logical schema in Figure 4.11 describes. Each module below is traced to the requirements it implements. Appendix C gives the code behind three of its key decisions.
 
 #### 5.3.1.1 Vault and Index Module
 
@@ -328,7 +328,7 @@ The usability test with real users is reported in Section 5.4.4.6.
 
 #### 5.4.4.6 Usability Test with Real Users
 
-Three volunteers tested the released build on their own Macs on 16 November 2026. Each gave the written test instructions to Claude Code on their Mac, which ran the commands and kept notes, while the volunteer did the steps that only a person may take, such as approving a program's settings in their own terminal, and gave their own ratings. The tasks were to install Burrow from the project website, download the models, make a vault from a few of their own notes, connect Claude Code, keep a decision with its reason, ask for it again in a new session, and ask the same question of a local model. Table 5.16 gives what happened at each step.
+Three volunteers tested the released build on their own Macs on 16 November 2026. The test protocol and the questions they answered are given in Appendix D. Each gave the written test instructions to Claude Code on their Mac, which ran the commands and kept notes, while the volunteer did the steps that only a person may take, such as approving a program's settings in their own terminal, and gave their own ratings. The tasks were to install Burrow from the project website, download the models, make a vault from a few of their own notes, connect Claude Code, keep a decision with its reason, ask for it again in a new session, and ask the same question of a local model. Table 5.16 gives what happened at each step.
 
 !tab Table 5.16: Usability test on three volunteers' Macs
 !widths 1.15,1.75,1.75,1.75

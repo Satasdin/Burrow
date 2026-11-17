@@ -414,6 +414,25 @@ class Writer:
         gap = self.document.add_paragraph(style="Body Text")
         gap.paragraph_format.space_after = Pt(2); gap.paragraph_format.line_spacing = 0.6
 
+    def code(self, caption, lines):
+        """A code extract: its caption, then the lines in Courier New in one shaded, bordered cell kept on one page."""
+        self.caption(caption, keep_next=True)
+        table = self.document.add_table(rows=1, cols=1)
+        table.autofit = False; table.alignment = 1
+        cell_borders(table); cell_margins(table, top=80, bottom=80, left=120, right=120)
+        cell = table.cell(0, 0); cell.width = Inches(TEXT_WIDTH); shade(cell, "F3F4F6")
+        keep_row_whole(table.rows[0])
+        for n, text in enumerate(lines):
+            para = cell.paragraphs[0] if n == 0 else cell.add_paragraph()
+            para.style = self.document.styles["Table Text"]; para.alignment = WD_ALIGN_PARAGRAPH.LEFT
+            pf = para.paragraph_format; pf.space_before = Pt(0); pf.space_after = Pt(0); pf.keep_with_next = True
+            pf.line_spacing_rule = WD_LINE_SPACING.SINGLE
+            run = para.add_run(text if text else " ")
+            run.font.name = "Courier New"; run.font.size = Pt(8.5)
+            run._element.get_or_add_rPr().get_or_add_rFonts().set(qn("w:cs"), "Courier New")
+        gap = self.document.add_paragraph(style="Body Text")
+        gap.paragraph_format.space_after = Pt(2); gap.paragraph_format.line_spacing = 0.6
+
     def equation(self, key, caption):
         holder = self.document.add_paragraph(style="Body Text")
         holder.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -485,6 +504,13 @@ class Writer:
                 bad = [row for row in rows if len(row) != len(rows[0])]
                 if bad: sys.exit(f"{name}: uneven table row in {caption}: {bad[0]}")
                 self.table(caption, rows, widths)
+            elif line.startswith("!code"):
+                # !code Table C.1: caption, then the code's lines until !endcode, set in one shaded cell.
+                caption = line[5:].strip(); i += 1; code = []
+                while i < len(lines) and not lines[i].startswith("!endcode"):
+                    code.append(lines[i].rstrip("\n")); i += 1
+                i += 1
+                self.code(caption, code)
             elif line.startswith("!eq"):
                 key, caption = [part.strip() for part in line[3:].split("|")]; self.equation(key, caption); i += 1
             elif line.startswith("- "):
