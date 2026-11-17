@@ -318,16 +318,7 @@ class Writer:
     def heading(self, level, words):
         match = re.match(r"(\d+(?:\.\d+)+)\s+(.*)", words)
         text = f"{match.group(1)}\t{match.group(2)}" if match else words
-        # The course template (template-2026.docx) sets every unnumbered main heading in its own "Kevin" style, based on
-        # Heading 1: Declaration and Approval, Acknowledgement, Abstract, the lists, References and Appendices. Chapter
-        # headings stay Heading 1; the contents heading uses TOC Heading, as in the template.
-        if level == 1 and words == "Table of Contents":
-            style = "TOC Heading"
-        elif level == 1 and not words.startswith("Chapter "):
-            style = "Kevin"
-        else:
-            style = f"Heading {level}"
-        made = self.document.add_paragraph(text, style=style)
+        made = self.document.add_paragraph(text, style=f"Heading {level}")
         if level == 4:
             # The template's Heading 4 is blue and italic; set it like Heading 3 so the four levels read as one system.
             for run in made.runs:
@@ -527,9 +518,9 @@ def set_spacing(style, before=None, after=None, line=None, exact=False):
 KEVIN_TEMPLATE = HERE / "template-2026.docx"
 
 def course_styles(document):
-    """Carries the course template's style set into the report: every style the 2026 template defines that the report
-    lacks is copied as it is there (Kevin and Kevin Char, its watermark headings, among them), and its Kevin, Kevin Char
-    and TOC Heading replace any of the same name. Styles both share keep the report's look."""
+    """Installs the course template's style set in the report, unused: every style the 2026 template defines that the
+    report lacks is copied as it is there, so its custom Kevin and Kevin Char headings appear in Word's list of styles.
+    The report's own headings keep their styles; styles both share keep the report's look."""
     import copy as _copy
     source = docx.Document(str(KEVIN_TEMPLATE)).styles.element
     target = document.styles.element
@@ -554,9 +545,6 @@ def styles(document):
     body.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
     body.paragraph_format.widow_control = True
     h1 = st["Heading 1"]; font(h1, 14, True); set_spacing(h1, 0, 14, 1.5); h1.paragraph_format.keep_with_next = True
-    # The template's TOC Heading is Word's blue, left-aligned default; set it like the other main headings.
-    toch = st["TOC Heading"]; font(toch, 14, True); set_spacing(toch, 0, 14, 1.5)
-    toch.font.color.rgb = RGBColor(0, 0, 0); toch.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
     h2 = st["Heading 2"]; font(h2, 12, True); set_spacing(h2, 14, 6, 1.5); h2.paragraph_format.keep_with_next = True
     h3 = st["Heading 3"]; font(h3, 12, True); set_spacing(h3, 10, 6, 1.5); h3.paragraph_format.keep_with_next = True
     for h in (h2, h3):
@@ -671,8 +659,6 @@ def main():
 
     course_styles(document)
     styles(document)
-    for paragraph in document.paragraphs:
-        if paragraph.text.strip() == "Declaration and Approval": paragraph.style = document.styles["Kevin"]
     library = Library(REFS)
     writer = Writer(document, library)
     for name in FRONT: writer.chapter(name)
