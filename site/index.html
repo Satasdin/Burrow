@@ -10,7 +10,7 @@
 <link rel="apple-touch-icon" href="media/touch-icon.png">
 <meta property="og:title" content="Burrow">
 <meta property="og:description" content="One memory on your Mac that every AI model you use reads from and writes to.">
-<meta property="og:image" content="media/app-ask.jpg">
+<meta property="og:image" content="media/app-home.jpg">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -19,9 +19,9 @@
     <a class="brand" href="./"><img src="media/wordmark.png" alt="Burrow" width="148" height="20"></a>
     <nav class="links" aria-label="Site">
       <a href="download.html">Download</a>
-      <a href="https://github.com/Satasdin/Burrow/blob/burrow/docs/README.md">Docs</a>
+      <a href="docs.html">Docs</a>
+      <a href="faq.html">FAQ</a>
       <a href="https://github.com/Satasdin/Burrow/tree/burrow/skills">Skills</a>
-      <a href="https://github.com/Satasdin/Burrow/blob/burrow/docs/security.md">Security</a>
     </nav>
     <div class="right">
       <a class="plain" href="https://github.com/Satasdin/Burrow">GitHub</a>
@@ -31,9 +31,9 @@
   </div>
   <nav class="sheet" id="sitemenu" aria-label="Site" hidden>
     <a href="download.html">Download</a>
-    <a href="https://github.com/Satasdin/Burrow/blob/burrow/docs/README.md">Docs</a>
+    <a href="docs.html">Docs</a>
+    <a href="faq.html">FAQ</a>
     <a href="https://github.com/Satasdin/Burrow/tree/burrow/skills">Skills</a>
-    <a href="https://github.com/Satasdin/Burrow/blob/burrow/docs/security.md">Security</a>
     <a href="https://github.com/Satasdin/Burrow">GitHub</a>
   </nav>
 </header>
@@ -47,25 +47,102 @@
       <a class="more" href="download.html">Version 1.2.3 · More ways to install</a>
     </div>
 
+    <div class="stage hero-shot">
+      <div class="window shot-window"><img src="media/app-home.jpg" width="2000" height="1257" alt="Burrow's Home: the vault as a live map of its notes, code and decisions, grouped by folder" fetchpriority="high"></div>
+    </div>
+  </section>
+
+  <section class="wrap yours">
+    <div class="trio">
+      <div><h3>Your memory is yours.</h3><p>Burrow keeps your notes, documents and code in a folder on your Mac, as files you can open without it. Nothing you keep leaves the Mac.</p></div>
+      <div><h3>Your AI is your choice.</h3><p>Local or cloud, Claude Code, OpenCode, OpenClaw, Hermes Agent or n8n. Switch whenever you like and keep everything.</p></div>
+      <div><h3>Your decisions should last.</h3><p>What you settle with one model, and why, is handed to the next. Approving, sharing and overriding stay yours alone.</p></div>
+    </div>
+    <div class="appcard">
+      <div class="appshot" style="--cx:650;--cy:230;--cw:900;--ih:1257"><img src="media/app-map.jpg" loading="lazy" decoding="async" width="2000" height="1257" alt="A vault in Burrow's Map: notes and code as one graph, grouped by folder"></div>
+      <img class="word" src="media/wordmark.png" alt="Burrow" width="296" height="40" loading="lazy" decoding="async">
+      <p>Free for Mac.<br><a href="download.html#install">Download now</a></p>
+    </div>
+  </section>
+
+
+  <section class="wrap sec split rev" id="live">
+    <div>
+      <h2>Watch your AI read.</h2>
+      <p class="sub">Home is your vault as a living map. Whatever a model reads lights up gold, whether it is the model on your Mac or a program you connected, such as Claude Code or OpenCode. The answer and every file it used sit beside it.</p>
+      <ul class="feats">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg><p><b>Lit as it reads.</b> Notes a program looked up in the last ten minutes glow, with a trail to the program.</p></li>
+        <li class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg><p><b>Rings on what matters.</b> Decisions in force, code that changed under one, and text written to steer an AI each wear a ring.</p></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 5h14v10H10l-5 4z"/></svg><p><b>Cited, not guessed.</b> Every answer names the file and line it came from.</p></li>
+      </ul>
+    </div>
+    <div class="shotframe crop" style="--cx:1050;--cy:110;--cw:950;--ih:1257"><img src="media/app-ask.jpg" loading="lazy" decoding="async" width="2000" height="1257" alt="Ask in Burrow: the notes the model read lit gold on the map, and its answer citing the Data Protection Act file and line"></div>
+  </section>
+
+  <section class="wrap sec">
+    <div class="head">
+      <h2>Everything your AIs know, in one place.</h2>
+      <p>A model on your Mac answers from your notes, documents and code. Gemma 4 12B answered 9 of 120 questions about private material alone, and 102 with Burrow. What you decide with it is kept, and every program that connects is handed it.</p>
+    </div>
+    <div class="cards">
+      <article class="card"><h3>Ledger</h3><p>Every decision made with an AI, with its reason and what was turned down. Mark one wrong and the next model knows.</p><div class="shot" style="--cx:400;--cy:140;--cw:1150;--ih:1257"><img src="media/app-ledger.jpg" decoding="async" loading="lazy" width="2000" height="1257" alt="The Ledger: four rules in force, two files changed under decisions, and a handoff and decision kept by Claude Code"></div></article>
+      <article class="card"><h3>Programs</h3><p>Which AI programs reach your vault, each with its own icon, and what each read today.</p><div class="shot" style="--cx:400;--cy:130;--cw:1150;--ih:1257"><img src="media/app-programs.jpg" decoding="async" loading="lazy" width="2000" height="1257" alt="The Programs page: Claude Code, OpenCode, LM Studio, llama.cpp and Ollama flowing into the vault"></div></article>
+      <article class="card"><h3>Map</h3><p>Your notes, documents and linked code as one graph, the way your models see it.</p><div class="shot" style="--cx:660;--cy:230;--cw:900;--ih:1257"><img src="media/app-map.jpg" decoding="async" loading="lazy" width="2000" height="1257" alt="The map of a vault: notes and code grouped by folder, with rings on decisions in force"></div></article>
+      <article class="card"><h3>Conversations</h3><p>Every conversation a program had with your vault: what it asked, what it read, what it kept.</p><div class="shot" style="--cx:400;--cy:130;--cw:1150;--ih:1257"><img src="media/app-conversation.jpg" decoding="async" loading="lazy" width="2000" height="1257" alt="A Claude Code conversation: its resume and commit, and the handoff and decision it kept in the Ledger"></div></article>
+    </div>
+  </section>
+
+  <section class="wrap sec split">
+    <div>
+      <h2>Checked before it's done.</h2>
+      <p class="sub">A model can read a decision and still break it. Burrow checks each change against the decisions it touches, and holds one that breaks.</p>
+      <ul class="feats">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 3 4.5 6v6c0 4.5 3.2 7.6 7.5 9 4.3-1.4 7.5-4.5 7.5-9V6z"/><path d="m9 12 2 2 4-4"/></svg><p><b>In every program.</b> Inside Claude Code, OpenCode, OpenClaw, Hermes Agent, and git's pre-commit hook.</p></li>
+        <li class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 3 3 20h18z"/><path d="M12 10v4M12 17v.5"/></svg><p><b>Steering flagged.</b> Text written to steer an AI is shown to you, never handed over as a rule.</p></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.6"/><path d="M4 4v4h4"/></svg><p><b>Never deletes.</b> A decision is replaced or marked wrong by a later one. The history stays.</p></li>
+      </ul>
+    </div>
+    <div class="panel"><div class="panel-in"><img src="media/gate.jpg" loading="lazy" width="1885" height="1041" alt="git's pre-commit hook letting a harmless change through and refusing one that breaks the payment decision"></div></div>
+  </section>
+
+  <section class="wrap sec split rev">
+    <div>
+      <h2>Carry on anywhere.</h2>
+      <p class="sub">Burrow keeps your Claude Code and Codex sessions, so a long one can be picked up again, by the same program or another, however long ago it ran.</p>
+      <ul class="feats">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.6"/><path d="M4 4v4h4"/></svg><p><b>Resume in one line.</b> <code class="inl">/burrow-resume</code> in Claude Code, <code class="inl">$burrow-resume</code> in Codex: the requests word for word, the decisions, and where it stopped.</p></li>
+        <li class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 19h16M6 16l4-5 3 3 5-7"/></svg><p><b>Context you can see.</b> How full each session is, request by request, and what Burrow kept out of it.</p></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8 7c6 0 4 10 8 10"/></svg><p><b>Handed over, not retold.</b> A different model in a different program picks up at the right step.</p></li>
+      </ul>
+    </div>
+    <div class="shotframe tall"><img src="media/app-sessions.jpg" loading="lazy" decoding="async" width="875" height="1330" alt="A Claude Code session in Burrow's Sessions page: context per request, and the lines to resume it in Claude Code or Codex"></div>
+  </section>
+
+  <section class="wrap sec">
+    <div class="head">
+      <h2>Try it.</h2>
+      <p>A working copy of the app, with real questions, answers, files and decisions from it. Click around.</p>
+    </div>
     <div class="stage">
       <div class="window demo" id="demo" aria-label="Interactive demo of Burrow. Click around.">
         <div class="demo-bar">
           <div class="demo-bar-l"><span class="lights"><i></i><i></i><i></i></span><span class="tb-plus" aria-hidden="true">+ <small>⌄</small></span><span class="tb-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3.5" y="5" width="17" height="14" rx="2.5"/><path d="M9 5v14"/></svg></span></div>
-          <div class="demo-bar-c"><span class="tb-ico" aria-hidden="true">‹</span><span class="tb-ico dim" aria-hidden="true">›</span><span class="demo-title"><b>vault</b><small>59 notes, 37 files, 290 links</small></span></div>
+          <div class="demo-bar-c"><span class="tb-ico" aria-hidden="true">‹</span><span class="tb-ico dim" aria-hidden="true">›</span><span class="demo-title"><b>vault</b><small>37 files · 59 notes · 290 links</small></span></div>
           <span class="demo-bar-r"><span class="tb-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="6"/><path d="m16 16 4 4"/></svg></span><span class="tb-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3.5" y="5" width="17" height="14" rx="2.5"/><path d="M15 5v14"/></svg></span></span>
         </div>
         <div class="demo-body">
           <nav class="demo-rail" aria-label="Pages">
-            <span class="r-deco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/></svg></span>
-            <span class="r-deco dot" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="5" cy="17" r="1.8"/><circle cx="12" cy="7" r="1.8"/><circle cx="19" cy="15" r="1.8"/><path d="M6.2 15.6 10.8 8.6M13.6 8.2l4.2 5.4M7 17.4l10-2" stroke-dasharray="1.6 2"/></svg></span>
+            <span class="r-deco" aria-hidden="true" data-l="Library"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/></svg></span>
+            <span class="r-deco dot" aria-hidden="true" data-l="Conversations"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="5" cy="17" r="1.8"/><circle cx="12" cy="7" r="1.8"/><circle cx="19" cy="15" r="1.8"/><path d="M6.2 15.6 10.8 8.6M13.6 8.2l4.2 5.4M7 17.4l10-2" stroke-dasharray="1.6 2"/></svg></span>
             <button type="button" data-show="ask" aria-selected="true" title="Ask"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 5.5h14v9.5H10l-5 4z"/></svg><span>Ask</span></button>
             <button type="button" data-show="ledger" aria-selected="false" title="Ledger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 19V6.5M9 19V5M13.5 19V8l2.5-.8L19.5 19"/><path d="M4 19.5h16"/></svg><span>Ledger</span></button>
-            <span class="r-deco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="5" y="7" width="14" height="10" rx="2"/><path d="M8 7V4.5M12 7V4.5M16 7V4.5M8 19.5V17M12 19.5V17M16 19.5V17"/></svg></span>
+            <span class="r-deco" aria-hidden="true" data-l="Shelf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="5" y="7" width="14" height="10" rx="2"/><path d="M8 7V4.5M12 7V4.5M16 7V4.5M8 19.5V17M12 19.5V17M16 19.5V17"/></svg></span>
             <button type="button" data-show="programs" aria-selected="false" title="Programs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="4" width="7" height="7" rx="1.8"/><rect x="13" y="13" width="7" height="7" rx="1.8"/><path d="M7.5 11v2.5a3 3 0 0 0 3 3H13"/></svg><span>Programs</span></button>
             <button type="button" data-show="map" aria-selected="false" title="Map"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="2.2"/><circle cx="12" cy="5" r="2.2"/><circle cx="12" cy="19" r="2.2"/><circle cx="6" cy="8.5" r="2.2"/><circle cx="18" cy="8.5" r="2.2"/><circle cx="6" cy="15.5" r="2.2"/><circle cx="18" cy="15.5" r="2.2"/></svg><span>Map</span></button>
+            <span class="r-deco" aria-hidden="true" data-l="Sessions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="8"/><path d="M12 12l4-3"/></svg></span>
             <span class="r-fill" aria-hidden="true"></span>
-            <span class="r-deco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 9V6.5A2.5 2.5 0 1 0 6.5 9H17.5A2.5 2.5 0 1 0 15 6.5v11a2.5 2.5 0 1 0 2.5-2.5h-11A2.5 2.5 0 1 0 9 17.5z"/></svg></span>
-            <span class="r-deco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="5.5" width="16" height="14" rx="2.5"/><path d="M4 9.5h16M8 13h1M11.5 13h1M15 13h1M8 16h1M11.5 16h1"/></svg></span>
+            <span class="r-deco" aria-hidden="true" data-l="Open"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 9V6.5A2.5 2.5 0 1 0 6.5 9H17.5A2.5 2.5 0 1 0 15 6.5v11a2.5 2.5 0 1 0 2.5-2.5h-11A2.5 2.5 0 1 0 9 17.5z"/></svg></span>
+            <span class="r-deco" aria-hidden="true" data-l="Today"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="5.5" width="16" height="14" rx="2.5"/><path d="M4 9.5h16M8 13h1M11.5 13h1M15 13h1M8 16h1M11.5 16h1"/></svg></span>
           </nav>
 
           <aside class="demo-tree" aria-label="Files in the vault">
@@ -96,7 +173,7 @@
           </aside>
 
           <div class="demo-center">
-            <div class="demo-tabs"><span class="d-tab dim"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/></svg>All</span><span class="d-tab on"><span class="demo-tab">Ask</span><i aria-hidden="true">×</i></span><span class="d-plus" aria-hidden="true">+</span></div>
+            <div class="demo-tabs"><span class="d-tab dim home"><img src="media/favicon.png" alt="" width="14" height="14">Home</span><span class="d-tab on"><span class="demo-tab">Ask</span><i aria-hidden="true">×</i></span><span class="d-plus" aria-hidden="true">+</span></div>
 
             <section class="demo-view demo-ask" data-view="ask">
               <div class="demo-main">
@@ -151,52 +228,36 @@
     </div>
   </section>
 
-  <section class="wrap yours">
-    <div class="trio">
-      <div><h3>Your memory is yours.</h3><p>Burrow keeps your notes, documents and code in a folder on your Mac, as files you can open without it. Nothing you keep leaves the Mac.</p></div>
-      <div><h3>Your AI is your choice.</h3><p>Local or cloud, Claude Code, OpenCode, OpenClaw, Hermes Agent or n8n. Switch whenever you like and keep everything.</p></div>
-      <div><h3>Your decisions should last.</h3><p>What you settle with one model, and why, is handed to the next. Approving, sharing and overriding stay yours alone.</p></div>
+  <section class="wrap sec">
+    <div class="head">
+      <h2>Works with what you use.</h2>
+      <p>Local or cloud. Switch whenever you like; the memory stays.</p>
     </div>
-    <div class="appcard">
-      <div class="appshot" style="--cx:660;--cy:200;--cw:900;--ih:1257"><img src="media/app-map.jpg" loading="lazy" decoding="async" width="2000" height="1257" alt="A vault in Burrow's Map: notes and code as one graph, grouped by folder"></div>
-      <img class="word" src="media/wordmark.png" alt="Burrow" width="296" height="40" loading="lazy" decoding="async">
-      <p>Free for Mac.<br><a href="download.html#install">Download now</a></p>
-    </div>
+    <ul class="chips" aria-label="Programs Burrow works with">
+      <li>Claude Code</li>
+      <li>Codex</li>
+      <li>OpenCode</li>
+      <li>OpenClaw</li>
+      <li>Hermes Agent</li>
+      <li>n8n</li>
+      <li>LM Studio</li>
+      <li>llama.cpp</li>
+      <li>Ollama</li>
+      <li>Cursor</li>
+    </ul>
   </section>
 
   <section class="wrap sec">
     <div class="head">
-      <h2>Ask your own material.</h2>
-      <p>A model on your Mac answers from your notes, documents and code, and cites the file and line. Gemma 4 12B answered 9 of 120 questions about private material alone, and 102 with Burrow.</p>
+      <h2>Private by design.</h2>
+      <p>Your memory is a folder on your Mac. <a href="docs.html#privacy">How it is kept safe.</a></p>
     </div>
-    <div class="cards">
-      <article class="card"><h3>Ask</h3><p>A question goes to the closest notes and code. The answer names the file and line it came from.</p><div class="shot" style="--cx:1010;--cy:100;--cw:990;--ih:1257"><img src="media/app-ask.jpg" decoding="async" loading="lazy" width="2000" height="1257" alt="Ask in Burrow: an answer citing a file and line, and the notes it read"></div></article>
-      <article class="card"><h3>Ledger</h3><p>Every decision made with an AI, with its reason and what was turned down. Every program that connects is handed it.</p><div class="shot" style="--cx:480;--cy:170;--cw:1000;--ih:1522"><img src="media/app-ledger.jpg" decoding="async" loading="lazy" width="2000" height="1522" alt="The Ledger: decisions with their reasons and who kept each"></div></article>
-      <article class="card"><h3>Programs</h3><p>Which AI tools reach your vault and what each read today. One command connects another.</p><div class="shot" style="--cx:400;--cy:140;--cw:1150;--ih:1257"><img src="media/app-programs.jpg" decoding="async" loading="lazy" width="2000" height="1257" alt="The Programs page with OpenCode connected to the vault"></div></article>
-      <article class="card"><h3>Map</h3><p>Your notes and code as one graph, the way your models see it. An Obsidian vault works as it is.</p><div class="shot" style="--cx:390;--cy:125;--cw:1180;--ih:1257"><img src="media/app-map.jpg" decoding="async" loading="lazy" width="2000" height="1257" alt="The map of a vault: notes and code as a graph, grouped by folder"></div></article>
+    <div class="three four">
+      <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><h3>No cloud model</h3><p>Burrow talks only to Ollama, on your own Mac.</p></div>
+      <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 7a2 2 0 0 1 2-2h4l2 2h6a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/></svg><h3>Plain files</h3><p>Notes you can open without Burrow. It never changes or deletes them.</p></div>
+      <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg><h3>You decide</h3><p>Approving folders, sharing and overriding a check refuse to run from an AI program.</p></div>
+      <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 3 4.5 6v6c0 4.5 3.2 7.6 7.5 9 4.3-1.4 7.5-4.5 7.5-9V6z"/></svg><h3>Secrets kept out</h3><p>Keys, tokens and passwords are removed before a session is kept or shared.</p></div>
     </div>
-  </section>
-
-  <section class="wrap sec split">
-    <div>
-      <h2>Checked before it's done.</h2>
-      <p class="sub">A model can read a decision and still break it. Burrow checks each change against the decisions it touches, and holds one that breaks.</p>
-      <ul class="feats">
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3 4.5 6v6c0 4.5 3.2 7.6 7.5 9 4.3-1.4 7.5-4.5 7.5-9V6z"/><path d="m9 12 2 2 4-4"/></svg><p><b>In every program.</b> Inside Claude Code, OpenCode, OpenClaw, Hermes Agent, and git's pre-commit hook.</p></li>
-        <li class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3 3 20h18z"/><path d="M12 10v4M12 17v.5"/></svg><p><b>Steering flagged.</b> Text written to steer an AI is shown to you, never handed over as a rule.</p></li>
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 12a8 8 0 1 0 2.3-5.6"/><path d="M4 4v4h4"/></svg><p><b>Never deletes.</b> A decision is replaced or marked wrong by a later one. The history stays.</p></li>
-      </ul>
-    </div>
-    <div class="panel"><div class="panel-in"><img src="media/gate.jpg" loading="lazy" width="1885" height="1041" alt="git's pre-commit hook letting a harmless change through and refusing one that breaks the payment decision"></div></div>
-  </section>
-
-  <section class="wrap sec">
-    <div class="head">
-      <h2>Carry on anywhere.</h2>
-      <p>A different model in a different program picks up where the last one stopped. Here Gemma 4 12B in OpenCode looks things up in Burrow, and every file it read is listed.</p>
-    </div>
-    <div class="showcase"><img src="media/app-session.jpg" loading="lazy" width="2000" height="1257" alt="An OpenCode session with Gemma 4 12B: each search it made in Burrow and every file it read"></div>
-    <p class="caption">Works with Claude Code, OpenCode, OpenClaw, Hermes Agent, n8n, Ollama, llama.cpp and LM Studio.</p>
   </section>
 
   <section class="wrap sec">
@@ -205,19 +266,34 @@
       <p>On one MacBook Pro, November 2026. <a href="https://github.com/Satasdin/Burrow/tree/burrow/docs">The method and every limit.</a></p>
     </div>
     <div class="three">
-      <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><h3>93% of the gap closed</h3><p>between Gemma 4 12B and a cloud model, on material neither had seen.</p></div>
-      <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 19V9M10 19V5M15 19v-8M20 19V7"/></svg><h3>9 of 9 sessions</h3><p>Later Claude Code sessions kept an earlier decision once its reason was kept.</p></div>
-      <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8 7c6 0 4 10 8 10"/></svg><h3>3 of 3 handovers</h3><p>A different program picked the work up at the right step.</p></div>
+      <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><h3>93% of the gap closed</h3><p>between Gemma 4 12B and a cloud model, on material neither had seen.</p></div>
+      <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 19V9M10 19V5M15 19v-8M20 19V7"/></svg><h3>9 of 9 sessions</h3><p>Later Claude Code sessions kept an earlier decision once its reason was kept.</p></div>
+      <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8 7c6 0 4 10 8 10"/></svg><h3>3 of 3 handovers</h3><p>A different program picked the work up at the right step.</p></div>
     </div>
-    <p class="caption">A small local model still broke a decision it had read in 2 of 4 runs, which is why Burrow checks changes too.</p>
+    <p class="caption">A small local model can still break a decision it has read, which is why Burrow checks changes too.</p>
+  </section>
+
+  <section class="wrap sec" id="faq">
+    <div class="head">
+      <h2>Questions.</h2>
+      <p><a href="faq.html">Every question and answer.</a></p>
+    </div>
+    <div class="faq">
+      <details><summary>Is Burrow free?</summary><p>Yes. The app and the <code>burrow</code> program are free to download, and the code is on GitHub.</p></details>
+      <details><summary>Does anything I keep leave my Mac?</summary><p>No. Burrow calls no cloud model: it talks only to Ollama on your own Mac. Your vault is a folder of files you can open without Burrow, and Burrow never changes or deletes them. A cloud program you connect, such as Claude Code, sees only what it looks up.</p></details>
+      <details><summary>Which AI programs work with it?</summary><p>Claude Code, OpenCode, OpenClaw, Hermes Agent and n8n connect with one command, <code>burrow connect</code>. LM Studio, llama.cpp and Ollama work through Burrow's MCP server, and Cursor, Codex and others can follow its AGENTS.md.</p></details>
+      <details><summary>Can I use my Obsidian vault?</summary><p>Yes. Point Burrow at the folder and it works as it is: Markdown, links, tags and front matter. The Ledger is kept as files Obsidian can read too.</p></details>
+      <details><summary>What do I need?</summary><p>A Mac with Apple silicon. The app needs macOS 26; the <code>burrow</code> program alone needs macOS 14. For search by meaning and answers on your Mac, Ollama with <code>qwen3-embedding:0.6b</code> and a chat model such as <code>gemma4:12b</code>.</p></details>
+      <details><summary>What if Ollama isn't running?</summary><p>Search still works by words. Search by meaning, and Ask on your Mac, wait until Ollama is back.</p></details>
+    </div>
   </section>
 
   <section class="wrap end">
     <h2>Give your AI a memory.</h2>
     <a class="btn big" href="download.html#install"><svg class="apple" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg>Download for Mac</a>
     <div class="three cards3">
-      <a href="https://github.com/Satasdin/Burrow/blob/burrow/docs/getting-started.md"><h3>Getting started</h3><p>Install, make a folder of notes a vault, and connect your first program.</p></a>
-      <a href="https://github.com/Satasdin/Burrow/tree/burrow/skills"><h3>Skills for your agent</h3><p>Teach Claude Code and other agents to carry work on, keep decisions and check changes.</p></a>
+      <a href="docs.html"><h3>Documentation</h3><p>Install, make a folder of notes a vault, connect your first program, and every page of the app.</p></a>
+      <a href="faq.html"><h3>FAQ</h3><p>Privacy, models, Obsidian vaults, what it needs and what it costs.</p></a>
       <a href="https://github.com/Satasdin/Burrow"><h3>Source on GitHub</h3><p>Read the code, the tools it gives a model, and how your data is kept safe.</p></a>
     </div>
   </section>
@@ -227,9 +303,9 @@
   <div class="wrap foot">
     <div><a class="brand" href="./"><img src="media/wordmark.png" alt="Burrow" width="148" height="20"></a><p>© 2026 Burrow</p></div>
     <div class="cols">
-      <div><span>Get started</span><a href="download.html">Download</a><a href="https://github.com/Satasdin/Burrow/blob/burrow/docs/getting-started.md">Getting started</a><a href="https://github.com/Satasdin/Burrow/releases">Releases</a></div>
-      <div><span>Learn</span><a href="https://github.com/Satasdin/Burrow/blob/burrow/docs/README.md">Docs</a><a href="https://github.com/Satasdin/Burrow/blob/burrow/docs/app.md">The app</a><a href="https://github.com/Satasdin/Burrow/blob/burrow/docs/tools.md">Tools</a></div>
-      <div><span>Project</span><a href="https://github.com/Satasdin/Burrow">GitHub</a><a href="https://github.com/Satasdin/Burrow/tree/burrow/skills">Skills</a><a href="https://github.com/Satasdin/Burrow/blob/burrow/docs/security.md">Security</a></div>
+      <div><span>Get started</span><a href="download.html">Download</a><a href="docs.html#start">Getting started</a><a href="https://github.com/Satasdin/Burrow/releases">Releases</a></div>
+      <div><span>Learn</span><a href="docs.html">Docs</a><a href="docs.html#app">The app</a><a href="faq.html">FAQ</a></div>
+      <div><span>Project</span><a href="https://github.com/Satasdin/Burrow">GitHub</a><a href="https://github.com/Satasdin/Burrow/tree/burrow/skills">Skills</a><a href="docs.html#privacy">Privacy</a></div>
     </div>
   </div>
 </footer>

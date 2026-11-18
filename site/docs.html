@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Burrow documentation</title>
+<meta name="description" content="Install Burrow, make a folder of notes a vault, connect your AI programs, and every page of the app.">
+<meta name="theme-color" content="#0f0f0f">
+<link rel="icon" href="media/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="media/touch-icon.png">
+<meta property="og:title" content="Burrow">
+<meta property="og:description" content="One memory on your Mac that every AI model you use reads from and writes to.">
+<meta property="og:image" content="media/app-ask.jpg">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div class="wrap bar">
+    <a class="brand" href="./"><img src="media/wordmark.png" alt="Burrow" width="148" height="20"></a>
+    <nav class="links" aria-label="Site">
+      <a href="download.html">Download</a>
+      <a href="docs.html">Docs</a>
+      <a href="faq.html">FAQ</a>
+      <a href="https://github.com/Satasdin/Burrow/tree/burrow/skills">Skills</a>
+    </nav>
+    <div class="right">
+      <a class="plain" href="https://github.com/Satasdin/Burrow">GitHub</a>
+      <a class="btn" href="download.html#install"><svg class="apple" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg>Download for Mac</a>
+      <button class="menu" type="button" aria-expanded="false" aria-controls="sitemenu" aria-label="Menu"><i></i></button>
+    </div>
+  </div>
+  <nav class="sheet" id="sitemenu" aria-label="Site" hidden>
+    <a href="download.html">Download</a>
+    <a href="docs.html">Docs</a>
+    <a href="faq.html">FAQ</a>
+    <a href="https://github.com/Satasdin/Burrow/tree/burrow/skills">Skills</a>
+    <a href="https://github.com/Satasdin/Burrow">GitHub</a>
+  </nav>
+</header>
+
+<main class="wrap docs">
+  <aside class="toc" aria-label="On this page">
+    <span>Documentation</span>
+    <a href="#start">Getting started</a>
+    <a href="#app">The app</a>
+    <a href="#connect">Connecting programs</a>
+    <a href="#decisions">Decisions and checks</a>
+    <a href="#sessions">Sessions</a>
+    <a href="#tools">Tools a model gets</a>
+    <a href="#terminal">The burrow command</a>
+    <a href="#privacy">Privacy and security</a>
+    <a href="#more">Full guides</a>
+  </aside>
+
+  <article class="doc">
+    <h1>Documentation.</h1>
+    <p class="lede">Ten minutes from nothing to an AI program that answers from your notes and keeps your decisions.</p>
+
+    <section id="start">
+      <h2>Getting started</h2>
+      <p>You need a Mac with Apple silicon. The app needs macOS 26 or later; the <code>burrow</code> program and its MCP server need macOS 14 or later. <a href="https://ollama.com">Ollama</a> gives search by meaning and answers on your Mac; without it, search still works by words.</p>
+      <ol class="steps">
+        <li><span><b>Install.</b> The app and the <code>burrow</code> program, from the <a href="download.html">download page</a>, or in a terminal:<code class="blk">curl -fsSL https://github.com/Satasdin/Burrow/releases/latest/download/install.sh | sh -s -- --app</code>The installer checks every file against its SHA-256 checksum and stops if one doesn't match.</span></li>
+        <li><span><b>Models.</b> One for search by meaning, one small chat model for Ask. Any Ollama chat model works; a 12-billion-parameter model such as <code>gemma4:12b</code> answers better if your Mac has the memory.<code class="blk">ollama pull qwen3-embedding:0.6b
+ollama pull qwen3:4b-instruct-2507-q4_K_M</code></span></li>
+        <li><span><b>A vault.</b> Any folder of Markdown notes is a vault, an Obsidian vault as it is. In the app: <b>New Vault…</b> or <b>Open Folder…</b>. In a terminal:<code class="blk">burrow vault new ~/Notes</code>Burrow builds its index in <code>~/Notes/.burrow</code>. Your files are never changed.</span></li>
+        <li><span><b>Link your code</b> (optional). The code stays where it is and is only ever read.<code class="blk">burrow link ~/Notes ~/code/my-project</code></span></li>
+        <li><span><b>Connect a program.</b> In the app, <b>Programs → Connect</b>. In a terminal, this prints what it would set up and writes nothing; run it again with <code>--write</code> to do it.<code class="blk">burrow connect claude-code ~/Notes</code></span></li>
+        <li><span><b>Check it works.</b> This shows what a model would read, with file and line, without calling a model. Then ask your program something your notes answer.<code class="blk">burrow find ~/Notes "something you wrote about"</code></span></li>
+      </ol>
+    </section>
+
+    <section id="app">
+      <h2>The app</h2>
+      <p>Laid out like a notes app you already know: a ribbon of pages on the left, your files beside it, tabs across the top, and a side pane for what belongs to the page. <b>⌘K</b> opens any file or command, including <b>Ask Your Vault</b>.</p>
+      <figure class="docshot"><img src="media/app-home.jpg" loading="lazy" decoding="async" width="2000" height="1257" alt="Burrow's Home: the vault as a live map"></figure>
+      <dl class="pages">
+        <dt>Home</dt><dd>Your vault as a live map, always the first tab. Notes a connected program looked up in the last ten minutes glow gold with a trail to that program; decisions in force, changed code and steering text wear rings.</dd>
+        <dt>Ask</dt><dd>A question answered by a model on this Mac, from the vault only. It cites the file and line, lists every file it used and the Ledger notes it was given, and <b>Keep as Note</b> saves the answer.</dd>
+        <dt>Library</dt><dd>Every note, document, image and code file as covers, by folder. PDFs, Word, RTF, OpenDocument and images are read in too.</dd>
+        <dt>Conversations</dt><dd>Each connection a program made: what it asked, searched for, read and kept. <b>Copy Handoff</b> and <b>Keep in Ledger</b>.</dd>
+        <dt>Ledger</dt><dd>Every decision, fact, plan and handoff, with its reason and what was turned down. <b>Still Right</b>, <b>Mark Wrong…</b>, and <b>Resume</b> to see what the next model is handed.</dd>
+        <dt>Programs</dt><dd>Which AI programs reach this vault, with their own icons, and what each read today.</dd>
+        <dt>Sessions</dt><dd>Your Claude Code and Codex sessions, how full their context is, and the line to resume each one.</dd>
+        <dt>Shelf</dt><dd>llama.cpp caches kept on disk, so a model starts on material it has already read.</dd>
+        <dt>Map</dt><dd>The whole vault as a graph, filtered by notes, code and files, or unconnected.</dd>
+        <dt>Settings</dt><dd>The night-sky theme (Ember, Nebula, Aurora or Tide), the model that answers, and linked folders.</dd>
+      </dl>
+      <p>The status bar light is green when nothing needs a look, amber when changed code rests on a decision, and red when the vault holds text written to steer an AI.</p>
+    </section>
+
+    <section id="connect">
+      <h2>Connecting programs</h2>
+      <p>One command sets up <code>claude-code</code>, <code>opencode</code>, <code>openclaw</code>, <code>hermes</code> and <code>n8n</code>. LM Studio, llama.cpp and Ollama work through Burrow's MCP server; other agents, such as Cursor and Codex, can follow its <a href="https://github.com/Satasdin/Burrow/blob/burrow/skills/AGENTS.md">AGENTS.md</a>.</p>
+      <code class="blk">burrow connect opencode ~/Notes --write
+burrow hook install claude ~/Notes</code>
+      <p>The hooks hand your decisions to Claude Code at the start of a session and keep its exact words when it compacts. To teach Claude Code to resume, keep decisions and answer a held change:</p>
+      <code class="blk">/plugin install burrow --marketplace Satasdin/Burrow</code>
+      <p><a href="https://github.com/Satasdin/Burrow/blob/burrow/docs/connect.md">Setup for every program</a></p>
+    </section>
+
+    <section id="decisions">
+      <h2>Decisions and checks</h2>
+      <p>When you settle something, say so: "Make this the decision and keep it in Burrow, with the reason." The program keeps it in the Ledger with why and what was turned down; Burrow refuses a decision without a reason. Every program that connects is handed the decisions in force from then on.</p>
+      <figure class="docshot"><img src="media/app-ledger.jpg" loading="lazy" decoding="async" width="2000" height="1257" alt="The Ledger page"></figure>
+      <p>Before a change is called done, <code>burrow_check</code> puts the decisions resting on the changed code beside it, with a verdict for each:</p>
+      <ul class="bullets">
+        <li><b>unaffected</b>: the change left what the decision rests on as it was.</li>
+        <li><b>affected</b> or <b>unprovable</b>: held once, so the decision is seen.</li>
+        <li><b>breaks</b>: the decision's own check failed. Held every time until the change is fixed.</li>
+      </ul>
+      <p>A program that never calls it is still stopped: Claude Code's Stop hook and git's pre-commit hook run the same check.</p>
+      <code class="blk">burrow hook install git-gate ~/Notes</code>
+      <p>When a file a decision rests on changes, the decision is kept and marked <b>check again</b>. <b>Still Right</b> or <b>Mark Wrong…</b> in the app. Nothing is deleted either way.</p>
+    </section>
+
+    <section id="sessions">
+      <h2>Sessions</h2>
+      <p>Burrow keeps your Claude Code and Codex sessions, so one can be picked up again by its name or id, however long ago it ran: the requests word for word, the decisions, the plan and where it stopped.</p>
+      <code class="blk">/burrow-resume &lt;id&gt;        # in Claude Code
+$burrow-resume &lt;id&gt;        # in Codex</code>
+    </section>
+
+    <section id="tools">
+      <h2>Tools a model gets</h2>
+      <p>A connected program sees a short set of tools, so even a small model uses them well.</p>
+      <dl class="pages tools">
+        <dt>burrow_find</dt><dd>Search by words and meaning, with file and line, and a line saying how much the vault holds on it.</dd>
+        <dt>burrow_read</dt><dd>A file, with the decisions that rest on it.</dd>
+        <dt>burrow_resume</dt><dd>The plan, where the last session stopped and the latest decisions.</dd>
+        <dt>burrow_commit</dt><dd>Keep a decision, fact, plan or handoff, with its reason.</dd>
+        <dt>burrow_check</dt><dd>A verdict for each decision on the current change.</dd>
+        <dt>burrow_session</dt><dd>Resume or search an earlier Claude Code or Codex session.</dd>
+        <dt>burrow_expand</dt><dd>Get back part of a long output Burrow kept whole.</dd>
+      </dl>
+      <p><a href="https://github.com/Satasdin/Burrow/blob/burrow/docs/tools.md">Every tool</a></p>
+    </section>
+
+    <section id="terminal">
+      <h2>The burrow command</h2>
+      <code class="blk">burrow find ~/Notes "query"          # what a model would read
+burrow ask ~/Notes "question"        # answer with a model on this Mac
+burrow log ~/Notes                   # what was kept, newest first
+burrow resume ~/Notes                # what the next model is handed
+burrow check ~/Notes                 # the gate, by hand
+burrow vault list                    # the vaults Burrow knows
+burrow --version</code>
+    </section>
+
+    <section id="privacy">
+      <h2>Privacy and security</h2>
+      <ul class="bullets">
+        <li>Burrow calls no cloud model. It talks only to Ollama on your own Mac. A cloud AI program you connect talks to its own provider, as it would without Burrow.</li>
+        <li>Its only network use is a team folder you join, and downloading a release.</li>
+        <li>Your files are never changed or deleted. Linked code is only read.</li>
+        <li>Approving a folder, sharing with a team, writing a program's settings and overriding a check refuse to run from an AI program. They need you.</li>
+        <li>Text written to steer an AI is flagged and never handed to a program as a rule.</li>
+        <li>Keys, tokens and passwords are replaced with <code>[secret removed]</code> before a session is kept or shared.</li>
+        <li>Burrow runs on macOS only. It isn't notarised by Apple yet, so a downloaded app asks for <b>Open Anyway</b> once.</li>
+      </ul>
+      <p><a href="https://github.com/Satasdin/Burrow/blob/burrow/docs/security.md">Security and privacy, in full</a></p>
+    </section>
+
+    <section id="more">
+      <h2>Full guides</h2>
+      <div class="three cards3 docs-cards">
+        <a href="https://github.com/Satasdin/Burrow/blob/burrow/docs/day-to-day.md"><h3>Day to day</h3><p>Asking, keeping decisions, picking up tomorrow, teams.</p></a>
+        <a href="https://github.com/Satasdin/Burrow/blob/burrow/docs/ledger.md"><h3>The Ledger</h3><p>Commits, hooks, verdicts and the git gate.</p></a>
+        <a href="https://github.com/Satasdin/Burrow/blob/burrow/docs/engine.md"><h3>The engine</h3><p>How Burrow answers from your material, and the results.</p></a>
+      </div>
+    </section>
+  </article>
+</main>
+
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <div><a class="brand" href="./"><img src="media/wordmark.png" alt="Burrow" width="148" height="20"></a><p>© 2026 Burrow</p></div>
+    <div class="cols">
+      <div><span>Get started</span><a href="download.html">Download</a><a href="docs.html#start">Getting started</a><a href="https://github.com/Satasdin/Burrow/releases">Releases</a></div>
+      <div><span>Learn</span><a href="docs.html">Docs</a><a href="docs.html#app">The app</a><a href="faq.html">FAQ</a></div>
+      <div><span>Project</span><a href="https://github.com/Satasdin/Burrow">GitHub</a><a href="https://github.com/Satasdin/Burrow/tree/burrow/skills">Skills</a><a href="docs.html#privacy">Privacy</a></div>
+    </div>
+  </div>
+</footer>
+<script src="site.js"></script>
+</body>
+</html>
