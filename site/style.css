@@ -519,3 +519,8 @@ header:has(.sheet:not([hidden])){background:var(--bg)}
 .home{--hh:90px}
 @media (max-width:860px){.home{--hh:68px}}
 .home .hero-c{margin-top:calc(-1 * var(--hh));padding-top:calc(var(--hh) + clamp(56px,8vw,104px))}
+.marquee-track span{display:inline-flex;align-items:center;gap:12px}
+.marquee-track img{width:28px;height:28px;flex:none}
+.marquee-track .mono{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:7px;background:#2c2c2c;font:700 13px var(--mono);font-style:normal;color:#ececec}
+@media (prefers-reduced-motion:reduce){.marquee-track span:nth-child(n+11){display:none}}
+@media (prefers-reduced-motion:reduce){.marquee{-webkit-mask:none;mask:none}}
