@@ -24,7 +24,7 @@ Table 4.1 lists the functional requirements. FR-01 and FR-02 cover the person's 
 | FR-07 | The system marks a decision to be checked again when a file it rests on changes, and lets the person confirm it or mark it wrong. | ii, iii | TC-07 |
 | FR-08 | The system catches a new decision that overlaps one in force and asks whether it replaces it or stands beside it. | ii, iii | TC-08 |
 | FR-09 | The system judges a change to linked code against each decision it touches (breaks, affected, unaffected or unprovable) and holds a change that touches a decision until it has been shown, through its own tool, a coding tool's end-of-turn hook, a git pre-commit hook and plugins for other programs. | ii, v | TC-09 |
-| FR-10 | The system keeps the exact words of a Claude Code session when it is compacted, and hands them back afterwards. | ii, v | TC-10 |
+| FR-10 | The system keeps the exact words of an AI session, keeps a long Claude Code session's context small, and hands the words back after compaction or to another program that resumes the session. | ii, v | TC-10 |
 | FR-11 | The system shares a decision with a team folder only after the person approves it, signed with the person and the program. | ii, iii | TC-11 |
 | FR-12 | The desktop application shows the Ledger, the Watch panel and the programs connected to the vault, and connects a program. | ii, iii | TC-12 |
 
@@ -160,7 +160,7 @@ Figure 4.10 shows the same system as UML components with the interfaces they pro
 
 Every front end, the MCP server, the command line and the desktop application, uses the same VaultTools interface of BurrowTools, which in turn uses BurrowCore's vault; nothing depends upwards, so the engine can be tested without any front end. The only outward dependencies are the files on disk and the local model service at the loopback address. Hooks and plugins in other programs do not link Burrow's code at all: they call the command line, which keeps them working across Burrow's releases.
 
-The interface every program meets is the MCP server. Table 4.6 gives its contract for the five tools a program is shown by default: what each takes, what it returns and whether it writes. The seventeen further tools that a program can be shown on request follow the same pattern and are listed in the repository's tool reference.
+The interface every program meets is the MCP server. Table 4.6 gives its contract for the seven tools a program is shown by default: what each takes, what it returns and whether it writes. The seventeen further tools that a program can be shown on request follow the same pattern and are listed in the repository's tool reference.
 
 !tab Table 4.6: Interface contract of the MCP server's default tools
 !widths 1.15,1.9,2.55,0.75
@@ -170,6 +170,8 @@ The interface every program meets is the MCP server. Table 4.6 gives its contrac
 | burrow_resume | Optionally a branch | The plan, where the last session stopped and what it was in the middle of, corrections and the latest decisions | No |
 | burrow_commit | A kind and a message; for a decision its reason, and optionally what was rejected, the files, a check and the decision it replaces | The identifier it was kept as, or a refusal naming an overlapping decision in force | Adds only |
 | burrow_check | Nothing | The change in linked code beside each decision resting on it, with a verdict: unaffected, affected, unprovable or breaks | No |
+| burrow_expand | The handle of a tool output that Burrow shortened; optionally a line range or words to match | Those lines of the output exactly as printed | No |
+| burrow_session | Optionally a session, by its identifier or words from its name; optionally words to find, a timeline or a message reference | A list of the latest sessions, or one session's resume of about 6,000 tokens, its timeline, or its exact messages | No |
 
 ### 4.4.3 Logical Database Schema
 

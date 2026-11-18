@@ -33,11 +33,9 @@ cp check-word.pdf $name.pdf
 
 mkdir -p "$showcase/1 Report" "$showcase/2 Application"
 cp $name.docx $name.pdf "$showcase/1 Report/"
-(cd "$repo" && swift build -c release --product burrow >/dev/null)
-cp "$repo/.build/release/burrow" "$showcase/2 Application/burrow"
-cp "$repo/scripts/install.sh" "$showcase/2 Application/install.sh"
-if [[ -d "$repo/app/build/Burrow.app" ]]; then
-  rm -rf "$showcase/2 Application/Burrow.app"
-  ditto "$repo/app/build/Burrow.app" "$showcase/2 Application/Burrow.app"
-fi
+# The showcase holds the published release as installed on this Mac (this branch's own sources are older).
+cp "$HOME/.local/bin/burrow" "$showcase/2 Application/burrow"
+curl -fsSL https://github.com/Satasdin/Burrow/releases/latest/download/install.sh -o "$showcase/2 Application/install.sh"
+rm -rf "$showcase/2 Application/Burrow.app"
+ditto /Applications/Burrow.app "$showcase/2 Application/Burrow.app"
 echo "Report rebuilt and copied to $showcase"

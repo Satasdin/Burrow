@@ -22,7 +22,7 @@ On the fourth objective, Burrow narrowed most of the knowledge gap on the laptop
 
 ### 6.1.5 Decisions and Carrying Work On (Objective v)
 
-On the fifth objective, models that shared the vault kept decisions and carried work on once the reasons were kept with the decisions: Claude Code kept an earlier decision in 9 of 9 sessions, against 12 of 15 before, and a different program continued the right step in 3 of 3 runs, against none before. Memory, however, did not make every model obey: Gemma 4 12B received a decision with its reason in every run and still broke it in some, which only the check, holding the change and naming the decision, could address.
+On the fifth objective, models that shared the vault kept decisions and carried work on once the reasons were kept with the decisions: Claude Code kept an earlier decision in 9 of 9 sessions, against 12 of 15 before, and a different program continued the right step in 3 of 3 runs, against none before. In the latest release a long Claude Code session compacted 1.5 times instead of 3.5 and cost 40% less, and an archived session was resumed in Codex and in a local model. Memory, however, did not make every model obey: Gemma 4 12B received a decision with its reason in every run and still broke it in some, which only the check, holding the change and naming the decision, could address.
 
 ### 6.1.6 Contribution and Boundaries
 
