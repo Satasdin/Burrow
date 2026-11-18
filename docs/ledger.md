@@ -49,7 +49,7 @@ burrow branch <vault> [name]
 
 ## Programs that use the vault (MCP)
 
-`burrow mcp <vault>` shows five tools by default, and a program can call only the tools it is shown: any other is refused by name (D-105). The old names of the shown search and read, `vault_search` and `vault_read`, still work. `--tools full` shows and allows every tool.
+`burrow mcp <vault>` shows seven tools by default, and a program can call only the tools it is shown: any other is refused by name (D-105). The old names of the shown search and read, `vault_search` and `vault_read`, still work. `--tools full` shows and allows every tool.
 
 | Tool | Shown by default | What it does |
 | --- | --- | --- |

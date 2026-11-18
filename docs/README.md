@@ -11,8 +11,9 @@ model, in any program, starts from what was settled.
 | [Getting started](getting-started.md) | installing, a first vault, connecting your first program, checking it works |
 | [Day to day](day-to-day.md) | a normal day: asking, keeping a decision, picking up tomorrow, teams, several vaults |
 | [The desktop app](app.md) | every page of Burrow.app |
-| [Connecting programs](connect.md) | Claude Code, OpenCode, OpenClaw, Hermes Agent, n8n, LM Studio, Ollama, llama.cpp |
+| [Connecting programs](connect.md) | Claude Code, Codex, OpenCode, OpenClaw, Hermes Agent, n8n, LM Studio, Ollama, llama.cpp |
 | [The Ledger](ledger.md) | decisions, the check of new work, hooks, verdicts, folds |
+| [Sessions](sessions.md) | long sessions kept lean, every session archived, and resumed in any program |
 | [The engine](engine.md) | how Burrow answers from your material: decide, fit, answer, check, learn |
 | [Tool reference](tools.md) | every MCP tool, what it takes and returns |
 | [Security and privacy](security.md) | what stays on your Mac, and what Burrow defends against |
@@ -33,7 +34,7 @@ Each capability, where to use it, and where it is explained. **App** is Burrow.a
 | Link code folders read-only, approved by you on this Mac | Link a Folder…, Allow | `burrow link`, `link list`, `link approve` | | [Day to day](day-to-day.md#linked-folders-you-havent-approved) |
 | Search by words and by meaning together, with file and line | Search, Library | `burrow find` | `burrow_find` | [Engine](engine.md) |
 | Read a file with the decisions resting on it and its neighbours | any note | | `burrow_read` | [Tools](tools.md) |
-| Links between notes and code, and a map of the vault | Map, Graph | `burrow links` | `vault_links` | [App](app.md) |
+| Links between notes and code, and a map of the vault | Home, Map, Graph | `burrow links` | `vault_links` | [App](app.md) |
 | Answer a question with a local model, citing file and line | Ask | `burrow ask`, `burrow chat`, `burrow tui` | `vault_ask` | [Engine](engine.md) |
 | Prepare a question for any other model | | `burrow brief` | `vault_prepare` | [Engine](engine.md) |
 | Fit how much a model is shown to what it can read in time | | `burrow fit` | | [Engine](engine.md) |
@@ -74,6 +75,11 @@ Each capability, where to use it, and where it is explained. **App** is Burrow.a
 | Resume where the last session stopped, what it was in the middle of | Resume | `burrow resume` | `burrow_resume` | [Tools](tools.md) |
 | Claude Code's exact words kept at every compaction and handed back | | `burrow recall` | `burrow_recall` | [Ledger](ledger.md#claude-code) |
 | Pick up a conversation another program started | Open Conversation | | `vault_session_list`, `vault_session_resume` | [Tools](tools.md) |
+| Long tool output kept whole, the model shown a short form with a handle | Sessions | `burrow expand` | `burrow_expand` | [Sessions](sessions.md) |
+| Words that left the context handed back; compaction told what to keep | Sessions | `burrow session meter` | hooks | [Sessions](sessions.md) |
+| Every Claude Code and Codex session archived, on an external drive if you like | Sessions | `burrow session sync`, `session settings` | hooks | [Sessions](sessions.md#the-archive) |
+| Resume an archived session in Claude Code, Codex or a local model | Sessions, Resume in… | `burrow session resume`, `burrow chat --resume` | `burrow_session`, `/burrow-resume`, `$burrow-resume` | [Sessions](sessions.md#picking-a-session-up-in-any-program) |
+| Another program reads a session's exact messages, only with your yes | | `burrow session allow` | refused until then | [Security](security.md#archived-sessions) |
 
 ### Programs and teams
 

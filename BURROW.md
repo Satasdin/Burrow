@@ -1,7 +1,7 @@
 # BURROW.md: everything Burrow does, for AI agents
 
 This file maps all of Burrow in one place, for an AI agent that has to use it, set it up or explain it. It is
-checked against the source (`Sources/burrow`, `Sources/BurrowTools`) as of version 1.2. For how to behave when
+checked against the source (`Sources/burrow`, `Sources/BurrowTools`) as of version 1.3. For how to behave when
 using it, read the skills in [`skills/`](skills/README.md); for a person's guide, [`docs/`](docs/README.md).
 
 ## In one paragraph
@@ -73,6 +73,13 @@ plugins for OpenCode, OpenClaw and Hermes Agent.
 and a handoff when it ends. For Claude Code, hooks **fold** each stretch of the session before compaction and when it
 ends, keeping the person's requests, reasons and exact errors word for word, and hand them back after compaction.
 
+**Sessions.** For Claude Code, hooks keep a long Bash or Grep output whole and show the model its start, end, error
+lines and a handle (`burrow_expand` gives the rest), hand back words that left the context on each message, and tell
+the compaction summary what to keep word for word. Every Claude Code and Codex session is archived in
+`~/Library/Application Support/Burrow/sessions` (or a folder the person chose, such as an external drive; when that
+drive is missing, Burrow's own folder), and any program can resume it from its resume pack: the person's requests word
+for word, decisions, plan and where it stopped. See [docs/sessions.md](docs/sessions.md).
+
 **Bridges and teams.** A vault can read another vault one way and read-only (a **bridge**). A vault can join a
 **team** folder (a git clone or a synced folder): the team's decisions are handed to every teammate's programs, and
 what a program asks to share waits on the person's Mac until they approve it.
@@ -87,11 +94,11 @@ what a program asks to share waits on the person's Mac until they approve it.
 
 ## MCP tools
 
-`burrow mcp <vault>` shows five tools by default (`--tools door`). `--tools full` shows all 22, `--tools classic` only
+`burrow mcp <vault>` shows seven tools by default (`--tools door`). `--tools full` shows all 24, `--tools classic` only
 the `vault_` ones. A program can call only the tools it is shown. Only `burrow_commit`, `burrow_revert`,
 `vault_remember` and `vault_session_log` write, and they only add.
 
-### The five shown by default
+### The seven shown by default
 
 | Tool | Parameters | Returns |
 | --- | --- | --- |
@@ -100,6 +107,8 @@ the `vault_` ones. A program can call only the tools it is shown. Only `burrow_c
 | `burrow_resume` | `branch` | the plan, where the last session stopped and what it was in the middle of (open request, exact error, constraint), corrections, latest decisions; at most 3,200 characters, never cutting a reason |
 | `burrow_commit` | `kind` (decision, fact, plan, handoff, correction), `message` (at most 600 characters) required; `because` (required for a decision), `rejected`, `files` (comma-separated), `supersedes` (an id), `alongside` (yes), `branch`, `share` (team, or the team's name), `model`, `check` (a command, or `forbid: <pattern>`) | the id it was kept as; or a refusal naming the decision in force it overlaps |
 | `burrow_check` | none | the change in linked code since its last git commit, beside each decision resting on it, with a verdict |
+| `burrow_expand` | `handle` (such as `k3f2a91`, required), `lines` (such as `200-260`), `find` (words) | part of a tool output Burrow kept whole and showed shortened: those lines, or each line holding all the words with two around it; neither gives the start. Only to the Claude Code session that ran it |
+| `burrow_session` | `session` (an id, its first 8 characters, or words from its name), `find` (words), `timeline` (yes), `ref` (a message ref) | no session: the latest archived sessions; a session: its resume pack, secrets taken out. `find` and `ref` give exact messages, only to the program that wrote the session unless the person ran `burrow session allow`; `timeline`, one line per request |
 
 ### Also shown with `--tools full`
 
@@ -166,7 +175,10 @@ burrow ask    <vault> "question" [--mode engine|none|search|walk] [--model NAME]
               [--no-skills] [--no-check] [--no-ledger] [--characters N]
 burrow brief  <vault> "question" [--characters N] [--json]  the question packed for any other model
 burrow fit    <vault> [--model NAME]                        measure a model once and set how much it is shown
-burrow chat   <vault> [--model NAME] [--folder F] [--tools-only]   a terminal chat; /keep proposes notes
+burrow chat   <vault> [--model NAME] [--folder F] [--tools-only] [--resume SESSION] [--llama URL]
+                                                            a terminal chat; /keep proposes notes; --resume hands
+                                                            the model an archived session; with --llama, llama.cpp
+                                                            answers and its cache of the session is kept on disk
 burrow skills <vault> [--install]                           list the engine's methods, or add the starter set
 burrow learn  <vault> <transcript.json> [--model NAME]      propose notes from a conversation, asking before each
 burrow note   <vault> "text" [--kind decision|rejected|bug|convention|note]
@@ -201,17 +213,37 @@ burrow recall <vault> [fold|session] [--full] [--find WORDS]
 burrow check  <vault> [--staged] [--json]                   exit 0 untouched, 2 touched and not shown yet, 3 breaks one
 burrow decision check <vault> <decision> [--set "command" | --set "forbid: pattern"] [--timeout SECONDS] [--confirm] [--clear]
 burrow decision override <vault> <decision>                 let this exact change through although its check fails (person only)
-burrow hook claude <vault> [--gate]                         Claude Code's SessionStart, PreCompact, SessionEnd and Stop hooks
+burrow hook claude <vault> [--gate]                         Claude Code's and Codex's hooks: SessionStart, PreCompact,
+                                                            SessionEnd, Stop, UserPromptSubmit, PostCompact, and
+                                                            PostToolUse (Claude Code only)
 burrow hook git <vault>                                     git's post-commit hook
 burrow hook install claude | git | git-gate <vault>         print Claude Code's settings, or write .git/hooks/post-commit or pre-commit
 ```
 
 A change is held once until its decisions have been shown; a change that breaks a decision's check is held every time.
 
+### Sessions
+
+```
+burrow session                                   the latest archived sessions
+burrow session sync                              keep every Claude Code and Codex session still on this Mac
+burrow session resume <name|id>                  the resume pack: requests word for word, decisions, plan, where it stopped
+burrow session find <name|id> "words"            the exact messages of that session that match
+burrow session timeline <name|id>                one line per request
+burrow session meter [id]                        what Burrow did in a live session: outputs kept, recalls, compactions
+burrow session allow <name|id> <program>         let another program read that session's exact messages (person only)
+burrow session settings [key value]              lean-bash, lean-read, lean-grep, recall, steer, archive on|off;
+                                                 lean-characters N; lean-read-lines N; archive-folder PATH|default
+burrow expand <handle> [--lines A-B] [--find words]   part of a tool output Burrow kept whole
+```
+
+In Claude Code `/burrow-resume <name>` and in Codex `$burrow-resume <name>` resume an archived session through the
+`burrow-resume` skill that `burrow connect` adds.
+
 ### Programs and teams
 
 ```
-burrow connect <program> <vault> [--write] [--home DIR]     programs: claude-code, opencode, openclaw, hermes, n8n
+burrow connect <program> <vault> [--write] [--home DIR]     programs: claude-code, codex, opencode, openclaw, hermes, n8n
 burrow team join    <vault> <team-folder> [--name N] [--as "Your Name"]   (person only)
 burrow team list    <vault>
 burrow team log     <vault> [--limit N]
@@ -228,8 +260,12 @@ inside the program. `--write` writes it. LM Studio, Ollama and llama.cpp connect
 
 ## The app
 
-A ribbon on the left switches pages, tabs hold notes, Ask and the map side by side, an inspector shows the open
-note's links and decisions, and ⌘K opens a note or runs a command (including themes: Nebula, Aurora, Ember, Tide).
+A short film plays at launch (a click skips it; Reduce Motion shows the still wordmark). The last vault opens straight
+away; otherwise a start window offers it, New Vault…, Open Folder… and the vaults Burrow knows. A vault opens on its
+live map, the **Home** tab (⇧⌘H): notes a connected program looked up in the last ten minutes glow gold, with a trail
+to that program, and notes a decision rests on wear a green, amber or red ring. A ribbon on the left switches pages,
+tabs hold notes, Ask and the map side by side, an inspector shows the open note's links and decisions, and ⌘K opens a
+note or runs a command (including themes: Ember, the default, Nebula, Aurora, Tide).
 The status light is green when nothing needs a look, amber when changed code rests on a decision, red when the vault
 holds text written to steer an AI.
 
@@ -240,8 +276,9 @@ holds text written to steer an AI.
 | Conversations | each connection a program made, what it searched, read and kept, and its handoff |
 | Ledger | what programs kept, by branch: Still Right, Mark Wrong…, Confirm Check, Share with Team, Drop, Resume |
 | Library | folders, linked folders (Link a Folder…, Unlink), bridges, teams, storage bars |
-| Programs | each AI program on the Mac and whether it finds this vault; Connect, Copy |
+| Programs | each AI program on the Mac, with its own app icon, and whether it finds this vault; Connect, Copy |
 | Map | the vault as a graph, coloured by folder |
+| Sessions (⌘6) | each live or recent Claude Code and Codex session: context per request with compactions, what Burrow kept out, recalls, expansions, and the lines to resume it in Claude Code, Codex or `burrow chat`; settings shown read-only |
 | Watch panel | what a connected program is shown: rules in force, what `burrow_check` would say now, steering lines; Keep newer, Keep both |
 
 ## What only the person may do
@@ -253,6 +290,7 @@ and wait.
 - linking or approving a folder (`burrow link`, `link approve`), joining a team (`team join`);
 - approving a share (`team approve`), and `team revert` or `commit --team` run by a program, which wait instead;
 - writing a program's settings (`burrow connect --write`);
+- letting another program read a session's exact messages (`burrow session allow`);
 - confirming, clearing or overriding a decision's check (`decision check --confirm|--clear`, `decision override`).
   These also need an 8-digit code shown only in a macOS notification, valid once for two minutes. Never ask the
   person for it and never type one you see.
@@ -270,6 +308,8 @@ Burrow's MCP tools never approve, share, confirm or override anything.
 | a code change finished | `burrow_check`; answer each non-unaffected verdict: still holds and why, undone, or tell them which decision it goes against |
 | to stop for now | `burrow_commit` kind handoff (and plan if it changed) |
 | an exact earlier word after compaction | `burrow_recall` with `find` |
+| a shortened tool output in full | `burrow_expand` with its handle and `lines` or `find` |
+| an earlier session picked up, from any program | `burrow_session` with the name or id; quote `find` or `ref` for anything the pack doesn't hold |
 | a whole module read | `vault_pack` part by part |
 | a small local model to answer well | `vault_prepare` before answering, or `vault_ask` to have Burrow's local model answer |
 | a decision shared with the team | `burrow_commit` with `share: team`; tell them it waits for `burrow team pending` |

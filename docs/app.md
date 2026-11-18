@@ -4,6 +4,25 @@ Burrow.app is where you read your vault and govern what your AI programs keep. I
 `burrow` command and the MCP server, on the same vault. It needs macOS 26 or later; install it with the installer's
 `--app` option, or build it with `app/build.sh`.
 
+## Opening it
+
+A short film plays once each time the app starts: sparks of light on black that land as the stars of the vault's map.
+A click skips it; with Reduce Motion on, it is the still wordmark for a second.
+
+The app then opens the last vault straight away. Otherwise the start window shows the wordmark, a line on what Burrow
+is, **Open** with the latest vault's name, **New Vault…**, **Open Folder…** and the vaults Burrow knows, with that
+vault's map drawn beside them.
+
+## Home: the vault's live map
+
+A vault opens on its map, with no tab open. The notes a connected program looked up in the last ten minutes glow gold,
+with a trail to that program's line in the corner ("Claude Code is reading · 11 notes · 7 seconds ago"). Notes a
+decision in force rests on wear a green ring, amber when that file changed since, and red for text written to steer an
+AI, the same three states as the Watch panel.
+
+The **Home** tab, with the B, sits first in the tab row and is never closed. It, or **View ▸ Home** (⇧⌘H), brings you
+back to the live map with every other tab left open.
+
 ## The window
 
 A ribbon on the left switches pages; tabs across the top hold notes, Ask and the map side by side (**Open in New
@@ -36,10 +55,19 @@ Wrong…** retires it with what is right, **Keep newer** or **Keep both** (in th
 Bridge…**) and teams, with a storage bar for this vault and one for all vaults, amber when nearly full.
 
 **Programs** reads each AI program's own settings on this Mac and says whether it will find this vault: connected,
-not set up, set up for another vault. **Connect** shows exactly what it will change and writes it when you agree;
+not set up, set up for another vault. Each program shows its own app's icon when it is installed (Claude, Codex,
+Ollama, LM Studio); Burrow asks macOS for it and bundles no one's logo. **Connect** shows exactly what it will change and writes it when you agree;
 **Copy** gives you the setup line instead.
 
-**Map** draws the vault as a graph of notes and the links between them, coloured by folder.
+**Map** (⇧⌘G) draws the vault as a graph of notes and the links between them, coloured by folder, with the same
+rings for decisions as Home.
+
+**Sessions** (⌘6) shows each live or recent Claude Code and Codex session that ran with Burrow's session hooks: its
+context per request with each compaction marked, the tokens Burrow kept out, recalls and outputs expanded, every step
+Burrow took, and the lines to resume it in Claude Code, Codex or `burrow chat`, ready to copy. It reads again every few
+seconds while open. A strip shows which parts are on, where the archive is and how big, and says when the archive's
+drive is not connected. The switches are changed with `burrow session settings` for now. See
+[sessions.md](sessions.md).
 
 ## The Watch panel
 
@@ -56,4 +84,5 @@ The Watch stays beside whatever page is open and shows what a connected program 
 
 ## Themes
 
-Nebula, Aurora, Ember and Tide: type "Theme" in the ⌘K palette.
+Ember, tuned to the logo's orange, is the default; Nebula, Aurora and Tide are there too. Type "Theme" in the ⌘K
+palette.

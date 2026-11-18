@@ -1,18 +1,18 @@
 # Connecting a model to Burrow
 
-Burrow is the memory. The chat program is whatever you already use: Claude Code, OpenCode, LM Studio, or a model served
-by Ollama or llama.cpp. They all reach Burrow the same way, as an MCP server:
+Burrow is the memory. The chat program is whatever you already use: Claude Code, Codex, OpenCode, LM Studio, or a model
+served by Ollama or llama.cpp. They all reach Burrow the same way, as an MCP server:
 
 ```
 burrow mcp ~/Notes
 ```
 
-That one command shows the program five tools: `burrow_find`, `burrow_read`, `burrow_resume`, `burrow_commit` and
-`burrow_check`. `--tools full` lists all 22 (the Ledger's history tools and the older `vault_` tools as well). A program
-can call only the tools it is shown; `vault_search` and `vault_read` still answer as the old names of `burrow_find` and
-`burrow_read`. When the program connects, its instructions carry the decisions in force on
-the vault's current branch, each with its reason; a decision resting on a file that changed since comes marked "check
-again". See [ledger.md](ledger.md).
+That one command shows the program seven tools: `burrow_find`, `burrow_read`, `burrow_resume`, `burrow_commit`,
+`burrow_check`, `burrow_expand` and `burrow_session`. `--tools full` lists all 24 (the Ledger's history tools and the
+older `vault_` tools as well). A program can call only the tools it is shown; `vault_search` and `vault_read` still
+answer as the old names of `burrow_find` and `burrow_read`. When the program connects, its instructions carry the
+decisions in force on the vault's current branch, each with its reason; a decision resting on a file that changed
+since comes marked "check again". See [ledger.md](ledger.md).
 
 Each connection is kept in the vault as its own conversation. Burrow writes down what the program searched for and which
 files it read as it happens, so another program can pick the conversation up later even if the model never saves
@@ -31,8 +31,8 @@ burrow connect <program> ~/Notes            # shows the setup, writes nothing
 burrow connect <program> ~/Notes --write    # writes it, in your own terminal, after you type yes
 ```
 
-Programs: `claude-code`, `opencode`, `openclaw`, `hermes`, `n8n`. It sets up three things, each the way that program
-allows:
+Programs: `claude-code`, `codex`, `opencode`, `openclaw`, `hermes`, `n8n`. It sets up three things, each the way that
+program allows:
 
 1. **Burrow as an MCP server**, started with the full path of this `burrow`, on this vault.
 2. **Burrow's tools always in view.** OpenClaw and Hermes hide MCP tools behind a search step by default, OpenCode 2
@@ -60,7 +60,8 @@ decision the change went against. Hermes put the code back 2 of 2, OpenCode 3 of
 
 | Program | Settings it changes | Tools in view | The gate |
 | --- | --- | --- | --- |
-| Claude Code | `~/.claude.json` (`mcpServers.burrow`), `~/.claude/settings.json` (hooks) | `"alwaysLoad": true` on Burrow's server | the Stop hook, `burrow hook claude <vault> --gate` (D-93) |
+| Claude Code | `~/.claude.json` (`mcpServers.burrow`), `~/.claude/settings.json` (hooks), `~/.claude/skills/burrow-resume/` | `"alwaysLoad": true` on Burrow's server | the Stop hook, `burrow hook claude <vault> --gate` (D-93) |
+| Codex | `~/.codex/config.toml` (`[mcp_servers.burrow]`), `~/.codex/hooks.json`, `~/.agents/skills/burrow-resume/` | no setting written | the Stop hook, the same command |
 | OpenCode | `~/.config/opencode/opencode.json`, `plugins/burrow-gate/` | `"codemode": false` on Burrow's server | plugin, when the session goes idle |
 | OpenClaw | `~/.openclaw/openclaw.json`, `~/.openclaw/burrow-gate/` | `tools.toolSearch: false` (no per-server setting) | plugin, after each edit or command |
 | Hermes Agent | `~/.hermes/config.yaml`, `~/.hermes/plugins/burrow-gate/` | `tools.tool_search.enabled: "off"` (no per-server setting) | plugin, after each edit or command, and before the final answer of a turn that edited files |
@@ -92,12 +93,35 @@ the project's `.mcp.json`, shared with whoever uses the project). Claude Code th
 
 With `burrow connect claude-code ~/Notes --write` the server is added with `"alwaysLoad": true`, so Claude Code never
 defers Burrow's tools behind its tool search, and the hooks are added beside any you have: session start, compaction
-and session end keep a handoff in the Ledger, and Stop runs the gate (D-93). Claude Code can stay open, even the
+and session end keep a handoff in the Ledger, and Stop runs the gate (D-93). Three more keep the session lean (D-116):
+PostToolUse after Bash, Read and Grep keeps a long output and shows the model a short form with a handle,
+UserPromptSubmit hands back words that have left the context, and PostCompact notes each compaction for the meter. The
+`burrow-resume` skill is added in `~/.claude/skills/`, so `/burrow-resume <name>` picks up any archived session. See
+[sessions.md](sessions.md). Claude Code can stay open, even the
 session you are setting up from: when Claude Code's `claude` command is installed, Burrow adds the server with
 `claude mcp add-json`, which writes `~/.claude.json` the way Claude Code itself does, and checks the file afterwards
 (D-114). The server and hooks load when a session starts: type `/exit`, then `claude --continue` to pick up the same
 conversation with Burrow. Without the `claude` command Burrow writes the file itself, and then Claude Code must be
 closed first, since it keeps `~/.claude.json` open and can write over a change made while it runs.
+
+## Codex
+
+```
+burrow connect codex ~/Notes --write
+```
+
+This writes three things (D-117):
+
+1. `[mcp_servers.burrow]` in `~/.codex/config.toml` (or `$CODEX_HOME/config.toml`), added at the end. A table of that
+   name you already have is left as it is: Burrow does not rewrite TOML it did not write.
+2. Burrow's hooks in `~/.codex/hooks.json`, beside any you have: session start, compaction, session end (at 3 seconds,
+   because Codex cuts it there), Stop with the gate, UserPromptSubmit for recall and PostCompact for the meter. Every
+   session is archived from them.
+3. The `burrow-resume` skill in `~/.agents/skills/burrow-resume/`, the folder Codex reads skills from, so
+   `$burrow-resume <name>` picks up any archived session, from Codex or Claude Code.
+
+Codex asks you to trust new hooks: open `/hooks` in Codex once and approve Burrow's. Codex can't be given a shorter tool
+output, so lean output stays Claude Code only. See [sessions.md](sessions.md).
 
 ## OpenCode
 

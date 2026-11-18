@@ -32,7 +32,12 @@ one model never reaches the next.
   its reason and what was turned down, and every model that connects is handed it. Once reasons were kept, Claude
   Code kept an earlier decision in 9 of 9 sessions.
 - **It replaces starting over in a new program.** Any program that speaks MCP picks up where the last one stopped:
-  Claude Code, OpenCode, OpenClaw, Hermes Agent, n8n, LM Studio, Ollama or llama.cpp.
+  Claude Code, Codex, OpenCode, OpenClaw, Hermes Agent, n8n, LM Studio, Ollama or llama.cpp.
+- **It replaces long sessions that fill up and are lost.** Burrow keeps big tool output out of Claude Code's context
+  without losing a word, and keeps every Claude Code and Codex session so any program can resume it, a month later if
+  need be. In real Sonnet 5.5 sessions full of raw tool output it meant 57 % fewer compactions, 74 % less tool output
+  in the context and 40 % lower cost than Claude Code alone. A quiz on the session's start did not separate the two,
+  so no claim about recall is made.
 - **It checks before "done".** A model can read a decision and still break it, so Burrow checks each code change
   against the decisions it touches, in the agent and in git's pre-commit hook.
 
@@ -70,7 +75,8 @@ keeps decisions with `burrow_commit` and checks its changes with `burrow_check`.
 | **Ledger** | A git for what AIs understood: decisions with reasons, plans, handoffs and corrections, on branches. Nothing is ever deleted. |
 | **Check** | A verdict per decision on your change: unaffected, affected, unprovable or breaks. Runs in Claude Code, OpenCode, OpenClaw, Hermes Agent and git. |
 | **Teams** | Share decisions through a git or synced folder. A program's share waits until you approve it. |
-| **App** | Ask, the Ledger, Conversations, Programs and a map of your vault, in a Mac app laid out like your notes app. |
+| **Sessions** | Long tool output kept by handle, lost words recalled, compaction steered; every Claude Code and Codex session archived, on an external drive if you like, and resumable in any program. |
+| **App** | Home, the vault's live map, glowing gold where a program is reading; Ask, the Ledger, Conversations, Programs and Sessions, in a Mac app laid out like your notes app. |
 
 ## Documentation
 
@@ -80,6 +86,7 @@ keeps decisions with `burrow_commit` and checks its changes with `burrow_check`.
 | [Day to day](docs/day-to-day.md) | asking, keeping decisions, picking up tomorrow, teams, several vaults |
 | [Connecting programs](docs/connect.md) | the setup line for each program |
 | [The Ledger](docs/ledger.md) | decisions, the check, hooks and verdicts |
+| [Sessions](docs/sessions.md) | long sessions kept lean, archived, and resumed in any program |
 | [Tool reference](docs/tools.md) | every MCP tool, what it takes and returns |
 | [Security and privacy](docs/security.md) | what stays on your Mac, and what Burrow defends against |
 | [Skills for agents](skills/README.md) | `/plugin install burrow --marketplace Satasdin/Burrow` |
@@ -92,7 +99,7 @@ Needs a Mac with Xcode (Swift 6).
 
 ```bash
 swift build -c release      # the burrow program, at .build/release/burrow
-swift test                  # 553 tests; no model or network needed
+swift test                  # 589 tests; no model or network needed
 app/build.sh                # the desktop app, at app/build/Burrow.app
 ```
 

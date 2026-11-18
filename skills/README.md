@@ -14,6 +14,11 @@ well: when to resume, how to keep a decision the next model will keep to, and wh
 | [burrow-vaults-and-teams](burrow-vaults-and-teams/SKILL.md) | results from another vault or a team, sharing a decision, a share waiting for approval |
 
 [AGENTS.md](AGENTS.md) is all seven on one page, for programs that read an instructions file instead of skills.
+
+One more skill is not in this folder: `burrow-resume`, for picking up an archived session, is written by
+`burrow connect claude-code` into `~/.claude/skills/burrow-resume/` (`/burrow-resume <name>`) and by
+`burrow connect codex` into `~/.agents/skills/burrow-resume/` (`$burrow-resume <name>`). See
+[docs/sessions.md](../docs/sessions.md).
 [BURROW.md](../BURROW.md) maps every tool, command and page of Burrow in one file, for an agent that needs the whole picture.
 
 ## Installing

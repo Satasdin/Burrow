@@ -35,10 +35,31 @@ A new session, a different program or a small local model starts with what was k
 - On connecting, every program is handed the decisions in force, each with its reason.
 - `burrow_resume` gives the plan, where the last session stopped and the latest decisions.
 - Claude Code's hooks (`burrow hook install claude ~/Notes`) hand this over at session start and write a handoff when
-  it compacts or ends.
+  it compacts or ends. Codex gets the same with `burrow connect codex ~/Notes --write`.
 
 Each connection is kept as its own conversation; the app's **Conversations** page shows what each one looked up, read
 and kept.
+
+## Picking a session up, a day or a month later
+
+Every Claude Code and Codex session is archived, so you can carry one on in another program, word for word:
+
+- in Claude Code, `/burrow-resume <name>`; in Codex, `$burrow-resume <name>`;
+- with a model on this Mac, `burrow chat ~/Notes --resume <name>` (add `--llama URL` to keep its cache on disk);
+- from the terminal, `burrow session` lists the latest, and `burrow session resume <name>` prints what a model is handed.
+
+The name is the session's id, its first 8 characters, or words from its name. The app's **Sessions** page (⌘6) has the
+line for each program ready to copy. Sessions from before Burrow was connected are kept with `burrow session sync`.
+
+**The archive** lives in Burrow's own folder. To keep it on an external drive:
+
+```
+burrow session settings archive-folder /Volumes/YourSSD/Burrow
+```
+
+When the drive is not connected, sessions are kept in Burrow's own folder instead, and both `burrow session settings`
+and the Sessions page say "YourSSD not connected"; your setting stays as you set it. `burrow session settings` alone
+shows every switch (lean output, recall, steering, the archive) and where the archive is. See [sessions.md](sessions.md).
 
 ## Before calling a code change done
 

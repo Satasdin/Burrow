@@ -21,6 +21,7 @@ agreeing to) or, for folders, shares and confirming a check, in the app:
 - approving a linked folder, linking one, and joining a team (D-101, D-104);
 - sharing with the team: a program's request waits on your Mac until you approve it (D-111);
 - writing a program's settings with `burrow connect --write` (D-108);
+- letting another program read a session's exact messages, with `burrow session allow` (D-117);
 - confirming, taking away or overriding a decision's check. These also need an 8-digit code shown only in a macOS
   notification, never in the terminal, valid once for two minutes. Burrow keeps no copy of it (D-113).
 
@@ -37,6 +38,19 @@ read. What keeps connected programs out is that Burrow's MCP tools never approve
 - A program can call only the tools it is shown (D-105).
 - Commits are signed by the program that connected; a model's name for itself is kept only as its claim (D-83).
 - A check a program proposes is kept as proposed and never run until you confirm it.
+
+## Archived sessions
+
+Every Claude Code and Codex session is kept in Burrow's folder, or on the drive you chose, written readable only by
+your account (D-117). A drive that ignores permissions, such as one formatted exFAT, can be read by anyone who has it.
+What a program can read back from it:
+
+- the resume pack and the timeline, with secrets taken out: any program you connected;
+- the exact messages, by search or by ref: only the program that wrote the session. Another program gets them only
+  after you run `burrow session allow <id> <program>` in your own terminal and type yes;
+- a tool output Burrow kept whole, through `burrow_expand`: only the Claude Code session that ran it (D-116).
+
+Everything it hands back is marked as data about past work, not instructions.
 
 ## Secrets
 
