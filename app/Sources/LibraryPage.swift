@@ -86,7 +86,7 @@ struct LibraryPage: View {
     private var header: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .firstTextBaseline, spacing: 12) {
-                Text(kind == .all ? "Library" : kind.title).font(.system(size: 28, weight: .bold)).tracking(-0.4)
+                Text(kind == .all ? "Library" : kind.title).font(.system(size: 28, weight: .bold)).fontWidth(.expanded).tracking(-0.4)
                 Text(summary).foregroundStyle(Night.dim).monospacedDigit()
                 Spacer()
                 if let storage = workspace.storage { StorageBars(report: storage) }

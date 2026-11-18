@@ -1,0 +1,101 @@
+{
+ "note": "Run 2 script: the same session, but the heavy steps ask for the raw output in the conversation (no pipes, no redirection, the Read tool on the whole file), as happens when a person wants to see it. Sonnet 5.5 in run 1 often redirected output to a file and grepped it, so its context barely filled. The scripted session every arm runs. 'quiz' messages run with Bash, Read, Grep and Glob disallowed, so answers come from the session's own memory (and, in arm C, Burrow's recall and tools). Each quiz item lists the strings a right answer must contain (any one group).",
+ "turns": [
+  "We're working on the ledgerly package in this folder. Before anything, some facts to keep for the whole session: the deploy port is 7431, the customer is Wanjiku Logistics, and our error budget is 0.3%. Never rename the public function reconcile_batch, other teams import it. Just acknowledge.",
+  "Read ledgerly/parse.py and ledgerly/reconcile.py and tell me in two sentences what they do.",
+  "Run: python3 tools/gen_report.py . Tell me which shard failed, and the exact expected and actual checksums. Run it exactly as written, with no pipes, redirection or files: I want you to look at the raw output yourself.",
+  "Decision: we'll store matched rows in SQLite, not Postgres, because the client's laptops are offline most of the day. Add a short comment saying so at the top of ledgerly/reconcile.py.",
+  "Read data/fixtures.py and tell me how many fixtures are marked void. Use the Read tool on the whole file (no offset or limit).",
+  "Run: python3 tools/run_checks.py and tell me if anything failed. Run it exactly as written, with no pipes, redirection or files: I want you to look at the raw output yourself.",
+  "Read ledgerly/rules.py and list the first five rule names. Use the Read tool on the whole file (no offset or limit).",
+  "Make parse_line strip spaces around the reference and uppercase it. Show me the diff.",
+  "Run: python3 -m pytest -q tests  (install nothing; if pytest is missing, run the test function directly with python3 -c).",
+  "Run: python3 tools/gen_report.py | grep WARN | head -400 and tell me which shard has the most warnings.",
+  "Read data/fixtures.py again and tell me the total amount of the open fixtures on route 46. Use the Read tool on the whole file (no offset or limit).",
+  "Run: python3 tools/run_checks.py --verbose and tell me the slowest check. Run it exactly as written, with no pipes, redirection or files: I want you to look at the raw output yourself.",
+  "Grep the rules file for every rule that mentions 'multiple of 7' and tell me how many there are.",
+  "Add a function summarise(matched) to reconcile.py that returns the count and total amount. Keep reconcile_batch's name and signature.",
+  "Run: python3 tools/gen_report.py and tell me how many warnings shard-07 had. Run it exactly as written, with no pipes, redirection or files: I want you to look at the raw output yourself.",
+  "Read ledgerly/rules.py in full and tell me which rule numbers flag multiples of 13. Use the Read tool on the whole file (no offset or limit).",
+  "Run: cat data/fixtures.py | head -1500 and tell me the reference of the 1000th fixture.",
+  "Run: python3 tools/run_checks.py and tell me the average time of the first 100 checks, roughly. Run it exactly as written, with no pipes, redirection or files: I want you to look at the raw output yourself.",
+  "Write a small test for summarise in tests/test_reconcile.py and run it.",
+  "Run: python3 tools/gen_report.py | tail -600 and summarise what the last 600 lines say.",
+  "Read data/fixtures.py once more and count fixtures on route 111 that are paid. Use the Read tool on the whole file (no offset or limit).",
+  "Run: python3 tools/run_checks.py | tail -800 and tell me the check numbers that took over 85 ms.",
+  "Look through everything once more and tell me if any file still needs work."
+ ],
+ "quiz": [
+  {
+   "ask": "Quiz, answer from memory of this session, no tools needed: what is the deploy port?",
+   "any": [
+    [
+     "7431"
+    ]
+   ]
+  },
+  {
+   "ask": "Quiz: who is the customer?",
+   "any": [
+    [
+     "Wanjiku"
+    ]
+   ]
+  },
+  {
+   "ask": "Quiz: what is our error budget?",
+   "any": [
+    [
+     "0.3"
+    ]
+   ]
+  },
+  {
+   "ask": "Quiz: which function must never be renamed, and why?",
+   "any": [
+    [
+     "reconcile_batch"
+    ]
+   ]
+  },
+  {
+   "ask": "Quiz: which shard failed in the first gen_report run, and what were the expected and actual checksums?",
+   "any": [
+    [
+     "0x5F3A",
+     "9c41",
+     "77e2"
+    ]
+   ]
+  },
+  {
+   "ask": "Quiz: which database did we choose for matched rows, and for what reason?",
+   "any": [
+    [
+     "SQLite",
+     "offline"
+    ]
+   ]
+  },
+  {
+   "ask": "Quiz: how many records did the gen_report SUMMARY line say were processed?",
+   "any": [
+    [
+     "48213"
+    ],
+    [
+     "48,213"
+    ]
+   ]
+  },
+  {
+   "ask": "Quiz: what was the first change I asked you to make to parse_line?",
+   "any": [
+    [
+     "strip",
+     "upper"
+    ]
+   ]
+  }
+ ]
+}

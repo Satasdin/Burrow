@@ -1,0 +1,327 @@
+<title>Session Context Plan</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+/* Layout: one reading column, wide tables scroll in their own box; a gauge strip shows what fills a context window. */
+:root {
+  --bg: #f6f7f5; --panel: #ffffff; --fg: #1d2420; --muted: #5d6a63; --line: #d9dfdb;
+  --accent: #2f6f5e; --accent-soft: #e2efea; --warn: #9a5b12; --warn-soft: #f6ead9; --no: #8c2f2f; --no-soft: #f4e2e2;
+  --display: "Space Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #131816; --panel: #1b2220; --fg: #e4ebe7; --muted: #9aa8a1; --line: #2e3834;
+  --accent: #7cc4ad; --accent-soft: #1f3530; --warn: #e0a95c; --warn-soft: #3a2c1a; --no: #e08a8a; --no-soft: #3a2222; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #131816; --panel: #1b2220; --fg: #e4ebe7; --muted: #9aa8a1; --line: #2e3834;
+  --accent: #7cc4ad; --accent-soft: #1f3530; --warn: #e0a95c; --warn-soft: #3a2c1a; --no: #e08a8a; --no-soft: #3a2222; color-scheme: dark }
+body { background: var(--bg); color: var(--fg); font: 15px/1.6 var(--body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 32px 64px; }
+main { max-width: 860px; margin: 0 auto; display: flex; flex-direction: column; gap: 40px; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; line-height: 1.2; margin: 0; }
+h1 { font-size: 2.1rem; } h2 { font-size: 1.45rem; } h3 { font-size: 1.08rem; }
+p { margin: 0; max-width: 68ch; }
+section { display: flex; flex-direction: column; gap: 14px; }
+.eyebrow { font: 500 .75rem var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+code, .mono { font-family: var(--mono); font-size: .88em; }
+.lede { font-size: 1.05rem; color: var(--muted); }
+.box { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 16px 18px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+.scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); }
+table { border-collapse: collapse; width: 100%; min-width: 620px; font-size: .9rem; }
+th, td { text-align: left; vertical-align: top; padding: 9px 12px; border-bottom: 1px solid var(--line); }
+th { font: 600 .74rem var(--mono); letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+tr:last-child td { border-bottom: 0; }
+.pill { display: inline-block; font: 500 .72rem var(--mono); padding: 1px 8px; border-radius: 99px; white-space: nowrap; }
+.yes { background: var(--accent-soft); color: var(--accent); } .part { background: var(--warn-soft); color: var(--warn); } .no { background: var(--no-soft); color: var(--no); }
+.gauge { display: flex; height: 26px; border-radius: 6px; overflow: hidden; border: 1px solid var(--line); font: 500 .7rem var(--mono); }
+.gauge span { display: flex; align-items: center; padding: 0 8px; white-space: nowrap; overflow: hidden; }
+.g1 { background: var(--line); color: var(--fg); } .g2 { background: var(--warn-soft); color: var(--warn); } .g3 { background: var(--accent-soft); color: var(--accent); }
+ol, ul { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 6px; max-width: 70ch; }
+.ask { border-left: 3px solid var(--accent); padding-left: 14px; }
+.num { font-variant-numeric: tabular-nums; }
+pre.mermaid { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px; overflow-x: auto; }
+</style>
+
+<main>
+<header style="display:flex;flex-direction:column;gap:10px">
+  <div class="eyebrow">Burrow · plan for review · 17 Nov 2026 · branch session-context</div>
+  <h1>Keeping a live AI session lean, and its memory whole</h1>
+  <p class="lede">Claude Code fills its context with tool output, compacts, and then forgets the exact words. This plan says what Burrow will do at each step of a live session, what it cannot do from outside the model's path, and how we will prove it with real Claude Code runs. Mark it up. No code gets written until you approve.</p>
+</header>
+
+<section>
+  <div class="eyebrow">Built and tested · 17 Nov · branch session-context</div>
+  <h2>What the real runs showed</h2>
+  <p>Real Claude Code on Sonnet 5.5, a 30-message session with a 100,000-token window, and the heavy steps asking for raw output in the conversation. One run per setup. Every number comes from the transcripts and the API's own usage. The raw files are in <code>docs/evidence/session-context/</code>.</p>
+  <div class="scroll"><table>
+    <tr><th>Setup</th><th>Compactions</th><th>Tool output the model saw</th><th>Tokens billed</th><th>Cost</th><th>Quiz on early details</th></tr>
+    <tr><td>Claude Code alone</td><td class="num">4</td><td class="num">472,609 chars</td><td class="num">3.49 M</td><td class="num">$34.59</td><td class="num">8/8</td></tr>
+    <tr><td>Burrow 1.2.3</td><td class="num">4</td><td class="num">472,231 chars</td><td class="num">3.54 M</td><td class="num">$36.28</td><td class="num">7/8</td></tr>
+    <tr><td><b>This branch</b></td><td class="num"><b>2</b></td><td class="num"><b>136,416 chars (−71 %)</b></td><td class="num"><b>2.89 M (−17 %)</b></td><td class="num"><b>$21.29 (−38 %)</b></td><td class="num">8/8</td></tr>
+  </table></div>
+  <ul>
+    <li><b>Resuming elsewhere.</b> Qwen3 4B through llama.cpp resumed the archived Sonnet session and answered 3 of 3 questions. On the second resume its saved memory loaded in 0.03 s, and the first answer came in 1.3 s instead of 3.1 s. Codex on Gemma 4 12B resumed the same session with <code>$burrow-resume</code> and answered 3 of 3.</li>
+    <li><b>What didn't work.</b>
+      <ul>
+        <li>The quiz didn't separate the setups: Claude Code's own summary kept most values, so no recall win is claimed.</li>
+        <li>Codex on Qwen3 8B never called the tool.</li>
+        <li>When Sonnet chose for itself, it grepped files instead of printing them, so Claude Code alone never compacted.</li>
+        <li>In that run, an old Burrow habit made the context bigger: it handed over the Ledger summary again on every resume. That is now fixed.</li>
+      </ul></li>
+  </ul>
+</section>
+
+<section>
+  <div class="eyebrow">What fills a session</div>
+  <h2>Where the context goes</h2>
+  <p>A coding session's window fills mostly with tool output: whole files, test logs, command output. The model needs a few lines of each and keeps all of it. Once the window is full, Claude Code rewrites the whole history into one summary. Everything said early is summarised again at every compaction, so it fades.</p>
+  <div class="gauge" aria-label="Illustration of a full context window">
+    <span class="g1" style="width:14%">system + tools</span>
+    <span class="g2" style="width:58%">tool output (reads, logs, commands)</span>
+    <span class="g3" style="width:28%">what was said</span>
+  </div>
+  <p class="mono" style="font-size:.8rem;color:var(--muted)">Illustration only. The proof runs will measure the real split.</p>
+</section>
+
+<section>
+  <div class="eyebrow">Research · checked against Claude Code 2.1.322 on this Mac</div>
+  <h2>What Burrow can and can't control</h2>
+  <p>Burrow sits beside Claude Code through hooks and MCP, not in the model's path. Two of the rows below were checked with a real run today: a PostToolUse hook swapped a Bash and a Read result, the model saw only the short version, and the transcript kept only the short version.</p>
+  <div class="scroll"><table>
+    <tr><th>Lever</th><th>What it allows</th><th>Burrow</th></tr>
+    <tr><td><code>PostToolUse</code> → <code>updatedToolOutput</code></td><td>Replace what the model sees from Bash, Read, Grep or any MCP tool, after the tool has run. <b>Verified today.</b></td><td><span class="pill yes">will use</span></td></tr>
+    <tr><td><code>PreCompact</code> stdout</td><td>Becomes instructions for Claude Code's compaction summary, up to 10,000 characters. A hook can also block a proactive compaction.</td><td><span class="pill yes">will use</span></td></tr>
+    <tr><td><code>UserPromptSubmit</code></td><td>Adds context before the model reads the person's message.</td><td><span class="pill yes">will use</span></td></tr>
+    <tr><td><code>SessionStart</code> source <code>compact</code></td><td>Adds context straight after a compaction. Burrow already hands folds back here (D-102).</td><td><span class="pill yes">already</span></td></tr>
+    <tr><td><code>PostCompact</code></td><td>Gives the summary Claude Code just wrote, so Burrow can see what it lost.</td><td><span class="pill yes">will use</span></td></tr>
+    <tr><td>Transcript <code>message.usage</code></td><td>Tokens per request: input, cache read, cache write. The format is undocumented and changes between versions.</td><td><span class="pill part">read, defensively</span></td></tr>
+    <tr><td>Editing earlier turns</td><td>No hook can change a turn once it is in the history, or move the compaction boundary.</td><td><span class="pill no">can't</span></td></tr>
+    <tr><td>Claude Code's own re-reads</td><td>After compaction it re-reads up to 5 recent files, CLAUDE.md and skills. Burrow can't stop or shrink that.</td><td><span class="pill no">can't</span></td></tr>
+    <tr><td>Anthropic's prompt cache</td><td>Claude Code manages it. A shorter history that stays fixed keeps the cache warm; Burrow can't set it.</td><td><span class="pill no">can't</span></td></tr>
+    <tr><td>API context editing / memory tool</td><td><code>clear_tool_uses</code> and <code>memory_20250818</code> are for programs that call the API directly. Claude Code doesn't let a hook switch them on.</td><td><span class="pill no">not reachable</span></td></tr>
+  </table></div>
+</section>
+
+<section>
+  <div class="eyebrow">The alternatives</div>
+  <h2>What others do better, and what we take from them</h2>
+  <div class="scroll"><table>
+    <tr><th>Tool</th><th>What it does well</th><th>Where it falls short</th><th>We take</th></tr>
+    <tr><td>Claude Code alone</td><td>Compacts automatically and re-reads recent files.</td><td>Summary of a summary: exact values, errors and early requests fade.</td><td>(baseline)</td></tr>
+    <tr><td>context-mode (plugin)</td><td>Keeps big output out of context and returns matching chunks plus a pointer. Claims 99% of bytes kept out.</td><td>Measures bytes saved, not whether the task still went right.</td><td>Lean output, search by words and by code names</td></tr>
+    <tr><td>claude-mem (plugin)</td><td>Hooks record every tool call; search in layers (index, timeline, full text).</td><td>A model call on every tool use, and the compression loses detail.</td><td>Layered recall: short hit first, full text on request</td></tr>
+    <tr><td>Cursor</td><td>Its summary is backed by the full history in a file the agent can open.</td><td>Only helps if the agent goes and reads it.</td><td>Every short form names its handle</td></tr>
+    <tr><td>Aider</td><td>Ranked repo map held to a token budget, every turn.</td><td>Code structure only, no session memory.</td><td>An outline instead of a whole file</td></tr>
+    <tr><td>Letta, mem0, Zep</td><td>Curated memory, facts updated or dated rather than piled up.</td><td>Heavy; every write is a model call.</td><td>Already in the Ledger (decisions, supersedes)</td></tr>
+    <tr><td>billion-context</td><td>Folds only what is new, keeps a pointer to the original, keeps the cached prefix stable.</td><td>Needs the model in its path.</td><td>Already in folds (D-102)</td></tr>
+  </table></div>
+  <p>None of these publish an independent benchmark; their numbers are their own. Our runs will be measured end to end, on whether answers stay right, not only on bytes saved.</p>
+</section>
+
+<section>
+  <div class="eyebrow">The design</div>
+  <h2>One session, step by step</h2>
+<pre class="mermaid">
+flowchart LR
+  P[Person types a message] -->|UserPromptSubmit| R[Recall: matching exact words that have left the context, capped]
+  R --> M[Model works]
+  M --> T[Tool runs: Bash, Read, Grep]
+  T -->|PostToolUse| L[Lean output: big result kept by Burrow, model sees head, tail, errors and a handle]
+  L --> M
+  M -->|window full| C[PreCompact: fold the stretch, and tell the summary what to keep word for word]
+  C --> S[SessionStart compact: folds handed back]
+  S --> M
+  L -.-> K[(Kept outputs)]
+  C -.-> F[(Folds)]
+  K -.-> R
+  F -.-> R
+  K -.-> Panel[Session panel in the app]
+  F -.-> Panel
+  R -.-> Panel
+</pre>
+
+  <div class="grid">
+    <div class="box">
+      <h3>1. Lean output</h3>
+      <p>When a Bash or Grep result is over about 6,000 characters, Burrow keeps the whole thing and the model sees the first and last 30 lines, every error line, and a handle such as <code>k3f2a</code>. A whole-file Read over about 1,500 lines (no range given) becomes the file's outline, its first 120 lines and a handle. <code>burrow_expand k3f2a</code> gives lines, a range or matching lines back.</p>
+      <p><b>Never shrunk:</b> small output, reads that asked for a range, Edit and Write results, Burrow's own tools. Kept outputs live outside the vault, readable only by your account and only by the session that made them, the same rule as folds (D-105).</p>
+    </div>
+    <div class="box">
+      <h3>2. Automatic recall</h3>
+      <p>On each new message, Burrow searches only what has <b>left</b> the context: kept outputs, this session's turns from before its last compaction, and earlier sessions' folds. Searching what the model can still see would only add noise. It hands back the exact words with their message reference, under 1,500 characters, and nothing at all when nothing matches well. It is marked as data, never as instructions.</p>
+    </div>
+    <div class="box">
+      <h3>3. Steered compaction <span class="pill part">new</span></h3>
+      <p>At PreCompact, Burrow already makes a fold. It will also print short instructions for the summary: keep the person's requests and exact values word for word, name the kept-output handles and folds, and keep the open plan. This is the cheapest lever the research turned up.</p>
+    </div>
+    <div class="box">
+      <h3>4. A cache for the app's model</h3>
+      <p>Measured today: Ollama reuses a prompt's start when it matches the last prompt exactly. A 4,600-token prompt went from <span class="num">2.93 s</span> to <span class="num">0.05 s</span>. Changing the window size reloads the model and loses the cache.</p>
+      <p>Today the app picks a different window per question and puts the parts that change first. The fix:</p>
+      <ul>
+        <li>One fixed window per model, so the model is never reloaded.</li>
+        <li>Load it for 30 minutes.</li>
+        <li>Lay the prompt out with the parts that don't change first.</li>
+        <li><code>burrow chat</code> keeps its history as an unchanged prefix.</li>
+        <li>Identical repeat questions get the kept answer.</li>
+        <li>Ollama's own count of cached tokens is recorded and shown.</li>
+      </ul>
+      <p><b>What it can't do:</b> Ollama has no way to save its cache to disk, so the cache can't outlive an unload. The llama.cpp shelf (D-60) stays for that.</p>
+    </div>
+    <div class="box">
+      <h3>5. Session panel</h3>
+      <p>A new page in the app, one row per live or recent Claude Code session. It shows:</p>
+      <ul>
+        <li>Context used over time, from the transcript's token counts.</li>
+        <li>Each compaction.</li>
+        <li>Outputs kept, with the characters they saved.</li>
+        <li>Folds made.</li>
+        <li>Recalls handed back, and whether the model then used the handle.</li>
+      </ul>
+      <p>The hooks write a small meter file per session, and the panel reads it.</p>
+    </div>
+    <div class="box">
+      <h3>6. Connect and settings</h3>
+      <p><code>burrow connect claude-code</code> and <code>hook install claude</code> add the new entries: PostToolUse on Bash, Read and Grep; UserPromptSubmit; PostCompact. Each part can be switched off on its own. Nothing is written to your real <code>~/.claude/settings.json</code> without asking you.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="eyebrow">Added 17 Nov after your note · measured on this Mac today</div>
+  <h2>Resuming a session: fast and cheap</h2>
+  <p>A resumed session has to be fed its whole history again. For Claude Code, that history is already in Anthropic's prompt cache for an hour after the last reply. For Burrow's own model, it is the model's working memory (its KV cache). Getting that memory back, instead of reading everything again, is what makes a resume fast and cheap.</p>
+  <div class="scroll"><table>
+    <tr><th>Measured today</th><th>Feeding the whole history again</th><th>With the session's cache</th></tr>
+    <tr><td>Burrow's model resumes a chat (Qwen3 4B, 8,600-token history, llama.cpp loading the same model file Ollama already has)</td><td class="num">7.32 s before the first word; all 8,653 tokens read</td><td class="num">0.49 s. The saved cache loads in 0.04 s and only 21 new tokens are read: <b>15× faster</b></td></tr>
+    <tr><td>Saving that chat's cache after a reply</td><td colspan="2" class="num">0.19 s; a 676 MB file (8-bit cache, about 78 KB per token)</td></tr>
+    <tr><td>Claude Code resumes a 69,000-token session within the hour (Haiku)</td><td colspan="2" class="num">68,710 tokens read from the cache and 400 written: the cache already does the work</td></tr>
+    <tr><td>A forked, headless request on the same session</td><td colspan="2" class="num">Also read 68,710 tokens from the cache, and resets its hour-long expiry</td></tr>
+    <tr><td>What Claude Code tells a hook on resume</td><td colspan="2"><code>context_tokens</code> 69,072 · <code>prompt_cache_likely_expired</code> false · <code>estimated_cache_write_usd</code> 0.0138 · <code>seconds_since_last_response</code></td></tr>
+  </table></div>
+  <div class="grid">
+    <div class="box">
+      <h3>7. Session cache for Burrow's own model</h3>
+      <p>Today Ollama can't save its cache to disk, so a chat resumed tomorrow reads its whole history again. llama.cpp can, and it runs the model file Ollama has already downloaded, so nothing new is downloaded.</p>
+      <ul>
+        <li>After each reply in <code>burrow chat</code> and the app's Ask, Burrow saves the conversation's cache.</li>
+        <li>On resume it loads the cache and reads only the new message.</li>
+        <li>The cache is filed by model and conversation, like the shelf (D-60), and cleared oldest first above a size limit.</li>
+      </ul>
+      <p>Ollama remains the fallback when llama.cpp isn't installed.</p>
+    </div>
+    <div class="box">
+      <h3>8. Resume advice for Claude Code</h3>
+      <p>On every resume, Burrow reads those numbers. When the cache has expired and the session is large, it shows you what the resume will cost to rewrite.</p>
+      <ul>
+        <li>For example: "140,000 tokens, about $0.60."</li>
+        <li>It also offers the lean alternative: <code>/clear</code>, after which Burrow hands back this session's folds, plan and last request in about 6,000 tokens.</li>
+      </ul>
+      <p>Lean output (part 1) also makes every resume cheaper, because there is less history to rewrite.</p>
+    </div>
+    <div class="box">
+      <h3>9. Keeping the cache warm <span class="pill part">your call</span></h3>
+      <p>The fork result above means Burrow could send one tiny forked request shortly before the hour runs out. That keeps the cache alive while you're away.</p>
+      <ul>
+        <li><b>Cost:</b> on Sonnet 5.5, a cache read costs 0.05× and rewriting an expired hour-long cache costs 2×. One keep-warm request therefore costs about a fortieth of a rewrite.</li>
+        <li><b>Open question:</b> I've only checked it from one headless session to another. Whether it matches an interactive session's cache needs one more test.</li>
+      </ul>
+      <p>It would be off by default, with a limit you set.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="eyebrow">Added 17 Nov from your idea</div>
+  <h2>Resume any session, in any model, a month later</h2>
+  <p>Burrow keeps every session on your Mac, or on an external SSD you choose: every word, every tool output and the kept outputs, indexed. Any program can pick it up. Claude Code, Codex, <code>burrow chat</code> on a local model, or the app.</p>
+  <ul>
+    <li><b>The person types:</b> <code>/burrow:resume parser-fix</code> in Claude Code, the same skill in Codex, or <code>burrow session resume parser-fix</code>.</li>
+    <li><b>The model gets:</b> a small resume pack. Then it reads and recalls the rest from Burrow when it needs it.</li>
+  </ul>
+
+  <div class="box" style="border-color:var(--warn)">
+    <h3>What can and can't move between models</h3>
+    <p>A prompt cache can't be shared between models. A cache is one model's working memory: the numbers its own weights made while reading those words. Anthropic's cache lives on Anthropic's servers for at most an hour, and no other model can read it. Qwen's cache means nothing to Gemma.</p>
+    <p>What moves is the words. So Burrow keeps the words whole and indexed. Each local model that resumes a session builds its own cache of the resume pack once, and Burrow keeps that cache on disk. From the second resume on, that model starts in under a second, as in part 7. Claude Code and Codex rebuild Anthropic's or OpenAI's cache from the small pack at a fraction of the full history's cost.</p>
+  </div>
+
+  <div class="scroll"><table>
+    <tr><th>Layer</th><th>What the model gets</th><th>Size</th></tr>
+    <tr><td>1. Resume pack (handed over at once)</td><td>
+      <ul>
+        <li>The person's requests, word for word</li>
+        <li>Decisions and the reasons given</li>
+        <li>The open plan, and where it stopped (Midway, D-110)</li>
+        <li>Files touched, errors still open, the folds</li>
+      </ul></td><td class="num">about 6,000 tokens</td></tr>
+    <tr><td>2. Timeline (on request)</td><td>One line per stretch of the session, each with a handle</td><td class="num">about 1,500 tokens</td></tr>
+    <tr><td>3. Exact recall (on request, and automatic in Claude Code)</td><td>The original messages and tool output, by handle or by search; the same search as part 2</td><td class="num">capped per call</td></tr>
+    <tr><td>4. Local model cache</td><td>That model's cache of layer 1, loaded instead of read</td><td class="num">about 470 MB per 6,000 tokens on Qwen3 4B</td></tr>
+  </table></div>
+
+  <div class="grid">
+    <div class="box">
+      <h3>Storage, measured</h3>
+      <p>Your Claude Code transcripts take <span class="num">7.2 GB</span> today, across 104 project folders. The largest single session is 203 MB, mostly tool output. Claude Code deletes transcripts after 30 days by default, so a session from a month ago is gone unless something keeps it.</p>
+      <p>Burrow's archive keeps them compressed; text usually shrinks 5 to 10 times. Local-model caches are the large part, so the archive folder can sit on an external SSD. If that drive is unplugged, the resume packs and the index still work from the Mac.</p>
+    </div>
+    <div class="box">
+      <h3>Codex both ways</h3>
+      <p>Codex 0.146 is installed here and has skills, hooks and its own session files (<code>~/.codex/sessions</code>). Burrow has no Codex connection yet, so I'd add <code>burrow connect codex</code>. That gives MCP, the resume skill and its hooks, if they cover the same moments.</p>
+      <p>Burrow would also read Codex's sessions into the same archive, so a Codex session can be resumed in Claude Code and the other way round.</p>
+    </div>
+    <div class="box">
+      <h3>Privacy</h3>
+      <p>Today the original messages go only to the program and session that wrote them (D-105). Resuming in another program changes that on purpose.</p>
+      <ul>
+        <li>The resume pack, with secrets taken out, goes to the program you resume in.</li>
+        <li>The raw originals go there only after you approve that session for that program once, in the app or at the command line, the same way linked folders are approved.</li>
+        <li>A model asking on its own never gets another program's raw session.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="eyebrow">Proof</div>
+  <h2>How we will know it works</h2>
+  <ol>
+    <li><b>The task.</b> A scripted session of about 30 messages, run with real Claude Code in headless mode, on a scratch repository with big logs and long files. The first messages plant facts: a port number, an error code, a constraint the person states once. The window is set to Claude Code's floor of 100,000 tokens, so several compactions happen.</li>
+    <li><b>Three arms, same script.</b>
+      <ul>
+        <li>A: Claude Code alone.</li>
+        <li>B: Burrow 1.2.3 as shipped (folds only).</li>
+        <li>C: Burrow with every new part.</li>
+      </ul>
+      Two runs per arm, if the cost is acceptable.</li>
+    <li><b>Counted from the raw transcripts:</b>
+      <ul>
+        <li>Compactions.</li>
+        <li>Context size after every request.</li>
+        <li>Tokens billed (input, cache read, cache write).</li>
+        <li>Outputs kept and expanded.</li>
+        <li>Recalls handed back.</li>
+      </ul></li>
+    <li><b>The quiz.</b> At the end, 8 questions about the early part of the session, each with one right answer, graded exactly. A failed answer is reported as plainly as a right one.</li>
+    <li><b>The app's model.</b> The same 10 questions asked twice in <code>burrow chat</code> and in the app, before and after the change. We record seconds to the first word, the cached tokens Ollama reports, and whether the answers stay the same.</li>
+    <li>Every transcript, hook log and number goes into <code>docs/evidence/session-context/</code> on the branch. <code>swift test</code> is run in full and the whole log read; the app is rebuilt.</li>
+  </ol>
+  <p><b>One setup note.</b> A scratch HOME isn't logged in to Claude Code, because the login lives in your keychain. The runs therefore use your login and switch off your own settings and MCP servers (<code>--setting-sources project,local --settings scratch.json --strict-mcp-config</code>), so your real Burrow hooks don't fire. I checked this today: a test session saw no Burrow context. Claude Code still writes those runs' transcripts under <code>~/.claude/projects</code>, in folders named after the scratch directory.</p>
+</section>
+
+<section>
+  <div class="eyebrow">Your call</div>
+  <h2>Mark these up</h2>
+  <div class="ask"><p><b>Model for the runs:</b> Sonnet, as you chose on 17 Nov. Two runs of 3 arms at 30 messages, with several compactions each, is roughly 6 to 10 million tokens, mostly cache reads. The resume tests add a few cheap runs.</p></div>
+  <div class="ask"><p><b>Keeping the cache warm (part 9).</b> Build it, off by default, with a cap such as 3 keep-warm requests per session? Or leave it as research only?</p></div>
+  <div class="ask"><p><b>The session archive.</b> Keep every session by default, or only the ones you name or resume? Where does it live by default: Burrow's folder on the Mac, with a setting to move it to an SSD? And should Codex be connected and imported in this round, or in a later one?</p></div>
+  <div class="ask"><p><b>Proof for resume.</b> Resume one of the test sessions 3 ways: in Claude Code after <code>/clear</code>, in Codex, and in <code>burrow chat</code> on Qwen3 4B. Ask each the same 8 quiz questions, and time the local model's first and second resume.</p></div>
+  <div class="ask"><p><b>Disk for the local session cache (part 7).</b> About 78 KB per token, so a long 16,000-token chat is about 1.3 GB. I suggest the shelf's existing 12 GB limit, shared with packs and cleared oldest first.</p></div>
+  <div class="ask"><p><b>Shrinking whole-file Reads.</b> This saves the most, but the model then has to read a range before it edits. I suggest it ships on, above about 1,500 lines only, with a switch to turn it off.</p></div>
+  <div class="ask"><p><b>Including a competitor in the runs.</b> Installing context-mode as a fourth arm would show "better than the alternatives" directly, rather than arguing it. It means downloading a third-party plugin into the scratch setup only. Yes or no?</p></div>
+  <div class="ask"><p><b>Transcripts under <code>~/.claude/projects</code></b> from the test runs (see the setup note). Is that acceptable, or should I delete those folders once the evidence is copied?</p></div>
+</section>
+</main>

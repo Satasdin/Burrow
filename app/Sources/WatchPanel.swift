@@ -7,8 +7,8 @@ import SwiftUI
 struct WatchPanel: View {
     let workspace: Workspace
     @State private var open: Part? = nil
-    @AppStorage(SkyTheme.key) private var themeName = SkyTheme.nebula.rawValue
-    private var theme: SkyTheme { SkyTheme(rawValue: themeName) ?? .nebula }
+    @AppStorage(SkyTheme.key) private var themeName = SkyTheme.standard.rawValue
+    private var theme: SkyTheme { SkyTheme(rawValue: themeName) ?? .standard }
 
     enum Part: String { case rules, check, flagged }
 

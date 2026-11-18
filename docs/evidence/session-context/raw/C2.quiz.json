@@ -1,0 +1,48 @@
+{
+ "arm": "C",
+ "run": "2",
+ "session": "7856a1e1-8eda-4173-a0d7-40afbb45b14e",
+ "quiz": [
+  {
+   "ask": "Quiz, answer from memory of this session, no tools needed: what is the deploy port?",
+   "answer": "The deploy port is 7431.",
+   "right": true
+  },
+  {
+   "ask": "Quiz: who is the customer?",
+   "answer": "The customer is Wanjiku Logistics.",
+   "right": true
+  },
+  {
+   "ask": "Quiz: what is our error budget?",
+   "answer": "Our error budget is 0.3%.",
+   "right": true
+  },
+  {
+   "ask": "Quiz: which function must never be renamed, and why?",
+   "answer": "`reconcile_batch` must never be renamed, because other teams import it. It's a public function in `ledgerly/reconcile.py`. Renaming it would break their imports.",
+   "right": true
+  },
+  {
+   "ask": "Quiz: which shard failed in the first gen_report run, and what were the expected and actual checksums?",
+   "answer": "In the first run, the raw output I could see didn't show the failure. Claude Code cut it at about 30,000 characters, so I said then that I couldn't tell you which shard failed or what the checksums were.\n\nI got the failure from a later view of the full output. It's the line at 09:20:34:\n\n`FATAL shard 0x5F3A checksum mismatch (expected 9c41 got 77e2)`\n\n- **Shard:** `0x5F3A`\n- **Expected checksum:** `9c41`\n- **Actual checksum:** `77e2`\n\nThat ID isn't one of the `shard-NN` labels used in the other lines, and I don't know which numbered shard it maps to. The final `SUMMARY` line reports 1 fatal, which matches this line.",
+   "right": true
+  },
+  {
+   "ask": "Quiz: which database did we choose for matched rows, and for what reason?",
+   "answer": "We chose SQLite, not Postgres, for matched rows. The reason is that the client's laptops are offline most of the day. A comment saying so sits at the top of `ledgerly/reconcile.py`.",
+   "right": true
+  },
+  {
+   "ask": "Quiz: how many records did the gen_report SUMMARY line say were processed?",
+   "answer": "The SUMMARY line said 48,213 records processed. The full line is `SUMMARY processed 48213 records, 1 fatal, 214 warnings`.",
+   "right": true
+  },
+  {
+   "ask": "Quiz: what was the first change I asked you to make to parse_line?",
+   "answer": "You asked me to make `parse_line` strip spaces around the reference and uppercase it, and to show you the diff. It was the only change you asked for on that function.\n\nThe result is in `ledgerly/parse.py`: `reference.strip().upper()`.\n\nMy first edit dropped a space after the comma, so I fixed it and re-diffed. The original copy is at `/tmp/ledgerly_orig/parse.py`.",
+   "right": true
+  }
+ ],
+ "score": 8
+}

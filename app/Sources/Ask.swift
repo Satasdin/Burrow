@@ -15,7 +15,7 @@ struct AskPage: View {
                     LazyVStack(alignment: .leading, spacing: 34) {
                         if workspace.turns.isEmpty {
                             VStack(spacing: 8) {
-                                Text("Ask your vault").font(.system(size: 28, weight: .semibold)).tracking(-0.4)
+                                Text("Ask your vault").font(.system(size: 28, weight: .semibold)).fontWidth(.expanded).tracking(-0.4)
                                 Text("The model on this Mac reads only what Burrow finds, and shows you what it used.")
                                     .foregroundStyle(.secondary)
                             }

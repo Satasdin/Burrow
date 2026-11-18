@@ -31,6 +31,8 @@ public final class ChatSession {
         public var rounds = 0
         public var endedAtLimit = false
         public var promptTokens = 0
+        /// Prompt tokens the model runner took from its cache rather than reading again (D-118).
+        public var cachedTokens = 0
         public var seconds = 0.0
         /// Ledger commits the tools handed the model, by id (D-90).
         public var ledger: [String] = []
@@ -69,6 +71,8 @@ public final class ChatSession {
     private let tools: VaultTools
     private let backend: ChatBackend
     public var settings: Settings
+    /// An earlier session this chat resumes, from Burrow's archive: its pack, handed over after the rules (D-117).
+    public var resumed: String?
     private var history: [[String: Any]] = []
     private let schemas = VaultTools.forChat.map(OllamaChat.schema)
     static let offered = Set(VaultTools.forChat.map(\.name))
@@ -146,7 +150,10 @@ public final class ChatSession {
     public func ask(_ question: String, observer: Observer = Observer()) async throws -> Turn {
         var turn = Turn()
         let started = Date()
-        var messages: [[String: Any]] = [["role": "system", "content": Self.systemPrompt(folder: tools.fixedFolder)]] + history
+        // A resumed session goes straight after the rules, before anything that changes, so its start is the same on every
+        // turn and on every resume, and a runner that kept its cache reads only what is new (D-118).
+        let system = Self.systemPrompt(folder: tools.fixedFolder) + (resumed.map { "\n\n" + $0 } ?? "")
+        var messages: [[String: Any]] = [["role": "system", "content": system]] + history
         messages.append(["role": "user", "content": userContent(question)])
 
         var spent = 0
@@ -175,6 +182,7 @@ public final class ChatSession {
             let reply = try await backend.reply(messages: messages, tools: toolsAllowed ? schemas : nil, onWord: stream.add)
             stream.finish()
             turn.promptTokens = max(turn.promptTokens, reply.promptTokens)
+            if turn.rounds == 1 { turn.cachedTokens = reply.cachedTokens }
             guard toolsAllowed, !reply.toolCalls.isEmpty else {
                 let checked = Citations.check(reply.text, shown: Self.shown(turn), ledger: Set(turn.ledger))
                 turn.answer = checked.text

@@ -8,8 +8,8 @@ struct Palette: View {
     @State private var selected = 0
     @FocusState private var focused: Bool
     @Namespace private var highlight
-    @AppStorage(SkyTheme.key) private var themeName = SkyTheme.nebula.rawValue
-    private var theme: SkyTheme { SkyTheme(rawValue: themeName) ?? .nebula }
+    @AppStorage(SkyTheme.key) private var themeName = SkyTheme.standard.rawValue
+    private var theme: SkyTheme { SkyTheme(rawValue: themeName) ?? .standard }
 
     private struct Item: Identifiable {
         let id: String
@@ -32,6 +32,7 @@ struct Palette: View {
             Item(id: "c-shelf", title: "Shelf", detail: "⌘3", icon: "memorychip") { w.go(.shelf) },
             Item(id: "c-programs", title: "Programs", detail: "⌘4", icon: "app.connected.to.app.below.fill") { w.go(.programs) },
             Item(id: "c-ledger", title: "Ledger", detail: "⌘5", icon: "books.vertical") { w.go(.ledger(nil)) },
+            Item(id: "c-sessions", title: "Sessions", detail: "⌘6", icon: "gauge.with.dots.needle.33percent") { w.go(.contextSessions) },
             Item(id: "c-graph", title: "Map", detail: "⇧⌘G", icon: "circle.hexagongrid") { w.go(.graph) },
             Item(id: "c-search", title: "Search Vault", detail: "⇧⌘F", icon: "magnifyingglass") { w.sidebarMode = .search },
             Item(id: "c-read", title: "Read Vault Again", detail: "⌘R", icon: "arrow.clockwise") { Task { await w.readAgain() } },

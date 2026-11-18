@@ -1,0 +1,48 @@
+{
+ "arm": "B",
+ "run": "1",
+ "session": "3ce42976-1030-439c-a5f1-e13681ead3f7",
+ "quiz": [
+  {
+   "ask": "Quiz, answer from memory of this session, no tools needed: what is the deploy port?",
+   "answer": "The deploy port is 7431.",
+   "right": true
+  },
+  {
+   "ask": "Quiz: who is the customer?",
+   "answer": "The customer is Wanjiku Logistics.",
+   "right": true
+  },
+  {
+   "ask": "Quiz: what is our error budget?",
+   "answer": "The error budget is 0.3%.",
+   "right": true
+  },
+  {
+   "ask": "Quiz: which function must never be renamed, and why?",
+   "answer": "`reconcile_batch` must never be renamed, because it's a public function that other teams import. Renaming it would break their code.",
+   "right": true
+  },
+  {
+   "ask": "Quiz: which shard failed in the first gen_report run, and what were the expected and actual checksums?",
+   "answer": "Shard `0x5F3A` failed with a checksum mismatch. The expected checksum was `9c41` and the actual was `77e2`. The line read `2026-11-17T09:20:34 FATAL shard 0x5F3A checksum mismatch (expected 9c41 got 77e2)`.\n\nAs I found in the last review, `gen_report.py` hardcodes that line, so it isn't evidence of a real failure in `ledgerly`.",
+   "right": true
+  },
+  {
+   "ask": "Quiz: which database did we choose for matched rows, and for what reason?",
+   "answer": "We chose SQLite, not Postgres, for matched rows. The reason is that the client's laptops are offline most of the day. A local SQLite database keeps working without a connection. I wrote this as a comment at the top of `ledgerly/reconcile.py`.",
+   "right": true
+  },
+  {
+   "ask": "Quiz: how many records did the gen_report SUMMARY line say were processed?",
+   "answer": "The SUMMARY line said 48213 records were processed: `SUMMARY processed 48213 records, 1 fatal, 214 warnings`.\n\nThat number is hardcoded in `gen_report.py`, like the FATAL line. It isn't a count of anything the script actually did.",
+   "right": true
+  },
+  {
+   "ask": "Quiz: what was the first change I asked you to make to parse_line?",
+   "answer": "The only change you asked for on `parse_line` was to strip spaces around the reference and uppercase it, and to show you the diff. The function now does `reference.strip().upper()`.",
+   "right": true
+  }
+ ],
+ "score": 8
+}

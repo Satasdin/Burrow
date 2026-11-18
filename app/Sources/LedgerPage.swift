@@ -88,8 +88,8 @@ struct LedgerPage: View {
     let branch: String?
     @State private var resume: String?
     @State private var copied = false
-    @AppStorage(SkyTheme.key) private var themeName = SkyTheme.nebula.rawValue
-    private var theme: SkyTheme { SkyTheme(rawValue: themeName) ?? .nebula }
+    @AppStorage(SkyTheme.key) private var themeName = SkyTheme.standard.rawValue
+    private var theme: SkyTheme { SkyTheme(rawValue: themeName) ?? .standard }
 
     private var commits: [LedgerCommit] { workspace.ledger.commits(on: branch) }
     private var days: [(day: Date, commits: [LedgerCommit])] {
@@ -102,7 +102,7 @@ struct LedgerPage: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 22) {
                 HStack(alignment: .firstTextBaseline, spacing: 12) {
-                    Text("Ledger").font(.system(size: 30, weight: .bold)).tracking(-0.6)
+                    Text("Ledger").font(.system(size: 30, weight: .bold)).fontWidth(.expanded).tracking(-0.6)
                         .foregroundStyle(LinearGradient(colors: [.white, theme.accent], startPoint: .leading, endPoint: .trailing))
                     Text("\(commits.count.counted("commit"))\(branch.map { " on \($0)" } ?? " on \(workspace.ledger.branches.count.counted("branch", "branches"))")")
                         .foregroundStyle(Night.dim).monospacedDigit()

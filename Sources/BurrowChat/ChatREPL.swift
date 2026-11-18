@@ -9,11 +9,21 @@ public final class ChatREPL {
     private let backend: ChatBackend
     private let interactive: Bool
     private let useColor: Bool
+    private let cache: Cache?
 
-    public init(session: ChatSession, tools: VaultTools, backend: ChatBackend) {
+    /// A llama.cpp slot kept on the shelf for this conversation (D-118).
+    public struct Cache {
+        public let shelf: KVShelf
+        public let server: URL
+        public let conversation: String
+        public init(shelf: KVShelf, server: URL, conversation: String) { self.shelf = shelf; self.server = server; self.conversation = conversation }
+    }
+
+    public init(session: ChatSession, tools: VaultTools, backend: ChatBackend, cache: Cache? = nil) {
         self.session = session
         self.tools = tools
         self.backend = backend
+        self.cache = cache
         interactive = isatty(STDIN_FILENO) == 1
         let environment = ProcessInfo.processInfo.environment
         useColor = isatty(STDOUT_FILENO) == 1 && environment["NO_COLOR"] == nil && environment["TERM"] != "dumb"
@@ -63,6 +73,13 @@ public final class ChatREPL {
         if let stats { put(dim("\(stats.notes) notes, \(stats.files) code files, \(stats.vectors > 0 ? "meaning search on" : "words only")"))  }
         put(dim(session.settings.alwaysSearchFirst ? "  ·  searches the vault first (always-search fallback; --tools-only turns it off)\n" : "\n"))
         put(dim("/help for commands\n\n"))
+        if let cache {
+            if let loaded = await cache.shelf.restoreChat(conversation: cache.conversation, server: cache.server) {
+                put(dim(String(format: "  loaded this session's saved working memory: %d tokens in %.2f s\n\n", loaded.tokens, loaded.seconds)))
+            } else {
+                put(dim("  no saved working memory for this session yet: the first answer reads it all, then it is kept\n\n"))
+            }
+        }
 
         while true {
             if interactive { put(bold("› ")) }
@@ -88,7 +105,12 @@ public final class ChatREPL {
                 if !turn.unverified.isEmpty {
                     put(dim("  ✗ not among what it read, so not a source: " + turn.unverified.prefix(4).joined(separator: ", ") + "\n"))
                 }
-                put(dim(String(format: "  %d tool calls, %d rounds, %d prompt tokens, %.1f s%@\n\n", turn.events.count, turn.rounds, turn.promptTokens, turn.seconds, turn.endedAtLimit ? ", stopped at the tool limit" : "")))
+                let fromCache = turn.cachedTokens > 0 ? String(format: " (%d of the first round's from cache)", turn.cachedTokens) : ""
+                put(dim(String(format: "  %d tool calls, %d rounds, %d prompt tokens%@, %.1f s%@\n", turn.events.count, turn.rounds, turn.promptTokens, fromCache, turn.seconds, turn.endedAtLimit ? ", stopped at the tool limit" : "")))
+                if let cache, let saved = await cache.shelf.saveChat(conversation: cache.conversation, server: cache.server) {
+                    put(dim(String(format: "  working memory kept: %d tokens, %@ in %.2f s\n", saved.tokens, ByteCountFormatter.string(fromByteCount: Int64(saved.bytes), countStyle: .file), saved.buildSeconds)))
+                }
+                put("\n")
             } catch where OllamaReach.isUnreachable(error) {
                 put("\n✗ \(OllamaReach.message)\n\n")
             } catch {

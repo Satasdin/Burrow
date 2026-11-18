@@ -1,0 +1,48 @@
+{
+ "arm": "C",
+ "run": "3",
+ "session": "61609185-cbd0-4519-984d-3a68bc8b358c",
+ "quiz": [
+  {
+   "ask": "Quiz, answer from memory of this session, no tools needed: what is the deploy port?",
+   "answer": "The deploy port is **7431**.",
+   "right": true
+  },
+  {
+   "ask": "Quiz: who is the customer?",
+   "answer": "The customer is **Wanjiku Logistics**.",
+   "right": true
+  },
+  {
+   "ask": "Quiz: what is our error budget?",
+   "answer": "Our error budget is **0.3%**.",
+   "right": true
+  },
+  {
+   "ask": "Quiz: which function must never be renamed, and why?",
+   "answer": "`reconcile_batch` must never be renamed. It's a public function in `ledgerly/reconcile.py`, and other teams import it, so a rename would break their code.",
+   "right": true
+  },
+  {
+   "ask": "Quiz: which shard failed in the first gen_report run, and what were the expected and actual checksums?",
+   "answer": "The failing shard was **`0x5F3A`**. The expected checksum was **`9c41`** and the actual one was **`77e2`**. The line reads: `FATAL shard 0x5F3A checksum mismatch (expected 9c41 got 77e2)`.\n\nI couldn't see this in the first run itself. Claude Code cut that output at about 30,000 characters, before the FATAL line. I only found it later, in the full report saved to a file. It's at line 1236 of 2,202, timestamped 09:20:34. The report is generated with a fixed seed, so every run prints the same line.",
+   "right": true
+  },
+  {
+   "ask": "Quiz: which database did we choose for matched rows, and for what reason?",
+   "answer": "We chose **SQLite**, not Postgres, for storing matched rows. The reason is that the client's laptops are offline most of the day. I recorded this as a comment at the top of `ledgerly/reconcile.py`.",
+   "right": true
+  },
+  {
+   "ask": "Quiz: how many records did the gen_report SUMMARY line say were processed?",
+   "answer": "The SUMMARY line said **48,213 records** processed, with 1 fatal and 214 warnings: `SUMMARY processed 48213 records, 1 fatal, 214 warnings`.\n\nThat line is hardcoded in `tools/gen_report.py`, so it isn't a real count of the run. The report actually has 182 `WARN` lines.",
+   "right": true
+  },
+  {
+   "ask": "Quiz: what was the first change I asked you to make to parse_line?",
+   "answer": "The first change you asked for was to make `parse_line` strip spaces around the reference and uppercase it. You also asked me to show the diff.\n\nThe change is one line in `ledgerly/parse.py`. It went from `\"reference\": reference` to `\"reference\": reference.strip().upper()`.",
+   "right": true
+  }
+ ],
+ "score": 8
+}

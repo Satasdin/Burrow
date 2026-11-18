@@ -1,0 +1,47 @@
+{"at":"2026-11-17T13:44:01Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":161792,"shown":26225,"tool":"SessionEnd"}
+{"at":"2026-11-17T13:44:08Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":186697,"shown":29001,"tool":"SessionEnd"}
+{"at":"2026-11-17T13:44:13Z","handle":"ka98f40","kind":"kept","label":"python3 tools/gen_report.py .","original":30000,"shown":4178,"tool":"Bash"}
+{"at":"2026-11-17T13:44:19Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":236123,"shown":35400,"tool":"SessionEnd"}
+{"at":"2026-11-17T13:44:25Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":259474,"shown":37427,"tool":"SessionEnd"}
+{"at":"2026-11-17T13:44:29Z","kind":"shortened","label":"/private/tmp/claude-501/-Users-p3wrky-Developer-burrow--claude-worktrees-session-memory-324f48/1f1bd66f-4ea0-4d18-a04f-8e841082c516/scratchpad/proof/C1/proj/data/fixtures.py","original":36377,"shown":5086,"tool":"Read"}
+{"at":"2026-11-17T13:44:34Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":315006,"shown":44321,"tool":"SessionEnd"}
+{"at":"2026-11-17T13:44:40Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":338504,"shown":46119,"tool":"SessionEnd"}
+{"at":"2026-11-17T13:44:52Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":364022,"shown":48318,"tool":"SessionEnd"}
+{"at":"2026-11-17T13:45:02Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":400509,"shown":51094,"tool":"SessionEnd"}
+{"at":"2026-11-17T13:45:15Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":439630,"shown":54220,"tool":"SessionEnd"}
+{"at":"2026-11-17T13:45:24Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":479787,"shown":58997,"tool":"SessionEnd"}
+{"at":"2026-11-17T13:45:25Z","kind":"recalled","label":"Read data/fixtures.py again and tell me the total amount of the open fixtures on","original":0,"shown":1501,"tool":"UserPromptSubmit"}
+{"at":"2026-11-17T13:45:33Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":516550,"shown":62617,"tool":"SessionEnd"}
+{"at":"2026-11-17T13:45:42Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":550717,"shown":65794,"tool":"SessionEnd"}
+{"at":"2026-11-17T13:45:53Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":581281,"shown":67835,"tool":"SessionEnd"}
+{"at":"2026-11-17T13:46:02Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":614525,"shown":70506,"tool":"SessionEnd"}
+{"at":"2026-11-17T13:46:03Z","kind":"recalled","label":"Run: python3 tools/gen_report.py and tell me how many warnings shard-07 had.","original":0,"shown":1180,"tool":"UserPromptSubmit"}
+{"at":"2026-11-17T13:46:11Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":651899,"shown":73814,"tool":"SessionEnd"}
+{"at":"2026-11-17T13:46:12Z","kind":"recalled","label":"Read ledgerly/rules.py in full and tell me which rule numbers flag multiples of ","original":0,"shown":1181,"tool":"UserPromptSubmit"}
+{"at":"2026-11-17T13:46:23Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":692831,"shown":77646,"tool":"SessionEnd"}
+{"at":"2026-11-17T13:46:34Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":725344,"shown":80650,"tool":"SessionEnd"}
+{"at":"2026-11-17T13:46:42Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":753295,"shown":82353,"tool":"SessionEnd"}
+{"at":"2026-11-17T13:46:56Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":789609,"shown":85180,"tool":"SessionEnd"}
+{"at":"2026-11-17T13:47:14Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":830442,"shown":89598,"tool":"SessionEnd"}
+{"at":"2026-11-17T13:47:20Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":860234,"shown":91383,"tool":"SessionEnd"}
+{"at":"2026-11-17T13:47:31Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":892798,"shown":93653,"tool":"SessionEnd"}
+{"at":"2026-11-17T13:47:47Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":939335,"shown":100439,"tool":"SessionEnd"}
+{"at":"2026-11-17T13:47:48Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":940044,"shown":100449,"tool":"SessionEnd"}
+{"at":"2026-11-17T13:47:49Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":940641,"shown":100471,"tool":"SessionEnd"}
+{"at":"2026-11-17T13:47:50Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":941238,"shown":100469,"tool":"SessionEnd"}
+{"at":"2026-11-17T13:47:51Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":941835,"shown":100471,"tool":"SessionEnd"}
+{"at":"2026-11-17T13:47:52Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":942432,"shown":100482,"tool":"SessionEnd"}
+{"at":"2026-11-17T13:47:53Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":943029,"shown":100489,"tool":"SessionEnd"}
+{"at":"2026-11-17T13:47:53Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":943626,"shown":100493,"tool":"SessionEnd"}
+{"at":"2026-11-17T13:47:54Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":944223,"shown":100495,"tool":"SessionEnd"}
+{"at":"2026-11-17T13:48:57Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":1003887,"shown":114533,"tool":"SessionEnd"}
+{"at":"2026-11-17T13:49:02Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":1029063,"shown":115678,"tool":"SessionEnd"}
+{"at":"2026-11-17T13:49:07Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":1054251,"shown":116738,"tool":"SessionEnd"}
+{"at":"2026-11-17T13:49:11Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":1079347,"shown":117825,"tool":"SessionEnd"}
+{"at":"2026-11-17T13:49:16Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":1105155,"shown":118997,"tool":"SessionEnd"}
+{"at":"2026-11-17T13:49:19Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":1131076,"shown":120177,"tool":"SessionEnd"}
+{"at":"2026-11-17T13:49:23Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":1157510,"shown":121281,"tool":"SessionEnd"}
+{"at":"2026-11-17T13:49:30Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":1184038,"shown":122388,"tool":"SessionEnd"}
+{"at":"2026-11-17T13:52:44Z","kind":"resumed","label":"We're working on the ledgerly package in this folder. Before anything,","original":59835,"shown":6218,"tool":"burrow_session"}
+{"at":"2026-11-17T13:52:51Z","kind":"resumed","label":"We're working on the ledgerly package in this folder. Before anything,","original":59835,"shown":6218,"tool":"burrow_session"}
+{"at":"2026-11-17T14:02:10Z","kind":"resumed","label":"We're working on the ledgerly package in this folder. Before anything,","original":59835,"shown":6218,"tool":"burrow_session"}

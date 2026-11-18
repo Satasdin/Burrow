@@ -196,11 +196,32 @@ func runTerminalCommand(_ arguments: [String]) async throws -> Bool {
         }
         var settings = ChatSession.Settings()
         settings.alwaysSearchFirst = !options.flags.contains("--tools-only")
-        let backend = OllamaChat(model: model)
-        // Loaded while the vault is read and the first question typed, with the window chat answers in (D-114).
-        let window = backend.contextWords
-        Task.detached { try? await Ollama().warm(model: model, contextWords: window) }
-        await ChatREPL(session: ChatSession(tools: tools, backend: backend, settings: settings), tools: tools, backend: backend).run()
+        // With --llama, a llama.cpp server answers, and a resumed session's working memory is saved and loaded (D-118).
+        let llama = options.values["--llama"].flatMap { URL(string: $0) }
+        let backend: ChatBackend
+        if let llama { backend = LlamaChat(base: llama, model: options.values["--model"] ?? "llama.cpp") } else {
+            let ollama = OllamaChat(model: model)
+            // Loaded while the vault is read and the first question typed, with the window chat answers in (D-114).
+            let window = ollama.contextWords
+            Task.detached { try? await Ollama().warm(model: model, contextWords: window) }
+            backend = ollama
+        }
+        let session = ChatSession(tools: tools, backend: backend, settings: settings)
+        var cache: ChatREPL.Cache?
+        // --resume picks up any archived session, from Claude Code, Codex or anywhere else Burrow keeps (D-117).
+        if let name = options.values["--resume"] {
+            let places = SessionHooks.Places()
+            let found = places.archive.find(name)
+            guard let meta = found.first else { throw Failure("no archived session matches \(name); burrow session lists them") }
+            guard found.count == 1 || meta.id.lowercased().hasPrefix(name.lowercased()) else {
+                throw Failure("\(found.count) sessions match \(name); give one id from burrow session")
+            }
+            let pack = SessionTools.session(meta.id, find: nil, timeline: nil, ref: nil, client: nil, places: places)
+            session.resumed = pack.text
+            logToStandardError("resuming session \(meta.id.prefix(8)): \"\(meta.name)\" (\(pack.text.count) characters handed over)")
+            if let llama { cache = ChatREPL.Cache(shelf: KVShelf(vault: vault), server: llama, conversation: "session-" + meta.id) }
+        }
+        await ChatREPL(session: session, tools: tools, backend: backend, cache: cache).run()
     case "link":
         guard options.positional.count > 1 else { throw Failure("link needs a code folder") }
         let target = URL(fileURLWithPath: options.positional[1])

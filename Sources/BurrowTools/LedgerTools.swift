@@ -106,6 +106,25 @@ extension VaultTools {
             ],
             readOnly: true),
         ToolDefinition(
+            name: "burrow_expand",
+            description: "Get back part of a tool output that Burrow kept whole and showed you shortened, by its handle (such as k3f2a91). Give lines (e.g. 200-260) or find (words to match); neither gives the start.",
+            parameters: [
+                ToolParameter("handle", .string, "The handle in the shortened output, such as k3f2a91.", required: true),
+                ToolParameter("lines", .string, "A line range such as 200-260."),
+                ToolParameter("find", .string, "Words to match; each matching line comes back with two lines around it."),
+            ],
+            readOnly: true),
+        ToolDefinition(
+            name: "burrow_session",
+            description: "Resume or search a past AI session that Burrow archived, from Claude Code or Codex, however long ago. With no session: the latest sessions. With session (an id, its first characters, or words from its name): the resume pack, the person's requests word for word, decisions, plan and where it stopped. Add find (words) for the exact messages that match, timeline (yes) for one line per request, or ref for one message whole.",
+            parameters: [
+                ToolParameter("session", .string, "A session id, its first 8 characters, or words from its name."),
+                ToolParameter("find", .string, "Words to look for in that session."),
+                ToolParameter("timeline", .string, "yes for one line per request."),
+                ToolParameter("ref", .string, "A message ref from the pack or a search, for that message whole."),
+            ],
+            readOnly: true),
+        ToolDefinition(
             name: "burrow_revert",
             description: "Mark a Ledger commit wrong and say what is right instead. Nothing is deleted; the correction is shown wherever the old commit would be.",
             parameters: [
@@ -116,7 +135,7 @@ extension VaultTools {
             readOnly: false),
     ]
 
-    static let doorNames: Set<String> = ["burrow_find", "burrow_read", "burrow_resume", "burrow_commit", "burrow_check"]
+    static let doorNames: Set<String> = ["burrow_find", "burrow_read", "burrow_resume", "burrow_commit", "burrow_check", "burrow_expand", "burrow_session"]
 
     /// Every tool Burrow has, whatever a connection is shown.
     public static var allDefinitions: [ToolDefinition] { ledgerDefinitions + definitions }
@@ -254,6 +273,12 @@ extension VaultTools {
                 let reader = Folds.Reader(client: connectionClient, session: claudeCodeSession)
                 let shown = Folds.recall(FoldStore(vault: vault), id: given.text("fold"), find: given.text("find"), full: full, reader: reader)
                 return remembered(name, given, ToolResult(text: shown.text, summary: shown.found ? "recalled \(given.text("fold") ?? given.text("find") ?? "latest folds")" : "no fold"))
+            case "burrow_expand":
+                return remembered(name, given, SessionTools.expand(handle: given.text("handle")!, lines: given.text("lines"), find: given.text("find"),
+                                                                    reader: Folds.Reader(client: connectionClient, session: claudeCodeSession)))
+            case "burrow_session":
+                return remembered(name, given, SessionTools.session(given.text("session"), find: given.text("find"), timeline: given.text("timeline"),
+                                                                     ref: given.text("ref"), client: connectionClient))
             case "burrow_revert":
                 let made = try ledger.revert(given.text("commit")!, why: given.text("right")!, author: who, client: connectionClient)
                 keptHere.insert(made.id)

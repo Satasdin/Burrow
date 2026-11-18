@@ -110,7 +110,7 @@ final class DualEraMCPTests: XCTestCase {
         let listed = try XCTUnwrap(list["result"] as? [String: Any], "\(list)")
         XCTAssertEqual(listed["resultType"] as? String, "complete")
         XCTAssertEqual((listed["tools"] as? [[String: Any]])?.compactMap { $0["name"] as? String }.sorted(),
-                       ["burrow_check", "burrow_commit", "burrow_find", "burrow_read", "burrow_resume"])
+                       ["burrow_check", "burrow_commit", "burrow_expand", "burrow_find", "burrow_read", "burrow_resume", "burrow_session"])  // D-116, D-117
         XCTAssertNotNil((listed["_meta"] as? [String: Any])?["io.modelcontextprotocol/serverInfo"])
         XCTAssertNotNil(listed["ttlMs"])
         let call = try json(await server.handle(Self.modern(2, "tools/call", #""name":"burrow_find","arguments":{"query":"retry a failed charge"}"#)))

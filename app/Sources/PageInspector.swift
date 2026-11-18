@@ -157,8 +157,7 @@ struct SessionGlance: View {
             let kept = workspace.ledger.commits.filter { $0.session == id }
 
             HStack(spacing: 12) {
-                Image(systemName: record.program.symbol).font(.system(size: 20)).foregroundStyle(record.program.colour)
-                    .frame(width: 44, height: 44).background(record.program.colour.opacity(0.15), in: .rect(cornerRadius: 11))
+                ProgramIcon(client: record.client ?? record.program.clientWord, symbol: record.program.symbol, colour: record.program.colour, size: 44)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(record.program.name).font(.system(size: 15, weight: .semibold)).foregroundStyle(Night.note)
                     Text(record.updated.formatted(date: .abbreviated, time: .shortened)).font(.system(size: 11.5)).foregroundStyle(Night.dim)

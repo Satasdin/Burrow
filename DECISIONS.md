@@ -321,3 +321,141 @@ D-115: two small things found while connecting Claude Code on the author's Mac w
 - **Each refusal names its own step.** Every step that needs the person typing yes in their own terminal refused with "only you can approve a linked folder", the text written for linking (D-104), so `burrow vault remove` and the team and decision prompts named the wrong step. `askThePerson` now takes the refusal; the default says "only you can allow this", linking and approving keep their own text, and `vault remove` says "only you can remove a vault's index".
 - **A dated copy on every write.** `connect --write` kept `.before-burrow` only the first time, so it stays the file as it was before Burrow. On the author's Mac that copy of `~/.claude/settings.json` was from 9 November, so undoing today's write from it would also have undone a week of the person's own changes, while the message said "the old file is kept". The app's Add for Me did the opposite and replaced `.before-burrow` every time, losing the pre-Burrow file. Both now call `Connect.keepCopies`: `.before-burrow` the first time only, and `.before-burrow-<yyyyMMdd-HHmmss>` on every write, which `--write` names when it finishes.
 Tests: `ConnectTests` (two writes leave two dated copies, the newest is the file just before the second, and the output names it; `.before-burrow` unchanged) and `TesterFixesTests` (`vault remove` through a pipe says "remove a vault's index" and not "linked folder").
+
+D-116: Burrow manages a live session's context (17 November). The author asked for it to keep Claude Code from compacting so often, to recall more of the session, and to need less context, measurably better than the alternatives. The research and plan are in `docs/session-context-plan.html`.
+- **What Burrow can reach, checked on Claude Code 2.1.322.** A PostToolUse hook's `updatedToolOutput` replaces what the model sees from Bash, Read and Grep, and the transcript keeps the replacement. A test hook returned "BURROW-REPLACED" for `echo hello-world`, and that is what the model saw. PreCompact's output becomes the compaction summary's instructions. UserPromptSubmit adds context before the model reads a message. No hook can change an earlier turn, the compaction boundary, the files Claude Code re-reads after compacting, or Anthropic's prompt cache. Codex 0.146 sends the same events but cannot replace a tool's output.
+- **Lean output.** A Bash or Grep result over 6,000 characters is kept whole in `kept/<session>/<handle>.txt` in Burrow's folder, readable only by this account. The model sees:
+  - its first and last 30 lines;
+  - every error line from the middle, exactly as printed;
+  - a footer saying it is the real output shortened, with a handle such as `kcd810b`.
+  `burrow_expand` gives any lines, or the lines matching some words. A whole-file Read over 1,500 lines shows its first 120 lines, plus the file's outline as extra context, and asks the model to read a range before editing. These are never shortened: a read that gave a range, a background command, Edit and Write. Kept output goes back only to the Claude Code session that ran it, the rule folds keep (D-105). Claude Code cuts Bash output at 30,000 characters before any hook sees it, so Burrow keeps at most that much and the footer says so. In the first real run a 29,999-character `cat` became 4,031 characters and the model still named the failed batch.
+- **Automatic recall.** On each message Burrow searches only what has left the context:
+  - outputs it kept, in 40-line stretches;
+  - this session's messages from before its last compaction, minus those Claude Code carried past it (`preservedMessages`).
+  Matching is BM25 over the words shared. A hit needs two of the message's words, or one specific word: a number of four digits or more, a code name with a digit in it, or a dotted name. In the first proof run, "route 46" brought back a log line about "46 rows", so short numbers no longer count on their own. Up to 3 pieces and 1,500 characters come back with their message refs, marked as data. Nothing comes back when nothing matches. Burrow's own short forms are never handed back. No model or embedding runs, because Claude Code waits for the hook.
+- **Steered compaction.** PreCompact prints at most 4,000 characters of instructions:
+  - quote the person's requests;
+  - keep values, errors, and decisions with their reasons, word for word;
+  - name the kept-output handles and the fold.
+  In the smoke run a manual `/compact` summary kept the planted port 7431, the codename Marmot and the handle `kcd810b`.
+- **Where these run.** They run wherever the session is, inside the vault or not, since they keep the session's own words in Burrow's folder and never touch the vault. The Ledger hooks still run only in the vault.
+- **Settings and the meter.** Each part has a switch in `session-context.json` in Burrow's folder (`burrow session settings`). Every action is appended to `meter/<session>.jsonl`, which the app's Sessions page reads.
+- **Rejected:**
+  - Rewriting Bash commands in PreToolUse so the full output also goes to a file. It changes how the command runs (the shell, `cd`, exit status, interactive programs) to save output that Claude Code would cut anyway.
+  - Raising `BASH_MAX_OUTPUT_LENGTH` from `connect`. That is the person's setting, and with lean output switched off it would flood the context.
+  - Summarising tool output with a model, as claude-mem does. That costs a model call per tool use and loses the exact words.
+
+D-117: Every session archived, and resumable in any program (17 November). The author asked for every session to be kept so it can be resumed in any model, Codex or a local one, even a month later, if need be on an external drive.
+- **What can and can't move between models.** A prompt cache can't move: Anthropic's lives on Anthropic's servers for at most an hour, and a KV cache only fits the weights that made it. The words can, so Burrow keeps the words. Each local model then keeps its own cache of the resume pack (D-118).
+- **The archive.** `sessions/<program>/<id>/` holds `transcript.jsonl.lzfse` and `meta.json`. Its home is Burrow's folder, or `archiveFolder` (an external drive) via `burrow session settings archive-folder PATH`. It is kept at PreCompact and SessionEnd, and at most every 10 minutes on a message. `burrow session sync` keeps every Claude Code transcript (`~/.claude/projects`, and `CLAUDE_CONFIG_DIR`) and every Codex rollout (`~/.codex/sessions`). It skips Codex threads listed in `external_agent_session_imports.json`: they are Codex's copies of Claude Code sessions (52 of the 57 rollouts on the author's Mac). A file unchanged since it was kept is not read again. On the author's Mac the first sync kept 766 sessions in 244 s, and 7.2 GB of transcripts became 1.9 GB. Claude Code deletes transcripts after 30 days by default, so without this a session from a month ago is gone.
+- **Reading sessions.** `SessionText` reads Claude Code transcripts and Codex rollouts into one form: requests, model text, tool calls and results, usage, compactions. Codex sessions are turned into Claude Code transcript lines, so `Fold.make` folds both.
+- **Resume pack.** About 6,000 tokens:
+  - the session's facts;
+  - the person's requests, word for word: the first in full, the first three and the last twelve when there are many;
+  - decisions, constraints, errors and files;
+  - the plan;
+  - where it stopped: the step in progress, the last error, the last request and the last thing said.
+  It is the same, byte for byte, every time it is made from the same session, with the facts that don't change first and where it stopped last, as Manus and Anthropic advise, so a model's cache of it fits again. `burrow_session` and `burrow session` give the pack, a timeline of one line per request, a search of the exact messages, or one message by ref.
+- **Who reads what.** The pack, with secrets taken out, goes to any program. The exact messages go to the program that wrote the session. Another program gets them only after the person runs `burrow session allow <id> <program>` in their own terminal and types yes.
+- **Resuming.**
+  - `/burrow-resume <name>` in Claude Code (`~/.claude/skills/burrow-resume`).
+  - `$burrow-resume` in Codex (`~/.agents/skills/burrow-resume`, the folder Codex reads).
+  - `burrow chat <vault> --resume <name>`.
+- **Resume advice.** On a resume, when Claude Code says the cache has probably expired and the session holds 40,000 tokens or more, Burrow shows the person the size and Claude Code's own estimate of the rewrite cost. It also shows the lighter way back: `/clear`, then `/burrow-resume`.
+- **Connect.** `burrow connect codex` adds:
+  - `[mcp_servers.burrow]` to `config.toml`, leaving a table the person already has as it is;
+  - the hooks to `hooks.json`, with SessionEnd at 3 s because Codex cuts it there;
+  - the skill.
+  Codex asks the person to trust new hooks in /hooks. `connect claude-code` and `hook install claude` add PostToolUse (Bash|Read|Grep), UserPromptSubmit and PostCompact.
+- **Not built: keeping Anthropic's cache warm.** A forked headless request on the same session read its cache (68,710 tokens read, 400 written) and resets its one-hour expiry. One request before the hour runs out would cost about a fortieth of rewriting the cache on Sonnet 5.5. It stays research only until it is checked against an interactive session's cache and the author chooses it.
+
+D-118: The app's own model keeps its cache (17 November).
+- **Ollama.** Ollama reuses the start of a prompt when it matches the last one exactly: a 4,600-token prompt was read in 0.05 s against 2.93 s. A change of window reloads the model and loses that. The app asked with a different window for a change request (16,384), and for remembering a turn (8,192), than the fitted one it warmed the model with, so it reloaded the model. It now always uses the model's fitted window, and every chat call asks Ollama to keep the model loaded for 30 minutes. `ChatResult.cachedTokens` and `ModelReply.cachedTokens` record Ollama's `prompt_eval_cached_count`. The engine's prompts were not reordered to put the steady parts first: their wording is frozen (D-49, D-58) and the answers were measured with it.
+- **llama.cpp.** Ollama has no way to save its cache to disk; llama.cpp does, and it loads the model file Ollama has already downloaded. With `--llama URL` and `--resume`, `burrow chat` answers through llama.cpp's OpenAI-style chat on one slot. It loads the session's saved cache from the shelf before the first question, and saves the slot after every reply. Each cache is filed by conversation and by the model the server reports, and is cleared oldest first under the shelf's 12 GB limit (D-60). The resumed session's pack goes straight after the rules, so it is the steady start of every request.
+  - Measured on Qwen3 4B with an 8,600-token history: 7.32 s to the first word reading it all again, against 0.49 s with the saved cache loaded in 0.04 s.
+  - Saving took 0.19 s for a 676 MB file, with an 8-bit cache.
+- **Rejected:** a cache of whole answers keyed by prompt. Ollama's own prefix cache already answers an identical repeat in about 0.3 s while the model stays loaded, and a stored answer would outlive the vault text it came from.
+
+D-119: What the real runs showed, and two fixes they led to (17 November). The evidence is in `docs/evidence/session-context/` (README, results, raw transcripts).
+- **Results, run 2.** The heavy steps put raw output in the conversation. Sonnet 5.5 with a 100,000-token window, one run per arm:
+
+  | Arm | Compactions | Tool output the model saw | Billed tokens | Cost | Quiz |
+  |---|---|---|---|---|---|
+  | Claude Code alone | 4 | 472,609 characters | 3.49 M | $34.59 | 8/8 |
+  | Burrow 1.2.3 | 4 | 472,231 characters | 3.54 M | $36.28 | 7/8 |
+  | This branch | 2 | 136,416 characters (−71 %) | 2.89 M (−17 %) | $21.29 (−38 %) | 8/8 |
+
+  A second round (run 3, same script) gave the same picture. Claude Code alone: 3 compactions, 367,416 characters, $29.32,
+  8/8. Burrow 1.2.3: 4 compactions, $36.84, 8/8. This branch: 1 compaction, 85,738 characters, $17.18, 8/8. Averaged over
+  the two rounds, against Claude Code alone, this branch had 57 % fewer compactions, 74 % less tool output in the context,
+  11 % fewer billed tokens and 40 % lower cost. Most of the cost saving is the cache rewrite each compaction costs. The
+  quiz did not separate the arms: Claude Code's own summary kept most planted values, so no claim about recall is made
+  from it.
+- **Results, run 1.** The model chose how to run things and mostly grepped files, so Claude Code alone never compacted.
+- **Fix: the Ledger's head handed over on every resume (D-64).** Burrow's SessionStart hook handed over the Ledger's head
+  on every resume, even when the copy from the last start was still in the context. In run 1 that put 23 copies in the
+  context of both Burrow arms. A resume now skips the head while the transcript holds one since the last compaction
+  (`SessionHooks.stillHasHead`).
+- **Fix: recall answered the program's own messages.** On the author's Mac, recall answered a `<system-reminder>` that the
+  app put in the person's turn, with 1,243 characters. Recall now runs only on what the person typed, by the rule
+  transcripts are read with (`SessionText.typed`).
+- **Fix: a short number brought back noise.** "Route 46" brought back a log line holding "46 rows", so a number shorter
+  than four digits no longer counts as a specific word for recall.
+- **Resume in another program.**
+  - `burrow chat --resume --llama` on Qwen3 4B answered 3 of 3 questions about the archived Sonnet session. The second
+    resume loaded the saved cache in 0.03 s, and the first answer came in 1.3 s instead of 3.1 s.
+  - Codex 0.146 on gemma4:12b resumed it with `$burrow-resume` and answered 3 of 3.
+  - On qwen3:8b, Codex never called the tool.
+- **The app's Sessions page (⌘6).** Each live or recent session shows:
+  - context per request, with each compaction marked;
+  - tokens Burrow kept out, recalls and outputs expanded;
+  - every meter event;
+  - the lines to resume it in Claude Code, Codex or `burrow chat`.
+  It reads the meter and transcripts again every 4 seconds while open, and the settings strip is read-only for now.
+
+D-120: The app's look is built on the vault's own map, with the new B logo (17 November). The author found the app well
+founded but weak to look at, starting with the first page. He chose the direction from a plan with real renders (A1, B1, C1):
+the splash film and the Map are the same picture, sparks of light on black, and gold already means "a model read this".
+- **The logo.** The orange-to-red B with BURROW, from the author's own file, replaces the Ledger Strata bands and the
+  violet crystal tried the same day. The app icon is the B on black with an ember glow. `BurrowMark` shows the B.
+  The files are in `app/Resources/Brand`, and `build.sh` copies them into the app.
+- **The splash.** The author's film, sped to 5 seconds and silent, plays once per launch over whatever opens, title bar
+  included. A click skips it; with Reduce Motion it is the still wordmark for a second. When it ends, the stars of the
+  page beneath fly in from the middle as gold sparks and settle in their folders' colours (`Landing`).
+- **The start window.** The wordmark, one line on what Burrow is, Open the last vault, New Vault, Open Folder, and the
+  vaults Burrow knows, with vaults in temporary folders left off. The last vault's map is drawn beside them from a
+  small copy saved each time a vault is read (`MapSnapshot`, `app-maps` in Burrow's folder). Launch still opens the
+  last vault straight away when there is one (D-114); the start window shows otherwise.
+- **The vault's home is the live map.** A vault opens with no tab, on its map. The notes a connected program looked
+  up in the last ten minutes glow gold, with a trail to that program's line in the corner ("Claude Code is reading ·
+  11 notes · 7 seconds ago"). It reads the lookups Burrow already records (`TrailStep.files`, `.at`), and the app
+  already reloads sessions when a program writes one. Notes a decision in force rests on wear a green ring, amber when
+  that file changed since, red for text written to steer AI: the Watch panel's three states, on the map and on the Map
+  page.
+- **Programs show their own icons.** Burrow asks macOS for the icon of the installed app (Claude, Codex, Ollama, LM
+  Studio), so it bundles no one else's logo, and a program whose app isn't installed keeps its symbol.
+- **Ember is the default theme**, tuned to the logo's orange; the other three stay in Settings. Page titles use the
+  system font's expanded width, after the wordmark.
+- **Proved by using it.** On the author's Mac, a real `claude -p` (its haiku model) asked the Notes vault about matching
+  payments to tickets and the defence plan through `burrow mcp`, while the app was open on that vault. Within seconds
+  the app showed "Claude Code is reading · 11 notes", gold trails to `reconcile.py`, `matcher.py`, `Defence plan.md`
+  and `Proposal.pdf`, the notes Haiku cited, and the conversations count went from 2 to 3.
+- **Left out on purpose.** Stock photos (the vault's map is the picture), a dashboard of cards, and motion anywhere
+  but the splash landing and gold for reading.
+
+D-121: The gaps D-120 left, closed (18 November). The author asked for the known gaps to be fixed before the build is
+pushed.
+- **Home.** A Home tab with the B sits first in the tab row and is never closed; it and Go ▸ Home (⇧⌘H) go back to the
+  live map with every tab left open. Next and Previous Tab count Home as the place before the first tab.
+- **No title bar over the splash.** The start window has no toolbar, so hiding the toolbar left its title over the
+  film. The window's title and its three buttons are now hidden while the film plays and given back as they were.
+  Checked from inside the app on both windows: hidden during the film, back after.
+- **An archive on a drive that isn't connected.** The archive folder can be set to an external drive
+  (`/Volumes/<name>/…`). When that drive is missing, Burrow keeps sessions in its own folder instead of failing to
+  write them, and says so: the Sessions page shows "<name> not connected", and `burrow session settings` prints it.
+  The person's setting is left as they set it; only the person changes it. On the author's Mac the archive pointed at
+  `/Volumes/YourSSD`, so sessions had stopped being kept; the page now shows the 1.95 GB kept in Burrow's folder.
+- **Program icons by name too.** An app is also found as `/Applications/<Name>.app` (or in `~/Applications`), so LM
+  Studio, whose bundle id could not be checked on this Mac, still shows its icon when installed.
+- **The logo from the master file.** The B, the wordmark and the app icon are cut from the author's full-size
+  transparent PNG, in place of the smaller copy from the chat.
