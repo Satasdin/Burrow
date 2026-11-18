@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://satasdin.github.io/Burrow/sitemap.xml

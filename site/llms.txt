@@ -2,10 +2,26 @@
 
 > One memory on a Mac that every AI model the person uses shares: their notes, documents and linked code, and a
 > Ledger of the decisions made with their models and why, reached by any program as an MCP server (`burrow mcp <vault>`).
+> macOS on Apple silicon; it calls no cloud model.
 
+## For agents
+
+- [Burrow for AI agents](https://satasdin.github.io/Burrow/agents.html): install Burrow for a person, connect over MCP, the tools, how to behave
+- [AGENTS.md](https://github.com/Satasdin/Burrow/blob/burrow/skills/AGENTS.md): the seven skills on one page, for an instructions file
+- [Skills](https://satasdin.github.io/Burrow/skills.html): what each skill is for, and how to install them
 - [BURROW.md](https://github.com/Satasdin/Burrow/blob/burrow/BURROW.md): every MCP tool, terminal command and app page in one file
-- [Skills for agents](https://github.com/Satasdin/Burrow/tree/burrow/skills): how an agent should use Burrow
-- [AGENTS.md](https://github.com/Satasdin/Burrow/blob/burrow/skills/AGENTS.md): the skills on one page, for an instructions file
-- [Tool reference](https://github.com/Satasdin/Burrow/blob/burrow/docs/tools.md)
+
+## Docs
+
+- [Documentation](https://satasdin.github.io/Burrow/docs.html): getting started, the app, connecting programs, decisions and checks, sessions
+- [FAQ](https://satasdin.github.io/Burrow/faq.html)
 - [Getting started](https://github.com/Satasdin/Burrow/blob/burrow/docs/getting-started.md)
+- [Connecting programs](https://github.com/Satasdin/Burrow/blob/burrow/docs/connect.md)
+- [Sessions](https://github.com/Satasdin/Burrow/blob/burrow/docs/sessions.md)
+- [Tool reference](https://github.com/Satasdin/Burrow/blob/burrow/docs/tools.md)
 - [Security](https://github.com/Satasdin/Burrow/blob/burrow/docs/security.md)
+
+## Optional
+
+- [Download](https://satasdin.github.io/Burrow/download.html)
+- [Source](https://github.com/Satasdin/Burrow)

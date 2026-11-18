@@ -21,7 +21,7 @@
       <a href="download.html">Download</a>
       <a href="docs.html">Docs</a>
       <a href="faq.html">FAQ</a>
-      <a href="https://github.com/Satasdin/Burrow/tree/burrow/skills">Skills</a>
+      <a href="skills.html">Skills</a>
     </nav>
     <div class="right">
       <a class="plain" href="https://github.com/Satasdin/Burrow">GitHub</a>
@@ -33,7 +33,7 @@
     <a href="download.html">Download</a>
     <a href="docs.html">Docs</a>
     <a href="faq.html">FAQ</a>
-    <a href="https://github.com/Satasdin/Burrow/tree/burrow/skills">Skills</a>
+    <a href="skills.html">Skills</a>
     <a href="https://github.com/Satasdin/Burrow">GitHub</a>
   </nav>
 </header>
@@ -50,11 +50,14 @@
     <a href="#terminal">The burrow command</a>
     <a href="#privacy">Privacy and security</a>
     <a href="#more">Full guides</a>
+    <a href="skills.html">Skills ↗</a>
+    <a href="agents.html">For AI agents ↗</a>
   </aside>
 
   <article class="doc">
     <h1>Documentation.</h1>
     <p class="lede">Ten minutes from nothing to an AI program that answers from your notes and keeps your decisions.</p>
+    <figure class="docshot hero-d"><img src="media/app-home.jpg" width="2000" height="1257" alt="Burrow's Home: the vault as a live map" fetchpriority="high"></figure>
 
     <section id="start">
       <h2>Getting started</h2>
@@ -72,18 +75,19 @@ ollama pull qwen3:4b-instruct-2507-q4_K_M</code></span></li>
 
     <section id="app">
       <h2>The app</h2>
-      <p>Laid out like a notes app you already know: a ribbon of pages on the left, your files beside it, tabs across the top, and a side pane for what belongs to the page. <b>⌘K</b> opens any file or command, including <b>Ask Your Vault</b>.</p>
-      <figure class="docshot"><img src="media/app-home.jpg" loading="lazy" decoding="async" width="2000" height="1257" alt="Burrow's Home: the vault as a live map"></figure>
+      <p>Laid out like a notes app you already know: a ribbon of pages on the left, your files beside it, tabs across the top, and a side pane for what belongs to the page. <b>⌘K</b> opens any file or command.</p>
+      <div class="appgrid">
+        <article class="appcard-d"><div class="shot" style="--cx:400;--cy:140;--cw:1150;--ih:1257"><img src="media/app-home.jpg" loading="lazy" decoding="async" width="2000" height="1257" alt="Burrow's Home page"></div><h3>Home</h3><p>Your vault as a live map, always the first tab. What a connected program looked up in the last ten minutes glows gold; decisions in force, changed code and steering text wear rings.</p></article>
+        <article class="appcard-d"><div class="shot" style="--cx:1050;--cy:100;--cw:950;--ih:1257"><img src="media/app-ask.jpg" loading="lazy" decoding="async" width="2000" height="1257" alt="Burrow's Ask page"></div><h3>Ask</h3><p>A model on this Mac answers from the vault only, cites file and line, and lists every file it used and the Ledger notes it was given. Open it with ⌘K, Ask Your Vault.</p></article>
+        <article class="appcard-d"><div class="shot" style="--cx:400;--cy:140;--cw:1150;--ih:1257"><img src="media/app-ledger.jpg" loading="lazy" decoding="async" width="2000" height="1257" alt="Burrow's Ledger page"></div><h3>Ledger</h3><p>Every decision, fact, plan and handoff, with its reason and what was turned down. Still Right, Mark Wrong…, and Resume to see what the next model is handed.</p></article>
+        <article class="appcard-d"><div class="shot" style="--cx:400;--cy:130;--cw:1150;--ih:1257"><img src="media/app-programs.jpg" loading="lazy" decoding="async" width="2000" height="1257" alt="Burrow's Programs page"></div><h3>Programs</h3><p>Which AI programs reach this vault, with their own icons, and what each read today.</p></article>
+        <article class="appcard-d"><div class="shot" style="--cx:660;--cy:230;--cw:900;--ih:1257"><img src="media/app-map.jpg" loading="lazy" decoding="async" width="2000" height="1257" alt="Burrow's Map page"></div><h3>Map</h3><p>The whole vault as one graph, filtered by notes, code and files, or unconnected.</p></article>
+        <article class="appcard-d"><div class="shot" style="--cx:400;--cy:130;--cw:1150;--ih:1257"><img src="media/app-conversation.jpg" loading="lazy" decoding="async" width="2000" height="1257" alt="Burrow's Conversations page"></div><h3>Conversations</h3><p>Each connection a program made: what it asked, read and kept. Copy Handoff and Keep in Ledger.</p></article>
+      </div>
       <dl class="pages">
-        <dt>Home</dt><dd>Your vault as a live map, always the first tab. Notes a connected program looked up in the last ten minutes glow gold with a trail to that program; decisions in force, changed code and steering text wear rings.</dd>
-        <dt>Ask</dt><dd>A question answered by a model on this Mac, from the vault only. It cites the file and line, lists every file it used and the Ledger notes it was given, and <b>Keep as Note</b> saves the answer.</dd>
         <dt>Library</dt><dd>Every note, document, image and code file as covers, by folder. PDFs, Word, RTF, OpenDocument and images are read in too.</dd>
-        <dt>Conversations</dt><dd>Each connection a program made: what it asked, searched for, read and kept. <b>Copy Handoff</b> and <b>Keep in Ledger</b>.</dd>
-        <dt>Ledger</dt><dd>Every decision, fact, plan and handoff, with its reason and what was turned down. <b>Still Right</b>, <b>Mark Wrong…</b>, and <b>Resume</b> to see what the next model is handed.</dd>
-        <dt>Programs</dt><dd>Which AI programs reach this vault, with their own icons, and what each read today.</dd>
         <dt>Sessions</dt><dd>Your Claude Code and Codex sessions, how full their context is, and the line to resume each one.</dd>
         <dt>Shelf</dt><dd>llama.cpp caches kept on disk, so a model starts on material it has already read.</dd>
-        <dt>Map</dt><dd>The whole vault as a graph, filtered by notes, code and files, or unconnected.</dd>
         <dt>Settings</dt><dd>The night-sky theme (Ember, Nebula, Aurora or Tide), the model that answers, and linked folders.</dd>
       </dl>
       <p>The status bar light is green when nothing needs a look, amber when changed code rests on a decision, and red when the vault holds text written to steer an AI.</p>
@@ -91,12 +95,12 @@ ollama pull qwen3:4b-instruct-2507-q4_K_M</code></span></li>
 
     <section id="connect">
       <h2>Connecting programs</h2>
-      <p>One command sets up <code>claude-code</code>, <code>opencode</code>, <code>openclaw</code>, <code>hermes</code> and <code>n8n</code>. LM Studio, llama.cpp and Ollama work through Burrow's MCP server; other agents, such as Cursor and Codex, can follow its <a href="https://github.com/Satasdin/Burrow/blob/burrow/skills/AGENTS.md">AGENTS.md</a>.</p>
+      <p>One command sets up <code>claude-code</code>, <code>codex</code>, <code>opencode</code>, <code>openclaw</code>, <code>hermes</code> and <code>n8n</code>. LM Studio, llama.cpp and Ollama work through Burrow's MCP server; other agents, such as Cursor, can follow its <a href="https://github.com/Satasdin/Burrow/blob/burrow/skills/AGENTS.md">AGENTS.md</a>. <a href="agents.html">For AI agents</a> has the setup an agent can follow by itself.</p>
       <code class="blk">burrow connect opencode ~/Notes --write
 burrow hook install claude ~/Notes</code>
       <p>The hooks hand your decisions to Claude Code at the start of a session and keep its exact words when it compacts. To teach Claude Code to resume, keep decisions and answer a held change:</p>
       <code class="blk">/plugin install burrow --marketplace Satasdin/Burrow</code>
-      <p><a href="https://github.com/Satasdin/Burrow/blob/burrow/docs/connect.md">Setup for every program</a></p>
+      <p><a href="skills.html">The seven skills</a> · <a href="https://github.com/Satasdin/Burrow/blob/burrow/docs/connect.md">Setup for every program</a></p>
     </section>
 
     <section id="decisions">
@@ -116,9 +120,21 @@ burrow hook install claude ~/Notes</code>
 
     <section id="sessions">
       <h2>Sessions</h2>
-      <p>Burrow keeps your Claude Code and Codex sessions, so one can be picked up again by its name or id, however long ago it ran: the requests word for word, the decisions, the plan and where it stopped.</p>
-      <code class="blk">/burrow-resume &lt;id&gt;        # in Claude Code
-$burrow-resume &lt;id&gt;        # in Codex</code>
+      <div class="sess">
+        <div>
+          <p>A long Claude Code session fills its context with tool output, compacts, and loses words on the way; a month later its transcript is gone. Burrow looks after both.</p>
+          <ul class="bullets">
+            <li><b>Lean output.</b> A Bash or Grep result over 6,000 characters is kept whole; the model sees its first and last 30 lines, every error line, and a handle to fetch the rest with <code>burrow_expand</code>. Nothing is summarised. (Claude Code only.)</li>
+            <li><b>Every session kept.</b> Claude Code and Codex sessions are archived, compressed, in Burrow's own folder, never in the vault.</li>
+            <li><b>Resumed anywhere.</b> A resume pack holds your requests word for word, the decisions, the plan and where it stopped.</li>
+          </ul>
+          <code class="blk">/burrow-resume &lt;name&gt;      # in Claude Code
+$burrow-resume &lt;name&gt;      # in Codex
+burrow chat ~/Notes --resume &lt;id&gt;   # with a local model</code>
+          <p><code>burrow connect claude-code ~/Notes --write</code> sets all of it up. <a href="https://github.com/Satasdin/Burrow/blob/burrow/docs/sessions.md">Sessions, in full</a></p>
+        </div>
+        <figure class="docshot tall"><img src="media/app-sessions.jpg" loading="lazy" decoding="async" width="875" height="1330" alt="A Claude Code session in Burrow's Sessions page"></figure>
+      </div>
     </section>
 
     <section id="tools">
@@ -180,7 +196,7 @@ burrow --version</code>
     <div class="cols">
       <div><span>Get started</span><a href="download.html">Download</a><a href="docs.html#start">Getting started</a><a href="https://github.com/Satasdin/Burrow/releases">Releases</a></div>
       <div><span>Learn</span><a href="docs.html">Docs</a><a href="docs.html#app">The app</a><a href="faq.html">FAQ</a></div>
-      <div><span>Project</span><a href="https://github.com/Satasdin/Burrow">GitHub</a><a href="https://github.com/Satasdin/Burrow/tree/burrow/skills">Skills</a><a href="docs.html#privacy">Privacy</a></div>
+      <div><span>Project</span><a href="https://github.com/Satasdin/Burrow">GitHub</a><a href="agents.html">For AI agents</a><a href="docs.html#privacy">Privacy</a></div>
     </div>
   </div>
 </footer>
