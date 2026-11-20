@@ -271,17 +271,13 @@ public final class VaultTools {
     public func find(_ question: String, folder: String?) async throws -> Found {
         var budget = Budget()
         budget.characters = searchCharacters
-        var how = "Ranked by words only, because this vault has no vectors."
-        if hasVectors, let embedder {
-            do {
-                let found = try await vault.retrieve(question, mode: .walk, budget: budget, embedder: embedder, scope: folder)
-                return Found(retrieved: found, how: "Ranked by words and meaning, then links.")
-            } catch {
-                log("meaning search unavailable: \(error)")
-                how = "Ranked by words only, because Ollama could not embed the question."
-            }
+        let meaning = hasVectors ? embedder : nil
+        let (found, failure) = try await vault.retrieveFallingBackToWords(question, mode: .walk, budget: budget, embedder: meaning, scope: folder)
+        if let failure {
+            log("meaning search unavailable: \(failure)")
+            return Found(retrieved: found, how: "Ranked by words only, because Ollama could not embed the question.")
         }
-        return Found(retrieved: try await vault.retrieve(question, mode: .walk, budget: budget, scope: folder), how: how)
+        return Found(retrieved: found, how: meaning == nil ? "Ranked by words only, because this vault has no vectors." : "Ranked by words and meaning, then links.")
     }
 
     /// Answers without going through the tool list, for a screen that wants the words as they arrive. With `notes`, what

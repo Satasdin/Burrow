@@ -84,6 +84,22 @@ final class ToolsTests: XCTestCase {
         XCTAssertTrue(result.sources.contains { $0.path == "Decisions/Retry.md" })
     }
 
+    /// `burrow find` ended with NSURLErrorDomain -1004 when Ollama was down; it now searches by words and says so in one
+    /// line, through the same fallback as the tool (IR-03, D-122). BrokenEmbedder throws that same -1004.
+    func testCommandLineFindFallsBackToWordsIfOllamaIsDown() async throws {
+        let vault = try await fixture.opened(embedder: FakeEmbedder())
+        XCTAssertGreaterThan(try vault.stats().vectors, 0, "the fallback only matters for a vault with vectors")
+        for json in [false, true] {
+            let printed = try await FindCommand.output(vault, "retry failed charge", mode: .walk, embedder: BrokenEmbedder(), json: json)
+            XCTAssertTrue(printed.contains("Retry.md"), printed)   // --json writes the slash as \/
+            XCTAssertTrue(printed.contains(FindCommand.wordsOnly), printed)
+            for raw in ["NSURLErrorDomain", "-1004", "Could not connect", "cannotConnectToHost"] { XCTAssertFalse(printed.contains(raw), printed) }
+        }
+        let working = try await FindCommand.output(vault, "retry failed charge", mode: .walk, embedder: FakeEmbedder(), json: false)
+        XCTAssertTrue(working.contains("Decisions/Retry.md"), working)
+        XCTAssertFalse(working.contains(FindCommand.wordsOnly), "the line is only for a skipped meaning search")
+    }
+
     func testReadNumbersLinesAndPages() async throws {
         let box = tools(try await fixture.opened())
         let result = try await box.call("vault_read", arguments: ["path": "shop/billing.py", "start_line": 2, "line_count": 1])

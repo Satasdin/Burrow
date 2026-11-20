@@ -77,11 +77,7 @@ func jsonLine(_ value: Any) throws -> String {
     String(decoding: try JSONSerialization.data(withJSONObject: value, options: [.sortedKeys]), as: UTF8.self)
 }
 
-func describe(_ found: Retrieved) -> [[String: Any]] {
-    found.excerpts.map {
-        ["path": $0.path, "start": $0.startLine, "end": $0.endLine, "reason": $0.reason.label, "note": $0.isNote]
-    }
-}
+func describe(_ found: Retrieved) -> [[String: Any]] { FindCommand.describe(found) }
 
 func mode(_ options: Options, default fallback: Mode) throws -> Mode {
     guard let word = options.values["--mode"] else { return fallback }
@@ -143,13 +139,9 @@ func run() async throws {
 
     case "find":
         guard let text else { throw Failure("find needs a question") }
-        let found = try await vault.retrieve(text, mode: try mode(options, default: .walk), embedder: try embedderIfIndexed(vault, ollama))
-        if options.flags.contains("--json") {
-            print(try jsonLine(["seconds": found.seconds, "characters": found.characters, "excerpts": describe(found)]))
-        } else {
-            for piece in found.excerpts { print("\(piece.path):\(piece.startLine)-\(piece.endLine)   [\(piece.reason.label)]") }
-            print(String(format: "\n%d characters in %.3f s", found.characters, found.seconds))
-        }
+        // Falls back to words, with one plain line, when Ollama can't embed the question (IR-03, D-122).
+        print(try await FindCommand.output(vault, text, mode: try mode(options, default: .walk), embedder: try embedderIfIndexed(vault, ollama),
+                                           json: options.flags.contains("--json")))
 
     case "ask":
         guard let text else { throw Failure("ask needs a question") }
