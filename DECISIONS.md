@@ -459,3 +459,22 @@ pushed.
   Studio, whose bundle id could not be checked on this Mac, still shows its icon when installed.
 - **The logo from the master file.** The B, the wordmark and the app icon are cut from the author's full-size
   transparent PNG, in place of the smaller copy from the chat.
+
+D-123: CI goes red when a test fails, and the secrets speed test no longer depends on how fast the machine is (20
+November). Found while collecting the 1.3.0 CI logs for the report's Appendix D.
+- **The test step could not fail.** It ran `swift test 2>&1 | tee swift-test.log` in GitHub's default shell
+  (`bash -e`, without pipefail), so the step took tee's exit code. Run 44270777591 on `burrow-v1.3.0` (53d809a) logged
+  "Executed 566 tests, with 1 test skipped and 1 failure" and still showed success. The step now runs with
+  `shell: bash` (which GitHub runs with `-eo pipefail`) and says `set -o pipefail` as well. The log artifact and the
+  count summary still run on failure (`if: always()`). A pull request that changes the workflow now runs it too.
+  Proved on the branch: a throwaway commit with a test that always fails made run 44784329522 (commit 7cc0590: "Executed 567 tests, with 1 test skipped and 1 failure", exit code 1) go red, with the
+  count and the log still kept; the commit was then dropped before the pull request.
+- **The timing test that failed there.** `SecretsNoBypassTests.testManyNamesOnOneLongLineStayQuick` took 2.02 s against
+  a flat 2.0 s on the hosted runner (0.8 s on a Mac) and passed in run 44270440796 on the same commit. What D-106
+  guards against is backtracking, which grows faster than the line, so the test now checks how the time grows:
+  doubling the line must take under 3x the CPU time (it takes 2.0x; a pattern that backtracks gives 4x or worse;
+  checked by making the larger run do double work, which failed at 3.96x). It counts this thread's CPU time, best of
+  two runs, so other jobs on a shared runner don't count against it. An absolute ceiling stays for "seconds, not
+  minutes": 2 s on a Mac, 6 s when `CI` is set.
+- **Turned down.** Only raising the flat limit (still tied to one machine's speed, and a slower runner would fail it
+  again); dropping the timing check (D-106 needs a guard that fails if backtracking comes back).
