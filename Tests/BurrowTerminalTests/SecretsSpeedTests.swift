@@ -87,11 +87,21 @@ final class SecretsNoBypassTests: XCTestCase {
         XCTAssertTrue(out.hasSuffix(" end"))
     }
 
+    /// D-123: what D-106 guards against is backtracking, which grows faster than the line. So the main check is how the
+    /// time grows, which does not depend on the machine: doubling the line about doubles the time (backtracking gives 4x
+    /// or worse). Then an absolute ceiling keeps it "seconds, not minutes", with room for a slower hosted runner, where a
+    /// flat 2 s failed at 2.02 s (run 44270777591) while a Mac takes 0.8 s.
     func testManyNamesOnOneLongLineStayQuick() {
-        let line = String(repeating: "key=", count: 50_000) + " " + String(repeating: "token: \"", count: 20_000)
-        let start = Date()
-        let out = Secrets.redacted(line)
-        XCTAssertLessThan(Date().timeIntervalSince(start), 2.0)
+        func line(_ n: Int) -> String {
+            String(repeating: "key=", count: 25_000 * n) + " " + String(repeating: "token: \"", count: 10_000 * n)
+        }
+        let half = line(1), full = line(2)
+        var out = ""
+        let tookHalf = cpuSeconds { _ = Secrets.redacted(half) }
+        let tookFull = cpuSeconds { out = Secrets.redacted(full) }
+        XCTAssertLessThan(tookFull / tookHalf, 3.0, "doubling the line took \(tookHalf) s to \(tookFull) s")
+        let ceiling = ProcessInfo.processInfo.environment["CI"] == nil ? 2.0 : 6.0
+        XCTAssertLessThan(tookFull, ceiling, "the full line took \(tookFull) s")
         XCTAssertFalse(out.isEmpty)
     }
 
@@ -122,6 +132,15 @@ final class SecretsNoBypassTests: XCTestCase {
             XCTAssertEqual(Secrets.redacted(line), line)
         }
     }
+}
+
+/// CPU seconds this thread spent on `work`, the best of `runs`: other jobs on a shared runner do not count against it.
+private func cpuSeconds(runs: Int = 2, _ work: () -> Void) -> Double {
+    (0..<runs).map { _ -> Double in
+        let start = clock_gettime_nsec_np(CLOCK_THREAD_CPUTIME_ID)
+        work()
+        return Double(clock_gettime_nsec_np(CLOCK_THREAD_CPUTIME_ID) - start) / 1e9
+    }.min()!
 }
 
 private extension String {

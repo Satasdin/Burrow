@@ -6,7 +6,7 @@ on:
   push:
     paths: ["Sources/**", "Tests/**", "Package.swift", ".github/workflows/tests.yml"]
   pull_request:
-    paths: ["Sources/**", "Tests/**", "Package.swift"]
+    paths: ["Sources/**", "Tests/**", "Package.swift", ".github/workflows/tests.yml"]
   workflow_dispatch:
 
 jobs:
@@ -20,8 +20,12 @@ jobs:
         run: swift --version
       - name: Build
         run: swift build
+      # D-123: without pipefail the step took tee's exit code, so a failing test still showed green.
       - name: Run the tests and keep the log
-        run: swift test 2>&1 | tee swift-test.log
+        shell: bash
+        run: |
+          set -o pipefail
+          swift test 2>&1 | tee swift-test.log
       - name: Count the tests
         if: always()
         run: grep -E "Test Suite '.*\.xctest' (passed|failed)|Executed [0-9]+ tests|Test run with" swift-test.log | tee -a "$GITHUB_STEP_SUMMARY"
