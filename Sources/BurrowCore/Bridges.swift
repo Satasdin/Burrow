@@ -342,3 +342,18 @@ extension Vault {
         return Retrieved(mode: mode, excerpts: excerpts, seconds: seconds, signal: signal)
     }
 }
+
+extension Vault {
+    /// Retrieves with meaning when an embedder is given. If it can't embed the question (Ollama not running), the same
+    /// search runs again on words alone and the failure is handed back, so every caller falls back the same way (IR-03,
+    /// D-122). `embedFailure` is nil when meaning was used or no embedder was given.
+    public func retrieveFallingBackToWords(_ question: String, mode: Mode, budget: Budget = Budget(), embedder: Embedder?,
+                                           scope: String? = nil) async throws -> (retrieved: Retrieved, embedFailure: Error?) {
+        guard let embedder else { return (try await retrieve(question, mode: mode, budget: budget, scope: scope), nil) }
+        do {
+            return (try await retrieve(question, mode: mode, budget: budget, embedder: embedder, scope: scope), nil)
+        } catch {
+            return (try await retrieve(question, mode: mode, budget: budget, scope: scope), error)
+        }
+    }
+}

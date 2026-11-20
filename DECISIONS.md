@@ -459,3 +459,21 @@ pushed.
   Studio, whose bundle id could not be checked on this Mac, still shows its icon when installed.
 - **The logo from the master file.** The B, the wordmark and the app icon are cut from the author's full-size
   transparent PNG, in place of the smaller copy from the chat.
+
+D-122: `burrow find` falls back to words when Ollama is down (20 November). A health check for the report's Chapter 5
+found that with Ollama not running, `burrow find <vault> "<question>"` on a vault with vectors ended with a raw
+`NSURLErrorDomain -1004 "Could not connect to the server"` on `/api/embed`, while `burrow_find` over MCP already fell
+back to words. Requirement IR-03 was therefore only partly met (Appendix E.2).
+- **One fallback, not two.** The fallback that lived inside the MCP tool's `find` moved into the engine as
+  `Vault.retrieveFallingBackToWords`: it searches with meaning, and if the question can't be embedded it runs the same
+  search on words alone and hands back the failure. The MCP tool and the command line both call it, so they can't drift
+  apart again.
+- **What the command prints.** The usual excerpt lines and character count, then one plain line: "Meaning search was
+  skipped because the local model service could not embed the question, so these are ranked by words only." With
+  `--json` the same sentence is the `meaningSkipped` field. It exits 0. The raw error is not shown.
+- **Tested both ways.** `ToolsTests.testCommandLineFindFallsBackToWordsIfOllamaIsDown` runs what `burrow find` prints
+  with an embedder that throws the same -1004, in text and JSON, and checks for word results, the one line and no raw
+  error. On the author's Mac, with Ollama stopped (the menu-bar app restarts `ollama serve`, so both were stopped),
+  `burrow find ~/BurrowHowTo/Notes "How long is the Data Commissioner's term of office?"` with released 1.3.0 still
+  ended with the raw -1004 and exit 1; the built binary listed ten excerpts by words, the Data Commissioner part of
+  the Act second (lines 51-72, "a single term of six years"), printed the one line and exited 0.
