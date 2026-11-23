@@ -1,5 +1,5 @@
 import AppKit
-import BurrowCore
+import CAMRCore
 import SwiftUI
 
 struct GraphFilter: Equatable {
@@ -248,7 +248,7 @@ final class GraphSim: @unchecked Sendable {
 struct GraphPage: View {
     @Bindable var workspace: Workspace
 
-    // Burrow is the database, not a chat: the Map shows the vault, and conversations happen in the programs that connect to it.
+    // CAMR is the database, not a chat: the Map shows the vault, and conversations happen in the programs that connect to it.
     var body: some View {
         ZStack(alignment: .bottom) {
             GraphCanvas(workspace: workspace, compact: false)

@@ -1,6 +1,6 @@
 import AppKit
-import BurrowCore
-import BurrowTools
+import CAMRCore
+import CAMRTools
 import SwiftUI
 
 /// What the Ledger holds, read once per refresh: every commit, which were marked wrong, and which rest on changed files.
@@ -16,7 +16,7 @@ struct LedgerState: Sendable {
     var current = Ledger.defaultBranch
     /// The decisions and corrections handed to every program when it connects, by id (D-76).
     var inForce: [String] = []
-    /// What burrow_check would show right now (D-79).
+    /// What camr_check would show right now (D-79).
     var check: CheckReport?
     /// Text in the vault written to steer AI assistants (D-80).
     var flagged: [FlaggedLine] = []
@@ -116,7 +116,7 @@ struct LedgerPage: View {
                 if let resume { resumeCard(resume) }
                 if commits.isEmpty {
                     ContentUnavailableView("Nothing kept yet", systemImage: "books.vertical",
-                                           description: Text("Programs keep decisions, plans and where they stopped here, through burrow_commit and the Claude Code and git hooks. Run burrow hook install claude <vault> to start."))
+                                           description: Text("Programs keep decisions, plans and where they stopped here, through camr_commit and the Claude Code and git hooks. Run camr hook install claude <vault> to start."))
                         .foregroundStyle(Night.dim).frame(maxWidth: .infinity).padding(.top, 40)
                 }
                 ForEach(days, id: \.day) { day in

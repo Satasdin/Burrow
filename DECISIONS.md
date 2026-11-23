@@ -496,3 +496,34 @@ November). Found while collecting the 1.3.0 CI logs for the report's Appendix D.
   minutes": 2 s on a Mac, 6 s when `CI` is set.
 - **Turned down.** Only raising the flat limit (still tied to one machine's speed, and a slower runner would fail it
   again); dropping the timing check (D-106 needs a guard that fails if backtracking comes back).
+
+D-124: Burrow is renamed CAMR (Capability-Adaptive Memory Retrieval), the name in the approved June proposal (23
+November). The author decided on 19 November that the app, the repository and the website take the report's name, and
+approved the plan for it on 23 November. Everything a person sees says CAMR; everything set up under the old name keeps
+working without anyone doing anything, since three volunteers and the author's own setups run it every day.
+- **What changed.** The command is `camr`, the MCP server `camr`, the Ledger's tools `camr_find`, `camr_resume`,
+  `camr_check` and the rest, the app CAMR.app, the downloads `camr-macos-arm64.tar.gz` and `CAMR-macos-arm64.zip/.dmg`,
+  releases are tagged `camr-vX.Y.Z` from 1.4.0, the code's modules `CAMRCore`, `CAMRTools` and so on, `BURROW.md` is
+  `CAMR.md`, and the skills and gate plugins are `camr-…`.
+- **What keeps working.** `burrow` stays as a second name for the program: the installer links it to `camr` (an older
+  `burrow` there is replaced by the link) and the app carries the same link beside its own copy. `burrow_find` and the
+  other old tool names still answer, unlisted, the way `vault_search` does (D-105). The settings folder
+  `~/Library/Application Support/Burrow` is moved to `…/CAMR` the first time CAMR runs, with a link left at the old name
+  for a program still on the older version; `BURROW_STATE_DIR` is still read. A vault keeps its `.burrow` folder and is
+  read where it is; only new vaults get `.camr`, because a Team's Ledger lives in that folder inside a synced folder
+  shared with people who may still run the older version. `camr connect` replaces what an earlier `burrow connect`
+  wrote (the `burrow` server in Claude Code, OpenCode and OpenClaw, Codex's `[mcp_servers.burrow]` table, the hooks
+  that ran `burrow hook`, OpenClaw's `burrow-gate` entry) instead of adding a second copy beside it. The app keeps its
+  hidden identifier `app.burrow.mac` and its theme setting under its first name, so macOS keeps its permissions and
+  settings.
+- **The logo.** The B became a C in the same family: one slanted stroke, amber to red, with AMR in the same wide white
+  letters (Michroma, thickened to the old weight). Drawn on a Claude Design canvas with the author, who picked it from
+  three; the first C, with the B's chevron on its back, read as a Σ once rendered, so its back is one straight slant.
+  The splash film of the B is gone: the launch screen shows the CAMR logo and its full name for a moment, then the map's
+  stars land as before (D-120). The SVG sources are in app/Resources.
+- **What stays.** This file's history, the `burrow-v1.x` releases and their downloads, and the main branch's name
+  `burrow` (other sessions and the website's publishing use it, and no user sees it). `docs/evidence/` keeps its
+  transcripts as they were recorded.
+- **Turned down.** A new hidden app identifier (macOS would forget every volunteer's permissions for a name nobody
+  sees); moving `.burrow` folders into `.camr` (cuts off teammates on the old version); a `camr` with no `burrow`
+  alias (every existing hook, MCP setting and gate plugin would stop at once).

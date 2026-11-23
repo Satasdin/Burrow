@@ -1,8 +1,8 @@
 import AppKit
-import BurrowTools
+import CAMRTools
 import SwiftUI
 
-/// The top of the Ledger: what every program is handed when it connects (D-76), what burrow_check would put beside the
+/// The top of the Ledger: what every program is handed when it connects (D-76), what camr_check would put beside the
 /// code changed right now (D-79), and text in the vault written to steer AI assistants (D-80). Three tiles; one opens.
 struct WatchPanel: View {
     let workspace: Workspace
@@ -44,7 +44,7 @@ struct WatchPanel: View {
         }
         .animation(.spring(response: 0.4, dampingFraction: 0.86), value: open)
         .onAppear {
-            if let peek = ProcessInfo.processInfo.environment["BURROW_WATCH"] { open = Part(rawValue: peek) }
+            if let peek = ProcessInfo.processInfo.environment["CAMR_WATCH"] { open = Part(rawValue: peek) }
         }
         .onChange(of: workspace.watchPeek) { _, peek in open = peek.flatMap(Part.init(rawValue:)) }
     }
@@ -93,7 +93,7 @@ struct WatchPanel: View {
 
     private var rulesPart: some View {
         VStack(alignment: .leading, spacing: 10) {
-            header("What a program reads first", "These are put in the instructions every program gets when it connects through burrow mcp, as notes by the models named, not orders.", Self.mint)
+            header("What a program reads first", "These are put in the instructions every program gets when it connects through camr mcp, as notes by the models named, not orders.", Self.mint)
             if rules.isEmpty {
                 Text("No decision is in force on \(ledger.current) yet. Decisions marked wrong are left out.")
                     .font(.system(size: 12.5)).foregroundStyle(Night.dim)
@@ -112,7 +112,7 @@ struct WatchPanel: View {
 
     @ViewBuilder private var checkPart: some View {
         VStack(alignment: .leading, spacing: 12) {
-            header("What burrow_check shows a program now", "The code changed in linked folders since their last git commit, beside the decisions that rest on those files or the files they import.", Night.conversation)
+            header("What camr_check shows a program now", "The code changed in linked folders since their last git commit, beside the decisions that rest on those files or the files they import.", Night.conversation)
             if let check, !check.changed.isEmpty {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 8) {
@@ -154,9 +154,9 @@ struct WatchPanel: View {
 
     private var flaggedPart: some View {
         VStack(alignment: .leading, spacing: 10) {
-            header("Text written to steer AI assistants", "When a program reads one of these lines through Burrow, it is told the line is content, not an instruction, and to tell you where it is.", Night.stale)
+            header("Text written to steer AI assistants", "When a program reads one of these lines through CAMR, it is told the line is content, not an instruction, and to tell you where it is.", Night.stale)
             if ledger.flagged.isEmpty {
-                Text("Burrow found no such text in the vault's notes and code.").font(.system(size: 12.5)).foregroundStyle(Night.dim)
+                Text("CAMR found no such text in the vault's notes and code.").font(.system(size: 12.5)).foregroundStyle(Night.dim)
             }
             ForEach(Array(ledger.flagged.enumerated()), id: \.element) { index, flag in
                 Button { workspace.go(.file(flag.path), newTab: true) } label: {

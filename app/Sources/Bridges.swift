@@ -1,5 +1,5 @@
 import AppKit
-import BurrowCore
+import CAMRCore
 import SwiftUI
 
 /// A bridged vault in the Library: its own section after this vault's folders, each file labelled with its vault (D-97).
@@ -91,7 +91,7 @@ struct BridgesSheet: View {
                 Divider().padding(.vertical, 2)
                 Text("Storage").font(.headline)
                 StorageBars(report: storage, wide: true)
-                Text("Burrow's own store is what counts: the index, meaning search, conversations and the Ledger. Your own files are never counted and never deleted. Set a limit with burrow config, such as storage.limit 2GB.")
+                Text("CAMR's own store is what counts: the index, meaning search, conversations and the Ledger. Your own files are never counted and never deleted. Set a limit with camr config, such as storage.limit 2GB.")
                     .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
             }
         }
@@ -106,11 +106,11 @@ func pickBridge(_ workspace: Workspace, withLedger: Bool) {
     panel.canChooseDirectories = true
     panel.canChooseFiles = false
     panel.prompt = "Bridge"
-    panel.message = "Choose another Burrow vault. \(workspace.name) will read it, one way and read-only."
+    panel.message = "Choose another CAMR vault. \(workspace.name) will read it, one way and read-only."
     if panel.runModal() == .OK, let url = panel.url { Task { await workspace.addBridge(url, withLedger: withLedger) } }
 }
 
-/// Burrow's store against its limits: this vault, and every vault together (D-98). Amber near a limit, red past it.
+/// CAMR's store against its limits: this vault, and every vault together (D-98). Amber near a limit, red past it.
 struct StorageBars: View {
     let report: StorageReport
     var wide = false
@@ -120,7 +120,7 @@ struct StorageBars: View {
             row("This vault", used: report.usage.total, limit: report.limit)
             row(report.vaultCount == 1 ? "All vaults" : "All \(report.vaultCount) vaults", used: report.allVaults, limit: report.globalLimit)
         }
-        .help("Burrow's own store: index \(ByteSize.format(report.usage.index)), meaning search \(ByteSize.format(report.usage.vectorCache)), conversations and the Ledger \(ByteSize.format(report.usage.other)). Your files are not counted.")
+        .help("CAMR's own store: index \(ByteSize.format(report.usage.index)), meaning search \(ByteSize.format(report.usage.vectorCache)), conversations and the Ledger \(ByteSize.format(report.usage.other)). Your files are not counted.")
     }
 
     private func colour(_ share: Double) -> Color {

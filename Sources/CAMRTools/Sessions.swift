@@ -1,0 +1,272 @@
+import CAMRCore
+import Foundation
+
+/// One question and its answer, with who answered it and what they read.
+public struct SessionTurn: Codable, Sendable {
+    public var question: String
+    public var answer: String
+    public var model: String
+    public var server: String
+    public var tools: [String]
+    public var sources: [String]
+    public var seconds: Double
+    public var promptTokens: Int
+    public var at: Date
+
+    public init(question: String, answer: String, model: String, server: String, tools: [String] = [], sources: [String] = [],
+                seconds: Double = 0, promptTokens: Int = 0, at: Date = Date()) {
+        self.question = question
+        self.answer = answer
+        self.model = model
+        self.server = server
+        self.tools = tools
+        self.sources = sources
+        self.seconds = seconds
+        self.promptTokens = promptTokens
+        self.at = at
+    }
+}
+
+/// One thing a connected program looked up, kept by CAMR whether or not the model logs anything.
+public struct TrailStep: Codable, Sendable {
+    public var tool: String
+    public var asked: String
+    public var files: [String]
+    public var at: Date
+
+    public init(tool: String, asked: String, files: [String], at: Date = Date()) {
+        self.tool = tool
+        self.asked = asked
+        self.files = files
+        self.at = at
+    }
+
+    /// The tools that look something up in the vault. Resuming, checking a change and keeping a commit are steps too, but
+    /// not lookups, so "3 lookups" no longer counts a resume, a check and a commit (D-85).
+    public static let lookupTools: Set<String> = [
+        "vault_search", "vault_read", "vault_links", "vault_list", "vault_ask", "vault_prepare", "vault_pack",
+        "camr_find", "camr_read", "camr_log", "camr_blame", "camr_diff",
+    ]
+    public var isLookup: Bool { Self.lookupTools.contains(tool) }
+}
+
+/// A conversation kept in the vault, so another model, another program or another day can pick it up.
+public struct SessionRecord: Codable, Sendable {
+    public var id: String
+    public var started: Date
+    public var updated: Date
+    public var turns: [SessionTurn]
+    /// The session this one was resumed from, if any.
+    public var resumedFrom: String?
+    /// The program that connected, as it named itself to MCP: opencode, claude-code, LM Studio.
+    public var client: String?
+    /// What that program looked up, in order. CAMR writes this itself, so a model that forgets to log still leaves a trace.
+    public var trail: [TrailStep]?
+    /// What the person asked for, when a program says so: Claude Code's hook reads it from the transcript. MCP itself
+    /// never carries the person's words, so most conversations have none.
+    public var request: String?
+
+    /// The searches and reads in the trail, without resumes, checks and commits (D-85).
+    public var lookups: [TrailStep] { (trail ?? []).filter(\.isLookup) }
+
+    /// A conversation's name for a person: what they asked for when that is known, then the first question a program
+    /// logged, then what it kept, then its first search. The model's first search is a guess at the task, so it comes
+    /// last among the words, and a conversation that only resumed and kept something is named for that (D-86).
+    public func title(kept: [String] = []) -> String? {
+        if let request = request?.trimmingCharacters(in: .whitespacesAndNewlines), !request.isEmpty { return request }
+        if let first = turns.first?.question { return first }
+        if let decision = kept.first { return "Kept: " + decision }
+        if let search = lookups.first(where: { !$0.asked.isEmpty })?.asked { return search }
+        let tools = Set((trail ?? []).map(\.tool))
+        if tools.contains("camr_check") { return "Checked a change against the Ledger" }
+        if tools.contains("camr_resume") { return "Picked up from the Ledger" }
+        return nil
+    }
+
+    public init(id: String = SessionRecord.newID(), resumedFrom: String? = nil) {
+        self.id = id
+        started = Date()
+        updated = started
+        turns = []
+        self.resumedFrom = resumedFrom
+    }
+
+    public static func newID(_ date: Date = Date()) -> String {
+        let format = DateFormatter()
+        format.locale = Locale(identifier: "en_US_POSIX")
+        format.dateFormat = "yyyyMMdd-HHmmss"
+        return format.string(from: date) + "-" + String(UUID().uuidString.prefix(4)).lowercased()
+    }
+
+    /// Every model that has answered in this session, in order of first appearance.
+    public var models: [String] {
+        var seen: [String] = []
+        for turn in turns where !seen.contains("\(turn.model) (\(turn.server))") { seen.append("\(turn.model) (\(turn.server))") }
+        return seen
+    }
+
+    /// Files read anywhere in the session, most recent first, without repeats.
+    public var filesInPlay: [String] {
+        var seen: [String] = []
+        for turn in turns.reversed() { for source in turn.sources where !seen.contains(source) { seen.append(source) } }
+        for step in (trail ?? []).reversed() { for file in step.files where !seen.contains(file) { seen.append(file) } }
+        return seen
+    }
+
+    public var isEmpty: Bool { turns.isEmpty && (trail ?? []).isEmpty }
+}
+
+/// Sessions live as plain JSON files in the vault's store, one per conversation.
+public struct SessionStore: Sendable {
+    public let folder: URL
+
+    public init(vault: Vault) { folder = vault.store.appendingPathComponent("sessions") }
+    public init(folder: URL) { self.folder = folder }
+
+    private static let encoder: JSONEncoder = {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes]
+        encoder.dateEncodingStrategy = .iso8601
+        return encoder
+    }()
+    private static let decoder: JSONDecoder = {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        return decoder
+    }()
+
+    /// A session id becomes a file name, and a session file can come from anywhere a vault is synced or shared,
+    /// so only plain ids are used: letters, digits and dashes, as `SessionRecord.newID` makes them.
+    static func isPlainID(_ id: String) -> Bool {
+        !id.isEmpty && id.count <= 64 && id.unicodeScalars.allSatisfy { CharacterSet.alphanumerics.contains($0) && $0.isASCII || $0 == "-" }
+    }
+
+    public func save(_ record: SessionRecord, touching: Bool = true) throws {
+        guard Self.isPlainID(record.id) else { throw CocoaError(.fileWriteInvalidFileName) }
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        var record = record
+        if touching { record.updated = Date() }
+        try Self.encoder.encode(record).write(to: folder.appendingPathComponent(record.id + ".json"), options: .atomic)
+    }
+
+    /// Newest first.
+    public func list() -> [SessionRecord] {
+        let names = (try? FileManager.default.contentsOfDirectory(atPath: folder.path)) ?? []
+        return names.filter { $0.hasSuffix(".json") }
+            .compactMap { try? Self.decoder.decode(SessionRecord.self, from: Data(contentsOf: folder.appendingPathComponent($0))) }
+            .filter { Self.isPlainID($0.id) }
+            .sorted { $0.updated > $1.updated }
+    }
+
+    /// While a connection is open it holds its session, so a second program that connects at the same time, under the same
+    /// name, starts a session of its own instead of writing over this one's trail (D-73). The hold is a file `<id>.open`
+    /// with the holding process's id and a token; a hold whose process has gone counts as released, so a crash frees it.
+    /// Returns the token to release it with, or nil when another live connection holds the session.
+    public func hold(_ id: String) -> String? {
+        guard Self.isPlainID(id) else { return nil }
+        try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        let path = folder.appendingPathComponent(id + ".open").path
+        let token = "\(getpid()) \(UUID().uuidString)"
+        for _ in 0..<2 {
+            let file = open(path, O_WRONLY | O_CREAT | O_EXCL, 0o644)
+            if file >= 0 {
+                _ = token.withCString { write(file, $0, strlen($0)) }
+                close(file)
+                return token
+            }
+            guard errno == EEXIST else { return nil }
+            let holder = (try? String(contentsOfFile: path, encoding: .utf8))?.split(separator: " ").first.flatMap { Int32($0) }
+            // A process that is gone cannot be signalled: its hold is stale and is cleared once.
+            if let holder, kill(holder, 0) == 0 || errno == EPERM { return nil }
+            unlink(path)
+        }
+        return nil
+    }
+
+    /// Lets go of a hold, only if it is still this connection's own.
+    public func release(_ id: String, token: String) {
+        guard Self.isPlainID(id) else { return }
+        let path = folder.appendingPathComponent(id + ".open").path
+        if (try? String(contentsOfFile: path, encoding: .utf8)) == token { unlink(path) }
+    }
+
+    /// An id, the start of one, or "last": the newest conversation with logged turns that is not `excluding`
+    /// (the caller's own session), or failing that the newest with any lookups.
+    public func load(_ id: String, excluding: String? = nil) -> SessionRecord? {
+        let all = list().filter { $0.id != excluding && !$0.isEmpty }
+        if id == "last" { return all.first { !$0.turns.isEmpty } ?? all.first }
+        return all.first { $0.id == id } ?? all.first { $0.id.hasPrefix(id) }
+    }
+}
+
+/// What a model that did not see a conversation is given to carry it on.
+public enum Carry: String, Sendable, CaseIterable {
+    /// CAMR's short handoff: earlier questions, files already read, and the last turns.
+    case handoff
+    /// Every turn, word for word. The baseline a person would get by pasting the transcript.
+    case full
+    /// Nothing. The baseline of starting again.
+    case none
+}
+
+public enum Handoff {
+    public static let defaultCharacters = 2_400
+    static let lastTurnsInFull = 2
+
+    private static func cut(_ text: String, _ most: Int) -> String {
+        let flat = text.replacingOccurrences(of: "\n\n", with: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
+        return flat.count > most ? String(flat.prefix(most - 1)) + "…" : flat
+    }
+
+    /// The handoff as text, held to `characters`, escaped so it can sit inside an `<excerpt>` or `<ledger>` block:
+    /// questions, answers, model and program names were all written by some other program, and a `</excerpt>` in
+    /// any of them must not end the block early and pass what follows off as CAMR's own words.
+    public static func text(_ record: SessionRecord, characters: Int = defaultCharacters) -> String {
+        Ledger.defanged(raw(record, characters: characters))
+    }
+
+    static func raw(_ record: SessionRecord, characters: Int) -> String {
+        guard !record.isEmpty else { return "" }
+        let by = record.models.isEmpty ? (record.client ?? "another program") : record.models.joined(separator: ", ")
+        let head = "This conversation started earlier (session \(record.id), \(record.turns.count) logged turns, answered by \(by)\(record.client.map { " in \($0)" } ?? "")). You are carrying it on. What follows is what happened so far."
+        let recentFrom = max(0, record.turns.count - lastTurnsInFull)
+        var answerRoom = 700
+        var olderRoom = 160
+        var dropped = 0
+        while true {
+            var parts = [head]
+            // The short parts go first, so trimming for length never loses them.
+            // File names only: the turns matter more than line ranges, and vault_read finds the lines again.
+            var names: [String] = []
+            for place in record.filesInPlay {
+                let name = place.components(separatedBy: ":").first ?? place
+                if !names.contains(name) { names.append(name) }
+            }
+            if !names.isEmpty { parts.append("Files read: " + names.prefix(6).joined(separator: ", ") + ".") }
+            let trail = (record.trail ?? []).filter { !$0.asked.isEmpty }
+            let kept = trail.filter { $0.tool == "vault_remember" }.suffix(6).map { "- " + cut(String($0.asked.dropFirst("kept a note: ".count)), 400) }
+            if !kept.isEmpty { parts.append("Notes kept during the conversation, oldest first:\n" + kept.joined(separator: "\n")) }
+            let looked = trail.filter { $0.tool != "vault_remember" }.suffix(8).map { cut($0.asked, 90) }
+            if !looked.isEmpty, record.turns.isEmpty { parts.append("Looked up in the vault, oldest first: " + looked.joined(separator: "; ") + ".") }
+            // Every turn is numbered the same way, so "my second question" means the same thing to every model.
+            if !record.turns.isEmpty {
+                let lines = record.turns.enumerated().dropFirst(dropped).map { index, turn -> String in
+                    let recent = index >= recentFrom
+                    return "Turn \(index + 1). User: \(cut(turn.question, recent ? 300 : 140))\nAnswer (\(turn.model)): \(cut(turn.answer, recent ? answerRoom : olderRoom))"
+                }
+                let gap = dropped > 0 ? "Turns 1 to \(dropped) are left out for length; vault_session_resume can't show more, but the files above hold what they read.\n\n" : ""
+                parts.append("The conversation, \(record.turns.count) turns, oldest first:\n\n" + gap + lines.joined(separator: "\n\n"))
+            }
+            let text = parts.joined(separator: "\n\n")
+            if text.count <= characters { return text }
+            if answerRoom > 240 { answerRoom -= 120; olderRoom = max(60, olderRoom - 40); continue }
+            if dropped < recentFrom { dropped += 1; continue }
+            return String(text.prefix(characters))
+        }
+    }
+
+    /// The whole conversation as alternating messages, for the `full` baseline.
+    public static func messages(_ record: SessionRecord) -> [[String: Any]] {
+        record.turns.flatMap { [["role": "user", "content": $0.question], ["role": "assistant", "content": $0.answer]] as [[String: Any]] }
+    }
+}

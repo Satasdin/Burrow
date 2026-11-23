@@ -1,15 +1,15 @@
 #!/bin/zsh
-# Makes Burrow.dmg: a disk image that opens with Burrow.app beside a shortcut to Applications, so people drag it in.
+# Makes CAMR.dmg: a disk image that opens with CAMR.app beside a shortcut to Applications, so people drag it in.
 # Running the app from the Downloads folder instead put it under App Translocation (16 November), which this avoids.
-#   scripts/make-dmg.sh app/build/Burrow.app out/Burrow-macos-arm64.dmg
-# Only hdiutil and Finder are used. Burrow is ad-hoc signed and not notarised, so macOS still asks the person to allow
+#   scripts/make-dmg.sh app/build/CAMR.app out/CAMR-macos-arm64.dmg
+# Only hdiutil and Finder are used. CAMR is ad-hoc signed and not notarised, so macOS still asks the person to allow
 # it once (System Settings › Privacy & Security › Open Anyway); the DMG's background says so.
 set -euo pipefail
 cd "${0:A:h}/.."
-app="${1:?usage: make-dmg.sh <Burrow.app> <out.dmg>}"
-out="${2:?usage: make-dmg.sh <Burrow.app> <out.dmg>}"
+app="${1:?usage: make-dmg.sh <CAMR.app> <out.dmg>}"
+out="${2:?usage: make-dmg.sh <CAMR.app> <out.dmg>}"
 [[ -d "$app" ]] || { echo "make-dmg: no app at $app" >&2; exit 1; }
-name="Burrow"
+name="CAMR"
 
 work="$(mktemp -d)"
 trap 'hdiutil detach "$work/mnt" -quiet -force 2>/dev/null || true; rm -rf "$work"' EXIT

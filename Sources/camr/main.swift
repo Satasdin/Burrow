@@ -1,0 +1,369 @@
+import CAMRCore
+import CAMRTools
+import Foundation
+
+let usage = """
+camr: private project memory for local models
+
+  camr                            full-screen terminal view of the last vault, or this folder if it is one
+  camr tui   <vault-folder> [--model NAME] [--store DIR]
+  camr chat  <vault-folder> [--model NAME] [--folder F] [--tools-only] [--resume SESSION] [--llama URL]
+               --resume hands the model an archived session (Claude Code, Codex); with --llama its working memory is kept on disk
+  camr mcp   <vault-folder> [--no-sessions] [--llama URL] [--tools door|full|classic]   MCP server on stdin and stdout; each connection is kept as a session.
+               With --llama, what lookups return is also read into that llama.cpp server's cache, in the background
+  camr link  <vault-folder> <code-folder>                     link a folder and approve it on this Mac (in your own terminal, typing yes)
+  camr link list <vault-folder>                               linked folders, and which are approved on this Mac
+  camr link approve <vault-folder> <folder> | --all           approve linked folders a vault came with (in your own terminal, typing yes); until then they are skipped
+
+  camr index <project> [--no-embed] [--vault]
+  camr find  <project> "question" [--mode search|walk] [--json]
+  camr ask   <project> "question" [--mode engine|none|search|walk] [--model NAME] [--json] [--no-skills] [--no-check] [--no-ledger] [--characters N]
+  camr brief <project> "question" [--characters N] [--json]     the question packed for any other model
+  camr fit   <project> [--model NAME]                           measure a model and set how much it is shown
+  camr skills <project> [--install]                             list the skills, or add the starter set
+  camr learn <project> <transcript.json> [--model NAME]         keep what a conversation decided
+  camr note  <project> "text" [--kind decision|rejected|bug|convention|note]
+  camr links <project> <file>
+  camr stats <project>
+  camr steering <project>                                      lines in the files written to steer an AI assistant
+  camr kv <vault> list|save|ask [files...] ["question"] [--server URL] [--cold]   model working memory kept on disk (llama.cpp)
+  camr kv <vault> pack <folder> [--part N] [--window TOKENS]    print one part of a folder read whole, to use as a system message
+  camr kv <vault> warm <folder> [--server URL]                  read every part of a folder into the model's cache and keep it
+
+The Ledger, a git for what AIs understood:
+\(ledgerUsage)
+\(decisionUsage)
+
+\(vaultUsage)
+
+\(teamUsage)
+Connecting a program:
+\(connectUsage)
+
+\(sessionUsage)
+
+Add --store DIR to keep the memory somewhere other than <project>/.camr.
+Add --vault to index a whole vault, where every Markdown file is a note.
+"""
+
+struct Options {
+    var positional: [String] = []
+    var flags = Set<String>()
+    var values: [String: String] = [:]
+
+    init(_ arguments: [String]) throws {
+        let takesValue: Set<String> = ["--mode", "--model", "--kind", "--store", "--folder", "--characters", "--server", "--llama", "--part", "--window", "--tools", "--name", "--resume"]
+        var index = 0
+        while index < arguments.count {
+            let word = arguments[index]
+            if takesValue.contains(word) {
+                guard index + 1 < arguments.count else { throw Failure("\(word) needs a value") }
+                values[word] = arguments[index + 1]
+                index += 2
+            } else {
+                if word.hasPrefix("--") { flags.insert(word) } else { positional.append(word) }
+                index += 1
+            }
+        }
+    }
+}
+
+struct Failure: Error, CustomStringConvertible {
+    let description: String
+    init(_ description: String) { self.description = description }
+}
+
+func jsonLine(_ value: Any) throws -> String {
+    String(decoding: try JSONSerialization.data(withJSONObject: value, options: [.sortedKeys]), as: UTF8.self)
+}
+
+func describe(_ found: Retrieved) -> [[String: Any]] { FindCommand.describe(found) }
+
+func mode(_ options: Options, default fallback: Mode) throws -> Mode {
+    guard let word = options.values["--mode"] else { return fallback }
+    guard let mode = Mode(rawValue: word) else { throw Failure("unknown mode \(word)") }
+    return mode
+}
+
+/// Uses embeddings only if this project was indexed with them, so a word-only index stays word-only.
+func embedderIfIndexed(_ vault: Vault, _ ollama: Ollama) throws -> Embedder? {
+    try vault.stats().vectors > 0 ? ollama.embedder() : nil
+}
+
+func run() async throws {
+    let arguments = Array(CommandLine.arguments.dropFirst())
+    if try await runTerminalCommand(arguments) { return }
+    if try await runTeamCommand(arguments) { return }
+    if try await runLedgerCommand(arguments) { return }
+    if try await runDecisionCommand(arguments) { return }
+    if try await runVaultCommand(arguments) { return }
+    if try runConnectCommand(arguments) { return }
+    if try runSessionCommand(arguments) { return }
+    guard let command = arguments.first, !["help", "--help", "-h"].contains(command) else {
+        print(usage)
+        return
+    }
+    if ["--version", "-v", "version"].contains(command) {
+        print("camr \(CAMRVersion.number)")
+        return
+    }
+    let options = try Options(Array(arguments.dropFirst()))
+    guard let projectPath = options.positional.first else {
+        throw Failure("\(command) needs a folder: camr \(command) <folder>. Run camr help for every command.")
+    }
+    let projectURL = URL(fileURLWithPath: projectPath), storeURL = options.values["--store"].map { URL(fileURLWithPath: $0) }
+    // `index` is the one older command that makes an index where there was none: naming a folder to index is choosing it.
+    // Every other command reads an index that exists, and refuses any other folder before anything is written (D-114).
+    if command != "index", !Vault.hasIndex(projectURL, store: storeURL) { throw Failure(Vault.notAVault(projectPath)) }
+    let vault = try Vault(project: projectURL, store: storeURL, everything: options.flags.contains("--vault"))
+    meetLinks(vault)
+    let ollama = Ollama()
+    let text = options.positional.dropFirst().first
+
+    switch command {
+    case "index":
+        let started = Date()
+        let report = try await vault.refresh(embedder: options.flags.contains("--no-embed") ? nil : ollama.embedder()) { line in
+            FileHandle.standardError.write(Data("\r\(line)   ".utf8))
+        }
+        FileHandle.standardError.write(Data("\n".utf8))
+        print("\(report.filesSeen) files, \(report.filesChanged) changed, \(report.filesRemoved) removed, \(report.chunks) chunks, \(report.links) links, \(report.embedded) embedded in \(String(format: "%.1f", Date().timeIntervalSince(started))) s")
+        KnownVaults.remember(vault)
+        // The team folders it reads are indexed into CAMR's own folder, the same way (D-109).
+        for problem in await vault.refreshTeams(embedder: report.embedded > 0 || ((try? vault.stats().vectors) ?? 0) > 0 ? ollama.embedder() : nil) { logToStandardError(problem) }
+        if report.tooLarge > 0 { print("\(report.tooLarge) file\(report.tooLarge == 1 ? " was" : "s were") larger than index.maxFileSize and left out.") }
+        if let stop = report.storageStop {
+            fflush(stdout)
+            throw Failure(stop.message)
+        }
+
+    case "find":
+        guard let text else { throw Failure("find needs a question") }
+        // Falls back to words, with one plain line, when Ollama can't embed the question (IR-03, D-122).
+        print(try await FindCommand.output(vault, text, mode: try mode(options, default: .walk), embedder: try embedderIfIndexed(vault, ollama),
+                                           json: options.flags.contains("--json")))
+
+    case "ask":
+        guard let text else { throw Failure("ask needs a question") }
+        let asJSON = options.flags.contains("--json")
+        let model = options.values["--model"] ?? Ollama.defaultModel
+        // Both paths hear the Ledger as `camr chat` and the app's Ask do, from AskLedger, and print the answer a line at
+        // a time with its citations checked, so a place it was not given never reads as a source (D-96). The engine's own
+        // words are unchanged; `--no-ledger` leaves the Ledger out, for a baseline.
+        let stream = CheckedStream { words in if !asJSON { FileHandle.standardOutput.write(Data(words.utf8)) } }
+        let ledgerOn = !options.flags.contains("--no-ledger")
+        let notes = NoteSource { question, read in
+            let handed = ledgerOn ? AskLedger.handed(vault: vault, question: question, shown: Set(read.paths)) : nil
+            stream.shown = read.excerpts.map(ShownLines.init)
+            stream.ledger = Set(handed?.ids ?? [])
+            return handed
+        }
+        func checkedLines(_ handed: HandedNotes?, _ checked: CheckedAnswer) {
+            if let handed {
+                print("Ledger notes given: " + handed.ids.map { AskLedger.label($0) + (checked.ledgerCited.contains($0) ? " (cited)" : "") }.joined(separator: ", "))
+            }
+            if !checked.unverified.isEmpty { print("Not among what it read, so not a source: " + checked.unverified.joined(separator: ", ")) }
+        }
+        func checkedFields(_ handed: HandedNotes?, _ checked: CheckedAnswer) -> [String: Any] {
+            // "answer" stays as the model wrote it, as the evaluation scripts read it; the checked text sits beside it.
+            ["checked_answer": checked.text, "unverified": checked.unverified, "ledger_given": handed?.ids ?? [], "ledger_cited": checked.ledgerCited]
+        }
+        if options.values["--mode"] == "engine" {
+            var profile = await vault.profile(for: model, ollama: ollama)
+            // For measuring how the amount shown changes the answers: a fixed budget in place of the fitted one.
+            if let fixed = options.values["--characters"].flatMap(Int.init), fixed > 0 {
+                profile.budgetCharacters = fixed
+                let needed = Int(Double(fixed) / ModelProfile.densest) + ModelProfile.reserveTokens
+                profile.windowTokens = [4_096, 8_192, 16_384, 32_768].first { $0 >= needed } ?? 32_768
+            }
+            var settings = EngineSettings()
+            settings.useSkills = !options.flags.contains("--no-skills")
+            settings.check = !options.flags.contains("--no-check")
+            let reply = try await vault.engage(text, profile: profile, embedder: try embedderIfIndexed(vault, ollama), scope: options.values["--folder"],
+                                               answerer: ollama.answerer(model: model, contextWords: profile.windowTokens), settings: settings,
+                                               notes: notes) { word in stream.add(word) }
+            stream.finish()
+            let found = reply.brief.retrieved
+            let checked = reply.checked
+            if asJSON {
+                print(try jsonLine(checkedFields(reply.handed, checked).merging([
+                    "answer": reply.result.text, "first_word_s": reply.result.secondsToFirstWord, "total_s": reply.result.totalSeconds + reply.brief.seconds,
+                    "retrieve_s": reply.brief.seconds, "prompt_tokens": reply.result.promptTokens, "answer_tokens": reply.result.answerTokens,
+                    "characters": found.characters, "excerpts": describe(found),
+                    "route": ["mode": reply.brief.route.mode.rawValue, "why": reply.brief.route.why],
+                    "skills": reply.brief.skill.map { [$0.name] } ?? [],
+                    "citations": ["named": reply.citations.count, "not_shown": reply.unverified.count],
+                    "retried": reply.retried, "budget_characters": profile.budgetCharacters, "window_tokens": profile.windowTokens,
+                    "nearest": found.signal.nearest.map { Double($0) } as Any? ?? NSNull(),
+                ]) { _, engine in engine }))
+            } else {
+                if reply.retried { print("\n\nChecked: the first answer pointed at lines it was not shown, so it was asked again.\n\n" + checked.text) }
+                print("\n\nDecided: \(reply.brief.route.mode.rawValue), because \(reply.brief.route.why)")
+                if let skill = reply.brief.skill { print("Skill: \(skill.name)") }
+                print("Read: " + (found.paths.isEmpty ? "nothing" : found.paths.joined(separator: ", ")))
+                print("Cited \(reply.citations.count) places, \(reply.unverified.count) not among what it read")
+                checkedLines(reply.handed, checked)
+                print(String(format: "Prepared in %.3f s, first word %.2f s, whole answer %.2f s, %d tokens read", reply.brief.seconds, reply.result.secondsToFirstWord, reply.result.totalSeconds, reply.result.promptTokens))
+            }
+            return
+        }
+        let answer = try await vault.ask(text, mode: try mode(options, default: .walk), embedder: try embedderIfIndexed(vault, ollama),
+                                         answerer: ollama.answerer(model: model), notes: notes) { word in stream.add(word) }
+        stream.finish()
+        let checked = answer.checked
+        if asJSON {
+            print(try jsonLine(checkedFields(answer.handed, checked).merging([
+                "answer": answer.result.text, "first_word_s": answer.result.secondsToFirstWord, "total_s": answer.result.totalSeconds,
+                "retrieve_s": answer.retrieved.seconds, "prompt_tokens": answer.result.promptTokens, "answer_tokens": answer.result.answerTokens,
+                "characters": answer.retrieved.characters, "excerpts": describe(answer.retrieved),
+            ]) { _, plain in plain }))
+        } else {
+            print("\n\nRead: " + (answer.retrieved.paths.isEmpty ? "nothing" : answer.retrieved.paths.joined(separator: ", ")))
+            checkedLines(answer.handed, checked)
+            print(String(format: "First word %.2f s, whole answer %.2f s, %d tokens read", answer.result.secondsToFirstWord, answer.result.totalSeconds, answer.result.promptTokens))
+        }
+
+    case "brief":
+        guard let text else { throw Failure("brief needs a question") }
+        var budget = Budget()
+        budget.characters = options.values["--characters"].flatMap(Int.init) ?? 24_000
+        budget.entryFiles = max(4, budget.characters / 3_000)
+        var settings = EngineSettings()
+        settings.useSkills = !options.flags.contains("--no-skills")
+        let brief = try await vault.brief(text, budget: budget, embedder: try embedderIfIndexed(vault, ollama), scope: options.values["--folder"], settings: settings)
+        if options.flags.contains("--json") {
+            print(try jsonLine([
+                "system": brief.system, "user": brief.user, "retrieve_s": brief.seconds, "characters": brief.retrieved.characters,
+                "excerpts": describe(brief.retrieved), "route": ["mode": brief.route.mode.rawValue, "why": brief.route.why],
+                "skills": brief.skill.map { [$0.name] } ?? [],
+                "nearest": brief.retrieved.signal.nearest.map { Double($0) } as Any? ?? NSNull(),
+                "word_matches": brief.retrieved.signal.wordMatches,
+                "skill_closeness": brief.skillCloseness.map { Double($0) } as Any? ?? NSNull(),
+            ]))
+        } else {
+            print(brief.system + "\n\n" + brief.user)
+        }
+
+    case "fit":
+        let model = options.values["--model"] ?? Ollama.defaultModel
+        let profile = try await ollama.measure(model: model)
+        try vault.keep(profile)
+        print(String(format: "%@: %.1f billion parameters, accepts %d tokens, reads %.0f and writes %.0f tokens a second, %.2f characters a token",
+                     model, profile.billions, profile.contextTokens, profile.readsPerSecond, profile.writesPerSecond, profile.charactersPerToken))
+        print("It will be shown up to \(profile.budgetCharacters) characters of the vault in a window of \(profile.windowTokens) tokens.")
+
+    case "skills":
+        if options.flags.contains("--install") {
+            let written = try vault.installStarterSkills()
+            print(written.isEmpty ? "the starter skills are already there" : "added: " + written.joined(separator: ", "))
+            if vault.everything { try await vault.refresh(embedder: try embedderIfIndexed(vault, ollama)) }
+        }
+        for skill in vault.skills() { print("\(skill.name)   when: \(skill.when)") }
+
+    case "learn":
+        guard let text else { throw Failure("learn needs a transcript file") }
+        let data = try Data(contentsOf: URL(fileURLWithPath: text))
+        guard let list = try JSONSerialization.jsonObject(with: data) as? [[String: String]] else { throw Failure("the transcript must be a JSON list of {question, answer}") }
+        let turns = list.map { (question: $0["question"] ?? "", answer: $0["answer"] ?? "") }
+        let written = try await vault.learn(from: turns, answerer: ollama.answerer(model: options.values["--model"] ?? Ollama.defaultModel),
+                                            embedder: try embedderIfIndexed(vault, ollama))
+        print(written.isEmpty ? "nothing new to keep" : "kept: " + written.joined(separator: ", "))
+
+    case "note":
+        guard let text else { throw Failure("note needs text") }
+        let kindName = options.values["--kind"] ?? "note"
+        guard let kind = NoteKind(rawValue: kindName) else { throw Failure("unknown kind \(kindName)") }
+        print("kept in \(try vault.addNote(text, kind: kind))")
+        try await vault.refresh(embedder: try embedderIfIndexed(vault, ollama))
+
+    case "links":
+        guard let text else { throw Failure("links needs a file") }
+        for link in try vault.neighbours(of: text) {
+            print("\(link.forward ? "->" : "<-") \(link.path)   [\(link.kind.rawValue)\(link.via.map { " " + $0 } ?? "")]")
+        }
+
+    case "steering":
+        // Text written to steer AI assistants, for the person to see (D-80).
+        var count = 0
+        for file in try vault.projectMap().files {
+            guard let text = vault.text(of: file.path) else { continue }
+            for found in Steering.lines(in: text) { print("\(file.path):\(found.line): \(found.text)"); count += 1 }
+        }
+        print(count == 0 ? "Nothing in the files reads as written to steer an AI assistant." : "\(count) line\(count == 1 ? "" : "s") written to steer an AI assistant. CAMR shows them as content and flags them wherever a model sees them.")
+
+    case "stats":
+        let stats = try vault.stats()
+        // The same count `camr index` and the app give: every file, and how many of them are the vault's own notes.
+        print("\(stats.files + stats.notes) files (\(stats.notes) notes in the vault, \(stats.files) other files), \(stats.clusters) clusters, \(stats.chunks) chunks, \(stats.links) links, \(stats.vectors) vectors, index \(stats.indexBytes / 1024) KB")
+        try storageLines(vault).forEach { print($0) }
+
+    case "kv":
+        // camr kv <vault> save|ask|list [files...] [--server URL] ["question"]
+        let shelf = KVShelf(vault: vault)
+        let server = URL(string: options.values["--server"] ?? "http://127.0.0.1:8080")!
+        let action = options.positional.dropFirst().first ?? "list"
+        var rest = Array(options.positional.dropFirst(2))
+        switch action {
+        case "list":
+            for entry in shelf.entries() {
+                print("\(entry.key)  \(entry.model)  \(entry.tokens) tokens  \(entry.bytes / 1_048_576) MB  built in \(String(format: "%.1f", entry.buildSeconds)) s  \(entry.sources.keys.sorted().joined(separator: ", "))")
+            }
+            print("kept in \(shelf.folder.path). Start llama.cpp with --slot-save-path \(shelf.folder.path) to use them.")
+        case "save":
+            guard !rest.isEmpty else { throw Failure("kv save needs one or more vault paths") }
+            let (entry, built) = try await shelf.save(rest, server: server)
+            print("saved \(entry.key) for \(entry.model): \(built.promptTokens) tokens read in \(String(format: "%.2f", built.promptSeconds)) s, \(entry.bytes / 1_048_576) MB on disk")
+        case "ask":
+            guard rest.count >= 2 else { throw Failure("kv ask needs vault paths and then a question") }
+            let question = rest.removeLast()
+            let out = try await shelf.ask(rest, question: question, server: server, cold: options.flags.contains("--cold"))
+            let how = out.used.map { "loaded the saved cache (\($0.tokens) tokens) in \(String(format: "%.2f", out.loaded)) s" } ?? "read everything from the start"
+            if options.flags.contains("--json") {
+                print(try jsonLine(["loaded_seconds": out.loaded, "prompt_tokens": out.timing.promptTokens, "prompt_seconds": out.timing.promptSeconds,
+                                    "total_seconds": out.timing.answerSeconds + out.loaded, "used_cache": out.used != nil, "answer": out.timing.answer]))
+            } else {
+                print("\(how); then read \(out.timing.promptTokens) tokens in \(String(format: "%.2f", out.timing.promptSeconds)) s\n\n\(out.timing.answer)")
+            }
+        case "pack", "warm":
+            // A folder read whole, in parts sized to the model's window (D-59).
+            guard let scope = rest.first else { throw Failure("kv \(action) needs a vault folder") }
+            var window = Int(options.values["--window"] ?? "") ?? KVShelf.defaultPackWindow
+            var spare: Int?
+            if action == "warm" || options.values["--window"] == nil {
+                let warmer = KVWarmer(settings: KVWarmer.Settings(server: server), open: { vault })
+                if case let .ready(_, slot, tokens) = await warmer.connect() {
+                    window = tokens
+                    spare = slot
+                } else if action == "warm" {
+                    throw Failure("kv warm needs a llama.cpp server with two or more slots at \(server.absoluteString)")
+                }
+            }
+            let plan = try shelf.plan(scope: scope, budgetCharacters: KVShelf.packCharacters(windowTokens: window))
+            if action == "pack" {
+                let part = Int(options.values["--part"] ?? "1") ?? 1
+                guard let pack = plan.packs.first(where: { $0.part == part }) else { throw Failure("\(scope) has \(plan.packs.count) parts") }
+                FileHandle.standardError.write(Data("part \(part) of \(plan.packs.count), sized for \(window) tokens\n".utf8))
+                print(shelf.text(of: pack, in: plan), terminator: "")
+            } else {
+                let started = Date()
+                for item in try await shelf.build(plan, server: server, slot: spare!) {
+                    let entry = item.entry
+                    print("part \(entry.part ?? 0) of \(entry.parts ?? 0): \(entry.tokens) tokens, " + (item.skipped ? "already on the shelf" :
+                        "\(item.readTokens) read in \(String(format: "%.1f", item.readSeconds)) s, \(entry.bytes / 1_048_576) MB"))
+                }
+                print("done in \(String(format: "%.1f", Date().timeIntervalSince(started))) s")
+            }
+        default: throw Failure("kv takes list, save, ask, pack or warm")
+        }
+
+    default:
+        throw Failure("unknown command \(command)\n\n\(usage)")
+    }
+}
+
+do {
+    try await run()
+} catch {
+    FileHandle.standardError.write(Data("camr: \(error)\n".utf8))
+    exit(1)
+}

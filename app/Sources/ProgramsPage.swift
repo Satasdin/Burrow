@@ -1,5 +1,5 @@
 import AppKit
-import BurrowTools
+import CAMRTools
 import Charts
 import SwiftUI
 
@@ -67,7 +67,7 @@ struct ProgramsPage: View {
     private func refresh() async {
         var read = await Connections.read(vault: workspace.folder)
         // A program that has used this vault was set up somewhere: most often a project's own settings file,
-        // which Burrow can't know to look in. Say so rather than "Not set up".
+        // which CAMR can't know to look in. Say so rather than "Not set up".
         // Global settings that point at another vault say nothing about a project's own settings, so a program that has
         // used this vault counts as set up here either way.
         for program in programs where !workspace.sessions(for: program).isEmpty {
@@ -78,8 +78,8 @@ struct ProgramsPage: View {
             read[program] = Connection(state: .usedElsewhere)
         }
         links = read
-        // For checking the hover card without a person at the screen: BURROW_PEEK=OpenCode, or BURROW_PEEK=vault.
-        if let peek = ProcessInfo.processInfo.environment["BURROW_PEEK"], hovered == nil {
+        // For checking the hover card without a person at the screen: CAMR_PEEK=OpenCode, or CAMR_PEEK=vault.
+        if let peek = ProcessInfo.processInfo.environment["CAMR_PEEK"], hovered == nil {
             if peek == "vault" { hoverVault = true } else { hovered = programs.first { $0.name == peek }; pointer = CGPoint(x: 420, y: 0) }
         }
     }
@@ -96,12 +96,12 @@ struct ProgramsPage: View {
         }
     }
 
-    /// Without the `burrow` command on the Mac, no program can start the vault, so this comes first.
+    /// Without the `camr` command on the Mac, no program can start the vault, so this comes first.
     private var commandMissing: some View {
         HStack(spacing: 12) {
             Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(Night.document)
             VStack(alignment: .leading, spacing: 2) {
-                Text("The burrow command isn't installed").font(.system(size: 13, weight: .semibold))
+                Text("The camr command isn't installed").font(.system(size: 13, weight: .semibold))
                 Text("Programs start the vault by running it. The setup lines below use its full path once it is installed.")
                     .font(.system(size: 12)).foregroundStyle(Night.dim)
             }
@@ -519,7 +519,7 @@ struct ProgramRow: View {
                 if canAdd {
                     Button(working ? "Adding…" : "Add for Me") { Task { await add() } }
                         .controlSize(.small).buttonStyle(.borderedProminent).tint(program.colour.opacity(0.85)).disabled(working)
-                        .help("Writes this into \(program.name)'s settings; the old file is kept beside it as .before-burrow")
+                        .help("Writes this into \(program.name)'s settings; the old file is kept beside it as .before-camr")
                 }
             }
             .padding(10).background(Color.white.opacity(0.05), in: .rect(cornerRadius: 8))
@@ -543,20 +543,20 @@ struct ProgramRow: View {
     }
 }
 
-/// Puts the `burrow` command where programs and the shell can find it: a link in ~/.local/bin to the copy inside the app.
+/// Puts the `camr` command where programs and the shell can find it: a link in ~/.local/bin to the copy inside the app.
 enum CommandInstaller {
     static func install() throws -> String {
-        let bundled = Bundle.main.bundleURL.appendingPathComponent("Contents/Resources/bin/burrow")
+        let bundled = Bundle.main.bundleURL.appendingPathComponent("Contents/Resources/bin/camr")
         guard FileManager.default.isExecutableFile(atPath: bundled.path) else {
-            throw Connections.SetupError("This copy of Burrow has no command inside it. Build it with app/build.sh, or run swift build in the repository.")
+            throw Connections.SetupError("This copy of CAMR has no command inside it. Build it with app/build.sh, or run swift build in the repository.")
         }
         let bin = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".local/bin")
         try FileManager.default.createDirectory(at: bin, withIntermediateDirectories: true)
-        let link = bin.appendingPathComponent("burrow")
+        let link = bin.appendingPathComponent("camr")
         if (try? link.checkResourceIsReachable()) == true || (try? FileManager.default.destinationOfSymbolicLink(atPath: link.path)) != nil {
             try FileManager.default.removeItem(at: link)
         }
         try FileManager.default.createSymbolicLink(at: link, withDestinationURL: bundled)
-        return "Installed burrow in ~/.local/bin"
+        return "Installed camr in ~/.local/bin"
     }
 }

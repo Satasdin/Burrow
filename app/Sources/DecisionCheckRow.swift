@@ -1,5 +1,5 @@
-import BurrowCore
-import BurrowTools
+import CAMRCore
+import CAMRTools
 import SwiftUI
 
 /// A decision's check as the app holds it (D-107).

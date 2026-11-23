@@ -1,6 +1,6 @@
-import BurrowCore
-import BurrowTrial
-import BurrowTools
+import CAMRCore
+import CAMRTrial
+import CAMRTools
 import Foundation
 import Observation
 import AppKit
@@ -10,7 +10,7 @@ actor Engine {
     let vault: Vault
     private let ollama = Ollama()
 
-    /// Where Burrow keeps its own files for this vault: the index, conversations and the Ledger.
+    /// Where CAMR keeps its own files for this vault: the index, conversations and the Ledger.
     nonisolated let store: URL
 
     init(folder: URL, store: URL?) throws {
@@ -78,7 +78,7 @@ actor Engine {
         try DecisionChecks.confirm(shown, for: id, vault: vault)
     }
 
-    /// Lines in the vault's notes and code written to steer AI assistants (D-80), the same pattern burrow_read flags.
+    /// Lines in the vault's notes and code written to steer AI assistants (D-80), the same pattern camr_read flags.
     /// Documents and images are left out: their text is extracted, and a long PDF would slow every refresh.
     private func flaggedText() -> [FlaggedLine] {
         guard let files = try? vault.projectMap().files else { return [] }
@@ -92,19 +92,19 @@ actor Engine {
     }
     func commit(_ kind: LedgerCommit.Kind, _ message: String, files: [String], branch: String?, session: String?, team: String? = nil) throws -> LedgerCommit {
         if let team { return try shareWithTeam(team, kind, message, files: files, session: session) }
-        return try Ledger(vault: vault).commit(kind, message, files: files, author: "person", client: "Burrow app", branch: branch, session: session)
+        return try Ledger(vault: vault).commit(kind, message, files: files, author: "person", client: "CAMR app", branch: branch, session: session)
     }
     func revert(_ id: String, why: String) throws {
         // A teammate's decision is marked wrong by a correction in the person's own team folder (D-109).
         if Ledger(vault: vault).find(id) == nil, let team = TeamLedger.holding(id, vault: vault) {
-            try TeamLedger.revert(vault: vault, team: team, id: id, why: why, author: "person", client: "Burrow app")
+            try TeamLedger.revert(vault: vault, team: team, id: id, why: why, author: "person", client: "CAMR app")
             return
         }
-        try Ledger(vault: vault).revert(id, why: why, author: "person", client: "Burrow app")
+        try Ledger(vault: vault).revert(id, why: why, author: "person", client: "CAMR app")
     }
-    func confirm(_ id: String) throws { try Ledger(vault: vault).confirm(id, author: "person", client: "Burrow app") }
-    func bothHold(_ id: String) throws { try Ledger(vault: vault).bothHold(id, author: "person", client: "Burrow app") }
-    /// The Ledger's decisions for a question and the files read for it, as `burrow chat` gets them (D-88, D-90).
+    func confirm(_ id: String) throws { try Ledger(vault: vault).confirm(id, author: "person", client: "CAMR app") }
+    func bothHold(_ id: String) throws { try Ledger(vault: vault).bothHold(id, author: "person", client: "CAMR app") }
+    /// The Ledger's decisions for a question and the files read for it, as `camr chat` gets them (D-88, D-90).
     func ledgerContext(_ question: String, shown: Set<String>) -> (notes: [LedgerCommit], text: String) {
         AskLedger.context(vault: vault, question: question, shown: shown)
     }
@@ -263,7 +263,7 @@ enum TabContent: Hashable {
     case shelf
     case programs
     case ledger(String?)
-    /// Live and recent Claude Code and Codex sessions, and what Burrow did for each one's context (D-116).
+    /// Live and recent Claude Code and Codex sessions, and what CAMR did for each one's context (D-116).
     case contextSessions
 }
 
@@ -290,7 +290,7 @@ final class Workspace {
     var linked: [LinkedFolder] = []
     /// Other vaults this one reads through a bridge, with their files labelled (D-97).
     var bridged: [BridgedShelf] = []
-    /// Burrow's store for this vault and for every vault, beside their limits (D-98).
+    /// CAMR's store for this vault and for every vault, beside their limits (D-98).
     var storage: StorageReport?
     var bridgesOpen = false
     /// Folders this vault's list links that the person on this Mac has not approved; skipped until they are (D-101).
@@ -319,7 +319,7 @@ final class Workspace {
     var sidebarMode = SidebarMode.files
     var isReading = false   // reading view rather than editing
     var paletteOpen = false
-    /// Which part of the Ledger's Watch panel a recorded tour opens (BURROW_TOUR watch=…).
+    /// Which part of the Ledger's Watch panel a recorded tour opens (CAMR_TOUR watch=…).
     var watchPeek: String?
     /// Text a recorded tour types into Quick Open.
     var paletteQuery = ""
@@ -370,7 +370,7 @@ final class Workspace {
             afterFirstRead?()
             afterFirstRead = nil
         } catch {
-            warning = "Burrow could not read this folder. \(error)"
+            warning = "CAMR could not read this folder. \(error)"
             progress = nil
             hasRead = true
             return
@@ -391,7 +391,7 @@ final class Workspace {
     /// A storage limit that stopped the index short shows as the warning line, in its own first words (D-98).
     private func noteStorage(_ report: IndexReport) {
         guard let stop = report.storageStop else { return }
-        warning = stop.message.components(separatedBy: "\n").first.map { $0 + " Nothing was deleted; raise the limit with burrow config." }
+        warning = stop.message.components(separatedBy: "\n").first.map { $0 + " Nothing was deleted; raise the limit with camr config." }
     }
 
     /// Counts this vault for the global storage limit (D-98).
@@ -411,7 +411,7 @@ final class Workspace {
         }
     }
 
-    /// The person said yes to every linked folder the sheet showed them, less any Burrow never follows: they are read
+    /// The person said yes to every linked folder the sheet showed them, less any CAMR never follows: they are read
     /// from now on, and indexed now (D-101, D-104).
     func approveLinks() async {
         linksOpen = false
@@ -986,7 +986,7 @@ final class Workspace {
                 // The Ledger, as a connected program would get it: the decisions on the files read, or matching the
                 // question, with their reasons. Asked why matching was by reference only, qwen3:4b quoted a code
                 // comment, because Ask never looked at the Ledger (14 November walkthrough, D-88).
-                // The same notes, block and rule `burrow chat` is given, from one place (D-90).
+                // The same notes, block and rule `camr chat` is given, from one place (D-90).
                 let ledger = await engine.ledgerContext(words, shown: Set(found.paths))
                 turn.ledger = ledger.notes
                 if !ledger.text.isEmpty {
@@ -1067,13 +1067,13 @@ final class Library {
     var workspace: Workspace?
     var recents: [String] = UserDefaults.standard.stringArray(forKey: "recentVaults") ?? []
     var failure: String?
-    /// The vaults the welcome screen offers: the app's recents, then every vault Burrow knows on this Mac (D-114).
+    /// The vaults the welcome screen offers: the app's recents, then every vault CAMR knows on this Mac (D-114).
     var choices: [String] = []
 
     init() { choices = recents }
 
     /// On launch with no vault open: the terminal's vault is opened if the app has never opened one, else every known
-    /// vault is listed. The app used to show only its own recents, so a vault made with `burrow vault new` was invisible.
+    /// vault is listed. The app used to show only its own recents, so a vault made with `camr vault new` was invisible.
     func start() {
         let known = KnownVaults.list().map(\.root)
         switch StartingVault.choose(recents: recents, last: LastVault.read(), known: known) {
@@ -1085,13 +1085,13 @@ final class Library {
     func open(_ folder: URL) {
         let environment = ProcessInfo.processInfo.environment
         do {
-            let opened = try Workspace(folder: folder, store: environment["BURROW_STORE"].map { URL(fileURLWithPath: $0) })
+            let opened = try Workspace(folder: folder, store: environment["CAMR_STORE"].map { URL(fileURLWithPath: $0) })
             opened.library = self
             workspace = opened
             // Counted for the global storage limit (D-98). A layout check counts only into a scratch state folder.
-            if environment["BURROW_SNAPSHOT"] == nil || environment["BURROW_STATE_DIR"] != nil { Task { await opened.remember() } }
+            if environment["CAMR_SNAPSHOT"] == nil || environment["CAMR_STATE_DIR"] != nil { Task { await opened.remember() } }
             // A layout check opens scratch vaults; it should not push the person's own vaults off their list.
-            if environment["BURROW_SNAPSHOT"] == nil {
+            if environment["CAMR_SNAPSHOT"] == nil {
                 recents = [folder.path] + recents.filter { $0 != folder.path }
                 UserDefaults.standard.set(Array(recents.prefix(8)), forKey: "recentVaults")
                 LastVault.write(folder.path)
@@ -1104,7 +1104,7 @@ final class Library {
     }
 
     /// A recent vault's name: its folder, with as many folders above it as it takes to tell it from the others
-    /// ("BurrowHowTo/Notes" beside "BurrowDemo/Notes"), up to three.
+    /// ("CAMRHowTo/Notes" beside "CAMRDemo/Notes"), up to three.
     static func shortName(_ path: String, among all: [String]) -> String {
         func tail(_ path: String, _ count: Int) -> String {
             path.split(separator: "/").suffix(count).joined(separator: "/")
@@ -1117,8 +1117,8 @@ final class Library {
     }
 
     /// For checking layouts without a person at the screen.
-    /// For the demo film: BURROW_TOUR="0:ledger;4:watch=check;9:graph;…" walks the app through pages on a clock while
-    /// BURROW_RECORD saves frames, so every app shot is the real app on a real vault, driven the same way each take.
+    /// For the demo film: CAMR_TOUR="0:ledger;4:watch=check;9:graph;…" walks the app through pages on a clock while
+    /// CAMR_RECORD saves frames, so every app shot is the real app on a real vault, driven the same way each take.
     private static func runTour(_ workspace: Workspace, _ tour: String) {
         for step in tour.split(separator: ";") {
             let parts = step.split(separator: ":", maxSplits: 1).map(String.init)
@@ -1150,13 +1150,13 @@ final class Library {
     }
 
     private static func applyCheckHooks(_ workspace: Workspace, _ environment: [String: String]) {
-        if let tour = environment["BURROW_TOUR"] { runTour(workspace, tour) }
-        if let path = environment["BURROW_OPEN"] { workspace.go(.file(path)) }
-        if environment["BURROW_READING"] != nil { workspace.isReading = true }
-        if let theme = environment["BURROW_THEME"] { UserDefaults.standard.set(theme, forKey: SkyTheme.key) }
-        if environment["BURROW_TAB"] == "ask" { workspace.go(.ask) }
-        if environment["BURROW_TAB"] == "graph" { workspace.go(.graph) }
-        switch environment["BURROW_TAB"] {
+        if let tour = environment["CAMR_TOUR"] { runTour(workspace, tour) }
+        if let path = environment["CAMR_OPEN"] { workspace.go(.file(path)) }
+        if environment["CAMR_READING"] != nil { workspace.isReading = true }
+        if let theme = environment["CAMR_THEME"] { UserDefaults.standard.set(theme, forKey: SkyTheme.key) }
+        if environment["CAMR_TAB"] == "ask" { workspace.go(.ask) }
+        if environment["CAMR_TAB"] == "graph" { workspace.go(.graph) }
+        switch environment["CAMR_TAB"] {
         case "conversations": workspace.go(.conversations(nil))
         case "session": if let first = workspace.sessions.first { workspace.go(.session(first.id)) }
         case "shelf": workspace.go(.shelf)
@@ -1167,20 +1167,20 @@ final class Library {
         case "none": workspace.tabs.forEach(workspace.close)
         default: break
         }
-        if let pick = environment["BURROW_SELECT"] { workspace.librarySelection = pick }
-        if environment["BURROW_SHEET"] == "bridges" { workspace.bridgesOpen = true }
-        if environment["BURROW_SHEET"] == "links" { workspace.linksOpen = true }
-        if environment["BURROW_PALETTE"] != nil { workspace.paletteOpen = true }
-        if let query = environment["BURROW_SEARCH"] {
+        if let pick = environment["CAMR_SELECT"] { workspace.librarySelection = pick }
+        if environment["CAMR_SHEET"] == "bridges" { workspace.bridgesOpen = true }
+        if environment["CAMR_SHEET"] == "links" { workspace.linksOpen = true }
+        if environment["CAMR_PALETTE"] != nil { workspace.paletteOpen = true }
+        if let query = environment["CAMR_SEARCH"] {
             workspace.sidebarMode = .search
             workspace.searchText = query
             workspace.runSearch()
         }
-        if environment["BURROW_SIDEBAR"] == "tags" { workspace.sidebarMode = .tags }
-        if let chosen = environment["BURROW_MODEL"] { workspace.model = chosen }
-        workspace.askScope = environment["BURROW_SCOPE"]
-        if let question = environment["BURROW_ASK"] { workspace.ask(question, wantsChange: environment["BURROW_CHANGE"] != nil) }
-        if let words = environment["BURROW_TYPE"] {
+        if environment["CAMR_SIDEBAR"] == "tags" { workspace.sidebarMode = .tags }
+        if let chosen = environment["CAMR_MODEL"] { workspace.model = chosen }
+        workspace.askScope = environment["CAMR_SCOPE"]
+        if let question = environment["CAMR_ASK"] { workspace.ask(question, wantsChange: environment["CAMR_CHANGE"] != nil) }
+        if let words = environment["CAMR_TYPE"] {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { typeIntoEditor(words) }
         }
     }

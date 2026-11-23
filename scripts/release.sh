@@ -4,29 +4,29 @@
 set -euo pipefail
 cd "${0:A:h}/.."
 version="${1:?usage: release.sh vX.Y.Z}"
-tag="burrow-$version"
+tag="camr-$version"
 out="$(mktemp -d)"
 
-swift build -c release --product burrow
-cp .build/release/burrow "$out/burrow"
-codesign --force --sign - "$out/burrow"
-tar -czf "$out/burrow-macos-arm64.tar.gz" -C "$out" burrow
+swift build -c release --product camr
+cp .build/release/camr "$out/camr"
+codesign --force --sign - "$out/camr"
+tar -czf "$out/camr-macos-arm64.tar.gz" -C "$out" camr
 
 app/build.sh
 # The zip is what install.sh --app fetches with curl; the DMG is the download for a browser, with the drag-to-Applications window.
-ditto -c -k --sequesterRsrc --keepParent app/build/Burrow.app "$out/Burrow-macos-arm64.zip"
-scripts/make-dmg.sh app/build/Burrow.app "$out/Burrow-macos-arm64.dmg"
-hdiutil verify -quiet "$out/Burrow-macos-arm64.dmg"
+ditto -c -k --sequesterRsrc --keepParent app/build/CAMR.app "$out/CAMR-macos-arm64.zip"
+scripts/make-dmg.sh app/build/CAMR.app "$out/CAMR-macos-arm64.dmg"
+hdiutil verify -quiet "$out/CAMR-macos-arm64.dmg"
 
 cp scripts/install.sh "$out/install.sh"
-(cd "$out" && shasum -a 256 burrow-macos-arm64.tar.gz Burrow-macos-arm64.zip Burrow-macos-arm64.dmg install.sh > SHA256SUMS)
+(cd "$out" && shasum -a 256 camr-macos-arm64.tar.gz CAMR-macos-arm64.zip CAMR-macos-arm64.dmg install.sh > SHA256SUMS)
 
-gh release create "$tag" -R Satasdin/Burrow --target "$(git rev-parse HEAD)" --latest \
-  --title "Burrow $version" \
-  --notes "Burrow for Apple silicon: the app needs macOS 26, the burrow program macOS 14.
+gh release create "$tag" -R Satasdin/CAMR --target "$(git rev-parse HEAD)" --latest \
+  --title "CAMR $version" \
+  --notes "CAMR for Apple silicon: the app needs macOS 26, the camr program macOS 14.
 
-Easiest, and the app opens without macOS's Open Anyway step: curl -fsSL https://github.com/Satasdin/Burrow/releases/latest/download/install.sh | sh -s -- --app
+Easiest, and the app opens without macOS's Open Anyway step: curl -fsSL https://github.com/Satasdin/CAMR/releases/latest/download/install.sh | sh -s -- --app
 
-Or download Burrow-macos-arm64.dmg, open it and drag Burrow into Applications. Burrow isn't notarised by Apple, so the first time you open it macOS stops it: open System Settings › Privacy & Security and choose Open Anyway." \
-  "$out/burrow-macos-arm64.tar.gz" "$out/Burrow-macos-arm64.zip" "$out/Burrow-macos-arm64.dmg" "$out/install.sh" "$out/SHA256SUMS"
+Or download CAMR-macos-arm64.dmg, open it and drag CAMR into Applications. CAMR isn't notarised by Apple, so the first time you open it macOS stops it: open System Settings › Privacy & Security and choose Open Anyway." \
+  "$out/camr-macos-arm64.tar.gz" "$out/CAMR-macos-arm64.zip" "$out/CAMR-macos-arm64.dmg" "$out/install.sh" "$out/SHA256SUMS"
 echo "published $tag"

@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://satasdin.github.io/Burrow/sitemap.xml
+Sitemap: https://satasdin.github.io/CAMR/sitemap.xml

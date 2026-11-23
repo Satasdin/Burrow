@@ -1,12 +1,12 @@
 import AppKit
-import BurrowCore
-import BurrowTools
+import CAMRCore
+import CAMRTools
 import Charts
 import SwiftUI
 
 // MARK: Conversations
 
-/// What other programs did with the vault, day by day. Burrow keeps these itself; it never chats.
+/// What other programs did with the vault, day by day. CAMR keeps these itself; it never chats.
 struct ConversationsPage: View {
     let workspace: Workspace
     let program: Program?
@@ -22,7 +22,7 @@ struct ConversationsPage: View {
             LazyVStack(alignment: .leading, spacing: 28) {
                 HStack(alignment: .firstTextBaseline, spacing: 12) {
                     Text(program?.name ?? "Conversations").font(.system(size: 28, weight: .bold)).fontWidth(.expanded).tracking(-0.4)
-                    Text("\(workspace.sessions(for: program).count) kept by Burrow").foregroundStyle(Night.dim).monospacedDigit()
+                    Text("\(workspace.sessions(for: program).count) kept by CAMR").foregroundStyle(Night.dim).monospacedDigit()
                 }
                 HStack(spacing: 8) {
                     Chip(title: "All", count: workspace.sessions.count, dot: Night.conversation, selected: program == nil) { workspace.go(.conversations(nil)) }
@@ -33,7 +33,7 @@ struct ConversationsPage: View {
                 }
                 if days.isEmpty {
                     ContentUnavailableView("No conversations yet", systemImage: "point.3.connected.trianglepath.dotted",
-                                           description: Text("When Claude Code, OpenCode, LM Studio, llama.cpp or Ollama use the vault through burrow mcp, each conversation lands here with what it looked up."))
+                                           description: Text("When Claude Code, OpenCode, LM Studio, llama.cpp or Ollama use the vault through camr mcp, each conversation lands here with what it looked up."))
                         .foregroundStyle(Night.dim).frame(maxWidth: .infinity).padding(.top, 60)
                 }
                 ForEach(days, id: \.day) { day in
@@ -336,7 +336,7 @@ struct ShelfPage: View {
                 }
                 if workspace.shelf.isEmpty {
                     ContentUnavailableView("The shelf is empty", systemImage: "memorychip",
-                                           description: Text("A model's working memory of a file is kept here after `burrow kv save`, so the next question loads it instead of reading the file again."))
+                                           description: Text("A model's working memory of a file is kept here after `camr kv save`, so the next question loads it instead of reading the file again."))
                         .foregroundStyle(Night.dim).frame(maxWidth: .infinity).padding(.top, 60)
                 } else {
                     HStack(alignment: .center, spacing: 34) {

@@ -1,9 +1,9 @@
 import AppKit
-import BurrowCore
+import CAMRCore
 import SwiftUI
 
 extension NSColor {
-    static func burrow(light: NSColor, dark: NSColor) -> NSColor {
+    static func camr(light: NSColor, dark: NSColor) -> NSColor {
         NSColor(name: nil) { $0.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua ? dark : light }
     }
     convenience init(hex: UInt32) {
@@ -13,12 +13,12 @@ extension NSColor {
 
 enum Theme {
     /// The page follows the Mac's appearance: warm paper by day, warm dark by night.
-    static let pageNS = NSColor.burrow(light: NSColor(hex: 0xFAF6EE), dark: NSColor(hex: 0x1C1B19))
-    static let inkNS = NSColor.burrow(light: NSColor(hex: 0x2B2620), dark: NSColor(hex: 0xE9E4DA))
-    static let inkSoftNS = NSColor.burrow(light: NSColor(hex: 0x6F675C), dark: NSColor(hex: 0x9D968A))
-    static let inkFaintNS = NSColor.burrow(light: NSColor(hex: 0xB5AC9E), dark: NSColor(hex: 0x5E5951))
-    static let wellNS = NSColor.burrow(light: NSColor(hex: 0xEFE9DC), dark: NSColor(hex: 0x2A2825))
-    static let tagNS = NSColor.burrow(light: NSColor(hex: 0x8A5A12), dark: NSColor(hex: 0xE3B66A))
+    static let pageNS = NSColor.camr(light: NSColor(hex: 0xFAF6EE), dark: NSColor(hex: 0x1C1B19))
+    static let inkNS = NSColor.camr(light: NSColor(hex: 0x2B2620), dark: NSColor(hex: 0xE9E4DA))
+    static let inkSoftNS = NSColor.camr(light: NSColor(hex: 0x6F675C), dark: NSColor(hex: 0x9D968A))
+    static let inkFaintNS = NSColor.camr(light: NSColor(hex: 0xB5AC9E), dark: NSColor(hex: 0x5E5951))
+    static let wellNS = NSColor.camr(light: NSColor(hex: 0xEFE9DC), dark: NSColor(hex: 0x2A2825))
+    static let tagNS = NSColor.camr(light: NSColor(hex: 0x8A5A12), dark: NSColor(hex: 0xE3B66A))
 
     static let page = Color(nsColor: pageNS)
     static let ink = Color(nsColor: inkNS)
@@ -66,10 +66,10 @@ extension String {
         let name = fileName
         return ["md", "markdown"].contains((name as NSString).pathExtension.lowercased()) ? (name as NSString).deletingPathExtension : name
     }
-    /// A tool's name the way a person reads it: vault_search and burrow_find become "search" and "find".
+    /// A tool's name the way a person reads it: vault_search and camr_find become "search" and "find".
     var toolTitle: String {
         var name = self
-        for prefix in ["vault_", "burrow_"] where name.hasPrefix(prefix) { name = String(name.dropFirst(prefix.count)) }
+        for prefix in ["vault_", "camr_"] where name.hasPrefix(prefix) { name = String(name.dropFirst(prefix.count)) }
         return name.replacingOccurrences(of: "_", with: " ")
     }
     var isMarkdownPath: Bool { ["md", "markdown"].contains((self as NSString).pathExtension.lowercased()) }
@@ -82,6 +82,7 @@ extension String {
 enum SkyTheme: String, CaseIterable, Identifiable {
     case nebula, aurora, ember, tide
 
+    /// Kept under its first name: the app's settings stay where 1.3 saved them, so the rename to CAMR keeps the theme.
     static let key = "burrow.skyTheme"
     /// Ember, the logo's colour, unless the person picked another (D-120).
     static let standard = SkyTheme.ember
@@ -214,10 +215,9 @@ extension View {
 /// The logo files that ride inside the app (build.sh copies app/Resources/Brand). Missing ones are nil, so a bare
 /// `swift run` still opens, without the pictures.
 enum Brand {
-    static let b = image("burrow-b")
-    static let wordmark = image("burrow-wordmark")
-    static var splash: URL? { Bundle.main.url(forResource: "splash", withExtension: "mp4") }
-    /// The logo's two ends: the B runs from amber at the top to red at the bottom.
+    static let c = image("camr-c")
+    static let wordmark = image("camr-wordmark")
+    /// The logo's two ends: the C runs from amber at the top to red at the bottom.
     static let amber = Color(red: 1.00, green: 0.67, blue: 0.00)
     static let flame = Color(red: 1.00, green: 0.24, blue: 0.07)
 
@@ -226,26 +226,26 @@ enum Brand {
     }
 }
 
-/// Burrow's mark: the orange B of the logo (D-120). It replaced the Ledger Strata bands drawn here before.
-struct BurrowMark: View {
+/// CAMR's mark: the orange C of the logo (D-124; the B before it, D-120, replaced the Ledger Strata bands).
+struct CAMRMark: View {
     var size: CGFloat = 64
 
     var body: some View {
         Group {
-            if let b = Brand.b {
-                Image(nsImage: b).resizable().interpolation(.high).aspectRatio(contentMode: .fit)
+            if let c = Brand.c {
+                Image(nsImage: c).resizable().interpolation(.high).aspectRatio(contentMode: .fit)
             } else {
-                Text("B").font(.system(size: size * 0.8, weight: .black)).fontWidth(.expanded)
+                Text("C").font(.system(size: size * 0.8, weight: .black)).fontWidth(.expanded)
                     .foregroundStyle(LinearGradient(colors: [Brand.amber, Brand.flame], startPoint: .top, endPoint: .bottom))
             }
         }
         .frame(width: size, height: size)
-        .accessibilityLabel("Burrow")
+        .accessibilityLabel("CAMR")
     }
 }
 
-/// The logo with its name: the B and BURROW, as the splash ends.
-struct BurrowWordmark: View {
+/// The logo with its name: the C and AMR, as on the launch screen (D-124).
+struct CAMRWordmark: View {
     var height: CGFloat = 44
 
     var body: some View {
@@ -253,10 +253,10 @@ struct BurrowWordmark: View {
             if let wordmark = Brand.wordmark {
                 Image(nsImage: wordmark).resizable().interpolation(.high).aspectRatio(contentMode: .fit)
             } else {
-                Text("BURROW").font(.system(size: height * 0.8, weight: .heavy)).fontWidth(.expanded).foregroundStyle(.white)
+                Text("CAMR").font(.system(size: height * 0.8, weight: .heavy)).fontWidth(.expanded).foregroundStyle(.white)
             }
         }
         .frame(height: height)
-        .accessibilityLabel("Burrow")
+        .accessibilityLabel("CAMR")
     }
 }

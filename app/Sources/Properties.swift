@@ -1,5 +1,5 @@
 import AppKit
-import BurrowCore
+import CAMRCore
 import SwiftUI
 
 /// A note's front matter as Obsidian shows it: a panel of named properties above the page, not raw YAML.

@@ -1,11 +1,11 @@
 {
-  "name": "burrow",
-  "description": "Burrow's skills for AI agents.",
+  "name": "camr",
+  "description": "CAMR's skills for AI agents.",
   "owner": { "name": "Satasdin" },
   "plugins": [
     {
-      "name": "burrow",
-      "description": "Use Burrow: answer from the person's own material, keep decisions with their reasons, carry work on between programs, and check changes against what was decided.",
+      "name": "camr",
+      "description": "Use CAMR: answer from the person's own material, keep decisions with their reasons, carry work on between programs, and check changes against what was decided.",
       "source": "./"
     }
   ]

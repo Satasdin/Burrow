@@ -1,5 +1,5 @@
 import AppKit
-import BurrowCore
+import CAMRCore
 import PDFKit
 import SwiftUI
 
@@ -50,9 +50,9 @@ struct LibraryPage: View {
             }
             .padding(.horizontal, 28).padding(.vertical, 22)
         }
-        // For checking the layout without a person at the screen: BURROW_LIBRARY_SCROLL=bridges shows the first bridged vault.
+        // For checking the layout without a person at the screen: CAMR_LIBRARY_SCROLL=bridges shows the first bridged vault.
         .task(id: workspace.bridged.count) {
-            guard ProcessInfo.processInfo.environment["BURROW_LIBRARY_SCROLL"] == "bridges", let first = workspace.bridged.first else { return }
+            guard ProcessInfo.processInfo.environment["CAMR_LIBRARY_SCROLL"] == "bridges", let first = workspace.bridged.first else { return }
             try? await Task.sleep(for: .milliseconds(600))
             reader.scrollTo("bridge-" + first.bridge.name, anchor: .top)
         }
@@ -264,7 +264,7 @@ struct LibraryInspector: View {
     }
 }
 
-/// What Burrow did to make a document searchable.
+/// What CAMR did to make a document searchable.
 struct ReadInFacts: View {
     let workspace: Workspace
     let path: String
@@ -307,7 +307,7 @@ struct DotLabel: LabelStyle {
     }
 }
 
-/// The pages of a PDF as small pictures. Each page is one section Burrow can find.
+/// The pages of a PDF as small pictures. Each page is one section CAMR can find.
 struct PageStrip: View {
     let url: URL
     @State private var pages: [NSImage] = []

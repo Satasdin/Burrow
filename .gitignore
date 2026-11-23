@@ -5,7 +5,8 @@ DerivedData/
 xcuserdata/
 app/build/
 
-# Burrow's own store inside a vault
+# CAMR's own store inside a vault (.burrow in vaults made before 1.4)
+.camr/index.sqlite*
 .burrow/index.sqlite*
 
 # Editors, agents and the system

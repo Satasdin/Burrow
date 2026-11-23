@@ -1,6 +1,6 @@
 # The engine: answering from your material
 
-When a question is about your own notes, documents or code, Burrow's engine prepares what a model reads. It does not
+When a question is about your own notes, documents or code, CAMR's engine prepares what a model reads. It does not
 change the model: any model, local or cloud, gets the same preparation.
 
 ## The steps
@@ -11,24 +11,24 @@ change the model: any model, local or cloud, gets the same preparation.
 2. **Find.** Pieces of the vault are ranked by their words and by their meaning, and the two rankings are merged. The
    decisions in the Ledger that fit the question are added with their reasons, labelled so the answer can name them.
 3. **Fit.** The excerpts are cut to what this model can read in the time it has, measured once per model with
-   `burrow fit` (for Gemma 4 12B on the evaluation laptop, 17,417 characters). Each excerpt keeps its file and line.
+   `camr fit` (for Gemma 4 12B on the evaluation laptop, 17,417 characters). Each excerpt keeps its file and line.
 4. **Answer.** The model answers from the excerpts and cites each place it used.
-5. **Check.** Every cited place is checked against what the model was shown. With `burrow ask --mode engine`, an answer
+5. **Check.** Every cited place is checked against what the model was shown. With `camr ask --mode engine`, an answer
    that cites a place it was not shown is asked again once with a correction, and the better-grounded answer is kept;
    the app and the chat warn instead.
-6. **Learn.** What a conversation decided can be kept, never without you: `/keep` in `burrow chat`, **What Should
-   Burrow Remember?** in the app, or `burrow learn <vault> <transcript.json>` propose notes and ask before writing each.
+6. **Learn.** What a conversation decided can be kept, never without you: `/keep` in `camr chat`, **What Should
+   CAMR Remember?** in the app, or `camr learn <vault> <transcript.json>` propose notes and ask before writing each.
 
 ## Commands
 
 ```bash
-burrow find  ~/Notes "question" [--mode search|walk] [--json]      # what would be read, no model
-burrow ask   ~/Notes "question" [--mode engine|none|search|walk]     # an answer from a local model
-burrow brief ~/Notes "question" [--json]                            # the question packed for any other model
-burrow fit   ~/Notes --model gemma4:12b                              # measure a model once
-burrow skills ~/Notes [--install]                                   # list the skills, or add the starter set
-burrow chat  ~/Notes [--model NAME]                                  # a terminal chat with a local model
-burrow tui   ~/Notes                                                 # the full-screen terminal view
+camr find  ~/Notes "question" [--mode search|walk] [--json]      # what would be read, no model
+camr ask   ~/Notes "question" [--mode engine|none|search|walk]     # an answer from a local model
+camr brief ~/Notes "question" [--json]                            # the question packed for any other model
+camr fit   ~/Notes --model gemma4:12b                              # measure a model once
+camr skills ~/Notes [--install]                                   # list the skills, or add the starter set
+camr chat  ~/Notes [--model NAME]                                  # a terminal chat with a local model
+camr tui   ~/Notes                                                 # the full-screen terminal view
 ```
 
 `--mode none` asks the model alone, `search` pastes the best excerpts, `walk` follows links, and `engine` runs every
@@ -40,8 +40,8 @@ answer.
 ## Skills
 
 A skill is a Markdown file in the vault's `Skills` folder with a `when:` line saying which tasks it fits, and a method
-for them. `burrow skills ~/Notes --install` adds a starter set; edit them or add your own. These are methods for
-Burrow's own engine, separate from the [skill pack for agents](../skills/README.md).
+for them. `camr skills ~/Notes --install` adds a starter set; edit them or add your own. These are methods for
+CAMR's own engine, separate from the [skill pack for agents](../skills/README.md).
 
 ## What it achieved
 
