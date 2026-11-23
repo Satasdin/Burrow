@@ -1,6 +1,6 @@
-import BurrowCore
-import BurrowTools
-import BurrowTrial
+import CAMRCore
+import CAMRTools
+import CAMRTrial
 import SwiftUI
 
 struct AskPage: View {
@@ -16,7 +16,7 @@ struct AskPage: View {
                         if workspace.turns.isEmpty {
                             VStack(spacing: 8) {
                                 Text("Ask your vault").font(.system(size: 28, weight: .semibold)).fontWidth(.expanded).tracking(-0.4)
-                                Text("The model on this Mac reads only what Burrow finds, and shows you what it used.")
+                                Text("The model on this Mac reads only what CAMR finds, and shows you what it used.")
                                     .foregroundStyle(.secondary)
                             }
                             .frame(maxWidth: .infinity).padding(.top, 140)
@@ -155,7 +155,7 @@ struct AnswerView: View {
         HStack(spacing: 14) {
             if let seconds = turn.seconds { Text(String(format: "%.1f s, on this Mac", seconds)).foregroundStyle(.tertiary) }
             Button("Keep as Note") { Task { await workspace.keepAsNote(turn) } }.buttonStyle(.link)
-            Button(turn.remembering ? "Thinking…" : "What Should Burrow Remember?") { workspace.remember(turn) }
+            Button(turn.remembering ? "Thinking…" : "What Should CAMR Remember?") { workspace.remember(turn) }
                 .buttonStyle(.link).disabled(turn.remembering)
         }
         .font(.caption)

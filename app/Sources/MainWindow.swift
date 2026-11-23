@@ -1,4 +1,4 @@
-import BurrowCore
+import CAMRCore
 import SwiftUI
 
 struct MainWindow: View {
@@ -156,7 +156,7 @@ struct HomeTab: View {
     var body: some View {
         let active = workspace.isHome
         HStack(spacing: 6) {
-            BurrowMark(size: 13).opacity(active ? 1 : 0.7)
+            CAMRMark(size: 13).opacity(active ? 1 : 0.7)
             Text("Home")
         }
         .font(.system(size: 12.5))

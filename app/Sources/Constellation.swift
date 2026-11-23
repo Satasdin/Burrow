@@ -1,6 +1,5 @@
-import AVKit
 import AppKit
-import BurrowCore
+import CAMRCore
 import CryptoKit
 import SwiftUI
 
@@ -9,7 +8,7 @@ import SwiftUI
 
 // MARK: Program icons
 
-/// A program's own icon, asked of macOS from the app installed on this Mac. Burrow bundles no one else's logo, and an
+/// A program's own icon, asked of macOS from the app installed on this Mac. CAMR bundles no one else's logo, and an
 /// app that isn't installed falls back to the symbol the page used before.
 enum ProgramApp {
     static func bundles(client: String?) -> [String] {
@@ -96,7 +95,7 @@ struct ProgramRead: Identifiable {
 enum LedgerMark { case inForce, changed, steer }
 
 extension Workspace {
-    /// What each connected program looked up lately, from the trail Burrow keeps of every lookup (TrailStep), newest first.
+    /// What each connected program looked up lately, from the trail CAMR keeps of every lookup (TrailStep), newest first.
     func programReads(within window: TimeInterval = 600, now: Date = Date()) -> [ProgramRead] {
         var out: [String: ProgramRead] = [:]
         for session in sessions where now.timeIntervalSince(session.updated) < window {
@@ -160,7 +159,7 @@ struct MapSnapshot: Codable {
     var nodes: [[Float]]
     var edges: [[Int]]
 
-    static var folder: URL { BurrowPlaces.stateFolder.appendingPathComponent("app-maps", isDirectory: true) }
+    static var folder: URL { CAMRPlaces.stateFolder.appendingPathComponent("app-maps", isDirectory: true) }
 
     static func file(for vault: String) -> URL {
         let hash = SHA256.hash(data: Data(vault.utf8)).prefix(10).map { String(format: "%02x", $0) }.joined()
@@ -204,44 +203,44 @@ extension Workspace {
 
 // MARK: The splash
 
-/// When the splash film ends, the map it lands on plays its arrival (the sparks become the vault's stars).
+/// When the launch screen ends, the map it lands on plays its arrival (the sparks become the vault's stars).
 enum Splash {
     @MainActor static var shown = false
     @MainActor static var endedAt: Date?
-    static let ended = Notification.Name("BurrowSplashEnded")
+    static let ended = Notification.Name("CAMRSplashEnded")
 
-    /// A cold launch plays it; a layout check or a recorded tour doesn't, unless BURROW_SPLASH asks.
+    /// A cold launch plays it; a layout check or a recorded tour doesn't, unless CAMR_SPLASH asks.
     static var wanted: Bool {
         let environment = ProcessInfo.processInfo.environment
-        if environment["BURROW_SPLASH"] != nil { return true }
-        return environment["BURROW_SNAPSHOT"] == nil && environment["BURROW_RECORD"] == nil && environment["BURROW_TOUR"] == nil
+        if environment["CAMR_SPLASH"] != nil { return true }
+        return environment["CAMR_SNAPSHOT"] == nil && environment["CAMR_RECORD"] == nil && environment["CAMR_TOUR"] == nil
     }
 
     /// The landing plays right after the film, not every time a page opens.
     @MainActor static var justEnded: Bool { endedAt.map { Date().timeIntervalSince($0) < 2.5 } ?? false }
 }
 
+/// The launch screen: the CAMR logo on black for a moment, then the page beneath. The film of the B that played here
+/// went with the rename (D-124); the stars still land on the map after it.
 struct SplashView: View {
     let done: () -> Void
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         ZStack {
             Color.black
-            if reduceMotion || Brand.splash == nil {
-                BurrowWordmark(height: 64).padding(60)
-            } else if let url = Brand.splash {
-                SplashPlayer(url: url, done: done)
+            VStack(spacing: 22) {
+                CAMRWordmark(height: 64)
+                Text("Capability-Adaptive Memory Retrieval")
+                    .font(.system(size: 13, weight: .medium)).tracking(1.2).foregroundStyle(.white.opacity(0.62))
             }
+            .padding(60)
         }
         .ignoresSafeArea()
         .contentShape(Rectangle())
         .onTapGesture(perform: done)
-        .onAppear {
-            if reduceMotion || Brand.splash == nil { DispatchQueue.main.asyncAfter(deadline: .now() + 1.2, execute: done) }
-        }
+        .onAppear { DispatchQueue.main.asyncAfter(deadline: .now() + 1.4, execute: done) }
         .accessibilityElement()
-        .accessibilityLabel("Burrow")
+        .accessibilityLabel("CAMR")
         .accessibilityHint("Click to skip")
     }
 }
@@ -283,37 +282,6 @@ struct SplashChrome: NSViewRepresentable {
     private func buttons(_ window: NSWindow, hidden: Bool) {
         for kind in [NSWindow.ButtonType.closeButton, .miniaturizeButton, .zoomButton] { window.standardWindowButton(kind)?.isHidden = hidden }
     }
-}
-
-/// The film, without controls, filling the window; it reports its end once.
-struct SplashPlayer: NSViewRepresentable {
-    let url: URL
-    let done: () -> Void
-
-    final class PlayerView: NSView {
-        let player: AVPlayer
-        private var observer: Any?
-
-        init(url: URL, done: @escaping () -> Void) {
-            player = AVPlayer(url: url)
-            super.init(frame: .zero)
-            wantsLayer = true
-            let layer = AVPlayerLayer(player: player)
-            layer.videoGravity = .resizeAspectFill
-            layer.backgroundColor = NSColor.black.cgColor
-            self.layer = layer
-            observer = NotificationCenter.default.addObserver(forName: .AVPlayerItemDidPlayToEndTime, object: player.currentItem, queue: .main) { _ in done() }
-            player.play()
-        }
-
-        required init?(coder: NSCoder) { nil }
-
-        deinit { if let observer { NotificationCenter.default.removeObserver(observer) } }
-    }
-
-    func makeNSView(context: Context) -> PlayerView { PlayerView(url: url, done: done) }
-    func updateNSView(_ view: PlayerView, context: Context) {}
-    static func dismantleNSView(_ view: PlayerView, coordinator: ()) { view.player.pause() }
 }
 
 // MARK: The arrival
@@ -383,7 +351,7 @@ struct StartPage: View {
 
     private var left: some View {
         VStack(alignment: .leading, spacing: 0) {
-            BurrowWordmark(height: 56)
+            CAMRWordmark(height: 56)
             Text("One memory for every AI on this Mac.").font(.system(size: 22, weight: .medium)).foregroundStyle(.white).padding(.top, 34)
             Text("Your notes and code, read by Claude Code, Codex and Ollama, kept here.")
                 .font(.system(size: 15)).foregroundStyle(.white.opacity(0.55)).padding(.top, 8)
@@ -532,7 +500,7 @@ func createVault(_ library: Library) {
         try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
         library.open(url)
     } catch {
-        library.failure = "Burrow could not make that folder: \(error.localizedDescription)"
+        library.failure = "CAMR could not make that folder: \(error.localizedDescription)"
     }
 }
 
@@ -561,7 +529,7 @@ struct HomePage: View {
     private var header: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 12) {
-                BurrowMark(size: 30)
+                CAMRMark(size: 30)
                 Text(workspace.name).font(.system(size: 30, weight: .bold)).fontWidth(.expanded).foregroundStyle(.white)
             }
             if let stats = workspace.stats {

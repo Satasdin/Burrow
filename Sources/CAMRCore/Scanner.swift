@@ -1,0 +1,132 @@
+import CryptoKit
+import Foundation
+
+/// Finds the text files of a project. Inside a git repository it asks git, so `.gitignore` is respected.
+struct Scanner {
+    static let skippedFolders: Set<String> = [
+        ".git", ".camr", ".burrow", ".obsidian", ".trash", ".Trash", ".build", ".swiftpm", "node_modules", "DerivedData", "build", "dist", "out", "target",
+        "__pycache__", ".venv", "venv", ".mypy_cache", ".pytest_cache", ".idea", ".vscode", "vendor", "Pods", ".next",
+    ]
+    static let textExtensions: Set<String> = [
+        "swift", "py", "js", "jsx", "ts", "tsx", "mjs", "cjs", "go", "rs", "java", "kt", "kts", "c", "h", "cc", "cpp", "hpp",
+        "m", "mm", "rb", "php", "cs", "scala", "dart", "lua", "sh", "zsh", "bash", "sql", "html", "css", "scss", "vue",
+        "svelte", "json", "yaml", "yml", "toml", "md", "markdown", "txt", "rst", "tex", "xml", "gradle", "cmake", "proto",
+    ]
+    static let namedTextFiles: Set<String> = ["Makefile", "Dockerfile", "README", "LICENSE", "Gemfile", "Rakefile"]
+    static let largestFile = 1_000_000
+    /// A small package.json is configuration worth reading. A large JSON file is data, and would drown the code.
+    static let dataExtensions: Set<String> = ["json", "xml", "yaml", "yml", "txt"]
+    static let largestDataFile = 32_000
+
+    struct Found {
+        let path: String
+        let text: String
+        let hash: String
+    }
+
+    /// Folders only a tool fills: caches, installed packages and build output. Narrower than what the index skips: a
+    /// hidden folder such as `.config` or `.husky`, or a vendored library, can hold a real change (D-87).
+    static let buildFolders: Set<String> = [
+        "__pycache__", "node_modules", ".build", "DerivedData", ".mypy_cache", ".pytest_cache", ".ruff_cache", ".tox", ".next", ".gradle",
+    ]
+    /// Files nobody writes by hand: compiled Python and Finder's or Explorer's folder settings.
+    static let builtExtensions: Set<String> = ["pyc", "pyo"]
+    static let builtNames: Set<String> = [".DS_Store", "Thumbs.db"]
+
+    /// True for a file a build, a test run or the Finder made: inside `__pycache__`, `node_modules`, `.build` and the
+    /// like, or a `.pyc` or `.DS_Store`. `camr_check` uses this so a test run is not counted as changing 15 files when
+    /// one was written by hand, and still names what it set aside (D-87).
+    static func isBuildOutput(_ path: String) -> Bool {
+        let parts = path.split(separator: "/").map(String.init)
+        guard let name = parts.last else { return false }
+        if parts.dropLast().contains(where: buildFolders.contains) { return true }
+        return builtNames.contains(name) || builtExtensions.contains((name as NSString).pathExtension.lowercased())
+    }
+
+    static func wanted(_ path: String) -> Bool {
+        let parts = path.split(separator: "/").map(String.init)
+        guard let name = parts.last else { return false }
+        if parts.dropLast().contains(where: { skippedFolders.contains($0) || $0.hasPrefix(".") }) { return false }
+        if namedTextFiles.contains(name) { return true }
+        return textExtensions.contains((name as NSString).pathExtension.lowercased()) || Extractor.handles(name)
+    }
+
+    /// Relative paths of every candidate file, sorted so that an index built twice comes out the same.
+    static func paths(in root: URL) -> [String] {
+        let fromGit = gitPaths(in: root)
+        let all = fromGit ?? walk(root)
+        return Array(Set(all.filter(wanted))).sorted()
+    }
+
+    private static func gitPaths(in root: URL) -> [String]? {
+        guard FileManager.default.fileExists(atPath: root.appendingPathComponent(".git").path) else { return nil }
+        let git = Process()
+        git.executableURL = URL(fileURLWithPath: "/usr/bin/git")
+        // A folder can come from someone else (a synced team folder, D-109) with its own .git/config: no fsmonitor command it names is run.
+        git.arguments = ["-c", "core.fsmonitor=false", "-C", root.path, "ls-files", "-co", "--exclude-standard", "-z"]
+        let pipe = Pipe()
+        git.standardOutput = pipe
+        git.standardError = Pipe()
+        guard (try? git.run()) != nil else { return nil }
+        let data = pipe.fileHandleForReading.readDataToEndOfFile()
+        git.waitUntilExit()
+        guard git.terminationStatus == 0 else { return nil }
+        return data.split(separator: 0).map { String(decoding: $0, as: UTF8.self) }
+    }
+
+    private static func walk(_ given: URL) -> [String] {
+        // The enumerator treats a starting folder that is a symbolic link as the link itself and finds nothing inside,
+        // so a vault opened through a link (or a link to a code folder) is walked at its real location.
+        let root = given.resolvingSymlinksInPath()
+        let base = root.standardizedFileURL.path + "/"
+        guard let walker = FileManager.default.enumerator(at: root, includingPropertiesForKeys: [.isDirectoryKey]) else { return [] }
+        var out: [String] = []
+        for case let url as URL in walker {
+            if skippedFolders.contains(url.lastPathComponent),
+               (try? url.resourceValues(forKeys: [.isDirectoryKey]))?.isDirectory == true {
+                walker.skipDescendants()
+                continue
+            }
+            let full = url.standardizedFileURL.path
+            if full.hasPrefix(base) { out.append(String(full.dropFirst(base.count))) }
+        }
+        return out
+    }
+
+    /// Reads one file. Returns nil for anything too large, not UTF-8, or binary.
+    /// - Parameter largest: a smaller cap set by `index.maxFileSize` (D-98), for every kind of file.
+    static func read(_ path: String, in root: URL, largest: Int? = nil) -> Found? {
+        let url = root.appendingPathComponent(path)
+        // A shortcut inside the folder must not be a way to read something outside it.
+        let home = root.resolvingSymlinksInPath().path + "/"
+        let real = url.resolvingSymlinksInPath().path
+        guard real.hasPrefix(home) else { return nil }
+        // Opened once, at the real path that was checked, without blocking: a pipe or a device is never read, and the
+        // cap is checked before reading, so a folder from someone else can't hang or flood the index (D-112).
+        if Extractor.handles(path) {
+            guard case let .success(data) = SafeRead.data(real, cap: min(Extractor.largest, largest ?? .max), within: home) else { return nil }
+            let hash = digest(data)
+            guard let text = Extractor.markdown(of: data, path: path, hash: hash) else { return nil }
+            return Found(path: path, text: text, hash: hash)
+        }
+        let limit = min(dataExtensions.contains(url.pathExtension.lowercased()) ? largestDataFile : largestFile, largest ?? .max)
+        guard case let .success(data) = SafeRead.data(real, cap: limit, within: home), !data.contains(0),
+              let text = String(data: data, encoding: .utf8) else { return nil }
+        return Found(path: path, text: text, hash: digest(data))
+    }
+
+    static func digest(_ data: Data) -> String {
+        SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
+    }
+}
+
+extension Vault {
+    /// The index's own rule for what nobody wrote: files in folders it skips, and files a build makes.
+    public static func isBuildOutput(_ path: String) -> Bool { Scanner.isBuildOutput(path) }
+}
+
+/// A cluster is the folder a file lives in, limited to two levels so a deep tree stays readable on the Map.
+func clusterName(of path: String) -> String {
+    let folders = path.split(separator: "/").dropLast().prefix(2)
+    return folders.isEmpty ? "(top level)" : folders.joined(separator: "/")
+}

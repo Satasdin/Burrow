@@ -1,6 +1,6 @@
 import AppKit
-import BurrowCore
-import BurrowTools
+import CAMRCore
+import CAMRTools
 import QuickLookThumbnailing
 import SwiftUI
 
@@ -58,7 +58,7 @@ enum LibraryKind: String, CaseIterable, Hashable {
     func holds(_ path: String) -> Bool { self == .all || Self.of(path) == self }
 
     /// A file's kind on the Library's shelves. A Markdown file inside a linked code folder (its README) belongs with that
-    /// code, so "Notes" counts the vault's own notes, the number the title bar and `burrow stats` give (14 November).
+    /// code, so "Notes" counts the vault's own notes, the number the title bar and `camr stats` give (14 November).
     static func of(_ file: MapFile) -> LibraryKind {
         let kind = of(file.path)
         return kind == .notes && !file.isNote ? .code : kind
@@ -75,7 +75,7 @@ enum LibraryKind: String, CaseIterable, Hashable {
     }
 }
 
-/// The programs that reach the vault through `burrow mcp`, named the way a person knows them.
+/// The programs that reach the vault through `camr mcp`, named the way a person knows them.
 enum Program: String, CaseIterable, Hashable, Identifiable {
     case claudeCode, openCode, lmStudio, llamaCpp, ollama, other
     var id: String { rawValue }
@@ -122,10 +122,10 @@ enum Program: String, CaseIterable, Hashable, Identifiable {
         encoder.outputFormatting = .withoutEscapingSlashes
         let json = String(String(data: (try? encoder.encode(path)) ?? Data(), encoding: .utf8)?.dropFirst().dropLast() ?? "")
         let isConfig = self == .openCode || self == .lmStudio
-        let burrow = Connections.command
-        let quotedCommand = isConfig ? burrow : (burrow.contains(" ") ? "'\(burrow)'" : burrow)
+        let camr = Connections.command
+        let quotedCommand = isConfig ? camr : (camr.contains(" ") ? "'\(camr)'" : camr)
         return setup.replacingOccurrences(of: "<vault>", with: isConfig ? json : shell)
-            .replacingOccurrences(of: "<burrow>", with: quotedCommand)
+            .replacingOccurrences(of: "<camr>", with: quotedCommand)
     }
 
     /// Each program's own colour, used only where programs are told apart: the Programs page and its chart.
@@ -143,12 +143,12 @@ enum Program: String, CaseIterable, Hashable, Identifiable {
     /// How a person wires this program to the vault. Matches docs/connect.md.
     private var setup: String {
         switch self {
-        case .claudeCode: return "claude mcp add --scope user burrow -- <burrow> mcp <vault>"
-        case .openCode: return "opencode.json → \"mcp\": { \"burrow\": { \"type\": \"local\", \"command\": [\"<burrow>\", \"mcp\", \"<vault>\"] } }"
-        case .lmStudio: return "~/.lmstudio/mcp.json → \"burrow\": { \"command\": \"<burrow>\", \"args\": [\"mcp\", \"<vault>\"] }"
-        case .llamaCpp: return "llama-server -m model.gguf --jinja -c 32768 --slot-save-path <vault>/.burrow/kv, then OpenCode's llamacpp provider"
+        case .claudeCode: return "claude mcp add --scope user camr -- <camr> mcp <vault>"
+        case .openCode: return "opencode.json → \"mcp\": { \"camr\": { \"type\": \"local\", \"command\": [\"<camr>\", \"mcp\", \"<vault>\"] } }"
+        case .lmStudio: return "~/.lmstudio/mcp.json → \"camr\": { \"command\": \"<camr>\", \"args\": [\"mcp\", \"<vault>\"] }"
+        case .llamaCpp: return "llama-server -m model.gguf --jinja -c 32768 --slot-save-path <vault>/.camr/kv, then OpenCode's llamacpp provider"
         case .ollama: return "ollama create qwen3-4b-16k -f Modelfile, then OpenCode's ollama provider (see docs/connect.md)"
-        case .other: return "<burrow> mcp <vault>"
+        case .other: return "<camr> mcp <vault>"
         }
     }
 }
@@ -172,11 +172,11 @@ struct ShelfItem: Identifiable, Sendable {
     }
 }
 
-typealias VaultSession = BurrowTools.SessionRecord
+typealias VaultSession = CAMRTools.SessionRecord
 
 extension VaultSession {
     var program: Program { Program(client: client) }
-    /// Searches and reads, from the trail Burrow keeps itself. Resumes, checks and commits are not lookups (D-85), so this
+    /// Searches and reads, from the trail CAMR keeps itself. Resumes, checks and commits are not lookups (D-85), so this
     /// is the number the conversation's own handoff gives.
     var lookupCount: Int { lookups.count }
 }
@@ -298,7 +298,7 @@ enum NoteText {
 }
 
 extension VaultStats {
-    /// Every file in the vault, notes included: the number `burrow index`, `burrow stats` and the Library's "All" give.
+    /// Every file in the vault, notes included: the number `camr index`, `camr stats` and the Library's "All" give.
     /// `files` alone counts only the files that are not notes, which read as a second, smaller total (14 November).
     var allFiles: Int { files + notes }
 }

@@ -1,5 +1,5 @@
-import BurrowCore
-import BurrowTools
+import CAMRCore
+import CAMRTools
 import SwiftUI
 
 /// The team's shared decisions on the app's Ledger page (D-109): each shown beside the vault's own, its branch shown as
@@ -32,10 +32,10 @@ extension Engine {
         state.commits = (state.commits + added).sorted { $0.at == $1.at ? $0.id > $1.id : $0.at > $1.at }
     }
 
-    /// Keeps a decision in a team's shared Ledger from the app, signed with the person's name and "the Burrow app".
+    /// Keeps a decision in a team's shared Ledger from the app, signed with the person's name and "the CAMR app".
     func shareWithTeam(_ name: String, _ kind: LedgerCommit.Kind, _ message: String, files: [String], session: String?) throws -> LedgerCommit {
         let team = try vault.team(named: name)
-        return try TeamLedger.commit(vault: vault, team: team, kind: kind, message: message, files: files, author: "person", client: "Burrow app", session: session)
+        return try TeamLedger.commit(vault: vault, team: team, kind: kind, message: message, files: files, author: "person", client: "CAMR app", session: session)
     }
 
     /// The person approves a share a program asked for: it goes to the team (D-111).

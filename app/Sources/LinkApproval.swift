@@ -1,9 +1,9 @@
-import BurrowCore
+import CAMRCore
 import SwiftUI
 
 /// Asked once when a vault opens with linked folders the person on this Mac has not approved (D-101). A vault's list of
 /// linked folders is a file in its folder, so a vault someone else gave you could point it anywhere on this Mac. Until
-/// the person says yes here, or with `burrow link approve` in their own terminal (D-104), those folders are not read by anything.
+/// the person says yes here, or with `camr link approve` in their own terminal (D-104), those folders are not read by anything.
 struct LinkApprovalSheet: View {
     static let symbol = "link"
     let workspace: Workspace
@@ -14,7 +14,7 @@ struct LinkApprovalSheet: View {
                 Image(systemName: Self.symbol).foregroundStyle(Night.document)
                 Text("Linked folders").font(.title2.weight(.semibold))
             }
-            Text("\(workspace.name) links \(workspace.linksWaiting.count == 1 ? "this folder" : "these folders") on your Mac. Burrow reads a linked folder only once you allow it here, so a vault someone else shared with you can't open your own folders.")
+            Text("\(workspace.name) links \(workspace.linksWaiting.count == 1 ? "this folder" : "these folders") on your Mac. CAMR reads a linked folder only once you allow it here, so a vault someone else shared with you can't open your own folders.")
                 .font(.callout).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
             ForEach(workspace.linksWaiting) { state in
                 HStack(spacing: 10) {
@@ -31,7 +31,7 @@ struct LinkApprovalSheet: View {
                                 .lineLimit(1).truncationMode(.middle)
                         }
                         if let why = state.refusal {
-                            Text("Burrow never reads this one: \(why).").font(.caption).foregroundStyle(Night.stale)
+                            Text("CAMR never reads this one: \(why).").font(.caption).foregroundStyle(Night.stale)
                         } else if !state.exists {
                             Text("Not found on this Mac").font(.caption).foregroundStyle(Night.stale)
                         }

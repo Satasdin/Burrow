@@ -2,13 +2,13 @@
 import PackageDescription
 
 let package = Package(
-    name: "BurrowApp",
+    name: "CAMRApp",
     platforms: [.macOS(.v26)],
-    dependencies: [.package(name: "Burrow", path: "..")],
+    dependencies: [.package(name: "CAMR", path: "..")],
     targets: [
         .executableTarget(
-            name: "Burrow",
-            dependencies: [.product(name: "BurrowCore", package: "Burrow"), .product(name: "BurrowTrial", package: "Burrow"), .product(name: "BurrowTools", package: "Burrow")],
+            name: "CAMR",
+            dependencies: [.product(name: "CAMRCore", package: "CAMR"), .product(name: "CAMRTrial", package: "CAMR"), .product(name: "CAMRTools", package: "CAMR")],
             path: "Sources",
             swiftSettings: [.swiftLanguageMode(.v5)]
         ),

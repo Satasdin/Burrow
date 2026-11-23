@@ -4,7 +4,7 @@ Git keeps the code. The Ledger keeps what AI sessions understood about it: decis
 
 ## What a commit is
 
-One Markdown file under `<vault>/.burrow/ledger/<branch>/<id>.md`, readable in Obsidian:
+One Markdown file under `<vault>/.camr/ledger/<branch>/<id>.md`, readable in Obsidian:
 
 ```markdown
 ---
@@ -27,100 +27,100 @@ Because: Sending again after a timeout paid 38 passengers twice (KES 3,040).
 
 - **id**: the second it was kept, on this Mac's clock (as conversation ids are), and four random characters.
 - **kind**: one of decision, fact, correction, plan, handoff, code or confirmation.
-- **author**: who Burrow knows wrote it: the model a llama.cpp server reports, else the program's logged model, else the name the program gave when it connected (`client`). The name a model types about itself is kept as `model_said` and shown as its claim, never as the author: small models copy names from earlier commits.
-- **person**: only in a team's shared Ledger, which lives in the team folder (`<team>/.burrow/ledger/<name>-<mac>/`, one folder per person and Mac). It is the name the person who kept it set with `burrow team join --as`, and a team decision is shown as "kept by Wanjiru Kamau with Claude Code, written in wanjiru-kamau-dd82's files (names are not verified)". Its id ends with the same `<name>-<mac>`, so two people's ids never meet (D-109). The name is not cryptographically signed: Burrow trusts only the folder, reads no file whose `branch` or id names another folder, and says so when the name doesn't match the folder (D-111).
+- **author**: who CAMR knows wrote it: the model a llama.cpp server reports, else the program's logged model, else the name the program gave when it connected (`client`). The name a model types about itself is kept as `model_said` and shown as its claim, never as the author: small models copy names from earlier commits.
+- **person**: only in a team's shared Ledger, which lives in the team folder (`<team>/.camr/ledger/<name>-<mac>/`, one folder per person and Mac). It is the name the person who kept it set with `camr team join --as`, and a team decision is shown as "kept by Wanjiru Kamau with Claude Code, written in wanjiru-kamau-dd82's files (names are not verified)". Its id ends with the same `<name>-<mac>`, so two people's ids never meet (D-109). The name is not cryptographically signed: CAMR trusts only the folder, reads no file whose `branch` or id names another folder, and says so when the name doesn't match the folder (D-111).
 - **Because and Rejected**: a decision needs its reason. Wherever a decision is handed to a program it reads message, then Because, then Rejected, and when it has to be shorter, Rejected and then the message are shortened; the reason is never cut.
-- **cites**: the vault files the commit rests on, with a hash of each. When a cited file changes, the commit is still handed to programs, marked **check again**, until someone looks: **Still Right** in the app or `burrow confirm` keeps a confirmation with the files' new hashes, and `burrow revert` marks it wrong.
+- **cites**: the vault files the commit rests on, with a hash of each. When a cited file changes, the commit is still handed to programs, marked **check again**, until someone looks: **Still Right** in the app or `camr confirm` keeps a confirmation with the files' new hashes, and `camr revert` marks it wrong.
 - **Never deleted**: `revert` adds a correction, and the old commit shows as **marked wrong** wherever it appears.
-- **Branches**: a linked folder is its own branch (`burrow`, `tally`); everything else is `main`.
+- **Branches**: a linked folder is its own branch (`camr`, `tally`); everything else is `main`.
 
 ## Terminal
 
 ```
-burrow commit <vault> "Shelf keeps 12 GB" --kind decision --files burrow/Sources/BurrowCore/KVShelf.swift
-burrow log    <vault> [--branch B] [--file PATH]
-burrow resume <vault> [branch]
-burrow blame  <vault> <path>
-burrow diff   <vault> --since <commit>
-burrow revert <vault> <commit> "what is right instead"
-burrow confirm <vault> <commit> ["note"]
-burrow branch <vault> [name]
+camr commit <vault> "Shelf keeps 12 GB" --kind decision --files camr/Sources/CAMRCore/KVShelf.swift
+camr log    <vault> [--branch B] [--file PATH]
+camr resume <vault> [branch]
+camr blame  <vault> <path>
+camr diff   <vault> --since <commit>
+camr revert <vault> <commit> "what is right instead"
+camr confirm <vault> <commit> ["note"]
+camr branch <vault> [name]
 ```
 
 ## Programs that use the vault (MCP)
 
-`burrow mcp <vault>` shows seven tools by default, and a program can call only the tools it is shown: any other is refused by name (D-105). The old names of the shown search and read, `vault_search` and `vault_read`, still work. `--tools full` shows and allows every tool.
+`camr mcp <vault>` shows seven tools by default, and a program can call only the tools it is shown: any other is refused by name (D-105). The old names of the shown search and read, `vault_search` and `vault_read`, still work. `--tools full` shows and allows every tool.
 
 | Tool | Shown by default | What it does |
 | --- | --- | --- |
-| `burrow_find` | yes | Search. Every result carries a trust line: strong, thin, or not in the vault, plus any correction on the files found, and ends with the Ledger's decisions on the files found |
-| `burrow_read` | yes | Read a file with line numbers, with the decisions on that file and the files it imports or is imported by |
-| `burrow_resume` | yes | The plan, where the last session stopped, corrections and latest commits, held to 3,200 characters without cutting a reason |
-| `burrow_commit` | yes | Keep a decision (with `because`, and `rejected`), fact, plan or handoff, citing its files |
-| `burrow_check` | yes | The code changed in linked git folders since their last commit, beside the decisions resting on those files. Build output (`__pycache__`, `.pyc`, `node_modules`, `.DS_Store`) is not counted but is named on one line |
-| `burrow_log`, `burrow_blame`, `burrow_diff`, `burrow_revert` | with `--tools full` | History, who explained a file, what changed since, and marking a commit wrong |
-| `burrow_recall` | with `--tools full` | The exact words of an earlier part of a Claude Code session: a fold, its original messages, or a search over every fold |
+| `camr_find` | yes | Search. Every result carries a trust line: strong, thin, or not in the vault, plus any correction on the files found, and ends with the Ledger's decisions on the files found |
+| `camr_read` | yes | Read a file with line numbers, with the decisions on that file and the files it imports or is imported by |
+| `camr_resume` | yes | The plan, where the last session stopped, corrections and latest commits, held to 3,200 characters without cutting a reason |
+| `camr_commit` | yes | Keep a decision (with `because`, and `rejected`), fact, plan or handoff, citing its files |
+| `camr_check` | yes | The code changed in linked git folders since their last commit, beside the decisions resting on those files. Build output (`__pycache__`, `.pyc`, `node_modules`, `.DS_Store`) is not counted but is named on one line |
+| `camr_log`, `camr_blame`, `camr_diff`, `camr_revert` | with `--tools full` | History, who explained a file, what changed since, and marking a commit wrong |
+| `camr_recall` | with `--tools full` | The exact words of an earlier part of a Claude Code session: a fold, its original messages, or a search over every fold |
 
-`--tools classic` shows only the `vault_` tools, for runs that must match earlier ones. Up to five decisions and corrections in force on the current branch are put in the instructions every program gets when it connects. Each connection is its own conversation, and when it closes Burrow writes a handoff from what it did ("stopped after resuming, 1 lookup, checking its change and keeping 1 commit"), so a model that never logged anything still leaves one. A lookup is a search or a read; resuming, checking and keeping are counted as what they are.
+`--tools classic` shows only the `vault_` tools, for runs that must match earlier ones. Up to five decisions and corrections in force on the current branch are put in the instructions every program gets when it connects. Each connection is its own conversation, and when it closes CAMR writes a handoff from what it did ("stopped after resuming, 1 lookup, checking its change and keeping 1 commit"), so a model that never logged anything still leaves one. A lookup is a search or a read; resuming, checking and keeping are counted as what they are.
 
 ## Claude Code
 
 ```
-burrow hook install claude ~/Notes
+camr hook install claude ~/Notes
 ```
 
-This prints the settings to add to `~/.claude/settings.json`. Burrow never edits that file itself. Then:
+This prints the settings to add to `~/.claude/settings.json`. CAMR never edits that file itself. Then:
 
 - **Session start**: Claude Code is handed the Ledger head for the folder it was opened in.
-- **Before compaction and at session end**: Burrow keeps the plan (from Claude Code's task list) and a handoff built from what you typed and the files edited. Facts and decisions are kept only when you asked for them, through `burrow_commit`.
-- **Folds** (D-102, after billion-context): at the same moments Burrow folds what was said since its last fold, once, from Claude Code's transcript: your requests word for word with their message ref, sentences that carry a decision, a reason or a constraint, error lines exactly as printed, file:line places, the files edited and read, the commands run, and the plan's open items. A fold is never summarised again. Claude Code's compaction rewrites the whole history each time, so early detail fades; after each compaction (SessionStart with `source: compact`) Burrow hands the session's folds back beside the Ledger head, held to 5,500 characters by giving up detail by kind (what was read and run first, your requests last), never by age, and always keeping your first request whole. `burrow recall <vault> [fold] [--full] [--find WORDS]` and `burrow_recall` show a fold, search them, or read the fold's original messages back from the transcript; that read only opens a file in Claude Code's own `projects` folder named for the fold's session, and over MCP the original messages go only to the program that wrote the fold, in its own session (Claude Code, matched by its name and `CLAUDE_CODE_SESSION_ID`); any other program is given the folds, not the originals. Keys, tokens, passwords in URLs, `Authorization` headers and private keys are replaced with `[secret removed]` before a fold is kept, and again whenever one is shown or its originals read (D-105). Folds are kept in Burrow's own folder on this Mac (`~/Library/Application Support/Burrow/folds/<vault>-<hash>/`), never in the vault, so they don't travel with a vault into git, a synced folder or someone else's hands. Folds made on 14 November before D-105 sit in `<vault>/.burrow/folds/`, are no longer read, and can be deleted. Any other start (a new session, a resume) is handed exactly what it was before.
-- **When Claude stops** (`Stop`, `burrow hook claude <vault> --gate`): if the code changed in linked folders rests on a decision, directly or one import step away, and that exact change has not been shown, Burrow holds the reply (`{"decision":"block","reason":…}`) with `burrow_check`'s words and asks Claude to tell you which decision the change touches and whether it goes against it. It holds once: a change already shown passes, and while Claude Code is continuing because of a stop hook (`stop_hook_active`) it never holds again. The `--gate` entry writes no handoff, so one is not kept at the end of every turn.
+- **Before compaction and at session end**: CAMR keeps the plan (from Claude Code's task list) and a handoff built from what you typed and the files edited. Facts and decisions are kept only when you asked for them, through `camr_commit`.
+- **Folds** (D-102, after billion-context): at the same moments CAMR folds what was said since its last fold, once, from Claude Code's transcript: your requests word for word with their message ref, sentences that carry a decision, a reason or a constraint, error lines exactly as printed, file:line places, the files edited and read, the commands run, and the plan's open items. A fold is never summarised again. Claude Code's compaction rewrites the whole history each time, so early detail fades; after each compaction (SessionStart with `source: compact`) CAMR hands the session's folds back beside the Ledger head, held to 5,500 characters by giving up detail by kind (what was read and run first, your requests last), never by age, and always keeping your first request whole. `camr recall <vault> [fold] [--full] [--find WORDS]` and `camr_recall` show a fold, search them, or read the fold's original messages back from the transcript; that read only opens a file in Claude Code's own `projects` folder named for the fold's session, and over MCP the original messages go only to the program that wrote the fold, in its own session (Claude Code, matched by its name and `CLAUDE_CODE_SESSION_ID`); any other program is given the folds, not the originals. Keys, tokens, passwords in URLs, `Authorization` headers and private keys are replaced with `[secret removed]` before a fold is kept, and again whenever one is shown or its originals read (D-105). Folds are kept in CAMR's own folder on this Mac (`~/Library/Application Support/CAMR/folds/<vault>-<hash>/`), never in the vault, so they don't travel with a vault into git, a synced folder or someone else's hands. Folds made on 14 November before D-105 sit in `<vault>/.camr/folds/`, are no longer read, and can be deleted. Any other start (a new session, a resume) is handed exactly what it was before.
+- **When Claude stops** (`Stop`, `camr hook claude <vault> --gate`): if the code changed in linked folders rests on a decision, directly or one import step away, and that exact change has not been shown, CAMR holds the reply (`{"decision":"block","reason":…}`) with `camr_check`'s words and asks Claude to tell you which decision the change touches and whether it goes against it. It holds once: a change already shown passes, and while Claude Code is continuing because of a stop hook (`stop_hook_active`) it never holds again. The `--gate` entry writes no handoff, so one is not kept at the end of every turn.
 
-## The gate: `burrow check`
+## The gate: `camr check`
 
 ```
-burrow check ~/Notes [--staged] [--json]
+camr check ~/Notes [--staged] [--json]
 ```
 
-Prints exactly what `burrow_check` gives a program, and exits 0 when no decision rests on the change, 2 when one does and this exact change has not been shown, 1 on an error. A change is fingerprinted by the decisions shown and the git blob of each changed file they rest on, and kept under `<vault>/.burrow/checks/` once shown, whether by `burrow check`, `burrow_check`, the Stop hook or the git gate. The same change then passes; a different change to those files is held again. `--staged` checks what the next commit holds (from inside a linked repository, only that repository). 
-Each decision gets a verdict (D-107), in a "Burrow's verdict:" block and in `--json` (`verdict`, `verdicts`):
+Prints exactly what `camr_check` gives a program, and exits 0 when no decision rests on the change, 2 when one does and this exact change has not been shown, 1 on an error. A change is fingerprinted by the decisions shown and the git blob of each changed file they rest on, and kept under `<vault>/.camr/checks/` once shown, whether by `camr check`, `camr_check`, the Stop hook or the git gate. The same change then passes; a different change to those files is held again. `--staged` checks what the next commit holds (from inside a linked repository, only that repository). 
+Each decision gets a verdict (D-107), in a "CAMR's verdict:" block and in `--json` (`verdict`, `verdicts`):
 
 - **unaffected**: the change left the functions, classes and blocks the decision rests on as they were (it changed something else in the file). Exit 0, nothing held.
 - **affected**: it changed one of them. Held once, as above (exit 2).
-- **unprovable**: Burrow can't tell (the decision names no code and none was kept with it, or a file doesn't parse, or its language isn't one Burrow outlines). Held once (exit 2).
-- **breaks**: the decision's check failed, or could not run (stopped at its time limit, not found). Exit 3, every time: seeing it does not let it through. Fix the change, or let that exact change through yourself with `burrow decision override ~/Notes <id>` in your own terminal.
+- **unprovable**: CAMR can't tell (the decision names no code and none was kept with it, or a file doesn't parse, or its language isn't one CAMR outlines). Held once (exit 2).
+- **breaks**: the decision's check failed, or could not run (stopped at its time limit, not found). Exit 3, every time: seeing it does not let it through. Fix the change, or let that exact change through yourself with `camr decision override ~/Notes <id>` in your own terminal.
 
 What a decision rests on is kept with it when it is kept: the code it names (`reconcile_statement`, `matchByPhone`, a name in backticks), or else what the session changed in its files. Then what those call, in its files and the changed files one import away. Python, Swift, JavaScript/TypeScript, Go, Rust, Java, Kotlin, C-family and C# are outlined.
 
 A decision's check is a test command, or `forbid: <pattern>` that no added line in its files may match:
 
 ```
-burrow commit ~/Notes "reconcile_statement matches by reference only" --kind decision --files matatu/matatu/payments/reconcile.py \
+camr commit ~/Notes "reconcile_statement matches by reference only" --kind decision --files matatu/matatu/payments/reconcile.py \
   --because "…" --check "python3 -m pytest -q tests/test_decisions.py"
-burrow decision check ~/Notes <id> --set "forbid: \.phone\s*==" [--timeout 60]
-burrow decision check ~/Notes <id> [--confirm | --clear]
+camr decision check ~/Notes <id> --set "forbid: \.phone\s*==" [--timeout 60]
+camr decision check ~/Notes <id> [--confirm | --clear]
 ```
 
 Only you set, confirm or take away a check, in your own terminal (it shows what will run and asks you to type yes) or with **Confirm Check** under the decision in the app's Ledger.
 
-Confirming, taking away or overriding a check is what would let a change through the gate a connected program is held by, so in a terminal it also takes a code you can see and a program can't (D-113). After a short wait (2 seconds, or 20 the first time), Burrow shows an 8-digit code in a macOS notification, never in the terminal, and asks you to type it before the yes. It works once, for 2 minutes, only in the command that showed it; three wrong tries end it. Burrow keeps no copy or hash of it anywhere. If no notification appears, allow notifications for Script Editor in System Settings. It is never printed in the terminal. If a code turns up that you didn't ask for, a program asked for it: don't type it anywhere, and never give it to a program or a chat. Before any of this, burrow refuses outright when it can see it was started by Claude Code, OpenCode, Codex, OpenClaw, Hermes, Gemini CLI or Cursor's agent (their variables in its environment, or one of them among the programs that started it or its terminal), and says which. The app is the strongest place to do it: it's your own window, and it asks its own question. A check a program proposes (`burrow_commit`'s `check`, or `burrow` run through a pipe) is kept as proposed and never run. A confirmed check lives in Burrow's own folder on this Mac, never in the vault. A command runs without a shell, in the linked folder, stopped after its time limit; it is run once when you confirm it, so you know whether it passes on the code as it is.
+Confirming, taking away or overriding a check is what would let a change through the gate a connected program is held by, so in a terminal it also takes a code you can see and a program can't (D-113). After a short wait (2 seconds, or 20 the first time), CAMR shows an 8-digit code in a macOS notification, never in the terminal, and asks you to type it before the yes. It works once, for 2 minutes, only in the command that showed it; three wrong tries end it. CAMR keeps no copy or hash of it anywhere. If no notification appears, allow notifications for Script Editor in System Settings. It is never printed in the terminal. If a code turns up that you didn't ask for, a program asked for it: don't type it anywhere, and never give it to a program or a chat. Before any of this, camr refuses outright when it can see it was started by Claude Code, OpenCode, Codex, OpenClaw, Hermes, Gemini CLI or Cursor's agent (their variables in its environment, or one of them among the programs that started it or its terminal), and says which. The app is the strongest place to do it: it's your own window, and it asks its own question. A check a program proposes (`camr_commit`'s `check`, or `camr` run through a pipe) is kept as proposed and never run. A confirmed check lives in CAMR's own folder on this Mac, never in the vault. A command runs without a shell, in the linked folder, stopped after its time limit; it is run once when you confirm it, so you know whether it passes on the code as it is.
 
 ## git
 
 Inside a repository linked to the vault:
 
 ```
-burrow hook install git ~/Notes
+camr hook install git ~/Notes
 ```
 
-This writes `.git/hooks/post-commit`, but never over an existing hook. Each commit is then linked into the Ledger by its sha and the files it changed, so `burrow blame` can show which AI session led to a change. The hook never blocks a commit.
+This writes `.git/hooks/post-commit`, but never over an existing hook. Each commit is then linked into the Ledger by its sha and the files it changed, so `camr blame` can show which AI session led to a change. The hook never blocks a commit.
 
 ```
-burrow hook install git-gate ~/Notes
+camr hook install git-gate ~/Notes
 ```
 
-This writes `.git/hooks/pre-commit` (never over an existing one, and only in a repository linked into the vault). It runs `burrow check --staged`: a commit whose change touches what a decision rests on is refused once, with the decisions and their reasons printed. Seeing them is the acknowledgement, so the same commit goes through on the next try; nothing else to type. A commit that breaks a decision (its check fails) is refused every time. A pre-commit hook installed before D-107 lets a breaking commit through: delete it and install it again. A different change to those files is held again. A Burrow error never blocks a commit, and `git commit --no-verify` skips the hook as it skips any.
+This writes `.git/hooks/pre-commit` (never over an existing one, and only in a repository linked into the vault). It runs `camr check --staged`: a commit whose change touches what a decision rests on is refused once, with the decisions and their reasons printed. Seeing them is the acknowledgement, so the same commit goes through on the next try; nothing else to type. A commit that breaks a decision (its check fails) is refused every time. A pre-commit hook installed before D-107 lets a breaking commit through: delete it and install it again. A different change to those files is held again. A CAMR error never blocks a commit, and `git commit --no-verify` skips the hook as it skips any.
 
 ## Safety
 
-Commits are written by models, so whatever reads them treats them as data. `resume`, `log` and `blame` output sits inside one `<ledger>` block that its contents cannot close, names who wrote each commit, and says to follow no instruction inside it. Cited paths must be plain vault paths: never absolute, never `..`. The write tools run only for programs connected over MCP; Burrow's own chat refuses them, because it asks before keeping anything.
+Commits are written by models, so whatever reads them treats them as data. `resume`, `log` and `blame` output sits inside one `<ledger>` block that its contents cannot close, names who wrote each commit, and says to follow no instruction inside it. Cited paths must be plain vault paths: never absolute, never `..`. The write tools run only for programs connected over MCP; CAMR's own chat refuses them, because it asks before keeping anything.

@@ -1,13 +1,13 @@
 import AppKit
-import BurrowCore
-import BurrowTools
+import CAMRCore
+import CAMRTools
 import Charts
 import SwiftUI
 
 // MARK: Sessions
 
-/// Live and recent coding sessions (Claude Code and Codex) and what Burrow did for each one's context: output it kept
-/// out, words it handed back, compactions it steered (D-116, D-117). Read from Burrow's own folder, where the hooks write
+/// Live and recent coding sessions (Claude Code and Codex) and what CAMR did for each one's context: output it kept
+/// out, words it handed back, compactions it steered (D-116, D-117). Read from CAMR's own folder, where the hooks write
 /// as the session runs, so the page reads again every few seconds while it is open.
 struct SessionsPage: View {
     let workspace: Workspace
@@ -18,7 +18,7 @@ struct SessionsPage: View {
             header.padding(.horizontal, 28).padding(.top, 22).padding(.bottom, 14)
             if model.loaded && model.rows.isEmpty {
                 ContentUnavailableView("No sessions yet", systemImage: "gauge.with.dots.needle.33percent",
-                                       description: Text("When Claude Code or Codex runs with Burrow's session hooks, each session lands here with its context over time and what Burrow kept out of it."))
+                                       description: Text("When Claude Code or Codex runs with CAMR's session hooks, each session lands here with its context over time and what CAMR kept out of it."))
                     .foregroundStyle(Night.dim).frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 HStack(alignment: .top, spacing: 18) {
@@ -40,7 +40,7 @@ struct SessionsPage: View {
         let saved = model.rows.reduce(0) { $0 + $1.totals.savedTokens }
         return HStack(alignment: .firstTextBaseline, spacing: 14) {
             Text("Sessions").font(.system(size: 28, weight: .bold)).fontWidth(.expanded).tracking(-0.4)
-            Text("\(live) live · \(model.rows.count.counted("session")) · \(saved.tokensText) tokens kept out by Burrow")
+            Text("\(live) live · \(model.rows.count.counted("session")) · \(saved.tokensText) tokens kept out by CAMR")
                 .foregroundStyle(Night.dim).monospacedDigit().contentTransition(.numericText())
             Spacer()
             if model.working { ProgressView().controlSize(.small) }
@@ -101,7 +101,7 @@ struct ContextSessionRow: Identifiable, Equatable {
     var tint: Color { program?.colour ?? Night.conversation }
 }
 
-/// The selected session opened up: every request's context, where it was compacted, and what Burrow did.
+/// The selected session opened up: every request's context, where it was compacted, and what CAMR did.
 struct ContextSessionDetailData: Equatable {
     let id: String
     var usage: [Int]
@@ -367,7 +367,7 @@ struct ContextSessionRowView: View {
                         Text("−\(row.totals.savedTokens.tokensText)").font(.system(size: 11, weight: .semibold)).foregroundStyle(Theme.gold)
                             .padding(.horizontal, 6).padding(.vertical, 1)
                             .background(Theme.gold.opacity(0.12), in: .capsule)
-                            .help("\(row.totals.savedTokens.formatted()) tokens kept out of the context by Burrow")
+                            .help("\(row.totals.savedTokens.formatted()) tokens kept out of the context by CAMR")
                     }
                     if row.contextNow > 0 {
                         Text("\(row.contextNow.tokensText) now").font(.system(size: 10.5)).foregroundStyle(Night.faint)
@@ -470,7 +470,7 @@ struct ContextSessionDetail: View {
         let totals = row.totals
         return LazyVGrid(columns: [GridItem(.adaptive(minimum: 128), spacing: 10)], spacing: 10) {
             ContextTile(title: "Context now", value: row.contextNow.tokensText, detail: "peak \(row.contextPeak.tokensText) tokens", tint: row.tint)
-            ContextTile(title: "Compactions", value: row.compactions.formatted(), detail: totals.steered > 0 ? "\(totals.steered) steered by Burrow" : "none steered", tint: Night.document)
+            ContextTile(title: "Compactions", value: row.compactions.formatted(), detail: totals.steered > 0 ? "\(totals.steered) steered by CAMR" : "none steered", tint: Night.document)
             ContextTile(title: "Kept out", value: totals.savedTokens.tokensText, detail: "tokens · \((totals.kept + totals.shortened).counted("output"))", tint: Theme.gold)
             ContextTile(title: "Recalls", value: totals.recalls.formatted(), detail: "\(totals.recalledCharacters.formatted()) characters handed back", tint: Night.conversation)
             ContextTile(title: "Expanded", value: totals.expanded.formatted(), detail: "kept outputs read again", tint: Night.cache)
@@ -530,7 +530,7 @@ struct ContextSessionDetail: View {
 
     @ViewBuilder private var timeline: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("What Burrow did").font(.system(size: 15, weight: .semibold)).foregroundStyle(Night.note)
+            Text("What CAMR did").font(.system(size: 15, weight: .semibold)).foregroundStyle(Night.note)
             if let events = detail?.events, !events.isEmpty {
                 let shown = Array(events.prefix(300))
                 VStack(alignment: .leading, spacing: 0) {
@@ -542,7 +542,7 @@ struct ContextSessionDetail: View {
                     Text("The newest \(shown.count) of \(events.count.counted("event")).").font(.system(size: 11.5)).foregroundStyle(Night.faint)
                 }
             } else {
-                Text(detail == nil ? "Reading…" : "Nothing yet: Burrow's hooks have not acted in this session.")
+                Text(detail == nil ? "Reading…" : "Nothing yet: CAMR's hooks have not acted in this session.")
                     .font(.system(size: 12)).foregroundStyle(Night.faint)
             }
         }
@@ -568,7 +568,7 @@ struct ContextTile: View {
     }
 }
 
-/// One thing Burrow did, drawn as a node on a line like the conversation trail.
+/// One thing CAMR did, drawn as a node on a line like the conversation trail.
 struct MeterEventRow: View {
     let event: MeterEvent
     let last: Bool
@@ -639,10 +639,10 @@ struct ResumeCommands: View {
     private var lines: [(who: String, line: String, tint: Color)] {
         let short = String(id.prefix(8))
         let vault = "'" + workspace.folder.path.replacingOccurrences(of: "'", with: "'\\''") + "'"
-        let burrow = Connections.command.contains(" ") ? "'\(Connections.command)'" : Connections.command
-        return [("Claude Code", "/burrow-resume \(short)", SessionText.Program.claudeCode.colour),
-                ("Codex", "$burrow-resume \(short)", SessionText.Program.codex.colour),
-                ("Burrow chat", "\(burrow) chat \(vault) --resume \(short)", Night.note)]
+        let camr = Connections.command.contains(" ") ? "'\(Connections.command)'" : Connections.command
+        return [("Claude Code", "/camr-resume \(short)", SessionText.Program.claudeCode.colour),
+                ("Codex", "$camr-resume \(short)", SessionText.Program.codex.colour),
+                ("CAMR chat", "\(camr) chat \(vault) --resume \(short)", Night.note)]
     }
 
     var body: some View {
@@ -678,7 +678,7 @@ struct ResumeCommands: View {
     }
 }
 
-/// What Burrow does to live sessions, as the person set it. Read-only here for now; `burrow session` changes it.
+/// What CAMR does to live sessions, as the person set it. Read-only here for now; `camr session` changes it.
 struct SessionSettingsStrip: View {
     let settings: SessionSettings
     let archiveFolder: String
@@ -694,11 +694,11 @@ struct SessionSettingsStrip: View {
             pill("Steer", settings.steer)
             pill("Archive", settings.archive)
             Spacer(minLength: 10)
-            // A chosen drive that isn't plugged in is said plainly; sessions go to Burrow's own folder meanwhile (D-121).
+            // A chosen drive that isn't plugged in is said plainly; sessions go to CAMR's own folder meanwhile (D-121).
             if let drive = SessionArchive.chosenFolder(settings).flatMap(SessionArchive.missingDrive) {
                 Image(systemName: "externaldrive.badge.exclamationmark").foregroundStyle(Brand.amber).font(.system(size: 11))
                 Text("\(drive) not connected").foregroundStyle(Brand.amber).lineLimit(1).fixedSize()
-                    .help("Your archive folder is on \(drive), which isn't connected, so sessions are kept in Burrow's own folder until it is. Connect the drive, or choose another folder with burrow session settings archive-folder PATH.")
+                    .help("Your archive folder is on \(drive), which isn't connected, so sessions are kept in CAMR's own folder until it is. Connect the drive, or choose another folder with camr session settings archive-folder PATH.")
             }
             Image(systemName: "archivebox").foregroundStyle(Night.faint).font(.system(size: 11))
             Text((archiveFolder as NSString).abbreviatingWithTildeInPath).lineLimit(1).truncationMode(.head).foregroundStyle(Night.dim)

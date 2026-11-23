@@ -1,16 +1,16 @@
 import AppKit
-import BurrowCore
+import CAMRCore
 import SwiftUI
 
 @main
-struct BurrowApp: App {
+struct CAMRApp: App {
     @NSApplicationDelegateAdaptor(Delegate.self) private var delegate
     @State private var library = Library()
 
     private var workspace: Workspace? { library.workspace }
 
     var body: some Scene {
-        WindowGroup("Burrow") {
+        WindowGroup("CAMR") {
             Root(library: library).frame(minWidth: 900, minHeight: 560)
         }
         .defaultSize(width: 1400, height: 880)
@@ -67,16 +67,16 @@ struct BurrowApp: App {
 final class Delegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.regular)
-        if ProcessInfo.processInfo.environment["BURROW_SNAPSHOT"] == nil { NSApp.activate(ignoringOtherApps: true) }
+        if ProcessInfo.processInfo.environment["CAMR_SNAPSHOT"] == nil { NSApp.activate(ignoringOtherApps: true) }
         snapshotIfAsked()
         recordIfAsked()
         placeIfAsked()
     }
 
-    /// For the demo film: BURROW_WINDOW="x,y,w,h" (points, from the screen's top left) pins the window, so a screen
+    /// For the demo film: CAMR_WINDOW="x,y,w,h" (points, from the screen's top left) pins the window, so a screen
     /// recording can be cropped to exactly the app and nothing else on the screen.
     private func placeIfAsked() {
-        guard let spec = ProcessInfo.processInfo.environment["BURROW_WINDOW"] else { return }
+        guard let spec = ProcessInfo.processInfo.environment["CAMR_WINDOW"] else { return }
         let n = spec.split(separator: ",").compactMap { Double($0) }
         guard n.count == 4 else { return }
         for delay in [0.3, 1.0, 2.0] {
@@ -90,15 +90,15 @@ final class Delegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    /// For a demonstration video without screen recording: BURROW_RECORD=folder saves the window as numbered frames,
-    /// ten a second, until the app quits; ffmpeg joins them. Frames come from the app's own drawing, like BURROW_SNAPSHOT.
+    /// For a demonstration video without screen recording: CAMR_RECORD=folder saves the window as numbered frames,
+    /// ten a second, until the app quits; ffmpeg joins them. Frames come from the app's own drawing, like CAMR_SNAPSHOT.
     private func recordIfAsked() {
-        guard let folder = ProcessInfo.processInfo.environment["BURROW_RECORD"] else { return }
+        guard let folder = ProcessInfo.processInfo.environment["CAMR_RECORD"] else { return }
         try? FileManager.default.createDirectory(atPath: folder, withIntermediateDirectories: true)
         var frame = 0
-        // BURROW_RECORD_FPS sets the rate (default 10); the film records at 30.
-        let fps = Double(ProcessInfo.processInfo.environment["BURROW_RECORD_FPS"] ?? "") ?? 10
-        let writer = DispatchQueue(label: "burrow.record", qos: .utility)
+        // CAMR_RECORD_FPS sets the rate (default 10); the film records at 30.
+        let fps = Double(ProcessInfo.processInfo.environment["CAMR_RECORD_FPS"] ?? "") ?? 10
+        let writer = DispatchQueue(label: "camr.record", qos: .utility)
         Timer.scheduledTimer(withTimeInterval: 1 / fps, repeats: true) { _ in
             guard let view = NSApp.windows.first(where: \.isVisible)?.contentView?.superview else { return }
             // 1920 px wide, whatever the screen's scale: the film's resolution, and fast enough to keep up at 30 a second.
@@ -117,13 +117,13 @@ final class Delegate: NSObject, NSApplicationDelegate {
     }
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }
 
-    /// For checking the layout without a person at the screen: BURROW_SNAPSHOT=out.png BURROW_SNAPSHOT_AFTER=seconds.
+    /// For checking the layout without a person at the screen: CAMR_SNAPSHOT=out.png CAMR_SNAPSHOT_AFTER=seconds.
     private func snapshotIfAsked() {
         let environment = ProcessInfo.processInfo.environment
-        guard let path = environment["BURROW_SNAPSHOT"] else { return }
-        let wait = Double(environment["BURROW_SNAPSHOT_AFTER"] ?? "") ?? 10
+        guard let path = environment["CAMR_SNAPSHOT"] else { return }
+        let wait = Double(environment["CAMR_SNAPSHOT_AFTER"] ?? "") ?? 10
         DispatchQueue.main.asyncAfter(deadline: .now() + wait) {
-            // An open sheet (BURROW_SHEET) is a window of its own: it is what gets saved, and it is closed so the app can quit.
+            // An open sheet (CAMR_SHEET) is a window of its own: it is what gets saved, and it is closed so the app can quit.
             let sheets = NSApp.windows.filter { $0.isVisible && $0.sheetParent != nil }
             let main = sheets.first?.sheetParent ?? NSApp.windows.first(where: { $0.isVisible && $0.sheetParent == nil })
             if let window = sheets.first ?? main, let view = window.contentView?.superview ?? window.contentView,
@@ -155,7 +155,7 @@ func pickLinkedFolder(_ workspace: Workspace) {
     panel.canChooseDirectories = true
     panel.canChooseFiles = false
     panel.prompt = "Link Folder"
-    panel.message = "Link a folder, such as a code project. Burrow reads it where it is."
+    panel.message = "Link a folder, such as a code project. CAMR reads it where it is."
     if panel.runModal() == .OK, let url = panel.url { Task { await workspace.link(url) } }
 }
 
@@ -195,9 +195,9 @@ struct Root: View {
         .onAppear {
             guard library.workspace == nil else { return }
             let environment = ProcessInfo.processInfo.environment
-            if let path = environment["BURROW_VAULT"] {
+            if let path = environment["CAMR_VAULT"] {
                 library.open(URL(fileURLWithPath: path))
-            } else if environment["BURROW_SNAPSHOT"] == nil || environment["BURROW_STATE_DIR"] != nil {
+            } else if environment["CAMR_SNAPSHOT"] == nil || environment["CAMR_STATE_DIR"] != nil {
                 // A vault made in the terminal is opened, or listed, rather than asking for a folder again (D-114).
                 library.start()
             }

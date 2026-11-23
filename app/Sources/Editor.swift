@@ -1,5 +1,5 @@
 import AppKit
-import BurrowCore
+import CAMRCore
 import SwiftUI
 
 struct FilePage: View {
@@ -27,7 +27,7 @@ struct FilePage: View {
 }
 
 extension NSAttributedString.Key {
-    static let burrowMark = NSAttributedString.Key("burrowMark")
+    static let camrMark = NSAttributedString.Key("camrMark")
 }
 
 /// The Markdown page. Marks like ** and [[ show only on the line you're on, so a note reads as finished text while you write it.
@@ -74,7 +74,7 @@ struct VaultTextView: NSViewRepresentable {
         context.coordinator.attach(text, scroll)
         text.string = context.coordinator.shown(document.text)
         context.coordinator.restyleAll()
-        if let target = ProcessInfo.processInfo.environment["BURROW_PREVIEW"] {
+        if let target = ProcessInfo.processInfo.environment["CAMR_PREVIEW"] {
             DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak text] in text?.previewForCheck(target) }
         }
         return scroll
@@ -167,7 +167,7 @@ struct VaultTextView: NSViewRepresentable {
         }
 
         func textView(_ textView: NSTextView, clickedOnLink link: Any, at charIndex: Int) -> Bool {
-            guard let url = link as? URL, url.scheme == "burrow" else {
+            guard let url = link as? URL, url.scheme == "camr" else {
                 if let url = link as? URL { NSWorkspace.shared.open(url) }
                 return true
             }
@@ -285,7 +285,7 @@ final class VaultNSTextView: NSTextView {
         let index = layout.characterIndexForGlyph(at: glyph)
         guard index < storage.length,
               layout.boundingRect(forGlyphRange: NSRange(location: glyph, length: 1), in: container).insetBy(dx: -2, dy: -2).contains(inContainer),
-              let url = storage.attribute(.link, at: index, effectiveRange: nil) as? URL, url.scheme == "burrow", url.host == "note",
+              let url = storage.attribute(.link, at: index, effectiveRange: nil) as? URL, url.scheme == "camr", url.host == "note",
               let workspace = coordinator?.parent.workspace else { return closePreview() }
         let target = String(url.path.dropFirst()).removingPercentEncoding ?? String(url.path.dropFirst())
         guard target != previewTarget || preview?.isShown != true else { return }
@@ -305,14 +305,14 @@ final class VaultNSTextView: NSTextView {
             workspace.go(.file(path))
         })
         popover.show(relativeTo: anchor, of: self, preferredEdge: .maxY)
-        if ProcessInfo.processInfo.environment["BURROW_PREVIEW"] != nil {
+        if ProcessInfo.processInfo.environment["CAMR_PREVIEW"] != nil {
             FileHandle.standardError.write(Data("preview shown: \(path), \(popover.isShown ? "visible" : "not visible"), \(Int(popover.contentSize.width))×\(Int(popover.contentSize.height))\n".utf8))
         }
         preview = popover
         previewTarget = target
     }
 
-    /// For checking the preview without a person at the screen: BURROW_PREVIEW=<link target> shows it over that link.
+    /// For checking the preview without a person at the screen: CAMR_PREVIEW=<link target> shows it over that link.
     func previewForCheck(_ target: String) {
         guard let layout = layoutManager, let container = textContainer, let storage = textStorage else { return }
         var found: NSRange?
@@ -493,7 +493,7 @@ final class Styler {
             if text.length >= inlineStart + 4, text.substring(with: NSRange(location: inlineStart, length: 1)) == "[", text.substring(with: NSRange(location: inlineStart + 2, length: 2)) == "] " {
                 let checked = text.substring(with: NSRange(location: inlineStart + 1, length: 1)) != " "
                 let box = NSRange(location: line.location + inlineStart, length: 3)
-                storage.addAttributes([.link: URL(string: "burrow://task/x")!, .foregroundColor: NSColor.controlAccentColor, .font: NSFont.monospacedSystemFont(ofSize: 15, weight: .medium)], range: box)
+                storage.addAttributes([.link: URL(string: "camr://task/x")!, .foregroundColor: NSColor.controlAccentColor, .font: NSFont.monospacedSystemFont(ofSize: 15, weight: .medium)], range: box)
                 if checked {
                     storage.addAttributes([.foregroundColor: Theme.inkFaintNS, .strikethroughStyle: NSUnderlineStyle.single.rawValue], range: NSRange(location: line.location + inlineStart + 4, length: text.length - inlineStart - 4))
                 }
@@ -554,10 +554,10 @@ final class Styler {
 
     private static func linkURL(_ target: String) -> URL {
         var parts = URLComponents()
-        parts.scheme = "burrow"
+        parts.scheme = "camr"
         parts.host = "note"
         parts.path = "/" + target
-        return parts.url ?? URL(string: "burrow://note/")!
+        return parts.url ?? URL(string: "camr://note/")!
     }
 
     private func headingLevel(_ raw: String) -> Int? {

@@ -1,20 +1,20 @@
 import AppKit
-import BurrowTools
+import CAMRTools
 import Foundation
 
 /// Whether each program on this Mac is actually wired to this vault, read from the programs' own settings files.
 /// The Programs page shows this so a person can see at a glance which program will find the vault and which won't.
 struct Connection: Equatable {
     enum State: Equatable {
-        /// Its settings start `burrow mcp` on this vault.
+        /// Its settings start `camr mcp` on this vault.
         case thisVault
-        /// Its settings start `burrow mcp` on a different folder.
+        /// Its settings start `camr mcp` on a different folder.
         case otherVault(String)
         /// A model server (Ollama, llama.cpp) that is running; it reaches the vault through OpenCode.
         case serving
-        /// Its own settings don't start Burrow, yet it has used this vault: set up in a project folder.
+        /// Its own settings don't start CAMR, yet it has used this vault: set up in a project folder.
         case usedElsewhere
-        /// Installed, but nothing points it at Burrow.
+        /// Installed, but nothing points it at CAMR.
         case notSetUp
         /// Not found on this Mac.
         case missing
@@ -36,11 +36,11 @@ struct Connection: Equatable {
 
     var detail: String {
         switch state {
-        case .thisVault: return "Its settings start Burrow on this vault" + (source.map { " (\($0))" } ?? "")
-        case let .otherVault(path): return "Its settings start Burrow on \((path as NSString).abbreviatingWithTildeInPath)"
+        case .thisVault: return "Its settings start CAMR on this vault" + (source.map { " (\($0))" } ?? "")
+        case let .otherVault(path): return "Its settings start CAMR on \((path as NSString).abbreviatingWithTildeInPath)"
         case .serving: return "Serving models on this Mac; point OpenCode at it to reach the vault"
-        case .usedElsewhere: return "Has used this vault through a project's own settings; its global settings don't start Burrow"
-        case .notSetUp: return "Installed, but it does not start Burrow yet"
+        case .usedElsewhere: return "Has used this vault through a project's own settings; its global settings don't start CAMR"
+        case .notSetUp: return "Installed, but it does not start CAMR yet"
         case .missing: return "Not found on this Mac"
         }
     }
@@ -51,23 +51,23 @@ struct Connection: Equatable {
 enum Connections {
     static let home = FileManager.default.homeDirectoryForCurrentUser
 
-    /// The `burrow` command to write into settings files. Always a full path: programs opened from the Dock
-    /// (LM Studio, Claude Desktop) do not get the shell's PATH, so a bare `burrow` would not start.
+    /// The `camr` command to write into settings files. Always a full path: programs opened from the Dock
+    /// (LM Studio, Claude Desktop) do not get the shell's PATH, so a bare `camr` would not start.
     /// The copy inside this app comes first, since it is the same version as the app. A command on the PATH is used
     /// only when it is a link to that copy (a steadier path to write into settings) or when the app holds none: on
-    /// 14 November `~/.local/bin/burrow` was an older, separate file, and the setup line pointed programs at it.
+    /// 14 November `~/.local/bin/camr` was an older, separate file, and the setup line pointed programs at it.
     static var command: String {
-        let candidates = ["/opt/homebrew/bin/burrow", "/usr/local/bin/burrow", home.appendingPathComponent(".local/bin/burrow").path]
+        let candidates = ["/opt/homebrew/bin/camr", "/usr/local/bin/camr", home.appendingPathComponent(".local/bin/camr").path]
         let installed = candidates.filter { FileManager.default.isExecutableFile(atPath: $0) }
-        let bundled = Bundle.main.bundleURL.appendingPathComponent("Contents/Resources/bin/burrow")
+        let bundled = Bundle.main.bundleURL.appendingPathComponent("Contents/Resources/bin/camr")
         if FileManager.default.isExecutableFile(atPath: bundled.path) {
             let real = bundled.resolvingSymlinksInPath().path
             return installed.first { URL(fileURLWithPath: $0).resolvingSymlinksInPath().path == real } ?? bundled.path
         }
-        return installed.first ?? "burrow"
+        return installed.first ?? "camr"
     }
 
-    static var commandIsInstalled: Bool { command != "burrow" }
+    static var commandIsInstalled: Bool { command != "camr" }
 
     /// Reads every program's settings once. Cheap: a few small JSON files and two port checks.
     static func read(vault: URL) async -> [Program: Connection] {
@@ -90,12 +90,12 @@ enum Connections {
             .contains { FileManager.default.isExecutableFile(atPath: "\($0)/\(tool)") }
     }
 
-    /// Looks for a server named `burrow` in each file and reads which folder it opens.
+    /// Looks for a server named `camr` in each file and reads which folder it opens.
     private static func scan(files: [URL], vault: String, installed: Bool) -> Connection {
         var other: (String, String)?
         for file in files {
             guard let data = try? Data(contentsOf: file), let json = try? JSONSerialization.jsonObject(with: data) else { continue }
-            for entry in burrowEntries(in: json) {
+            for entry in camrEntries(in: json) {
                 let words = strings(in: entry)
                 guard let mcp = words.firstIndex(of: "mcp") else { continue }
                 let folder = words.dropFirst(mcp + 1).first.map { URL(fileURLWithPath: ($0 as NSString).expandingTildeInPath).standardizedFileURL.path } ?? ""
@@ -108,12 +108,13 @@ enum Connections {
         return Connection(state: installed ? .notSetUp : .missing)
     }
 
-    /// Every value stored under a key named "burrow", at any depth: Claude Code keeps servers per project.
-    private static func burrowEntries(in json: Any) -> [Any] {
+    /// Every value stored under a key named "camr", at any depth: Claude Code keeps servers per project.
+    private static func camrEntries(in json: Any) -> [Any] {
         if let object = json as? [String: Any] {
-            return object.flatMap { key, value in (key == "burrow" ? [value] : []) + burrowEntries(in: value) }
+            // "burrow" is the name an earlier version set servers up under (D-124); they still run CAMR.
+            return object.flatMap { key, value in (key == "camr" || key == Connect.olderName ? [value] : []) + camrEntries(in: value) }
         }
-        if let list = json as? [Any] { return list.flatMap(burrowEntries) }
+        if let list = json as? [Any] { return list.flatMap(camrEntries) }
         return []
     }
 
@@ -133,33 +134,33 @@ enum Connections {
 
     // MARK: Setting up
 
-    /// Adds Burrow to LM Studio's `mcp.json`, keeping every other server and a copy of the file as it was.
+    /// Adds CAMR to LM Studio's `mcp.json`, keeping every other server and a copy of the file as it was.
     static func addToLMStudio(vault: URL) throws -> String {
         let file = home.appendingPathComponent(".lmstudio/mcp.json")
         var root = try existing(file) ?? [:]
         var servers = root["mcpServers"] as? [String: Any] ?? [:]
-        servers["burrow"] = ["command": command, "args": ["mcp", vault.standardizedFileURL.path]]
+        servers["camr"] = ["command": command, "args": ["mcp", vault.standardizedFileURL.path]]
         root["mcpServers"] = servers
         try write(root, to: file)
-        return "Added to LM Studio. Restart its chat to see the burrow tools."
+        return "Added to LM Studio. Restart its chat to see the camr tools."
     }
 
-    /// Adds Burrow and the `burrow` agent to OpenCode's own settings, keeping what is there.
+    /// Adds CAMR and the `camr` agent to OpenCode's own settings, keeping what is there.
     static func addToOpenCode(vault: URL) throws -> String {
         let file = home.appendingPathComponent(".config/opencode/opencode.json")
         var root = try existing(file) ?? ["$schema": "https://opencode.ai/config.json"]
         var mcp = root["mcp"] as? [String: Any] ?? [:]
-        mcp["burrow"] = ["type": "local", "command": [command, "mcp", vault.standardizedFileURL.path], "enabled": true]
+        mcp["camr"] = ["type": "local", "command": [command, "mcp", vault.standardizedFileURL.path], "enabled": true]
         root["mcp"] = mcp
         var agents = root["agent"] as? [String: Any] ?? [:]
-        if agents["burrow"] == nil {
-            agents["burrow"] = ["description": "Answers from the Burrow vault only", "mode": "primary",
-                                "prompt": "You answer from the user's Burrow vault. Use the burrow tools; name the file for each fact. If the vault does not hold the answer, say so.",
-                                "tools": ["*": false, "burrow_*": true]]
+        if agents["camr"] == nil {
+            agents["camr"] = ["description": "Answers from the CAMR vault only", "mode": "primary",
+                                "prompt": "You answer from the user's CAMR vault. Use the camr tools; name the file for each fact. If the vault does not hold the answer, say so.",
+                                "tools": ["*": false, "camr_*": true]]
         }
         root["agent"] = agents
         try write(root, to: file)
-        return "Added to OpenCode, with a burrow agent for small local models."
+        return "Added to OpenCode, with a camr agent for small local models."
     }
 
     /// Runs `claude mcp add` for the person, at user scope so every project sees the vault.
@@ -169,7 +170,7 @@ enum Connections {
         guard let claude else { throw SetupError("Claude Code was not found.") }
         let process = Process()
         process.executableURL = URL(fileURLWithPath: claude)
-        process.arguments = ["mcp", "add", "--scope", "user", "burrow", "--", command, "mcp", vault.standardizedFileURL.path]
+        process.arguments = ["mcp", "add", "--scope", "user", "camr", "--", command, "mcp", vault.standardizedFileURL.path]
         let pipe = Pipe()
         process.standardOutput = pipe
         process.standardError = pipe
@@ -186,14 +187,14 @@ enum Connections {
         guard let data = try? Data(contentsOf: file) else { return nil }
         if data.allSatisfy({ $0 == 32 || $0 == 10 || $0 == 13 || $0 == 9 }) { return nil }
         guard let root = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
-            throw SetupError("\((file.path as NSString).abbreviatingWithTildeInPath) has comments or isn't plain JSON, so Burrow left it alone. Copy the line instead.")
+            throw SetupError("\((file.path as NSString).abbreviatingWithTildeInPath) has comments or isn't plain JSON, so CAMR left it alone. Copy the line instead.")
         }
         return root
     }
 
     private static func write(_ root: [String: Any], to file: URL) throws {
         try FileManager.default.createDirectory(at: file.deletingLastPathComponent(), withIntermediateDirectories: true)
-        // The same copies as `burrow connect` (D-115): the pre-Burrow file is never replaced, and this write gets its own.
+        // The same copies as `camr connect` (D-115): the pre-CAMR file is never replaced, and this write gets its own.
         try Connect.keepCopies(of: file)
         let data = try JSONSerialization.data(withJSONObject: root, options: [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes])
         try data.write(to: file, options: .atomic)

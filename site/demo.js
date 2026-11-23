@@ -1,4 +1,4 @@
-// An interactive, scripted Burrow window. Every question, answer, file name and decision below was taken from the
+// An interactive, scripted CAMR window. Every question, answer, file name and decision below was taken from the
 // real app (its screenshots, kept with the project report); nothing is generated here. Nothing is sent anywhere.
 (() => {
   const root = document.getElementById("demo");
@@ -127,9 +127,9 @@
      line: "Read the vault: the closest files are notes and documents. Method: Answer from documents.",
      used: ["act-part-02-office-of-the-data-commissioner", "complaints-regs-part-01-02-lodging-and-handling", "act-part-01-preliminary", "general-regs-part-01-02-rights-of-a-data-subject", "registration-regs-regulations-01-18", "general-regs-part-07-transfer-outside-kenya"],
      time: "15.0 s, on this Mac"},
-    {q: "How does Burrow merge the word ranking and the meaning ranking?", lit: "code",
-     answer: [{t: "Burrow merges the word and meaning rankings using Reciprocal Rank Fusion. The method is defined in "}, {code: "Project/Sources/BurrowCore/Retrieval.swift"}, {t: " at line 118. Each ID's score is incremented by "}, {code: "1.0 / Double(60 + rank + 1)"}, {t: ", a weight is applied by the file path of the chunk, and the IDs are sorted by score into one ranking. "}, {cite: "Project/Sources/BurrowCore/Retrieval.swift:123"}],
-     line: "Read 10 notes and files: the closest files are code, so Burrow followed their links.",
+    {q: "How does CAMR merge the word ranking and the meaning ranking?", lit: "code",
+     answer: [{t: "CAMR merges the word and meaning rankings using Reciprocal Rank Fusion. The method is defined in "}, {code: "Project/Sources/CAMRCore/Retrieval.swift"}, {t: " at line 118. Each ID's score is incremented by "}, {code: "1.0 / Double(60 + rank + 1)"}, {t: ", a weight is applied by the file path of the chunk, and the IDs are sorted by score into one ranking. "}, {cite: "Project/Sources/CAMRCore/Retrieval.swift:123"}],
+     line: "Read 10 notes and files: the closest files are code, so CAMR followed their links.",
      used: ["DECISIONS", "Markdown.swift", "Views.swift", "VaultTools.swift", "Retrieval.swift", "sqlite-releases-2026-01-to-07-3.5…"], read: "Read 10 notes and files", time: ""},
     {q: "A shop sells pens at 15 shillings each. Amina buys 8 pens and pays with a 200 shilling note. How much change does she get?", lit: "none",
      answer: [{t: "Total cost = 8 pens × 15 shillings = 120 shillings. Change = 200 − 120 = 80. Check: 120 + 80 = 200. Answer: 80"}],
@@ -175,14 +175,14 @@
       out.appendChild(make("div", "demo-used-h", "Used"));
       const ul = make("ul", "demo-used"); item.used.forEach((u) => { const li = make("li"); li.append(make("i"), make("span", "", u), make("em", "", /\.\w+$/.test(u) ? "code" : "note")); ul.appendChild(li); }); out.appendChild(ul);
     }
-    const foot = make("p", "demo-foot"); [item.time, "Keep as Note", "What Should Burrow Remember?"].filter(Boolean).forEach((t) => foot.appendChild(make("span", "", t))); out.appendChild(foot);
+    const foot = make("p", "demo-foot"); [item.time, "Keep as Note", "What Should CAMR Remember?"].filter(Boolean).forEach((t) => foot.appendChild(make("span", "", t))); out.appendChild(foot);
   }
   $(".demo-input").addEventListener("submit", (e) => {
     e.preventDefault(); touched = true;
     const text = input.value.trim().toLowerCase(); if (!text) return;
     const hit = QUESTIONS.findIndex((q) => q.q.toLowerCase().startsWith(text.slice(0, 18)));
     if (hit >= 0) { ask(hit); return; }
-    out.replaceChildren(make("h4", "demo-q", input.value), make("p", "demo-line", "This demo answers the three questions above, with the real answers from the app. Download Burrow to ask your own vault: it runs on your Mac."));
+    out.replaceChildren(make("h4", "demo-q", input.value), make("p", "demo-line", "This demo answers the three questions above, with the real answers from the app. Download CAMR to ask your own vault: it runs on your Mac."));
     light([]); reading(null);
   });
 
@@ -237,7 +237,7 @@
       const row = make("div", "demo-prog" + (p.on ? " on" : "") + (p.server ? " server" : ""));
       const dot = make("i"); const txt = make("div"); txt.append(make("b", "", p.name), make("span", "", p.state));
       row.append(dot, txt);
-      if (p.id && !p.on) { const b = make("button", "", "Connect"); b.type = "button"; b.addEventListener("click", () => { p.on = true; p.state = "Connected (demo)"; cmd.textContent = `burrow connect ${p.id} ~/Notes --write`; $(".demo-progcount").textContent = "2 set up for this vault · 1 active in the last 30 minutes"; renderPrograms(); }); row.appendChild(b); }
+      if (p.id && !p.on) { const b = make("button", "", "Connect"); b.type = "button"; b.addEventListener("click", () => { p.on = true; p.state = "Connected (demo)"; cmd.textContent = `camr connect ${p.id} ~/Notes --write`; $(".demo-progcount").textContent = "2 set up for this vault · 1 active in the last 30 minutes"; renderPrograms(); }); row.appendChild(b); }
       plist.appendChild(row);
     });
     $(".demo-flow").replaceChildren(...PROGRAMS.map((p, i) => { const l = make("span", "demo-flowline" + (p.on ? " on" : "") + (p.server ? " server" : "")); l.style.setProperty("--i", i); return l; }));

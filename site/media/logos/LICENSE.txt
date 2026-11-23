@@ -1,5 +1,5 @@
 The program logos in this folder come from Lobe Icons (https://github.com/lobehub/lobe-icons), @lobehub/icons-static-svg 1.103.0,
-recoloured for a dark page. Each logo is a trademark of its owner and is shown only to name the programs Burrow works with.
+recoloured for a dark page. Each logo is a trademark of its owner and is shown only to name the programs CAMR works with.
 
 MIT License
 

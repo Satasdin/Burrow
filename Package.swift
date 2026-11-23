@@ -2,26 +2,26 @@
 import PackageDescription
 
 let package = Package(
-    name: "Burrow",
+    name: "CAMR",
     platforms: [.macOS(.v14)],
     products: [
-        .library(name: "BurrowCore", targets: ["BurrowCore"]),
-        .library(name: "BurrowTrial", targets: ["BurrowTrial"]),
-        .library(name: "BurrowTools", targets: ["BurrowTools"]),
-        .executable(name: "burrow", targets: ["burrow"]),
-        .executable(name: "burrow-trial", targets: ["burrow-trial"]),
+        .library(name: "CAMRCore", targets: ["CAMRCore"]),
+        .library(name: "CAMRTrial", targets: ["CAMRTrial"]),
+        .library(name: "CAMRTools", targets: ["CAMRTools"]),
+        .executable(name: "camr", targets: ["camr"]),
+        .executable(name: "camr-trial", targets: ["camr-trial"]),
     ],
     targets: [
-        .target(name: "BurrowCore", swiftSettings: [.swiftLanguageMode(.v5)]),
-        .target(name: "BurrowTrial", dependencies: ["BurrowCore"], swiftSettings: [.swiftLanguageMode(.v5)]),
-        .target(name: "BurrowTools", dependencies: ["BurrowCore"], swiftSettings: [.swiftLanguageMode(.v5)]),
-        .target(name: "BurrowMCP", dependencies: ["BurrowCore", "BurrowTools"], swiftSettings: [.swiftLanguageMode(.v5)]),
-        .target(name: "BurrowChat", dependencies: ["BurrowCore", "BurrowTools"], swiftSettings: [.swiftLanguageMode(.v5)]),
-        .target(name: "BurrowTUI", dependencies: ["BurrowCore", "BurrowTools"], swiftSettings: [.swiftLanguageMode(.v5)]),
-        .executableTarget(name: "burrow", dependencies: ["BurrowCore", "BurrowTools", "BurrowMCP", "BurrowChat", "BurrowTUI"], swiftSettings: [.swiftLanguageMode(.v5)]),
-        .executableTarget(name: "burrow-trial", dependencies: ["BurrowCore", "BurrowTrial"], swiftSettings: [.swiftLanguageMode(.v5)]),
-        .testTarget(name: "BurrowCoreTests", dependencies: ["BurrowCore"], swiftSettings: [.swiftLanguageMode(.v5)]),
-        .testTarget(name: "BurrowTrialTests", dependencies: ["BurrowCore", "BurrowTrial"], swiftSettings: [.swiftLanguageMode(.v5)]),
-        .testTarget(name: "BurrowTerminalTests", dependencies: ["BurrowCore", "BurrowTools", "BurrowMCP", "BurrowChat", "BurrowTUI"], swiftSettings: [.swiftLanguageMode(.v5)]),
+        .target(name: "CAMRCore", swiftSettings: [.swiftLanguageMode(.v5)]),
+        .target(name: "CAMRTrial", dependencies: ["CAMRCore"], swiftSettings: [.swiftLanguageMode(.v5)]),
+        .target(name: "CAMRTools", dependencies: ["CAMRCore"], swiftSettings: [.swiftLanguageMode(.v5)]),
+        .target(name: "CAMRMCP", dependencies: ["CAMRCore", "CAMRTools"], swiftSettings: [.swiftLanguageMode(.v5)]),
+        .target(name: "CAMRChat", dependencies: ["CAMRCore", "CAMRTools"], swiftSettings: [.swiftLanguageMode(.v5)]),
+        .target(name: "CAMRTUI", dependencies: ["CAMRCore", "CAMRTools"], swiftSettings: [.swiftLanguageMode(.v5)]),
+        .executableTarget(name: "camr", dependencies: ["CAMRCore", "CAMRTools", "CAMRMCP", "CAMRChat", "CAMRTUI"], swiftSettings: [.swiftLanguageMode(.v5)]),
+        .executableTarget(name: "camr-trial", dependencies: ["CAMRCore", "CAMRTrial"], swiftSettings: [.swiftLanguageMode(.v5)]),
+        .testTarget(name: "CAMRCoreTests", dependencies: ["CAMRCore"], swiftSettings: [.swiftLanguageMode(.v5)]),
+        .testTarget(name: "CAMRTrialTests", dependencies: ["CAMRCore", "CAMRTrial"], swiftSettings: [.swiftLanguageMode(.v5)]),
+        .testTarget(name: "CAMRTerminalTests", dependencies: ["CAMRCore", "CAMRTools", "CAMRMCP", "CAMRChat", "CAMRTUI"], swiftSettings: [.swiftLanguageMode(.v5)]),
     ]
 )

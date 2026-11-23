@@ -1,4 +1,4 @@
-// Draws the DMG window's background: dark like the app, with a line telling people to drag Burrow into Applications.
+// Draws the DMG window's background: dark like the app, with a line telling people to drag CAMR into Applications.
 //   swift scripts/dmg/background.swift scripts/dmg   (writes background.png and background@2x.png)
 import AppKit
 
@@ -25,7 +25,7 @@ for scale in [1, 2] {
             .font: NSFont.systemFont(ofSize: size, weight: weight), .foregroundColor: NSColor(calibratedWhite: 1, alpha: alpha), .paragraphStyle: style])
         words.draw(in: NSRect(x: 0, y: y, width: 640, height: size * 1.5))
     }
-    say("Drag Burrow into Applications", y: 330, size: 20, alpha: 0.92, weight: .semibold)
+    say("Drag CAMR into Applications", y: 330, size: 20, alpha: 0.92, weight: .semibold)
     say("Then open it from Applications. The first time, macOS asks you to allow it:", y: 70, size: 12, alpha: 0.6, weight: .regular)
     say("System Settings › Privacy & Security › Open Anyway", y: 50, size: 12, alpha: 0.6, weight: .medium)
     NSGraphicsContext.restoreGraphicsState()

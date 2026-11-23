@@ -1,7 +1,7 @@
 # The desktop app
 
-Burrow.app is where you read your vault and govern what your AI programs keep. It runs the same engine as the
-`burrow` command and the MCP server, on the same vault. It needs macOS 26 or later; install it with the installer's
+CAMR.app is where you read your vault and govern what your AI programs keep. It runs the same engine as the
+`camr` command and the MCP server, on the same vault. It needs macOS 26 or later; install it with the installer's
 `--app` option, or build it with `app/build.sh`.
 
 ## Opening it
@@ -9,8 +9,8 @@ Burrow.app is where you read your vault and govern what your AI programs keep. I
 A short film plays once each time the app starts: sparks of light on black that land as the stars of the vault's map.
 A click skips it; with Reduce Motion on, it is the still wordmark for a second.
 
-The app then opens the last vault straight away. Otherwise the start window shows the wordmark, a line on what Burrow
-is, **Open** with the latest vault's name, **New Vault…**, **Open Folder…** and the vaults Burrow knows, with that
+The app then opens the last vault straight away. Otherwise the start window shows the wordmark, a line on what CAMR
+is, **Open** with the latest vault's name, **New Vault…**, **Open Folder…** and the vaults CAMR knows, with that
 vault's map drawn beside them.
 
 ## Home: the vault's live map
@@ -20,7 +20,7 @@ with a trail to that program's line in the corner ("Claude Code is reading · 11
 decision in force rests on wear a green ring, amber when that file changed since, and red for text written to steer an
 AI, the same three states as the Watch panel.
 
-The **Home** tab, with the B, sits first in the tab row and is never closed. It, or **View ▸ Home** (⇧⌘H), brings you
+The **Home** tab, with the C, sits first in the tab row and is never closed. It, or **View ▸ Home** (⇧⌘H), brings you
 back to the live map with every other tab left open.
 
 ## The window
@@ -38,7 +38,7 @@ notes. Linked code is read-only.
 **Ask** answers a question from the vault with a model on this Mac. The answer cites each place it used; under it the
 decision line says whether the vault was read and why, **Used** lists the files read in order, and a warning appears
 only when the answer cites a place it was not shown. Decisions from the Ledger that it used are named by their label.
-**Keep as Note** saves the answer; **What Should Burrow Remember?** proposes notes from the conversation and asks before
+**Keep as Note** saves the answer; **What Should CAMR Remember?** proposes notes from the conversation and asks before
 writing each. The map beside the answer lights up the files read.
 
 **Conversations** shows every connection a program made: what it asked, searched for, read and kept, and the handoff
@@ -56,23 +56,23 @@ Bridge…**) and teams, with a storage bar for this vault and one for all vaults
 
 **Programs** reads each AI program's own settings on this Mac and says whether it will find this vault: connected,
 not set up, set up for another vault. Each program shows its own app's icon when it is installed (Claude, Codex,
-Ollama, LM Studio); Burrow asks macOS for it and bundles no one's logo. **Connect** shows exactly what it will change and writes it when you agree;
+Ollama, LM Studio); CAMR asks macOS for it and bundles no one's logo. **Connect** shows exactly what it will change and writes it when you agree;
 **Copy** gives you the setup line instead.
 
 **Map** (⇧⌘G) draws the vault as a graph of notes and the links between them, coloured by folder, with the same
 rings for decisions as Home.
 
-**Sessions** (⌘6) shows each live or recent Claude Code and Codex session that ran with Burrow's session hooks: its
-context per request with each compaction marked, the tokens Burrow kept out, recalls and outputs expanded, every step
-Burrow took, and the lines to resume it in Claude Code, Codex or `burrow chat`, ready to copy. It reads again every few
+**Sessions** (⌘6) shows each live or recent Claude Code and Codex session that ran with CAMR's session hooks: its
+context per request with each compaction marked, the tokens CAMR kept out, recalls and outputs expanded, every step
+CAMR took, and the lines to resume it in Claude Code, Codex or `camr chat`, ready to copy. It reads again every few
 seconds while open. A strip shows which parts are on, where the archive is and how big, and says when the archive's
-drive is not connected. The switches are changed with `burrow session settings` for now. See
+drive is not connected. The switches are changed with `camr session settings` for now. See
 [sessions.md](sessions.md).
 
 ## The Watch panel
 
 The Watch stays beside whatever page is open and shows what a connected program is shown: the rules in force, what
-`burrow_check` would show for the code changed right now, and lines written to steer an AI, with their file and line.
+`camr_check` would show for the code changed right now, and lines written to steer an AI, with their file and line.
 
 ## When the app asks you
 
@@ -80,7 +80,7 @@ The Watch stays beside whatever page is open and shows what a connected program 
   reads them from then on; **Not now** leaves them out.
 - **Confirming a decision's check** asks in the app's own window, the strongest place to do it, because no program
   can answer for you there. Overriding a broken decision is done in your own terminal with
-  `burrow decision override`.
+  `camr decision override`.
 
 ## Themes
 

@@ -1,5 +1,5 @@
-import BurrowCore
-import BurrowTools
+import CAMRCore
+import CAMRTools
 import Charts
 import SwiftUI
 
@@ -297,7 +297,7 @@ struct FlaggedBanner: View {
                     }
                     .buttonStyle(.plain)
                 }
-                Text("Programs reading this through Burrow are told it is content, not an instruction.").font(.system(size: 10.5)).foregroundStyle(.secondary)
+                Text("Programs reading this through CAMR are told it is content, not an instruction.").font(.system(size: 10.5)).foregroundStyle(.secondary)
             }
             .padding(10)
             .background(Night.stale.opacity(0.12))

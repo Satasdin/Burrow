@@ -1,0 +1,166 @@
+import CAMRCore
+import Foundation
+
+/// The moments a coding AI loses its memory, handled by hooks so the model never has to pick the right tool for it.
+/// Claude Code calls `camr hook claude <vault>` with a JSON event on stdin; git calls `camr hook git <vault>` after a commit.
+public enum Hooks {
+    /// Where the work happens, as the vault sees it: a linked folder (its name is the branch), or the vault itself.
+    public struct Place: Sendable, Equatable {
+        public let branch: String
+        /// The folder on disk that vault paths under `prefix` live in.
+        public let root: URL
+        /// The vault path of `root`: the linked folder's name, or "" for the vault itself.
+        public let prefix: String
+
+        /// A file on disk as a vault path, or nil when it is outside this place.
+        public func vaultPath(_ file: String) -> String? {
+            let absolute = file.hasPrefix("/") ? file : root.appendingPathComponent(file).path
+            let base = root.standardizedFileURL.path
+            var standard = URL(fileURLWithPath: absolute).standardizedFileURL.path
+            if !standard.hasPrefix(base + "/") {
+                // A linked folder's root is its real path (D-104); a file named through a symlink above it (/tmp, /var,
+                // a shortcut) is the same file once its folder is resolved.
+                let url = URL(fileURLWithPath: standard)
+                standard = Vault.realPath(url.deletingLastPathComponent().path) + "/" + url.lastPathComponent
+            }
+            guard standard.hasPrefix(base + "/") else { return nil }
+            let rest = String(standard.dropFirst(base.count + 1))
+            return prefix.isEmpty ? rest : prefix + "/" + rest
+        }
+    }
+
+    /// The place for a working folder: the linked folder that holds it, else the vault when it holds it, else nil.
+    public static func place(for directory: URL, vaultRoot: URL, linked: [LinkedFolder]) -> Place? {
+        let here = directory.standardizedFileURL.path
+        // Linked folders come with their real paths (D-104), so the working folder is matched resolved too.
+        let real = Vault.realPath(here)
+        for folder in linked {
+            let base = folder.url.standardizedFileURL.path
+            if [here, real].contains(where: { $0 == base || $0.hasPrefix(base + "/") }) {
+                return Place(branch: (try? Ledger.branchName(folder.name)) ?? Ledger.defaultBranch, root: folder.url, prefix: folder.name)
+            }
+        }
+        let base = vaultRoot.standardizedFileURL.path
+        if here == base || here.hasPrefix(base + "/") { return Place(branch: Ledger.defaultBranch, root: vaultRoot, prefix: "") }
+        return nil
+    }
+
+    /// What a Claude Code transcript says happened: the person's requests, the files edited, the plan's open items and the model.
+    public struct Transcript: Sendable, Equatable {
+        public var asked: [String] = []
+        public var edited: [String] = []
+        public var openTodos: [String] = []
+        public var doneTodos: [String] = []
+        public var model: String?
+    }
+
+    /// Reads Claude Code's JSON-lines transcript. Unknown lines are skipped, so a format change loses detail, never the hook.
+    public static func readTranscript(_ text: String) -> Transcript {
+        var out = Transcript()
+        for line in text.split(separator: "\n") {
+            guard let entry = try? JSONSerialization.jsonObject(with: Data(line.utf8)) as? [String: Any],
+                  let message = entry["message"] as? [String: Any] else { continue }
+            let role = message["role"] as? String ?? entry["type"] as? String
+            let parts = message["content"] as? [[String: Any]] ?? []
+            // Only what the person typed: not copies the program keeps of its requests, not tool results that ride in the user's turn.
+            // Nor Claude Code's own summary after a compaction, which rides in a user entry (D-102).
+            let typed = entry["type"] as? String == "user" && entry["isMeta"] as? Bool != true && entry["isCompactSummary"] as? Bool != true
+                && !parts.contains { $0["type"] as? String == "tool_result" }
+            if role == "user", typed {
+                if let words = message["content"] as? String { remember(words, in: &out.asked) }
+                for part in message["content"] as? [[String: Any]] ?? [] where part["type"] as? String == "text" {
+                    if let words = part["text"] as? String { remember(words, in: &out.asked) }
+                }
+            }
+            if role == "assistant" {
+                if let model = message["model"] as? String, !model.hasPrefix("<") { out.model = model }
+                for part in message["content"] as? [[String: Any]] ?? [] where part["type"] as? String == "tool_use" {
+                    let input = part["input"] as? [String: Any] ?? [:]
+                    switch part["name"] as? String {
+                    case "Edit", "Write", "MultiEdit", "NotebookEdit":
+                        if let path = (input["file_path"] ?? input["notebook_path"]) as? String, !out.edited.contains(path) { out.edited.append(path) }
+                    case "TodoWrite":
+                        let todos = input["todos"] as? [[String: Any]] ?? []
+                        out.openTodos = todos.filter { $0["status"] as? String != "completed" }.compactMap { $0["content"] as? String }
+                        out.doneTodos = todos.filter { $0["status"] as? String == "completed" }.compactMap { $0["content"] as? String }
+                    default: break
+                    }
+                }
+            }
+        }
+        return out
+    }
+
+    private static func remember(_ words: String, in list: inout [String]) {
+        let text = words.trimmingCharacters(in: .whitespacesAndNewlines)
+        // Skip what Claude Code itself puts in the user's turn: command output, reminders, interrupted markers.
+        guard !text.isEmpty, !text.hasPrefix("<"), !text.hasPrefix("[Request interrupted") else { return }
+        list.append(text)
+    }
+
+    /// Claude Code's session start: the Ledger's head for this place, as context the model sees before the first message.
+    public static func sessionStart(ledger: Ledger, place: Place) -> String {
+        let head = ledger.resume(branch: place.branch, characters: 2_400)
+        let context = head + "\n\nThis comes from CAMR's Ledger. Before compaction and when the session ends, CAMR writes where you stopped. To keep a decision or fact, call camr_commit."
+        let reply: [String: Any] = ["hookSpecificOutput": ["hookEventName": "SessionStart", "additionalContext": context]]
+        return String(data: (try? JSONSerialization.data(withJSONObject: reply)) ?? Data(), encoding: .utf8) ?? ""
+    }
+
+    /// Before compaction or at the end: a handoff commit, and the plan when the session kept one. Nothing when nothing happened.
+    @discardableResult
+    public static func checkpoint(ledger: Ledger, place: Place, transcript: Transcript, session: String, event: String,
+                                  folded: Fold? = nil) throws -> [LedgerCommit] {
+        guard !transcript.asked.isEmpty || !transcript.edited.isEmpty else { return [] }
+        let author = transcript.model ?? "claude-code"
+        let files = transcript.edited.compactMap(place.vaultPath)
+        let outside = transcript.edited.filter { place.vaultPath($0) == nil }
+        var made: [LedgerCommit] = []
+        if !transcript.openTodos.isEmpty {
+            let plan = Secrets.redacted("Open: " + transcript.openTodos.prefix(6).joined(separator: "; "))
+            let done = transcript.doneTodos.isEmpty ? "" : Secrets.redacted("Done: " + transcript.doneTodos.suffix(6).joined(separator: "; "))
+            let latest = ledger.log(branch: place.branch, limit: 20).first { $0.kind == .plan }
+            if latest?.message != String(plan.prefix(600)) {
+                made.append(try ledger.commit(.plan, String(plan.prefix(600)), body: done, files: files, author: author,
+                                              client: "claude-code", branch: place.branch, session: "claude-" + session))
+            }
+        }
+        // At the end, CAMR's MCP connection may already have written this session's handoff as it closed (D-70); one is enough.
+        let closing = ledger.log(limit: 20).first { $0.kind == .handoff && $0.client == "claude-code" && !($0.session ?? "").hasPrefix("claude-") }
+        if event != "PreCompact", let closing, Date().timeIntervalSince(closing.at) < 120 { return made }
+        let when = event == "PreCompact" ? "before compacting" : "when the session ended"
+        // What the person typed can hold a key or a password: taken out before it is kept in the vault (D-105).
+        let last = transcript.asked.last.map { String(Secrets.redacted(Secrets.cutForRedaction($0, 420)).prefix(220)) } ?? "editing"
+        var body = ["Asked: " + transcript.asked.suffix(4).map { String(Secrets.redacted(Secrets.cutForRedaction($0, 360)).prefix(160)) }.joined(separator: " | ")]
+        if !files.isEmpty { body.append("Edited: " + files.suffix(10).joined(separator: ", ")) }
+        if !outside.isEmpty { body.append("Outside the vault: \(outside.count) file\(outside.count == 1 ? "" : "s")") }
+        // Where the exact words of this stretch are kept, so a later session can get them back (D-102).
+        if let folded { body.append("Kept word for word in fold \(folded.id) (\(folded.messages) messages): camr_recall \(folded.id)") }
+        made.append(try ledger.commit(.handoff, "Claude Code stopped \(when). Last asked: \(last)", body: body.joined(separator: "\n"),
+                                      files: files, author: author, client: "claude-code", branch: place.branch, session: "claude-" + session))
+        return made
+    }
+
+    /// MCP never carries what the person asked, but Claude Code's transcript does. When its hook runs, the newest
+    /// conversation Claude Code had with CAMR in the last few minutes, if it has no name from the person yet, takes the
+    /// person's first request as its name (D-86). Returns the conversation's id, or nil when none fits.
+    @discardableResult
+    public static func nameConversation(_ sessions: SessionStore, transcript: Transcript, now: Date = Date()) -> String? {
+        guard let first = transcript.asked.first else { return nil }
+        guard var record = sessions.list().first(where: { $0.client == "claude-code" && now.timeIntervalSince($0.updated) < 300 }),
+              record.request == nil else { return nil }
+        record.request = String(Secrets.redacted(Secrets.cutForRedaction(first, 500)).prefix(300))
+        // Naming it is not activity: the time it was last used stays as it was.
+        guard (try? sessions.save(record, touching: false)) != nil else { return nil }
+        return record.id
+    }
+
+    /// After a git commit: a code commit in the Ledger, linked by git's id, citing the files it changed.
+    @discardableResult
+    public static func gitCommit(ledger: Ledger, place: Place, sha: String, subject: String, files: [String], author: String = "git") throws -> LedgerCommit? {
+        guard !sha.isEmpty, !ledger.all().contains(where: { $0.sha == sha }) else { return nil }
+        // Files come as absolute paths, or relative to the place's root.
+        let paths = files.compactMap(place.vaultPath)
+        return try ledger.commit(.code, String("\(sha.prefix(10)) \(subject)".prefix(600)), files: paths, author: author,
+                                 client: "git", branch: place.branch, sha: sha)
+    }
+}

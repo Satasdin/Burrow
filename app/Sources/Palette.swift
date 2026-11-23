@@ -1,4 +1,4 @@
-import BurrowCore
+import CAMRCore
 import SwiftUI
 
 /// ⌘K: type part of a name to open it, or the name of a command to run it.
