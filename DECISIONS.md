@@ -532,3 +532,17 @@ working without anyone doing anything, since three volunteers and the author's o
 - **Turned down.** A new hidden app identifier (macOS would forget every volunteer's permissions for a name nobody
   sees); moving `.burrow` folders into `.camr` (cuts off teammates on the old version); a `camr` with no `burrow`
   alias (every existing hook, MCP setting and gate plugin would stop at once).
+
+D-125: An existing CAMR folder in Application Support no longer hides the old settings (23 November). Found by
+installing 1.4.0 on the author's own Mac, right after the release: `~/Library/Application Support/CAMR` was already
+there, made on 9 November by his CAMR engine (it holds only `engine`). 1.4.0 moved the old `Burrow` folder only when no
+CAMR folder existed, so it started from empty settings: his linked `matatu` folder showed as not approved, and the vaults
+it knew, the kept sessions and their settings were out of sight (all still in `…/Burrow`, untouched, and still used by
+the 1.3.1 servers already running). Now, when a CAMR folder exists but holds none of CAMR's own files (`vaults.json`,
+`last-vault`, `linked-folders.json`, `session-context.json`, `kept`, `meter`, `sessions`, `app-maps`), the old folder's
+contents are moved into it beside what is there, one by one, the old folder is replaced by a link to it, and the other
+program's files are left as they are. A CAMR folder that already holds CAMR's files is used as it is (an earlier run
+moved it). The temporary-home test of D-124 could not show this: that home had no CAMR folder. Running the tests for this fix
+also showed that a test reading the state folder without `CAMR_STATE_DIR` reaches the person's own Application Support:
+that run moved the author's real settings into `CAMR` (correctly: everything there, `matatu` approved, `Burrow` a link).
+Inside a test run the move is now skipped.

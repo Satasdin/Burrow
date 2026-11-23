@@ -11,7 +11,11 @@ public enum CAMRPlaces {
         if let set = [environment["CAMR_STATE_DIR"], environment["BURROW_STATE_DIR"]].compactMap({ $0 }).first(where: { !$0.isEmpty }) {
             folder = URL(fileURLWithPath: set)
         } else {
-            folder = settledStateFolder(in: FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0])
+            let support = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+            // Inside a test run nothing in the person's own Application Support is moved: on 23 November a test that
+            // read the state folder without CAMR_STATE_DIR moved the author's real settings (D-125). The move itself is
+            // tested through settledStateFolder(in:) on a temporary folder.
+            folder = NSClassFromString("XCTestCase") != nil ? support.appendingPathComponent("CAMR") : settledStateFolder(in: support)
         }
         makePrivate(folder)
         return folder
@@ -24,17 +28,40 @@ public enum CAMRPlaces {
     public static func settledStateFolder(in support: URL) -> URL {
         let current = support.appendingPathComponent("CAMR"), older = support.appendingPathComponent("Burrow")
         let files = FileManager.default
-        if files.fileExists(atPath: current.path) { return current }
         // Only a real folder is moved: a link there is one this method left, or one the person made.
-        guard (try? files.attributesOfItem(atPath: older.path)[.type] as? FileAttributeType) == .typeDirectory else { return current }
-        do {
-            try files.moveItem(at: older, to: current)
-            try? files.createSymbolicLink(at: older, withDestinationURL: current)
-            return current
-        } catch {
-            // Another CAMR process may have moved it a moment ago.
-            return files.fileExists(atPath: current.path) ? current : older
+        let olderIsFolder = (try? files.attributesOfItem(atPath: older.path)[.type] as? FileAttributeType) == .typeDirectory
+        guard files.fileExists(atPath: current.path) else {
+            guard olderIsFolder else { return current }
+            do {
+                try files.moveItem(at: older, to: current)
+                try? files.createSymbolicLink(at: older, withDestinationURL: current)
+                return current
+            } catch {
+                // Another CAMR process may have moved it a moment ago.
+                return files.fileExists(atPath: current.path) ? current : older
+            }
         }
+        // A CAMR folder is already there. Either an earlier run moved the old one here, or another program of the same
+        // name made it (on the author's Mac, his CAMR engine's `engine` folder, D-125). In the second case it holds
+        // none of CAMR's own files, and the old folder's are moved in beside what is there, one by one.
+        guard olderIsFolder, !holdsState(current) else { return current }
+        for _ in 0..<2 {   // twice: an older program still running may write a new file while the first pass runs
+            for name in (try? files.contentsOfDirectory(atPath: older.path)) ?? [] {
+                let target = current.appendingPathComponent(name)
+                if !files.fileExists(atPath: target.path) { try? files.moveItem(at: older.appendingPathComponent(name), to: target) }
+            }
+        }
+        if ((try? files.contentsOfDirectory(atPath: older.path)) ?? []).isEmpty,
+           (try? files.removeItem(at: older)) != nil {
+            try? files.createSymbolicLink(at: older, withDestinationURL: current)
+        }
+        return holdsState(current) ? current : older
+    }
+
+    /// Whether a folder holds CAMR's own state: the files CAMR keeps there and no other program does.
+    static func holdsState(_ folder: URL) -> Bool {
+        ["vaults.json", "last-vault", "linked-folders.json", "session-context.json", "kept", "meter", "sessions", "app-maps"]
+            .contains { FileManager.default.fileExists(atPath: folder.appendingPathComponent($0).path) }
     }
 
     /// The hidden folder inside a vault that holds its index, Ledger and settings: `.camr`. Vaults made before the rename

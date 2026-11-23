@@ -71,6 +71,26 @@ final class RenameTests: XCTestCase {
         XCTAssertNotNil(try? FileManager.default.destinationOfSymbolicLink(atPath: older.path))
     }
 
+    func testAnotherProgramsCAMRFolderGetsTheOldSettingsMovedIn() throws {
+        // What the author's Mac had: Application Support/CAMR made on 9 Nov by his CAMR engine, holding only `engine`.
+        let support = top.appendingPathComponent("Application Support")
+        let other = support.appendingPathComponent("CAMR/engine/camr_engine")
+        try FileManager.default.createDirectory(at: other, withIntermediateDirectories: true)
+        let older = support.appendingPathComponent("Burrow")
+        try FileManager.default.createDirectory(at: older.appendingPathComponent("kept"), withIntermediateDirectories: true)
+        try "/Users/me/Notes\n".write(to: older.appendingPathComponent("last-vault"), atomically: true, encoding: .utf8)
+        try #"{"vaults":{}}"#.write(to: older.appendingPathComponent("linked-folders.json"), atomically: true, encoding: .utf8)
+
+        let folder = CAMRPlaces.settledStateFolder(in: support)
+        XCTAssertEqual(folder.lastPathComponent, "CAMR")
+        XCTAssertEqual(try String(contentsOf: folder.appendingPathComponent("last-vault"), encoding: .utf8), "/Users/me/Notes\n")
+        XCTAssertTrue(FileManager.default.fileExists(atPath: folder.appendingPathComponent("linked-folders.json").path))
+        XCTAssertTrue(FileManager.default.fileExists(atPath: folder.appendingPathComponent("kept").path))
+        XCTAssertTrue(FileManager.default.fileExists(atPath: other.path), "the other program's files stay where they are")
+        XCTAssertEqual(try FileManager.default.destinationOfSymbolicLink(atPath: older.path), folder.path)
+        XCTAssertEqual(CAMRPlaces.settledStateFolder(in: support).path, folder.path, "a second run changes nothing")
+    }
+
     func testANewMacGetsTheCAMRFolder() {
         XCTAssertEqual(CAMRPlaces.settledStateFolder(in: top).lastPathComponent, "CAMR")
         XCTAssertFalse(FileManager.default.fileExists(atPath: top.appendingPathComponent("Burrow").path))
