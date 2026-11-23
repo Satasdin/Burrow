@@ -41,6 +41,18 @@ public struct TrailStep: Codable, Sendable {
         self.at = at
     }
 
+    private enum CodingKeys: String, CodingKey { case tool, asked, files, at }
+
+    /// A step written before the rename (D-124) says burrow_find, burrow_check and so on: it is read as the tool it is now,
+    /// so counts, titles and handoffs made from older records still see it.
+    public init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        tool = VaultTools.currentName(try values.decode(String.self, forKey: .tool))
+        asked = try values.decode(String.self, forKey: .asked)
+        files = try values.decode([String].self, forKey: .files)
+        at = try values.decode(Date.self, forKey: .at)
+    }
+
     /// The tools that look something up in the vault. Resuming, checking a change and keeping a commit are steps too, but
     /// not lookups, so "3 lookups" no longer counts a resume, a check and a commit (D-85).
     public static let lookupTools: Set<String> = [

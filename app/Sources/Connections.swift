@@ -111,7 +111,8 @@ enum Connections {
     /// Every value stored under a key named "camr", at any depth: Claude Code keeps servers per project.
     private static func camrEntries(in json: Any) -> [Any] {
         if let object = json as? [String: Any] {
-            return object.flatMap { key, value in (key == "camr" ? [value] : []) + camrEntries(in: value) }
+            // "burrow" is the name an earlier version set servers up under (D-124); they still run CAMR.
+            return object.flatMap { key, value in (key == "camr" || key == Connect.olderName ? [value] : []) + camrEntries(in: value) }
         }
         if let list = json as? [Any] { return list.flatMap(camrEntries) }
         return []

@@ -99,6 +99,7 @@ struct LedgerPage: View {
     }
 
     var body: some View {
+        ScrollViewReader { reader in
         ScrollView {
             VStack(alignment: .leading, spacing: 22) {
                 HStack(alignment: .firstTextBaseline, spacing: 12) {
@@ -125,11 +126,20 @@ struct LedgerPage: View {
                         ForEach(Array(day.commits.enumerated()), id: \.element.id) { index, commit in
                             CommitRow(workspace: workspace, commit: commit, last: index == day.commits.count - 1)
                                 .arrive(index)
+                                .id(commit.id)
                         }
                     }
                 }
             }
             .padding(.horizontal, 28).padding(.vertical, 22).frame(maxWidth: 920, alignment: .leading)
+        }
+        // For checking the layout without a person at the screen: CAMR_LEDGER_SCROLL=decision shows the newest decision.
+        .task(id: commits.count) {
+            guard ProcessInfo.processInfo.environment["CAMR_LEDGER_SCROLL"] == "decision",
+                  let first = commits.first(where: { $0.kind == .decision }) else { return }
+            try? await Task.sleep(for: .milliseconds(600))
+            reader.scrollTo(first.id, anchor: .top)
+        }
         }
         .frame(maxWidth: .infinity)
         .background(NightSky())

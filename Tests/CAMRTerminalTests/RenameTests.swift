@@ -39,6 +39,19 @@ final class RenameTests: XCTestCase {
         XCTAssertNotEqual(result["isError"] as? Bool, true)
     }
 
+    func testARecordFromBeforeTheRenameReadsAsTheToolsItUsed() throws {
+        let json = #"{"tool":"burrow_check","asked":"","files":["matatu/payments/matcher.py"],"at":0}"#
+        let step = try JSONDecoder().decode(TrailStep.self, from: Data(json.utf8))
+        XCTAssertEqual(step.tool, "camr_check")
+        let find = try JSONDecoder().decode(TrailStep.self, from: Data(#"{"tool":"burrow_find","asked":"rent","files":[],"at":0}"#.utf8))
+        XCTAssertTrue(find.isLookup, "an old burrow_find still counts as a lookup")
+    }
+
+    func testAnOldBurrowMCPProcessCountsAsCAMR() {
+        let facts = PersonPresence.ProcessFacts(pid: 1, parent: 0, name: "burrow", path: "/Users/me/.local/bin/camr", arguments: ["/Users/me/.local/bin/burrow", "mcp", "/v"])
+        XCTAssertEqual(PersonPresence.agent(facts), "camr mcp")
+    }
+
     // MARK: The settings folder
 
     func testTheOldSettingsFolderIsMovedOnceAndLinked() throws {

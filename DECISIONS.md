@@ -515,7 +515,12 @@ working without anyone doing anything, since three volunteers and the author's o
   wrote (the `burrow` server in Claude Code, OpenCode and OpenClaw, Codex's `[mcp_servers.burrow]` table, the hooks
   that ran `burrow hook`, OpenClaw's `burrow-gate` entry) instead of adding a second copy beside it. The app keeps its
   hidden identifier `app.burrow.mac` and its theme setting under its first name, so macOS keeps its permissions and
-  settings.
+  settings. Found by using the renamed app on the author's own vault, not by the tests: the Programs page called Claude
+  Code "Set up in a project" because its server is still named `burrow`, and older records said `burrow_check`, so a
+  conversation that checked a change was titled "0 lookups". The app now counts a `burrow` server as CAMR's, a record's
+  old tool names are read as the new ones, and a running `burrow mcp` counts as CAMR.
+- **For figures.** `CAMR_LEDGER_SCROLL=decision` scrolls the Ledger page to the newest decision, as
+  `CAMR_LIBRARY_SCROLL` does for the Library, so a screenshot can show a decision with its reasons.
 - **The logo.** The B became a C in the same family: one slanted stroke, amber to red, with AMR in the same wide white
   letters (Michroma, thickened to the old weight). Drawn on a Claude Design canvas with the author, who picked it from
   three; the first C, with the B's chevron on its back, read as a Σ once rendered, so its back is one straight slant.

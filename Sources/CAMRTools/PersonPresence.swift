@@ -100,7 +100,7 @@ public enum PersonPresence {
         }
         // Claude Code's native build runs from a file named for its version, kept in a folder named for it.
         if process.path.contains("/claude/versions/") || process.path.contains("/claude-code/") { return "Claude Code" }
-        if [process.name, file].contains("camr"), process.arguments.count > 1, ["mcp", "check", "hook"].contains(process.arguments[1]) {
+        if [process.name, argv0, file].contains(where: { $0 == "camr" || $0 == Connect.olderName }), process.arguments.count > 1, ["mcp", "check", "hook"].contains(process.arguments[1]) {
             return "camr \(process.arguments[1])"
         }
         if interpreters.contains(where: { process.name.hasPrefix($0) || file.hasPrefix($0) }) || agentWords[argv0] != nil {
