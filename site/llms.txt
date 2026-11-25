@@ -2,7 +2,8 @@
 
 > One memory on a Mac that every AI model the person uses shares: their notes, documents and linked code, and a
 > Ledger of the decisions made with their models and why, reached by any program as an MCP server (`camr mcp <vault>`).
-> macOS on Apple silicon; it calls no cloud model.
+> macOS on Apple silicon; it calls no cloud model. Called Burrow until 1.4: `burrow`, the `burrow` MCP server and the
+> `burrow_*` tool names still answer as CAMR.
 
 ## For agents
 
