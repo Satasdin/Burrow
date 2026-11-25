@@ -90,7 +90,7 @@ records you can also mask who they are about:
 camr config ~/Clients set privacy.mask on
 ```
 
-What `camr_find`, `camr_read`, `vault_prepare`, `vault_ask` and `camr brief` hand out then has these replaced:
+Everything CAMR's tools hand a program (`camr_find`, `camr_read`, `camr_resume`, the Ledger notes, listings and the rest) and `camr brief` then has these replaced:
 Kenyan national ID numbers (7 or 8 digits after an ID label), KRA PINs, phone numbers (+254, 07xx, 01xx), email
 addresses, and the people listed in `.camr/people.txt`, one person a line, other names after a `|`:
 
@@ -101,7 +101,7 @@ Grace Akinyi Otieno | Grace Otieno | Ms. Otieno
 Within one answer the same person, number or address always gets the same placeholder, so the model can still tell
 who is who. Line numbers and cited file paths stay exactly as they are, and your files are never changed. File names
 are not masked (a citation has to name the real file), so name case files by matter number if that matters. Other
-numbers (NSSF, SHA, clinic numbers) and addresses are not masked. `camr config ~/Clients set privacy.mask off`
+numbers (NSSF, SHA, clinic numbers) and addresses are not masked, and neither is `camr find`, which prints only file names and lines. `camr config ~/Clients set privacy.mask off`
 turns it off again.
 
 ## Documentation

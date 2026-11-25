@@ -196,8 +196,8 @@ extension VaultTools {
         let said: String? = given.text("model").map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.flatMap { $0.isEmpty ? nil : $0 }
         do {
             switch name {
-            case "camr_find": return try await call("vault_search", arguments: arguments)
-            case "camr_read": return try await call("vault_read", arguments: arguments)
+            case "camr_find": return try await unmaskedCall("vault_search", arguments: arguments)
+            case "camr_read": return try await unmaskedCall("vault_read", arguments: arguments)
             case "camr_resume":
                 // With what the last Claude Code session on the branch was in the middle of, from its folds (D-110). Asked
                 // for no branch, the newest session on any branch, labelled with its own, when none is on the current one.

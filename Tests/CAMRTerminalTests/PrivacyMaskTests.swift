@@ -1,4 +1,5 @@
 @testable import CAMRCore
+@testable import CAMRMCP
 @testable import CAMRTools
 import Foundation
 import XCTest
@@ -185,6 +186,51 @@ final class PrivacyMaskTests: XCTestCase {
         XCTAssertFalse(brief.isError, brief.text)
         XCTAssertFalse(brief.text.contains("Otieno"), brief.text)
         XCTAssertFalse(brief.text.contains("28456173"))
+    }
+
+    func testEveryToolIsMaskedAndListingsKeepTheRealPaths() async throws {
+        let extra = top.appendingPathComponent("vault/cases/2026-017-wekesa-notes.md")
+        try "Brian Wekesa, 0711 903 264.\n".write(to: extra, atomically: true, encoding: .utf8)
+        let tools = try await tools()
+        try turnOn(tools, people: "Grace Akinyi Otieno | Grace Otieno\nBrian Wekesa | Wekesa\n")
+        // A listing names the real file, so it can still be read by that name.
+        let listed = try await tools.call("vault_list", arguments: ["folder": "cases"])
+        XCTAssertTrue(listed.text.contains("cases/2026-017-wekesa-notes.md"), listed.text)
+        let read = try await tools.call("camr_read", arguments: ["path": "cases/2026-017-wekesa-notes.md"])
+        XCTAssertTrue(read.text.contains("1: [PERSON-1], [PHONE-1]."), read.text)
+        XCTAssertTrue(read.text.contains("file=\"cases/2026-017-wekesa-notes.md\""))
+        let packed = try await tools.call("vault_pack", arguments: ["folder": "cases"])
+        XCTAssertFalse(packed.text.contains("Otieno"), packed.text)
+        XCTAssertFalse(packed.text.contains("0711 903 264"), packed.text)
+    }
+
+    func testTheMCPReplyIsMaskedAsOneWholeLedgerIncluded() async throws {
+        let tools = try await tools()
+        try turnOn(tools, people: "Grace Akinyi Otieno | Grace Otieno\nBrian Wekesa\n")
+        let first = MCPServer(tools: tools, keepsSessions: false)
+        first.toolSet = .door
+        func call(_ server: MCPServer, _ id: Int, _ name: String, _ arguments: String) async throws -> String {
+            let line = await server.handle(#"{"jsonrpc":"2.0","id":\#(id),"method":"tools/call","params":{"name":"\#(name)","arguments":\#(arguments)}}"#)
+            let reply = try JSONSerialization.jsonObject(with: XCTUnwrap(line).data(using: .utf8)!) as! [String: Any]
+            let content = (reply["result"] as? [String: Any])?["content"] as? [[String: Any]]
+            return try XCTUnwrap(content?.first?["text"] as? String, "\(reply)")
+        }
+        _ = await first.handle(#"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"claude-code","version":"1"}}}"#)
+        let kept = try await call(first, 2, "camr_commit", #"{"kind":"decision","message":"Brian Wekesa is referred to another firm, 0711 903 264.","because":"Conflict: the firm acted for his employer.","files":"cases/2026-014-intake.md","model":"claude-code"}"#)
+        XCTAssertFalse(kept.contains("Wekesa"), kept)
+
+        // A new connection reads the file: the excerpt and the decision resting on it are masked as one reply, numbered once.
+        let second = MCPServer(tools: VaultTools(vault: tools.vault, embedder: nil) { _ in FakeAnswerer() }, keepsSessions: false)
+        second.toolSet = .door
+        _ = await second.handle(#"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"codex","version":"1"}}}"#)
+        let reply = try await call(second, 2, "camr_read", #"{"path":"cases/2026-014-intake.md"}"#)
+        XCTAssertTrue(reply.contains("Conflict"), reply)
+        for real in ["Wekesa", "Otieno", "0711 903 264", "28456173"] { XCTAssertFalse(reply.contains(real), "\(real):\n\(reply)") }
+        XCTAssertTrue(reply.contains("[PERSON-2] is referred to another firm, [PHONE-3]."), reply)
+        XCTAssertTrue(reply.contains("5: - Name: [PERSON-1]"), reply)
+        let resumed = try await call(second, 3, "camr_resume", "{}")
+        XCTAssertTrue(resumed.contains("Conflict"), resumed)
+        XCTAssertFalse(resumed.contains("Wekesa"), resumed)
     }
 
     func testTheSettingTakesOnlyOnOrOff() throws {

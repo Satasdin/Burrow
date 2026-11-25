@@ -135,12 +135,13 @@ public struct PrivacyMask: Sendable {
 }
 
 extension ToolResult {
-    /// This result with its text masked, its cited paths kept as they are (D-126).
-    func masked(by mask: PrivacyMask?) -> ToolResult {
+    /// This result with its text masked, its cited paths and the given ones kept as they are (D-126).
+    func masked(by mask: PrivacyMask?, keeping paths: [String] = []) -> ToolResult {
         guard let mask else { return self }
+        let kept = sources.map(\.path) + paths
         var copy = self
-        copy.text = mask.masked(text, keeping: sources.map(\.path))
-        copy.summary = mask.masked(summary, keeping: sources.map(\.path))
+        copy.text = mask.masked(text, keeping: kept)
+        copy.summary = mask.masked(summary, keeping: kept)
         return copy
     }
 }

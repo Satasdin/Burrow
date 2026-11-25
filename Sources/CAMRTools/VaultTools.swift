@@ -166,25 +166,43 @@ public final class VaultTools {
     }
 
     /// Runs one tool. Throws only when the call itself doesn't fit the tool's definition. Anything else comes back as a result the caller can read.
+    /// Every result is masked when the vault's privacy.mask is on (D-126): all tools, so one added later is masked too.
     public func call(_ name: String, arguments: [String: Any]) async throws -> ToolResult {
+        let result = try await unmaskedCall(name, arguments: arguments)
+        guard let mask = PrivacyMask.forVault(vault) else { return result }
+        return result.masked(by: mask, keeping: keptPaths(result))
+    }
+
+    /// The text as it leaves CAMR for a program: masked when privacy.mask is on, with every indexed path and the cited
+    /// ones kept as they are, so a listing or a citation still names the real file. The MCP server masks a result together
+    /// with what it adds around it, in one pass, so placeholders are numbered once across the whole reply.
+    public func handOut(_ text: String, citing sources: [ToolResult.Source] = []) -> String {
+        guard let mask = PrivacyMask.forVault(vault) else { return text }
+        return mask.masked(text, keeping: keptPaths(ToolResult(text: "", sources: sources, summary: "")))
+    }
+
+    private func keptPaths(_ result: ToolResult) -> [String] {
+        let indexed = ((try? vault.projectMap().files) ?? []) + vault.bridgedShelves().flatMap(\.files)
+        return result.sources.map(\.path) + indexed.map(\.path)
+    }
+
+    /// The tool's result as made, before any mask. For the MCP server, which masks the whole reply with handOut.
+    public func unmaskedCall(_ name: String, arguments: [String: Any]) async throws -> ToolResult {
         let name = Self.currentName(name)
         if let result = try await ledgerCall(name, arguments: arguments) { return result }
         guard let tool = Self.definitions.first(where: { $0.name == name }) else { throw ToolCallProblem(description: "Unknown tool: \(name)") }
         let given = try ToolArguments(arguments, for: tool)
         await freshen()
-        // Passages handed out are masked when the vault's privacy.mask is on (D-126); read once a call, so turning it on
-        // takes effect at the next call without restarting the server.
-        let mask = PrivacyMask.forVault(vault)
         do {
             switch name {
-            case "vault_search": return remembered(name, given, try await search(given).masked(by: mask))
-            case "vault_read": return remembered(name, given, try await read(given).masked(by: mask))
+            case "vault_search": return remembered(name, given, try await search(given))
+            case "vault_read": return remembered(name, given, try await read(given))
             case "vault_links": return remembered(name, given, try await links(given))
             case "vault_list": return remembered(name, given, try await list(given))
             case "vault_folders": return try folders()
             case "vault_remember": return remembered(name, given, try await remember(given))
-            case "vault_ask": return remembered(name, given, try await ask(given).masked(by: mask))
-            case "vault_prepare": return remembered(name, given, try await prepare(given).masked(by: mask))
+            case "vault_ask": return remembered(name, given, try await ask(given))
+            case "vault_prepare": return remembered(name, given, try await prepare(given))
             case "vault_pack": return remembered(name, given, try await pack(given))
             case "vault_session_list": return sessionList()
             case "vault_session_resume": return sessionResume(given)
