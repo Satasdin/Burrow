@@ -172,16 +172,19 @@ public final class VaultTools {
         guard let tool = Self.definitions.first(where: { $0.name == name }) else { throw ToolCallProblem(description: "Unknown tool: \(name)") }
         let given = try ToolArguments(arguments, for: tool)
         await freshen()
+        // Passages handed out are masked when the vault's privacy.mask is on (D-126); read once a call, so turning it on
+        // takes effect at the next call without restarting the server.
+        let mask = PrivacyMask.forVault(vault)
         do {
             switch name {
-            case "vault_search": return remembered(name, given, try await search(given))
-            case "vault_read": return remembered(name, given, try await read(given))
+            case "vault_search": return remembered(name, given, try await search(given).masked(by: mask))
+            case "vault_read": return remembered(name, given, try await read(given).masked(by: mask))
             case "vault_links": return remembered(name, given, try await links(given))
             case "vault_list": return remembered(name, given, try await list(given))
             case "vault_folders": return try folders()
             case "vault_remember": return remembered(name, given, try await remember(given))
-            case "vault_ask": return remembered(name, given, try await ask(given))
-            case "vault_prepare": return remembered(name, given, try await prepare(given))
+            case "vault_ask": return remembered(name, given, try await ask(given).masked(by: mask))
+            case "vault_prepare": return remembered(name, given, try await prepare(given).masked(by: mask))
             case "vault_pack": return remembered(name, given, try await pack(given))
             case "vault_session_list": return sessionList()
             case "vault_session_resume": return sessionResume(given)
@@ -744,7 +747,8 @@ extension VaultTools {
         // Bridged vaults are named, so a model knows a question about them is one to search for (D-97).
         let bridged = vault.bridgedShelves().filter { !$0.files.isEmpty }.map { "\(plain($0.bridge.name, 30)) (\($0.files.count) files)" }
         if !bridged.isEmpty { line += (line.isEmpty ? "" : ". ") + "Bridged vaults, read-only, paths starting with their name and ›: " + bridged.joined(separator: ", ") }
-        return line
+        // A listed name in a file's name is masked here too when privacy.mask is on (D-126).
+        return PrivacyMask.forVault(vault)?.masked(line) ?? line
     }
 
     /// Said to a connected program when this vault lists linked folders the person on this Mac has not approved (D-101).

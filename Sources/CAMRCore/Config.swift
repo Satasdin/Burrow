@@ -173,6 +173,15 @@ public struct CAMRConfig {
                 guard !clean.isEmpty else { throw ConfigProblem("vault.name needs some letters.") }
                 return clean
             }),
+        Key(name: "privacy.mask", scope: .vault,
+            help: "on: names (listed in the vault's people.txt), Kenyan ID numbers, KRA PINs, phone numbers and email addresses in what CAMR hands to AI programs are replaced with placeholders such as [PERSON-1]. Your files are not changed. Off unless set.",
+            normalise: { text in
+                switch text.trimmingCharacters(in: .whitespaces).lowercased() {
+                case "on", "yes", "true", "1": return "on"
+                case "off", "no", "false", "0": return "off"
+                default: throw ConfigProblem("privacy.mask takes on or off, not \"\(text)\".")
+                }
+            }),
     ]
 
     public let file: URL
@@ -224,6 +233,8 @@ public struct CAMRConfig {
 
     public var storageLimit: Int? { values["storage.limit"].flatMap(ByteSize.parse) }
     public var largestFile: Int? { values["index.maxFileSize"].flatMap(ByteSize.parse) }
+    /// Whether what CAMR hands to AI programs from this vault is masked (D-126). Off unless set to on.
+    public var privacyMask: Bool { values["privacy.mask"] == "on" }
 }
 
 /// The vaults CAMR has been pointed at on this Mac, for the global storage limit (D-98). A plain list of folders in

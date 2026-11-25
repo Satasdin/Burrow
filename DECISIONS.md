@@ -546,3 +546,25 @@ moved it). The temporary-home test of D-124 could not show this: that home had n
 also showed that a test reading the state folder without `CAMR_STATE_DIR` reaches the person's own Application Support:
 that run moved the author's real settings into `CAMR` (correctly: everything there, `matatu` approved, `Burrow` a link).
 Inside a test run the move is now skipped.
+
+D-126: A privacy mask for case files and patient notes (25 November). CAMR hands a program only the passages it asks
+for and takes secrets out of kept sessions (D-105), but a passage from a lawyer's intake note or a clinic's visit note
+still carries the client's name, ID number and phone, and the program reading it may be a cloud model (Claude Code,
+Codex). Professionals asked to use their files with those models need the people in them kept out. A vault setting,
+`privacy.mask` (off unless set, so nothing existing changes), masks what `camr_find`, `camr_read`, `vault_prepare`,
+`vault_ask` and `camr brief` hand out, and the vault catalogue in the tool descriptions: Kenyan national ID numbers
+(7 or 8 digits right after an ID label), KRA PINs, phone numbers (+254, 254, 07xx, 01xx, grouped or not), email
+addresses, and the names listed in the store's `people.txt` (one person a line, other names after `|`). Each becomes a
+placeholder numbered in order of first appearance in that response, the same value always the same placeholder
+(`0722 418 905` and `+254722418905` are one `[PHONE-n]`), so a model can still reason about who is who. Placeholders
+never span a line and the cited paths are kept exactly (also in JSON's escaped form), so every citation still names the
+right file and line; the files on disk are never touched. It sits beside `Secrets` (PrivacyMask, CAMRTools) rather than
+inside it: secrets come out of kept sessions always, while these are only masked where the person turned it on.
+Tested on the fictional demo vaults (~/CAMR Demo/Advocate and Clinic): with it on, `camr brief` and `camr_find`/
+`camr_read` over MCP showed no listed name, ID, PIN, phone or email, the same line count and the same cited files; with
+it off, the output was byte for byte the original. That run found one false match the unit tests had not:
+`SHA-0112-450981`, an insurance number, was read as a phone number; a number joined to a letter, digit or dash on either
+side is now left alone. Not masked: file names (a citation must name the real file), addresses and other numbers
+(NSSF, SHA, clinic numbers), and what `camr_resume` and the session tools return. Turned down: masking every capitalised
+name automatically (it would mask statute titles, courts and places in the law files beside the cases, and still miss
+names in lower case); a `camr privacy` command (the existing `camr config` already holds per-vault settings).

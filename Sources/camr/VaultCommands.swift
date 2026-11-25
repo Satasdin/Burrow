@@ -222,6 +222,12 @@ private func config(_ options: Options) throws {
         do { try settings.set(words[1], words[2...].joined(separator: " ")) } catch let problem as ConfigProblem { throw Failure(problem.description) }
         let key = words[1].lowercased()
         print("\(key) = \(settings.value(words[1]) ?? "") for \(whose).")
+        if key == "privacy.mask", let vault, settings.privacyMask {
+            let people = PrivacyMask.peopleFile(vault)
+            let count = PrivacyMask.people(in: (try? String(contentsOf: people, encoding: .utf8)) ?? "").count
+            print("ID numbers, KRA PINs, phone numbers and email addresses are masked in what AI programs are handed. "
+                  + "Names are masked for the \(count) \(count == 1 ? "person" : "people") listed in \(people.path) (one a line; other names after |).")
+        }
         if key == "storage.limit", let bytes = settings.storageLimit {
             if let vault {
                 KnownVaults.remember(vault)
