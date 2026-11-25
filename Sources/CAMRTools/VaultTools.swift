@@ -166,7 +166,28 @@ public final class VaultTools {
     }
 
     /// Runs one tool. Throws only when the call itself doesn't fit the tool's definition. Anything else comes back as a result the caller can read.
+    /// Every result is masked when the vault's privacy.mask is on (D-126): all tools, so one added later is masked too.
     public func call(_ name: String, arguments: [String: Any]) async throws -> ToolResult {
+        let result = try await unmaskedCall(name, arguments: arguments)
+        guard let mask = PrivacyMask.forVault(vault) else { return result }
+        return result.masked(by: mask, keeping: keptPaths(result))
+    }
+
+    /// The text as it leaves CAMR for a program: masked when privacy.mask is on, with every indexed path and the cited
+    /// ones kept as they are, so a listing or a citation still names the real file. The MCP server masks a result together
+    /// with what it adds around it, in one pass, so placeholders are numbered once across the whole reply.
+    public func handOut(_ text: String, citing sources: [ToolResult.Source] = []) -> String {
+        guard let mask = PrivacyMask.forVault(vault) else { return text }
+        return mask.masked(text, keeping: keptPaths(ToolResult(text: "", sources: sources, summary: "")))
+    }
+
+    private func keptPaths(_ result: ToolResult) -> [String] {
+        let indexed = ((try? vault.projectMap().files) ?? []) + vault.bridgedShelves().flatMap(\.files)
+        return result.sources.map(\.path) + indexed.map(\.path)
+    }
+
+    /// The tool's result as made, before any mask. For the MCP server, which masks the whole reply with handOut.
+    public func unmaskedCall(_ name: String, arguments: [String: Any]) async throws -> ToolResult {
         let name = Self.currentName(name)
         if let result = try await ledgerCall(name, arguments: arguments) { return result }
         guard let tool = Self.definitions.first(where: { $0.name == name }) else { throw ToolCallProblem(description: "Unknown tool: \(name)") }
@@ -744,7 +765,8 @@ extension VaultTools {
         // Bridged vaults are named, so a model knows a question about them is one to search for (D-97).
         let bridged = vault.bridgedShelves().filter { !$0.files.isEmpty }.map { "\(plain($0.bridge.name, 30)) (\($0.files.count) files)" }
         if !bridged.isEmpty { line += (line.isEmpty ? "" : ". ") + "Bridged vaults, read-only, paths starting with their name and ›: " + bridged.joined(separator: ", ") }
-        return line
+        // A listed name in a file's name is masked here too when privacy.mask is on (D-126).
+        return PrivacyMask.forVault(vault)?.masked(line) ?? line
     }
 
     /// Said to a connected program when this vault lists linked folders the person on this Mac has not approved (D-101).

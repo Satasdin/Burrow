@@ -231,9 +231,12 @@ func run() async throws {
         var settings = EngineSettings()
         settings.useSkills = !options.flags.contains("--no-skills")
         let brief = try await vault.brief(text, budget: budget, embedder: try embedderIfIndexed(vault, ollama), scope: options.values["--folder"], settings: settings)
+        // The brief is what a model is handed, so it is masked when the vault's privacy.mask is on (D-126).
+        let mask = PrivacyMask.forVault(vault), paths = brief.retrieved.paths
+        func shown(_ words: String) -> String { mask?.masked(words, keeping: paths) ?? words }
         if options.flags.contains("--json") {
             print(try jsonLine([
-                "system": brief.system, "user": brief.user, "retrieve_s": brief.seconds, "characters": brief.retrieved.characters,
+                "system": shown(brief.system), "user": shown(brief.user), "retrieve_s": brief.seconds, "characters": brief.retrieved.characters,
                 "excerpts": describe(brief.retrieved), "route": ["mode": brief.route.mode.rawValue, "why": brief.route.why],
                 "skills": brief.skill.map { [$0.name] } ?? [],
                 "nearest": brief.retrieved.signal.nearest.map { Double($0) } as Any? ?? NSNull(),
@@ -241,7 +244,7 @@ func run() async throws {
                 "skill_closeness": brief.skillCloseness.map { Double($0) } as Any? ?? NSNull(),
             ]))
         } else {
-            print(brief.system + "\n\n" + brief.user)
+            print(shown(brief.system + "\n\n" + brief.user))
         }
 
     case "fit":

@@ -296,7 +296,8 @@ public final class MCPServer {
         let connection = Self.connectionKey(stateless)
         let keptBefore = tools.keptHere
         do {
-            let result = try await tools.call(name, arguments: arguments)
+            // Masked below as one reply, with the notes added around it (D-126).
+            let result = try await tools.unmaskedCall(name, arguments: arguments)
             log(String(format: "%@ %@ in %.2f s: %@", name, result.isError ? "failed" : "ok", Date().timeIntervalSince(started), result.summary))
             defer { if !result.isError { afterCall?(name, arguments, result) } }
             keptOn[connection, default: []].formUnion(tools.keptHere.subtracting(keptBefore))
@@ -309,7 +310,7 @@ public final class MCPServer {
                     approvalNoteGiven = true
                 }
             }
-            let text = handingRules(to: body, on: connection)
+            let text = tools.handOut(handingRules(to: body, on: connection), citing: result.sources)
             if stateless != nil {
                 return Self.stateless(id: id, ["content": [["type": "text", "text": text]], "isError": result.isError])
             }
