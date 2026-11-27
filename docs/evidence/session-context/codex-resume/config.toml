@@ -7,10 +7,10 @@ wire_api = "responses"
 
 
 [mcp_servers.burrow]
-command = "/private/tmp/claude-501/-Users-p3wrky-Developer-burrow--claude-worktrees-session-memory-324f48/1f1bd66f-4ea0-4d18-a04f-8e841082c516/scratchpad/proof/bin/burrow-new"
-args = ["mcp", "/private/tmp/claude-501/-Users-p3wrky-Developer-burrow--claude-worktrees-session-memory-324f48/1f1bd66f-4ea0-4d18-a04f-8e841082c516/scratchpad/proof/C1/proj"]
+command = "/private/tmp/claude-501/-Users-author-Developer-burrow--claude-worktrees-session-memory-324f48/1f1bd66f-4ea0-4d18-a04f-8e841082c516/scratchpad/proof/bin/burrow-new"
+args = ["mcp", "/private/tmp/claude-501/-Users-author-Developer-burrow--claude-worktrees-session-memory-324f48/1f1bd66f-4ea0-4d18-a04f-8e841082c516/scratchpad/proof/C1/proj"]
 [mcp_servers.burrow.env]
-BURROW_STATE_DIR = "/private/tmp/claude-501/-Users-p3wrky-Developer-burrow--claude-worktrees-session-memory-324f48/1f1bd66f-4ea0-4d18-a04f-8e841082c516/scratchpad/proof/C1/state"
+BURROW_STATE_DIR = "/private/tmp/claude-501/-Users-author-Developer-burrow--claude-worktrees-session-memory-324f48/1f1bd66f-4ea0-4d18-a04f-8e841082c516/scratchpad/proof/C1/state"
 
-[projects."/private/tmp/claude-501/-Users-p3wrky-Developer-burrow--claude-worktrees-session-memory-324f48/1f1bd66f-4ea0-4d18-a04f-8e841082c516/scratchpad/proof/codex/work"]
+[projects."/private/tmp/claude-501/-Users-author-Developer-burrow--claude-worktrees-session-memory-324f48/1f1bd66f-4ea0-4d18-a04f-8e841082c516/scratchpad/proof/codex/work"]
 trust_level = "trusted"

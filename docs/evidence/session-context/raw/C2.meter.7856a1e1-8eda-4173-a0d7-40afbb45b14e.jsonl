@@ -10,7 +10,7 @@
 {"at":"2026-11-17T13:51:16Z","handle":"kdf8046","kind":"expanded","label":"actual","original":0,"shown":75,"tool":"burrow_expand"}
 {"at":"2026-11-17T13:51:22Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":299111,"shown":38958,"tool":"SessionEnd"}
 {"at":"2026-11-17T13:51:30Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":315937,"shown":40747,"tool":"SessionEnd"}
-{"at":"2026-11-17T13:51:36Z","kind":"shortened","label":"/private/tmp/claude-501/-Users-p3wrky-Developer-burrow--claude-worktrees-session-memory-324f48/1f1bd66f-4ea0-4d18-a04f-8e841082c516/scratchpad/proof/C2/proj/data/fixtures.py","original":36377,"shown":5086,"tool":"Read"}
+{"at":"2026-11-17T13:51:36Z","kind":"shortened","label":"/private/tmp/claude-501/-Users-author-Developer-burrow--claude-worktrees-session-memory-324f48/1f1bd66f-4ea0-4d18-a04f-8e841082c516/scratchpad/proof/C2/proj/data/fixtures.py","original":36377,"shown":5086,"tool":"Read"}
 {"at":"2026-11-17T13:51:42Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":361341,"shown":47745,"tool":"SessionEnd"}
 {"at":"2026-11-17T13:51:47Z","handle":"k27ca37","kind":"kept","label":"python3 tools/run_checks.py","original":29999,"shown":3391,"tool":"Bash"}
 {"at":"2026-11-17T13:51:50Z","handle":"k27ca37","kind":"expanded","label":"FAIL","original":0,"shown":73,"tool":"burrow_expand"}
@@ -22,12 +22,12 @@
 {"at":"2026-11-17T13:51:54Z","handle":"k27ca37","kind":"expanded","label":"passed","original":0,"shown":75,"tool":"burrow_expand"}
 {"at":"2026-11-17T13:51:54Z","handle":"k27ca37","kind":"expanded","label":"580-585","original":0,"shown":378,"tool":"burrow_expand"}
 {"at":"2026-11-17T13:51:58Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":430472,"shown":54614,"tool":"SessionEnd"}
-{"at":"2026-11-17T13:52:02Z","kind":"shortened","label":"/private/tmp/claude-501/-Users-p3wrky-Developer-burrow--claude-worktrees-session-memory-324f48/1f1bd66f-4ea0-4d18-a04f-8e841082c516/scratchpad/proof/C2/proj/ledgerly/rules.py","original":47601,"shown":4458,"tool":"Read"}
+{"at":"2026-11-17T13:52:02Z","kind":"shortened","label":"/private/tmp/claude-501/-Users-author-Developer-burrow--claude-worktrees-session-memory-324f48/1f1bd66f-4ea0-4d18-a04f-8e841082c516/scratchpad/proof/C2/proj/ledgerly/rules.py","original":47601,"shown":4458,"tool":"Read"}
 {"at":"2026-11-17T13:52:06Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":465113,"shown":58229,"tool":"SessionEnd"}
 {"at":"2026-11-17T13:52:24Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":516422,"shown":64341,"tool":"SessionEnd"}
 {"at":"2026-11-17T13:52:35Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":543485,"shown":66864,"tool":"SessionEnd"}
 {"at":"2026-11-17T13:52:45Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":564390,"shown":70264,"tool":"SessionEnd"}
-{"at":"2026-11-17T13:52:52Z","kind":"shortened","label":"/private/tmp/claude-501/-Users-p3wrky-Developer-burrow--claude-worktrees-session-memory-324f48/1f1bd66f-4ea0-4d18-a04f-8e841082c516/scratchpad/proof/C2/proj/data/fixtures.py","original":36377,"shown":5086,"tool":"Read"}
+{"at":"2026-11-17T13:52:52Z","kind":"shortened","label":"/private/tmp/claude-501/-Users-author-Developer-burrow--claude-worktrees-session-memory-324f48/1f1bd66f-4ea0-4d18-a04f-8e841082c516/scratchpad/proof/C2/proj/data/fixtures.py","original":36377,"shown":5086,"tool":"Read"}
 {"at":"2026-11-17T13:52:55Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":616940,"shown":73857,"tool":"SessionEnd"}
 {"at":"2026-11-17T13:53:00Z","handle":"k639d58","kind":"kept","label":"python3 tools/run_checks.py --verbose","original":29999,"shown":3391,"tool":"Bash"}
 {"at":"2026-11-17T13:53:04Z","handle":"k639d58","kind":"expanded","label":"31-555","original":0,"shown":12064,"tool":"burrow_expand"}
@@ -46,7 +46,7 @@
 {"at":"2026-11-17T13:54:19Z","handle":"kfd8905","kind":"expanded","label":"shard-07","original":0,"shown":12113,"tool":"burrow_expand"}
 {"at":"2026-11-17T13:54:29Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":1093983,"shown":132078,"tool":"SessionEnd"}
 {"at":"2026-11-17T13:54:30Z","kind":"recalled","label":"Read ledgerly/rules.py in full and tell me which rule numbers flag multiples of ","original":0,"shown":562,"tool":"UserPromptSubmit"}
-{"at":"2026-11-17T13:54:33Z","kind":"shortened","label":"/private/tmp/claude-501/-Users-p3wrky-Developer-burrow--claude-worktrees-session-memory-324f48/1f1bd66f-4ea0-4d18-a04f-8e841082c516/scratchpad/proof/C2/proj/ledgerly/rules.py","original":47601,"shown":4458,"tool":"Read"}
+{"at":"2026-11-17T13:54:33Z","kind":"shortened","label":"/private/tmp/claude-501/-Users-author-Developer-burrow--claude-worktrees-session-memory-324f48/1f1bd66f-4ea0-4d18-a04f-8e841082c516/scratchpad/proof/C2/proj/ledgerly/rules.py","original":47601,"shown":4458,"tool":"Read"}
 {"at":"2026-11-17T13:54:42Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":1144072,"shown":139107,"tool":"SessionEnd"}
 {"at":"2026-11-17T13:54:43Z","kind":"recalled","label":"Run: cat data/fixtures.py | head -1500 and tell me the reference of the 1000th f","original":0,"shown":578,"tool":"UserPromptSubmit"}
 {"at":"2026-11-17T13:54:47Z","handle":"kf8f073","kind":"kept","label":"cat data/fixtures.py | head -1500","original":30000,"shown":2831,"tool":"Bash"}
@@ -61,7 +61,7 @@
 {"at":"2026-11-17T13:55:26Z","handle":"k934bef","kind":"kept","label":"python3 tools/gen_report.py | tail -600","original":29999,"shown":4176,"tool":"Bash"}
 {"at":"2026-11-17T13:55:42Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":1322136,"shown":163534,"tool":"SessionEnd"}
 {"at":"2026-11-17T13:55:43Z","kind":"recalled","label":"Read data/fixtures.py once more and count fixtures on route 111 that are paid. U","original":0,"shown":562,"tool":"UserPromptSubmit"}
-{"at":"2026-11-17T13:55:47Z","kind":"shortened","label":"/private/tmp/claude-501/-Users-p3wrky-Developer-burrow--claude-worktrees-session-memory-324f48/1f1bd66f-4ea0-4d18-a04f-8e841082c516/scratchpad/proof/C2/proj/data/fixtures.py","original":36377,"shown":5086,"tool":"Read"}
+{"at":"2026-11-17T13:55:47Z","kind":"shortened","label":"/private/tmp/claude-501/-Users-author-Developer-burrow--claude-worktrees-session-memory-324f48/1f1bd66f-4ea0-4d18-a04f-8e841082c516/scratchpad/proof/C2/proj/data/fixtures.py","original":36377,"shown":5086,"tool":"Read"}
 {"at":"2026-11-17T13:55:54Z","kind":"archived","label":"We're working on the ledgerly package in this folder. Before anything,","original":1373229,"shown":169663,"tool":"SessionEnd"}
 {"at":"2026-11-17T13:55:55Z","kind":"recalled","label":"Run: python3 tools/run_checks.py | tail -800 and tell me the check numbers that ","original":0,"shown":1045,"tool":"UserPromptSubmit"}
 {"at":"2026-11-17T13:55:58Z","handle":"k7c0e5f","kind":"kept","label":"python3 tools/run_checks.py | tail -800","original":30000,"shown":3665,"tool":"Bash"}
