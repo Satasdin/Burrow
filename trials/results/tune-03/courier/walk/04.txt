@@ -2854,7 +2854,7 @@ F.
 FAIL: test_a_payment_that_went_through_is_paid (test_task.AfterATimeout)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/0344f63f-7d4d-4c56-939b-1cf2edf80ea5/scratchpad/trial3/tune-03/courier/walk/hidden/04/test_task.py", line 44, in test_a_payment_that_went_through_is_paid
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/0344f63f-7d4d-4c56-939b-1cf2edf80ea5/scratchpad/trial3/tune-03/courier/walk/hidden/04/test_task.py", line 44, in test_a_payment_that_went_through_is_paid
     self.assertEqual(invoice.status, INVOICE_PAID)
 AssertionError: 'pending_review' != 'paid'
 - pending_review

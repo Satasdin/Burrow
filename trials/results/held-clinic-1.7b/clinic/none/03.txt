@@ -562,7 +562,7 @@ FFFF.
 FAIL: test_below_90 (test_task.Oxygen)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-1.7b/clinic/none/hidden/03/test_task.py", line 14, in test_below_90
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-1.7b/clinic/none/hidden/03/test_task.py", line 14, in test_below_90
     self.assertEqual(score_vitals(Vitals(spo2=89)).points("oxygen"), 3)
 AssertionError: 0 != 3
 
@@ -570,7 +570,7 @@ AssertionError: 0 != 3
 FAIL: test_changes_the_level_in_the_queue (test_task.Oxygen)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-1.7b/clinic/none/hidden/03/test_task.py", line 29, in test_changes_the_level_in_the_queue
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-1.7b/clinic/none/hidden/03/test_task.py", line 29, in test_changes_the_level_in_the_queue
     self.assertEqual(admit(store, "P1", Vitals(spo2=85), FixedClock()).level, LEVEL_URGENT)
 AssertionError: 'routine' != 'urgent'
 - routine
@@ -581,7 +581,7 @@ AssertionError: 'routine' != 'urgent'
 FAIL: test_counts_towards_the_total (test_task.Oxygen)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-1.7b/clinic/none/hidden/03/test_task.py", line 24, in test_counts_towards_the_total
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-1.7b/clinic/none/hidden/03/test_task.py", line 24, in test_counts_towards_the_total
     self.assertEqual(score_vitals(Vitals(spo2=89)).total, score_vitals(Vitals(spo2=98)).total + 3)
 AssertionError: 0 != 3
 
@@ -589,7 +589,7 @@ AssertionError: 0 != 3
 FAIL: test_edges_of_the_middle_band (test_task.Oxygen)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-1.7b/clinic/none/hidden/03/test_task.py", line 17, in test_edges_of_the_middle_band
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-1.7b/clinic/none/hidden/03/test_task.py", line 17, in test_edges_of_the_middle_band
     self.assertEqual(score_vitals(Vitals(spo2=90)).points("oxygen"), 2)
 AssertionError: 0 != 2
 

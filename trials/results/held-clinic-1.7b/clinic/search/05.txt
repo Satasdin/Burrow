@@ -3835,7 +3835,7 @@ FF..
 FAIL: test_exact_figures_are_left_alone (test_task.Graduations)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-1.7b/clinic/search/hidden/05/test_task.py", line 15, in test_exact_figures_are_left_alone
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-1.7b/clinic/search/hidden/05/test_task.py", line 15, in test_exact_figures_are_left_alone
     self.assertEqual(volume_ml(prescribed(120), get_drug("PRN-SYR")), 5.0)
 AssertionError: 2.5 != 5.0
 
@@ -3843,7 +3843,7 @@ AssertionError: 2.5 != 5.0
 FAIL: test_other_figures_land_on_a_graduation (test_task.Graduations)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-1.7b/clinic/search/hidden/05/test_task.py", line 22, in test_other_figures_land_on_a_graduation
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-1.7b/clinic/search/hidden/05/test_task.py", line 22, in test_other_figures_land_on_a_graduation
     self.assertLessEqual(abs(volume - dose / 24.0), 0.5)
 AssertionError: 3.791666666666667 not less than or equal to 0.5
 
@@ -3858,7 +3858,7 @@ F
 FAIL: test_between_two_graduations_goes_to_the_lower_one (test_decisions.LowerAmountBetweenSteps)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-1.7b/clinic/search/hidden/05/test_decisions.py", line 15, in test_between_two_graduations_goes_to_the_lower_one
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-1.7b/clinic/search/hidden/05/test_decisions.py", line 15, in test_between_two_graduations_goes_to_the_lower_one
     self.assertEqual(volume(175), 7.0)
 AssertionError: 3.5 != 7.0
 

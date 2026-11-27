@@ -2485,9 +2485,9 @@ def chase_invoice(store, invoice_id: str, sender, clock) -> Message:
 ERROR: test_amount_is_what_is_still_owed (test_task.Chasing)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/hidden/06/test_task.py", line 42, in test_amount_is_what_is_still_owed
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/hidden/06/test_task.py", line 42, in test_amount_is_what_is_still_owed
     self.assertIn("KES 3,500.00", chase_invoice(store, invoice.id, outbox_sender(store), clock).body)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/workspace/clinic/billing/collections.py", line 13, in chase_invoice
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/workspace/clinic/billing/collections.py", line 13, in chase_invoice
     patient = get_patient(store, invoice.patient_id)
 NameError: name 'get_patient' is not defined
 
@@ -2495,9 +2495,9 @@ NameError: name 'get_patient' is not defined
 ERROR: test_sends_one_sms_to_the_patient (test_task.Chasing)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/hidden/06/test_task.py", line 28, in test_sends_one_sms_to_the_patient
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/hidden/06/test_task.py", line 28, in test_sends_one_sms_to_the_patient
     message = chase_invoice(store, invoice.id, outbox_sender(store), clock)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/workspace/clinic/billing/collections.py", line 13, in chase_invoice
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/workspace/clinic/billing/collections.py", line 13, in chase_invoice
     patient = get_patient(store, invoice.patient_id)
 NameError: name 'get_patient' is not defined
 
@@ -2505,9 +2505,9 @@ NameError: name 'get_patient' is not defined
 ERROR: test_text_quotes_the_invoice_amount_and_visit_date (test_task.Chasing)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/hidden/06/test_task.py", line 35, in test_text_quotes_the_invoice_amount_and_visit_date
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/hidden/06/test_task.py", line 35, in test_text_quotes_the_invoice_amount_and_visit_date
     body = chase_invoice(store, invoice.id, outbox_sender(store), clock).body
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/workspace/clinic/billing/collections.py", line 13, in chase_invoice
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/workspace/clinic/billing/collections.py", line 13, in chase_invoice
     patient = get_patient(store, invoice.patient_id)
 NameError: name 'get_patient' is not defined
 
@@ -2522,9 +2522,9 @@ E
 ERROR: test_sms_does_not_name_the_doctor_department_or_reason (test_decisions.NothingAboutTheVisitInTheText)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/hidden/06/test_decisions.py", line 21, in test_sms_does_not_name_the_doctor_department_or_reason
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/hidden/06/test_decisions.py", line 21, in test_sms_does_not_name_the_doctor_department_or_reason
     body = chase_invoice(store, invoice.id, outbox_sender(store), clock).body.lower()
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/workspace/clinic/billing/collections.py", line 13, in chase_invoice
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/workspace/clinic/billing/collections.py", line 13, in chase_invoice
     patient = get_patient(store, invoice.patient_id)
 NameError: name 'get_patient' is not defined
 

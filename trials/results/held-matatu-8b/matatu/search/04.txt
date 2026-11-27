@@ -2202,11 +2202,11 @@ E.E
 ERROR: test_a_line_for_no_ticket_goes_to_suspense (test_task.MistypedReferences)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/search/hidden/04/test_task.py", line 42, in test_a_line_for_no_ticket_goes_to_suspense
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/search/hidden/04/test_task.py", line 42, in test_a_line_for_no_ticket_goes_to_suspense
     reconcile_statement(self.store, [line("QA1", "+254799999999", "HELLO", amount=75)], FixedClock())
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/search/workspace/matatu/payments/reconcile.py", line 34, in reconcile_statement
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/search/workspace/matatu/payments/reconcile.py", line 34, in reconcile_statement
     ticket = ticket_for_line(store, line)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/search/workspace/matatu/payments/matcher.py", line 16, in ticket_for_line
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/search/workspace/matatu/payments/matcher.py", line 16, in ticket_for_line
     if (line.account_ref.lower() == ticket.account_ref.lower() or
 AttributeError: 'Ticket' object has no attribute 'account_ref'
 
@@ -2214,11 +2214,11 @@ AttributeError: 'Ticket' object has no attribute 'account_ref'
 ERROR: test_mistyped_references_end_up_on_their_ticket (test_task.MistypedReferences)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/search/hidden/04/test_task.py", line 30, in test_mistyped_references_end_up_on_their_ticket
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/search/hidden/04/test_task.py", line 30, in test_mistyped_references_end_up_on_their_ticket
     result = reconcile_statement(self.store, lines, FixedClock())
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/search/workspace/matatu/payments/reconcile.py", line 34, in reconcile_statement
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/search/workspace/matatu/payments/reconcile.py", line 34, in reconcile_statement
     ticket = ticket_for_line(store, line)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/search/workspace/matatu/payments/matcher.py", line 16, in ticket_for_line
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/search/workspace/matatu/payments/matcher.py", line 16, in ticket_for_line
     if (line.account_ref.lower() == ticket.account_ref.lower() or
 AttributeError: 'Ticket' object has no attribute 'account_ref'
 
@@ -2233,11 +2233,11 @@ EE
 ERROR: test_a_group_payment_lands_on_the_ticket_it_names (test_decisions.MatchedByReferenceOnly)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/search/hidden/04/test_decisions.py", line 30, in test_a_group_payment_lands_on_the_ticket_it_names
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/search/hidden/04/test_decisions.py", line 30, in test_a_group_payment_lands_on_the_ticket_it_names
     reconcile_statement(store, [line], FixedClock())
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/search/workspace/matatu/payments/reconcile.py", line 34, in reconcile_statement
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/search/workspace/matatu/payments/reconcile.py", line 34, in reconcile_statement
     ticket = ticket_for_line(store, line)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/search/workspace/matatu/payments/matcher.py", line 16, in ticket_for_line
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/search/workspace/matatu/payments/matcher.py", line 16, in ticket_for_line
     if (line.account_ref.lower() == ticket.account_ref.lower() or
 AttributeError: 'Ticket' object has no attribute 'account_ref'
 
@@ -2245,11 +2245,11 @@ AttributeError: 'Ticket' object has no attribute 'account_ref'
 ERROR: test_phone_and_amount_alone_do_not_make_a_match (test_decisions.MatchedByReferenceOnly)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/search/hidden/04/test_decisions.py", line 23, in test_phone_and_amount_alone_do_not_make_a_match
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/search/hidden/04/test_decisions.py", line 23, in test_phone_and_amount_alone_do_not_make_a_match
     reconcile_statement(store, [line], FixedClock())
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/search/workspace/matatu/payments/reconcile.py", line 34, in reconcile_statement
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/search/workspace/matatu/payments/reconcile.py", line 34, in reconcile_statement
     ticket = ticket_for_line(store, line)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/search/workspace/matatu/payments/matcher.py", line 16, in ticket_for_line
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/search/workspace/matatu/payments/matcher.py", line 16, in ticket_for_line
     if (line.account_ref.lower() == ticket.account_ref.lower() or
 AttributeError: 'Ticket' object has no attribute 'account_ref'
 

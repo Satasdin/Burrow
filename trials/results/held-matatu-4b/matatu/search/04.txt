@@ -2592,7 +2592,7 @@ Therefore, no file needs to be rewritten. The current implementation is unchange
 FAIL: test_mistyped_references_end_up_on_their_ticket (test_task.MistypedReferences)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-4b/matatu/search/hidden/04/test_task.py", line 31, in test_mistyped_references_end_up_on_their_ticket
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-4b/matatu/search/hidden/04/test_task.py", line 31, in test_mistyped_references_end_up_on_their_ticket
     self.assertEqual(result.matched, 3)
 AssertionError: 0 != 3
 
@@ -2607,7 +2607,7 @@ F.
 FAIL: test_a_group_payment_lands_on_the_ticket_it_names (test_decisions.MatchedByReferenceOnly)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-4b/matatu/search/hidden/04/test_decisions.py", line 31, in test_a_group_payment_lands_on_the_ticket_it_names
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-4b/matatu/search/hidden/04/test_decisions.py", line 31, in test_a_group_payment_lands_on_the_ticket_it_names
     self.assertEqual(store.tickets["TKT-2345AB"].status, TICKET_PAID)
 AssertionError: 'issued' != 'paid'
 - issued

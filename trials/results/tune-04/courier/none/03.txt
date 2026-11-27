@@ -438,11 +438,11 @@ EEE
 ERROR: test_fragile_adds_the_surcharge (test_task.Fragile)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/trial04/tune-04/courier/none/hidden/03/test_task.py", line 13, in test_fragile_adds_the_surcharge
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/trial04/tune-04/courier/none/hidden/03/test_task.py", line 13, in test_fragile_adds_the_surcharge
     self.assertEqual(quote_parcel(parcel(True)).total_cents - quote_parcel(parcel(False)).total_cents, 15_000)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/trial04/tune-04/courier/none/workspace/courier/pricing/quote.py", line 41, in quote_parcel
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/trial04/tune-04/courier/none/workspace/courier/pricing/quote.py", line 41, in quote_parcel
     lines.extend(surcharges_for(parcel, subtotal, settings))
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/trial04/tune-04/courier/none/workspace/courier/pricing/surcharges.py", line 35, in surcharges_for
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/trial04/tune-04/courier/none/workspace/courier/pricing/surcharges.py", line 35, in surcharges_for
     if parcel.is_fragile:
 AttributeError: 'Parcel' object has no attribute 'is_fragile'
 
@@ -450,11 +450,11 @@ AttributeError: 'Parcel' object has no attribute 'is_fragile'
 ERROR: test_fragile_line_is_named (test_task.Fragile)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/trial04/tune-04/courier/none/hidden/03/test_task.py", line 16, in test_fragile_line_is_named
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/trial04/tune-04/courier/none/hidden/03/test_task.py", line 16, in test_fragile_line_is_named
     self.assertEqual(quote_parcel(parcel(True)).amount("fragile"), 15_000)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/trial04/tune-04/courier/none/workspace/courier/pricing/quote.py", line 41, in quote_parcel
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/trial04/tune-04/courier/none/workspace/courier/pricing/quote.py", line 41, in quote_parcel
     lines.extend(surcharges_for(parcel, subtotal, settings))
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/trial04/tune-04/courier/none/workspace/courier/pricing/surcharges.py", line 35, in surcharges_for
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/trial04/tune-04/courier/none/workspace/courier/pricing/surcharges.py", line 35, in surcharges_for
     if parcel.is_fragile:
 AttributeError: 'Parcel' object has no attribute 'is_fragile'
 
@@ -462,11 +462,11 @@ AttributeError: 'Parcel' object has no attribute 'is_fragile'
 ERROR: test_other_parcels_have_no_line (test_task.Fragile)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/trial04/tune-04/courier/none/hidden/03/test_task.py", line 19, in test_other_parcels_have_no_line
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/trial04/tune-04/courier/none/hidden/03/test_task.py", line 19, in test_other_parcels_have_no_line
     self.assertNotIn("fragile", [name for name, _ in quote_parcel(parcel(False)).lines])
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/trial04/tune-04/courier/none/workspace/courier/pricing/quote.py", line 41, in quote_parcel
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/trial04/tune-04/courier/none/workspace/courier/pricing/quote.py", line 41, in quote_parcel
     lines.extend(surcharges_for(parcel, subtotal, settings))
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/trial04/tune-04/courier/none/workspace/courier/pricing/surcharges.py", line 35, in surcharges_for
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/trial04/tune-04/courier/none/workspace/courier/pricing/surcharges.py", line 35, in surcharges_for
     if parcel.is_fragile:
 AttributeError: 'Parcel' object has no attribute 'is_fragile'
 

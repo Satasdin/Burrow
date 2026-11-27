@@ -617,7 +617,7 @@ FF...
 FAIL: test_both_messages_are_counted (test_task.SmsReminders)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-1.7b/clinic/walk/hidden/01/test_task.py", line 38, in test_both_messages_are_counted
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-1.7b/clinic/walk/hidden/01/test_task.py", line 38, in test_both_messages_are_counted
     self.assertEqual(send_reminders(store, outbox_sender(store), clock), 2)
 AssertionError: 1 != 2
 
@@ -625,7 +625,7 @@ AssertionError: 1 != 2
 FAIL: test_email_is_unchanged (test_task.SmsReminders)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-1.7b/clinic/walk/hidden/01/test_task.py", line 53, in test_email_is_unchanged
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-1.7b/clinic/walk/hidden/01/test_task.py", line 53, in test_email_is_unchanged
     self.assertEqual(len(by_channel(store, "email")), 1)
 AssertionError: 0 != 1
 
@@ -640,7 +640,7 @@ F
 FAIL: test_sms_does_not_name_the_doctor_department_or_reason (test_decisions.NothingAboutTheVisitInTheText)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-1.7b/clinic/walk/hidden/01/test_decisions.py", line 22, in test_sms_does_not_name_the_doctor_department_or_reason
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-1.7b/clinic/walk/hidden/01/test_decisions.py", line 22, in test_sms_does_not_name_the_doctor_department_or_reason
     self.assertNotIn(word, body)
 AssertionError: 'otieno' unexpectedly found in 'dear amina,\nyou have an appointment on 2024-03-05 at 10:40.\nyou will be seen by: dr otieno, oncology, room b12.\nreason for visit: chemotherapy review\nbooking reference: apt-7\nto change it, call +254700000100.'
 

@@ -1,6 +1,6 @@
 # What worked in last year's reports (Makara 2025, Mbuvi 2025; Gudle 2022 at lower weight)
 
-Text dumps and page renders of the three reports: `/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/c9fa3d16-1d5a-4dfc-a561-4ba5be77a6b1/scratchpad/txt` and `.../scratchpad/img`. They are other students' work: learn the pattern, never copy the prose.
+Text dumps and page renders of the three reports: `/private/tmp/claude-501/-Users-author-Desktop-camr-repo/c9fa3d16-1d5a-4dfc-a561-4ba5be77a6b1/scratchpad/txt` and `.../scratchpad/img`. They are other students' work: learn the pattern, never copy the prose.
 
 ## Size
 - 69 to 82 pages in total. Front matter 12. Ch 1: 5 to 6. Ch 2: 5 to 10. Ch 3: 9 to 13. Ch 4: 11. Ch 5: 10 to 22. References 4 to 6. Appendix 5 to 7 pages of images.

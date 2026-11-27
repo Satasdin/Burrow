@@ -2145,7 +2145,7 @@ FF
 FAIL: test_a_group_payment_lands_on_the_ticket_it_names (test_decisions.MatchedByReferenceOnly)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/walk/hidden/04/test_decisions.py", line 31, in test_a_group_payment_lands_on_the_ticket_it_names
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/walk/hidden/04/test_decisions.py", line 31, in test_a_group_payment_lands_on_the_ticket_it_names
     self.assertEqual(store.tickets["TKT-2345AB"].status, TICKET_PAID)
 AssertionError: 'issued' != 'paid'
 - issued
@@ -2156,7 +2156,7 @@ AssertionError: 'issued' != 'paid'
 FAIL: test_phone_and_amount_alone_do_not_make_a_match (test_decisions.MatchedByReferenceOnly)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/walk/hidden/04/test_decisions.py", line 24, in test_phone_and_amount_alone_do_not_make_a_match
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/walk/hidden/04/test_decisions.py", line 24, in test_phone_and_amount_alone_do_not_make_a_match
     self.assertEqual(store.tickets["TKT-2345AB"].status, TICKET_ISSUED)
 AssertionError: 'paid' != 'issued'
 - paid

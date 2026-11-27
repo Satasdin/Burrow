@@ -2,7 +2,7 @@
 // Each check is one point. The same checks are applied to every model and set-up.
 async (page) => {
   const base = "http://127.0.0.1:8765/out/";
-  const shots = "/Users/p3wrky/Desktop/camr-repo/.playwright-mcp/web/";
+  const shots = ".playwright-mcp/web/"; // relative to the repo root, where Playwright MCP runs
   const results = [];
   // A page may answer bad input with an alert box. It is closed so the checks can go on; using one is not counted against the page.
   page.on("dialog", (dialog) => dialog.dismiss().catch(() => {}));

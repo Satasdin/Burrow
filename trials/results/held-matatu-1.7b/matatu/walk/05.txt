@@ -1653,9 +1653,9 @@ Traceback (most recent call last):
     module = self._get_module_from_name(name)
   File "/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/unittest/loader.py", line 377, in _get_module_from_name
     __import__(name)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-1.7b/matatu/walk/hidden/05/test_task.py", line 5, in <module>
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-1.7b/matatu/walk/hidden/05/test_task.py", line 5, in <module>
     from matatu.fleet.owners import owner_payout
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-1.7b/matatu/walk/workspace/matatu/fleet/owners.py", line 1, in <module>
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-1.7b/matatu/walk/workspace/matatu/fleet/owners.py", line 1, in <module>
     def owner_payout(store, owner_id, date) -> Dict:
 NameError: name 'Dict' is not defined
 
@@ -1676,9 +1676,9 @@ Traceback (most recent call last):
     module = self._get_module_from_name(name)
   File "/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/unittest/loader.py", line 377, in _get_module_from_name
     __import__(name)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-1.7b/matatu/walk/hidden/05/test_decisions.py", line 4, in <module>
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-1.7b/matatu/walk/hidden/05/test_decisions.py", line 4, in <module>
     from matatu.fleet.owners import owner_payout
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-1.7b/matatu/walk/workspace/matatu/fleet/owners.py", line 1, in <module>
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-1.7b/matatu/walk/workspace/matatu/fleet/owners.py", line 1, in <module>
     def owner_payout(store, owner_id, date) -> Dict:
 NameError: name 'Dict' is not defined
 

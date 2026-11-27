@@ -1924,7 +1924,7 @@ FF.F
 FAIL: test_each_bag_after_the_first_is_charged (test_task.Luggage)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-4b/matatu/search/hidden/03/test_task.py", line 11, in test_each_bag_after_the_first_is_charged
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-4b/matatu/search/hidden/03/test_task.py", line 11, in test_each_bag_after_the_first_is_charged
     self.assertEqual(quote_fare(2, MIDDAY, bags=3).amount("luggage"), 40)
 AssertionError: 0 != 40
 
@@ -1932,7 +1932,7 @@ AssertionError: 0 != 40
 FAIL: test_luggage_adds_to_the_total (test_task.Luggage)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-4b/matatu/search/hidden/03/test_task.py", line 14, in test_luggage_adds_to_the_total
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-4b/matatu/search/hidden/03/test_task.py", line 14, in test_luggage_adds_to_the_total
     self.assertEqual(quote_fare(2, MIDDAY, bags=4).total_kes - quote_fare(2, MIDDAY).total_kes, 60)
 AssertionError: 0 != 60
 
@@ -1940,7 +1940,7 @@ AssertionError: 0 != 60
 FAIL: test_rain_is_still_charged (test_task.Luggage)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-4b/matatu/search/hidden/03/test_task.py", line 23, in test_rain_is_still_charged
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-4b/matatu/search/hidden/03/test_task.py", line 23, in test_rain_is_still_charged
     self.assertEqual(result.amount("luggage"), 20)
 AssertionError: 0 != 20
 

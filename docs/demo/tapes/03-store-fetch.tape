@@ -1,4 +1,4 @@
-Output "/Users/p3wrky/Developer/burrow/docs/demo/clips/03-memory-stored-and-fetched.mp4"
+Output "docs/demo/clips/03-memory-stored-and-fetched.mp4"
 Set Shell "bash"
 Set FontSize 18
 Set Width 1600

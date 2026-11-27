@@ -449,7 +449,7 @@ EE
 ERROR: test_current_is_the_most_recent_status (test_task.Current)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/trial05/tune-05/courier/none/hidden/05/test_task.py", line 23, in test_current_is_the_most_recent_status
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/trial05/tune-05/courier/none/hidden/05/test_task.py", line 23, in test_current_is_the_most_recent_status
     self.assertEqual(response["current"], "out_for_delivery")
 KeyError: 'current'
 
@@ -457,7 +457,7 @@ KeyError: 'current'
 ERROR: test_no_events_yet (test_task.Current)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/trial05/tune-05/courier/none/hidden/05/test_task.py", line 28, in test_no_events_yet
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/trial05/tune-05/courier/none/hidden/05/test_task.py", line 28, in test_no_events_yet
     self.assertIsNone(response["current"])
 KeyError: 'current'
 
@@ -472,9 +472,9 @@ EE
 ERROR: test_build_timeline_stays_oldest_first (test_decisions.OldestFirst)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/trial05/tune-05/courier/none/hidden/05/test_decisions.py", line 29, in test_build_timeline_stays_oldest_first
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/trial05/tune-05/courier/none/hidden/05/test_decisions.py", line 29, in test_build_timeline_stays_oldest_first
     self.assertEqual([event["at"] for event in build_timeline(store_with_events(), "P1")], [100, 200, 300])
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/trial05/tune-05/courier/none/hidden/05/test_decisions.py", line 29, in <listcomp>
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/trial05/tune-05/courier/none/hidden/05/test_decisions.py", line 29, in <listcomp>
     self.assertEqual([event["at"] for event in build_timeline(store_with_events(), "P1")], [100, 200, 300])
 KeyError: 'at'
 
@@ -482,9 +482,9 @@ KeyError: 'at'
 ERROR: test_response_events_stay_oldest_first (test_decisions.OldestFirst)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/trial05/tune-05/courier/none/hidden/05/test_decisions.py", line 26, in test_response_events_stay_oldest_first
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/trial05/tune-05/courier/none/hidden/05/test_decisions.py", line 26, in test_response_events_stay_oldest_first
     self.assertEqual([event["at"] for event in parcel_timeline({"parcel_id": "P1"}, context)["events"]], [100, 200, 300])
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/trial05/tune-05/courier/none/hidden/05/test_decisions.py", line 26, in <listcomp>
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/trial05/tune-05/courier/none/hidden/05/test_decisions.py", line 26, in <listcomp>
     self.assertEqual([event["at"] for event in parcel_timeline({"parcel_id": "P1"}, context)["events"]], [100, 200, 300])
 KeyError: 'at'
 

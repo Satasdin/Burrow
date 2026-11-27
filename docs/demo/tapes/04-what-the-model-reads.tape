@@ -1,4 +1,4 @@
-Output "/Users/p3wrky/Developer/burrow/docs/demo/clips/04-what-the-model-reads.mp4"
+Output "docs/demo/clips/04-what-the-model-reads.mp4"
 Set Shell "bash"
 Set FontSize 17
 Set Width 1600

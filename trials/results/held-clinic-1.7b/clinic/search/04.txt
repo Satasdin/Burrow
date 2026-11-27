@@ -4570,7 +4570,7 @@ The task is complete.
 FAIL: test_sms_gives_the_room (test_task.WhereToGo)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-1.7b/clinic/search/hidden/04/test_task.py", line 23, in test_sms_gives_the_room
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-1.7b/clinic/search/hidden/04/test_task.py", line 23, in test_sms_gives_the_room
     self.assertIn("B12", messages()["sms"].body)
 AssertionError: 'B12' not found in 'Amina, you have an appointment at Mawingu Clinic on 2024-03-05 at 10:40. Booking reference APT-7. To change it, call +254700000100.'
 

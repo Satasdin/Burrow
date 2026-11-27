@@ -487,11 +487,11 @@ Traceback (most recent call last):
     module = self._get_module_from_name(name)
   File "/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/unittest/loader.py", line 377, in _get_module_from_name
     __import__(name)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/none/hidden/06/test_task.py", line 3, in <module>
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/none/hidden/06/test_task.py", line 3, in <module>
     from clinic.billing.collections import chase_invoice
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/none/workspace/clinic/billing/collections.py", line 7, in <module>
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/none/workspace/clinic/billing/collections.py", line 7, in <module>
     from ..clock import clock_now
-ImportError: cannot import name 'clock_now' from 'clinic.clock' (/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/none/workspace/clinic/clock.py)
+ImportError: cannot import name 'clock_now' from 'clinic.clock' (/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/none/workspace/clinic/clock.py)
 
 
 ----------------------------------------------------------------------
@@ -510,11 +510,11 @@ Traceback (most recent call last):
     module = self._get_module_from_name(name)
   File "/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/unittest/loader.py", line 377, in _get_module_from_name
     __import__(name)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/none/hidden/06/test_decisions.py", line 3, in <module>
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/none/hidden/06/test_decisions.py", line 3, in <module>
     from clinic.billing.collections import chase_invoice
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/none/workspace/clinic/billing/collections.py", line 7, in <module>
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/none/workspace/clinic/billing/collections.py", line 7, in <module>
     from ..clock import clock_now
-ImportError: cannot import name 'clock_now' from 'clinic.clock' (/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/none/workspace/clinic/clock.py)
+ImportError: cannot import name 'clock_now' from 'clinic.clock' (/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/none/workspace/clinic/clock.py)
 
 
 ----------------------------------------------------------------------

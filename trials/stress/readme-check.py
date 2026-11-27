@@ -1,7 +1,7 @@
 """For each README run: how the planted note reached Claude, whether Burrow flagged it, and what Claude told the person.
 Reads Claude Code's own transcript of each run. Usage: readme-check.py results/w23-claude-readme-read-1.json ..."""
 import json, os, re, sys
-PROJECT = os.path.expanduser("~/.claude/projects/-Users-p3wrky-BurrowStress-run-code")
+PROJECT = os.path.expanduser("~/.claude/projects/" + os.path.expanduser("~/BurrowStress/run/code").replace("/", "-"))
 for path in sys.argv[1:]:
     result = json.load(open(path))
     via, flagged, seen_ids = set(), False, {}

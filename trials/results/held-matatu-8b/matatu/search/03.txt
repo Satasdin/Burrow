@@ -1932,11 +1932,11 @@ EEEE
 ERROR: test_each_bag_after_the_first_is_charged (test_task.Luggage)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/search/hidden/03/test_task.py", line 11, in test_each_bag_after_the_first_is_charged
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/search/hidden/03/test_task.py", line 11, in test_each_bag_after_the_first_is_charged
     self.assertEqual(quote_fare(2, MIDDAY, bags=3).amount("luggage"), 40)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/search/workspace/matatu/fares/quote.py", line 37, in quote_fare
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/search/workspace/matatu/fares/quote.py", line 37, in quote_fare
     result.lines.extend(extras_for(raining, settings))
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/search/workspace/matatu/fares/extras.py", line 13, in extras_for
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/search/workspace/matatu/fares/extras.py", line 13, in extras_for
     if bags > 0:
 NameError: name 'bags' is not defined
 
@@ -1944,11 +1944,11 @@ NameError: name 'bags' is not defined
 ERROR: test_luggage_adds_to_the_total (test_task.Luggage)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/search/hidden/03/test_task.py", line 14, in test_luggage_adds_to_the_total
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/search/hidden/03/test_task.py", line 14, in test_luggage_adds_to_the_total
     self.assertEqual(quote_fare(2, MIDDAY, bags=4).total_kes - quote_fare(2, MIDDAY).total_kes, 60)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/search/workspace/matatu/fares/quote.py", line 37, in quote_fare
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/search/workspace/matatu/fares/quote.py", line 37, in quote_fare
     result.lines.extend(extras_for(raining, settings))
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/search/workspace/matatu/fares/extras.py", line 13, in extras_for
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/search/workspace/matatu/fares/extras.py", line 13, in extras_for
     if bags > 0:
 NameError: name 'bags' is not defined
 
@@ -1956,11 +1956,11 @@ NameError: name 'bags' is not defined
 ERROR: test_no_line_for_one_bag_or_none (test_task.Luggage)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/search/hidden/03/test_task.py", line 18, in test_no_line_for_one_bag_or_none
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/search/hidden/03/test_task.py", line 18, in test_no_line_for_one_bag_or_none
     self.assertNotIn("luggage", [name for name, _ in quote_fare(2, MIDDAY, bags=bags).lines])
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/search/workspace/matatu/fares/quote.py", line 37, in quote_fare
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/search/workspace/matatu/fares/quote.py", line 37, in quote_fare
     result.lines.extend(extras_for(raining, settings))
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/search/workspace/matatu/fares/extras.py", line 13, in extras_for
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/search/workspace/matatu/fares/extras.py", line 13, in extras_for
     if bags > 0:
 NameError: name 'bags' is not defined
 
@@ -1968,11 +1968,11 @@ NameError: name 'bags' is not defined
 ERROR: test_rain_is_still_charged (test_task.Luggage)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/search/hidden/03/test_task.py", line 21, in test_rain_is_still_charged
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/search/hidden/03/test_task.py", line 21, in test_rain_is_still_charged
     result = quote_fare(2, MIDDAY, bags=2, raining=True)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/search/workspace/matatu/fares/quote.py", line 37, in quote_fare
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/search/workspace/matatu/fares/quote.py", line 37, in quote_fare
     result.lines.extend(extras_for(raining, settings))
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/search/workspace/matatu/fares/extras.py", line 13, in extras_for
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/search/workspace/matatu/fares/extras.py", line 13, in extras_for
     if bags > 0:
 NameError: name 'bags' is not defined
 

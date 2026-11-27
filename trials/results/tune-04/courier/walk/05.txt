@@ -2333,7 +2333,7 @@ def parcel_timeline(request, context):
 FAIL: test_no_events_yet (test_task.Current)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/trial04/tune-04/courier/walk/hidden/05/test_task.py", line 29, in test_no_events_yet
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/trial04/tune-04/courier/walk/hidden/05/test_task.py", line 29, in test_no_events_yet
     self.assertEqual(response["events"], [])
 AssertionError: Lists differ: [{'status': None, 'at': None, 'note': None}] != []
 

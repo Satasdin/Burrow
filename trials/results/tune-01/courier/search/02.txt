@@ -969,9 +969,9 @@ Traceback (most recent call last):
     module = self._get_module_from_name(name)
   File "/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/unittest/loader.py", line 377, in _get_module_from_name
     __import__(name)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/0344f63f-7d4d-4c56-939b-1cf2edf80ea5/scratchpad/trial/tune-01/courier/search/hidden/02/test_task.py", line 3, in <module>
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/0344f63f-7d4d-4c56-939b-1cf2edf80ea5/scratchpad/trial/tune-01/courier/search/hidden/02/test_task.py", line 3, in <module>
     from courier.api.handlers import Context, parcel_timeline
-ImportError: cannot import name 'parcel_timeline' from 'courier.api.handlers' (/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/0344f63f-7d4d-4c56-939b-1cf2edf80ea5/scratchpad/trial/tune-01/courier/search/workspace/courier/api/handlers.py)
+ImportError: cannot import name 'parcel_timeline' from 'courier.api.handlers' (/private/tmp/claude-501/-Users-author-Desktop-camr-repo/0344f63f-7d4d-4c56-939b-1cf2edf80ea5/scratchpad/trial/tune-01/courier/search/workspace/courier/api/handlers.py)
 
 
 ----------------------------------------------------------------------
@@ -985,7 +985,7 @@ F
 FAIL: test_timeline_is_oldest_first (test_decisions.OldestFirst)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/0344f63f-7d4d-4c56-939b-1cf2edf80ea5/scratchpad/trial/tune-01/courier/search/hidden/02/test_decisions.py", line 17, in test_timeline_is_oldest_first
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/0344f63f-7d4d-4c56-939b-1cf2edf80ea5/scratchpad/trial/tune-01/courier/search/hidden/02/test_decisions.py", line 17, in test_timeline_is_oldest_first
     self.assertEqual([event["at"] for event in build_timeline(store, "P1")], [100, 200, 300])
 AssertionError: Lists differ: [200, 100, 300] != [100, 200, 300]
 

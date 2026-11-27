@@ -846,11 +846,11 @@ def parcel_timeline(request, context):
 ERROR: test_handler (test_task.Timeline)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/trial05/tune-05/courier/none/hidden/02/test_task.py", line 36, in test_handler
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/trial05/tune-05/courier/none/hidden/02/test_task.py", line 36, in test_handler
     response = parcel_timeline({"parcel_id": "P1"}, context)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/trial05/tune-05/courier/none/workspace/courier/api/handlers.py", line 32, in wrapper
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/trial05/tune-05/courier/none/workspace/courier/api/handlers.py", line 32, in wrapper
     return function(request, context)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/trial05/tune-05/courier/none/workspace/courier/api/handlers.py", line 98, in parcel_timeline
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/trial05/tune-05/courier/none/workspace/courier/api/handlers.py", line 98, in parcel_timeline
     events = build_timeline(context.store, request["parcel_id"])
 NameError: name 'build_timeline' is not defined
 
@@ -858,11 +858,11 @@ NameError: name 'build_timeline' is not defined
 ERROR: test_handler_reports_a_missing_parcel (test_task.Timeline)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/trial05/tune-05/courier/none/hidden/02/test_task.py", line 43, in test_handler_reports_a_missing_parcel
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/trial05/tune-05/courier/none/hidden/02/test_task.py", line 43, in test_handler_reports_a_missing_parcel
     self.assertEqual(parcel_timeline({"parcel_id": "NOPE"}, context)["error"], "not_found")
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/trial05/tune-05/courier/none/workspace/courier/api/handlers.py", line 32, in wrapper
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/trial05/tune-05/courier/none/workspace/courier/api/handlers.py", line 32, in wrapper
     return function(request, context)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/trial05/tune-05/courier/none/workspace/courier/api/handlers.py", line 98, in parcel_timeline
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/trial05/tune-05/courier/none/workspace/courier/api/handlers.py", line 98, in parcel_timeline
     events = build_timeline(context.store, request["parcel_id"])
 NameError: name 'build_timeline' is not defined
 
@@ -870,9 +870,9 @@ NameError: name 'build_timeline' is not defined
 ERROR: test_unknown_parcel (test_task.Timeline)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/trial05/tune-05/courier/none/hidden/02/test_task.py", line 31, in test_unknown_parcel
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/trial05/tune-05/courier/none/hidden/02/test_task.py", line 31, in test_unknown_parcel
     build_timeline(InMemoryStore(), "NOPE")
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/trial05/tune-05/courier/none/workspace/courier/tracking/timeline.py", line 18, in build_timeline
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/trial05/tune-05/courier/none/workspace/courier/tracking/timeline.py", line 18, in build_timeline
     raise NotFound(f"Parcel {parcel_id} not found")
 NameError: name 'NotFound' is not defined
 

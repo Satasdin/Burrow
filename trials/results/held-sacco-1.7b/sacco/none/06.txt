@@ -467,7 +467,7 @@ def disburse_loan(store, loan_id: str, gateway, clock) -> Disbursement:
 FAIL: test_the_member_still_bears_the_charge_somewhere (test_task.FullAmountReachesThePhone)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-1.7b/sacco/none/hidden/06/test_task.py", line 50, in test_the_member_still_bears_the_charge_somewhere
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-1.7b/sacco/none/hidden/06/test_task.py", line 50, in test_the_member_still_bears_the_charge_somewhere
     self.assertGreaterEqual(savings_given_up + extra_to_repay, FEE)
 AssertionError: 0 not greater than or equal to 150000
 
@@ -475,7 +475,7 @@ AssertionError: 0 not greater than or equal to 150000
 FAIL: test_the_transfer_is_the_full_amount (test_task.FullAmountReachesThePhone)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-1.7b/sacco/none/hidden/06/test_task.py", line 35, in test_the_transfer_is_the_full_amount
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-1.7b/sacco/none/hidden/06/test_task.py", line 35, in test_the_transfer_is_the_full_amount
     self.assertEqual(gateway.transfers[-1].amount_cents, APPROVED)
 AssertionError: 9850000 != 10000000
 

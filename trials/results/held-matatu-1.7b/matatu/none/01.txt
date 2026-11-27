@@ -543,9 +543,9 @@ EE.
 ERROR: test_the_rest_of_the_statement_is_applied (test_task.UnknownReferences)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-1.7b/matatu/none/hidden/01/test_task.py", line 34, in test_the_rest_of_the_statement_is_applied
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-1.7b/matatu/none/hidden/01/test_task.py", line 34, in test_the_rest_of_the_statement_is_applied
     result = reconcile_statement(self.store, lines, FixedClock())
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-1.7b/matatu/none/workspace/matatu/payments/reconcile.py", line 37, in reconcile_statement
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-1.7b/matatu/none/workspace/matatu/payments/reconcile.py", line 37, in reconcile_statement
     raise NotFound("ticket", line.account_ref)
 matatu.errors.NotFound: ticket NOTHING not found
 
@@ -553,9 +553,9 @@ matatu.errors.NotFound: ticket NOTHING not found
 ERROR: test_unknown_reference_goes_to_suspense (test_task.UnknownReferences)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-1.7b/matatu/none/hidden/01/test_task.py", line 27, in test_unknown_reference_goes_to_suspense
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-1.7b/matatu/none/hidden/01/test_task.py", line 27, in test_unknown_reference_goes_to_suspense
     result = reconcile_statement(self.store, [line("QA1", "+254799999999", 70, "NOTHING")], FixedClock())
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-1.7b/matatu/none/workspace/matatu/payments/reconcile.py", line 37, in reconcile_statement
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-1.7b/matatu/none/workspace/matatu/payments/reconcile.py", line 37, in reconcile_statement
     raise NotFound("ticket", line.account_ref)
 matatu.errors.NotFound: ticket NOTHING not found
 
@@ -570,9 +570,9 @@ E
 ERROR: test_same_phone_and_amount_does_not_make_a_match (test_decisions.MatchedByReferenceOnly)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-1.7b/matatu/none/hidden/01/test_decisions.py", line 17, in test_same_phone_and_amount_does_not_make_a_match
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-1.7b/matatu/none/hidden/01/test_decisions.py", line 17, in test_same_phone_and_amount_does_not_make_a_match
     reconcile_statement(store, [line], FixedClock())
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-1.7b/matatu/none/workspace/matatu/payments/reconcile.py", line 37, in reconcile_statement
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-1.7b/matatu/none/workspace/matatu/payments/reconcile.py", line 37, in reconcile_statement
     raise NotFound("ticket", line.account_ref)
 matatu.errors.NotFound: ticket NOTHING not found
 

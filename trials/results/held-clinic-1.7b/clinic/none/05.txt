@@ -377,9 +377,9 @@ Traceback (most recent call last):
     module = self._get_module_from_name(name)
   File "/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/unittest/loader.py", line 377, in _get_module_from_name
     __import__(name)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-1.7b/clinic/none/hidden/05/test_task.py", line 6, in <module>
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-1.7b/clinic/none/hidden/05/test_task.py", line 6, in <module>
     from clinic.prescriptions.labels import label_text, volume_ml
-ImportError: cannot import name 'label_text' from 'clinic.prescriptions.labels' (/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-1.7b/clinic/none/workspace/clinic/prescriptions/labels.py)
+ImportError: cannot import name 'label_text' from 'clinic.prescriptions.labels' (/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-1.7b/clinic/none/workspace/clinic/prescriptions/labels.py)
 
 
 ----------------------------------------------------------------------
@@ -398,9 +398,9 @@ Traceback (most recent call last):
     module = self._get_module_from_name(name)
   File "/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/unittest/loader.py", line 377, in _get_module_from_name
     __import__(name)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-1.7b/clinic/none/hidden/05/test_decisions.py", line 5, in <module>
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-1.7b/clinic/none/hidden/05/test_decisions.py", line 5, in <module>
     from clinic.prescriptions.labels import volume_ml
-ImportError: cannot import name 'volume_ml' from 'clinic.prescriptions.labels' (/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-1.7b/clinic/none/workspace/clinic/prescriptions/labels.py)
+ImportError: cannot import name 'volume_ml' from 'clinic.prescriptions.labels' (/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-1.7b/clinic/none/workspace/clinic/prescriptions/labels.py)
 
 
 ----------------------------------------------------------------------

@@ -2496,9 +2496,9 @@ Traceback (most recent call last):
     module = self._get_module_from_name(name)
   File "/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/unittest/loader.py", line 377, in _get_module_from_name
     __import__(name)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-1.7b/sacco/walk/hidden/02/test_task.py", line 5, in <module>
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-1.7b/sacco/walk/hidden/02/test_task.py", line 5, in <module>
     from sacco.loans.disbursement import PROCESSING_FEE_BASIS_POINTS, disburse_loan
-ImportError: cannot import name 'PROCESSING_FEE_BASIS_POINTS' from 'sacco.loans.disbursement' (/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-1.7b/sacco/walk/workspace/sacco/loans/disbursement.py)
+ImportError: cannot import name 'PROCESSING_FEE_BASIS_POINTS' from 'sacco.loans.disbursement' (/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-1.7b/sacco/walk/workspace/sacco/loans/disbursement.py)
 
 
 ----------------------------------------------------------------------
@@ -2512,9 +2512,9 @@ EE
 ERROR: test_principal_is_unchanged (test_decisions.PrincipalIsTheApprovedSum)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-1.7b/sacco/walk/hidden/02/test_decisions.py", line 27, in test_principal_is_unchanged
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-1.7b/sacco/walk/hidden/02/test_decisions.py", line 27, in test_principal_is_unchanged
     disburse_loan(store, "L1", SandboxMpesa(), clock)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-1.7b/sacco/walk/workspace/sacco/loans/disbursement.py", line 23, in disburse_loan
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-1.7b/sacco/walk/workspace/sacco/loans/disbursement.py", line 23, in disburse_loan
     fee_cents = basis_points_of(loan.principal_cents, PROCESSING_FEE_BASIS_POINTS)
 NameError: name 'basis_points_of' is not defined
 
@@ -2522,9 +2522,9 @@ NameError: name 'basis_points_of' is not defined
 ERROR: test_schedule_repays_only_the_approved_sum (test_decisions.PrincipalIsTheApprovedSum)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-1.7b/sacco/walk/hidden/02/test_decisions.py", line 34, in test_schedule_repays_only_the_approved_sum
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-1.7b/sacco/walk/hidden/02/test_decisions.py", line 34, in test_schedule_repays_only_the_approved_sum
     disburse_loan(store, "L1", SandboxMpesa(), clock)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-1.7b/sacco/walk/workspace/sacco/loans/disbursement.py", line 23, in disburse_loan
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-1.7b/sacco/walk/workspace/sacco/loans/disbursement.py", line 23, in disburse_loan
     fee_cents = basis_points_of(loan.principal_cents, PROCESSING_FEE_BASIS_POINTS)
 NameError: name 'basis_points_of' is not defined
 

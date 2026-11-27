@@ -4143,9 +4143,9 @@ Traceback (most recent call last):
     module = self._get_module_from_name(name)
   File "/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/unittest/loader.py", line 377, in _get_module_from_name
     __import__(name)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-1.7b/matatu/walk/hidden/02/test_task.py", line 3, in <module>
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-1.7b/matatu/walk/hidden/02/test_task.py", line 3, in <module>
     from matatu.api.handlers import Context, day_close_report
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-1.7b/matatu/walk/workspace/matatu/api/handlers.py", line 5, in <module>
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-1.7b/matatu/walk/workspace/matatu/api/handlers.py", line 5, in <module>
     @handled
 NameError: name 'handled' is not defined
 
@@ -4161,9 +4161,9 @@ EE
 ERROR: test_small_hours_belong_to_the_day_before (test_decisions.OperatingDay)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-1.7b/matatu/walk/hidden/02/test_decisions.py", line 21, in test_small_hours_belong_to_the_day_before
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-1.7b/matatu/walk/hidden/02/test_decisions.py", line 21, in test_small_hours_belong_to_the_day_before
     self.assertEqual(day_close(store, "2023-11-15")["tickets"], 1)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-1.7b/matatu/walk/workspace/matatu/reports/day_close.py", line 27, in day_close
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-1.7b/matatu/walk/workspace/matatu/reports/day_close.py", line 27, in day_close
     moment = moment_of(day, 3, 0, LOCAL_OFFSET_HOURS)
 NameError: name 'moment_of' is not defined
 
@@ -4171,9 +4171,9 @@ NameError: name 'moment_of' is not defined
 ERROR: test_the_day_turns_over_at_three (test_decisions.OperatingDay)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-1.7b/matatu/walk/hidden/02/test_decisions.py", line 26, in test_the_day_turns_over_at_three
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-1.7b/matatu/walk/hidden/02/test_decisions.py", line 26, in test_the_day_turns_over_at_three
     self.assertEqual(day_close(store, "2023-11-15")["tickets"], 1)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-1.7b/matatu/walk/workspace/matatu/reports/day_close.py", line 27, in day_close
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-1.7b/matatu/walk/workspace/matatu/reports/day_close.py", line 27, in day_close
     moment = moment_of(day, 3, 0, LOCAL_OFFSET_HOURS)
 NameError: name 'moment_of' is not defined
 

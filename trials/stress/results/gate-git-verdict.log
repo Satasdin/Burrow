@@ -1,4 +1,4 @@
-Wrote /private/tmp/claude-501/-Users-p3wrky-Developer-burrow/c1b54dff-2b1c-4c65-9097-270e29021224/scratchpad/work-git/fx-git-verdict/code/matatu/.git/hooks/pre-commit. A commit that touches what a decision in the Ledger rests on is refused once, with the decisions shown, and the same change commits on the next try; one that fails a decision's check is refused every time (D-107).
+Wrote /private/tmp/claude-501/-Users-author-Developer-burrow/c1b54dff-2b1c-4c65-9097-270e29021224/scratchpad/work-git/fx-git-verdict/code/matatu/.git/hooks/pre-commit. A commit that touches what a decision in the Ledger rests on is refused once, with the decisions shown, and the same change commits on the next try; one that fails a decision's check is refused every time (D-107).
 == a harmless helper added to matcher.py, the decided file
 burrow: passes: the change leaves the parts these decisions rest on as they were.
 commit exit 0
@@ -54,9 +54,9 @@ index dd05b1e..66c9cd3 100644
 </excerpt>
 
 For each decision, check whether your change keeps to it. If it does not, undo that part, or tell the person plainly which decision it goes against and why.
-burrow: breaks: the check set for 20261112-214056-002e failed. Seeing it does not let it through: fix the change. Only you can override it, in your own terminal: burrow decision override /tmp/claude-501/-Users-p3wrky-Developer-burrow/c1b54dff-2b1c-4c65-9097-270e29021224/scratchpad/work-git/fx-git-verdict/Notes 20261112-214056-002e
+burrow: breaks: the check set for 20261112-214056-002e failed. Seeing it does not let it through: fix the change. Only you can override it, in your own terminal: burrow decision override /tmp/claude-501/-Users-author-Developer-burrow/c1b54dff-2b1c-4c65-9097-270e29021224/scratchpad/work-git/fx-git-verdict/Notes 20261112-214056-002e
 
-burrow: commit refused. This change breaks a decision: the check set for it failed (above). Seeing it does not let it through: fix the change. Only you can override it, in your own terminal: '/Users/p3wrky/Developer/burrow/.claude/worktrees/agent-aa7f78686aba45a1e/.build/out/Products/Debug/burrow' decision override '/tmp/claude-501/-Users-p3wrky-Developer-burrow/c1b54dff-2b1c-4c65-9097-270e29021224/scratchpad/work-git/fx-git-verdict/Notes' <decision id>
+burrow: commit refused. This change breaks a decision: the check set for it failed (above). Seeing it does not let it through: fix the change. Only you can override it, in your own terminal: '/Users/author/Developer/burrow/.claude/worktrees/agent-aa7f78686aba45a1e/.build/out/Products/Debug/burrow' decision override '/tmp/claude-501/-Users-author-Developer-burrow/c1b54dff-2b1c-4c65-9097-270e29021224/scratchpad/work-git/fx-git-verdict/Notes' <decision id>
 commit exit 1
 -- second try
 commit exit 1

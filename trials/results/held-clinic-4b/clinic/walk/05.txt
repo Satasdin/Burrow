@@ -2375,7 +2375,7 @@ F
 FAIL: test_between_two_graduations_goes_to_the_lower_one (test_decisions.LowerAmountBetweenSteps)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/walk/hidden/05/test_decisions.py", line 15, in test_between_two_graduations_goes_to_the_lower_one
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/walk/hidden/05/test_decisions.py", line 15, in test_between_two_graduations_goes_to_the_lower_one
     self.assertEqual(volume(175), 7.0)
 AssertionError: 7.5 != 7.0
 

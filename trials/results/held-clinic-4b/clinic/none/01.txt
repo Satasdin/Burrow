@@ -550,11 +550,11 @@ EE..E
 ERROR: test_both_messages_are_counted (test_task.SmsReminders)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/hidden/01/test_task.py", line 38, in test_both_messages_are_counted
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/hidden/01/test_task.py", line 38, in test_both_messages_are_counted
     self.assertEqual(send_reminders(store, outbox_sender(store), clock), 2)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/workspace/clinic/reminders/dispatch.py", line 38, in send_reminders
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/workspace/clinic/reminders/dispatch.py", line 38, in send_reminders
     count += sum(1 for message in messages_for(patient, doctor, appointment, now) if sender.send(message))
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/workspace/clinic/reminders/dispatch.py", line 24, in messages_for
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/workspace/clinic/reminders/dispatch.py", line 24, in messages_for
     text = f"Dear {patient.first_name}, your appointment on {day_of(appointment.start_at)} at {time_of(appointment.start_at)}. Booking reference: {appointment.id}"
 NameError: name 'day_of' is not defined
 
@@ -562,11 +562,11 @@ NameError: name 'day_of' is not defined
 ERROR: test_email_is_unchanged (test_task.SmsReminders)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/hidden/01/test_task.py", line 52, in test_email_is_unchanged
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/hidden/01/test_task.py", line 52, in test_email_is_unchanged
     send_reminders(store, outbox_sender(store), clock)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/workspace/clinic/reminders/dispatch.py", line 38, in send_reminders
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/workspace/clinic/reminders/dispatch.py", line 38, in send_reminders
     count += sum(1 for message in messages_for(patient, doctor, appointment, now) if sender.send(message))
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/workspace/clinic/reminders/dispatch.py", line 24, in messages_for
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/workspace/clinic/reminders/dispatch.py", line 24, in messages_for
     text = f"Dear {patient.first_name}, your appointment on {day_of(appointment.start_at)} at {time_of(appointment.start_at)}. Booking reference: {appointment.id}"
 NameError: name 'day_of' is not defined
 
@@ -574,11 +574,11 @@ NameError: name 'day_of' is not defined
 ERROR: test_sms_says_who_when_and_the_reference (test_task.SmsReminders)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/hidden/01/test_task.py", line 29, in test_sms_says_who_when_and_the_reference
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/hidden/01/test_task.py", line 29, in test_sms_says_who_when_and_the_reference
     send_reminders(store, outbox_sender(store), clock)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/workspace/clinic/reminders/dispatch.py", line 38, in send_reminders
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/workspace/clinic/reminders/dispatch.py", line 38, in send_reminders
     count += sum(1 for message in messages_for(patient, doctor, appointment, now) if sender.send(message))
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/workspace/clinic/reminders/dispatch.py", line 24, in messages_for
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/workspace/clinic/reminders/dispatch.py", line 24, in messages_for
     text = f"Dear {patient.first_name}, your appointment on {day_of(appointment.start_at)} at {time_of(appointment.start_at)}. Booking reference: {appointment.id}"
 NameError: name 'day_of' is not defined
 
@@ -593,11 +593,11 @@ E
 ERROR: test_sms_does_not_name_the_doctor_department_or_reason (test_decisions.NothingAboutTheVisitInTheText)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/hidden/01/test_decisions.py", line 18, in test_sms_does_not_name_the_doctor_department_or_reason
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/hidden/01/test_decisions.py", line 18, in test_sms_does_not_name_the_doctor_department_or_reason
     send_reminders(store, outbox_sender(store), FixedClock(moment_at("2024-03-04", 12)))
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/workspace/clinic/reminders/dispatch.py", line 38, in send_reminders
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/workspace/clinic/reminders/dispatch.py", line 38, in send_reminders
     count += sum(1 for message in messages_for(patient, doctor, appointment, now) if sender.send(message))
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/workspace/clinic/reminders/dispatch.py", line 24, in messages_for
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/workspace/clinic/reminders/dispatch.py", line 24, in messages_for
     text = f"Dear {patient.first_name}, your appointment on {day_of(appointment.start_at)} at {time_of(appointment.start_at)}. Booking reference: {appointment.id}"
 NameError: name 'day_of' is not defined
 
