@@ -507,13 +507,13 @@ Traceback (most recent call last):
     module = self._get_module_from_name(name)
   File "/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/unittest/loader.py", line 377, in _get_module_from_name
     __import__(name)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-4b/matatu/none/hidden/04/test_task.py", line 5, in <module>
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-4b/matatu/none/hidden/04/test_task.py", line 5, in <module>
     from matatu.payments.reconcile import reconcile_statement
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-4b/matatu/none/workspace/matatu/payments/reconcile.py", line 8, in <module>
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-4b/matatu/none/workspace/matatu/payments/reconcile.py", line 8, in <module>
     from .matcher import ticket_for_line
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-4b/matatu/none/workspace/matatu/payments/matcher.py", line 6, in <module>
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-4b/matatu/none/workspace/matatu/payments/matcher.py", line 6, in <module>
     from ..ids import normalize_account_ref
-ImportError: cannot import name 'normalize_account_ref' from 'matatu.ids' (/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-4b/matatu/none/workspace/matatu/ids.py)
+ImportError: cannot import name 'normalize_account_ref' from 'matatu.ids' (/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-4b/matatu/none/workspace/matatu/ids.py)
 
 
 ----------------------------------------------------------------------
@@ -532,13 +532,13 @@ Traceback (most recent call last):
     module = self._get_module_from_name(name)
   File "/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/unittest/loader.py", line 377, in _get_module_from_name
     __import__(name)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-4b/matatu/none/hidden/04/test_decisions.py", line 5, in <module>
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-4b/matatu/none/hidden/04/test_decisions.py", line 5, in <module>
     from matatu.payments.reconcile import reconcile_statement
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-4b/matatu/none/workspace/matatu/payments/reconcile.py", line 8, in <module>
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-4b/matatu/none/workspace/matatu/payments/reconcile.py", line 8, in <module>
     from .matcher import ticket_for_line
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-4b/matatu/none/workspace/matatu/payments/matcher.py", line 6, in <module>
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-4b/matatu/none/workspace/matatu/payments/matcher.py", line 6, in <module>
     from ..ids import normalize_account_ref
-ImportError: cannot import name 'normalize_account_ref' from 'matatu.ids' (/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-4b/matatu/none/workspace/matatu/ids.py)
+ImportError: cannot import name 'normalize_account_ref' from 'matatu.ids' (/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-4b/matatu/none/workspace/matatu/ids.py)
 
 
 ----------------------------------------------------------------------

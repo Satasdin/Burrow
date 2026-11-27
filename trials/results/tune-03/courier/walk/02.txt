@@ -1763,11 +1763,11 @@ def parcel_timeline(request, context):
 ERROR: test_handler (test_task.Timeline)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/0344f63f-7d4d-4c56-939b-1cf2edf80ea5/scratchpad/trial3/tune-03/courier/walk/hidden/02/test_task.py", line 36, in test_handler
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/0344f63f-7d4d-4c56-939b-1cf2edf80ea5/scratchpad/trial3/tune-03/courier/walk/hidden/02/test_task.py", line 36, in test_handler
     response = parcel_timeline({"parcel_id": "P1"}, context)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/0344f63f-7d4d-4c56-939b-1cf2edf80ea5/scratchpad/trial3/tune-03/courier/walk/workspace/courier/api/handlers.py", line 32, in wrapper
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/0344f63f-7d4d-4c56-939b-1cf2edf80ea5/scratchpad/trial3/tune-03/courier/walk/workspace/courier/api/handlers.py", line 32, in wrapper
     return function(request, context)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/0344f63f-7d4d-4c56-939b-1cf2edf80ea5/scratchpad/trial3/tune-03/courier/walk/workspace/courier/api/handlers.py", line 97, in parcel_timeline
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/0344f63f-7d4d-4c56-939b-1cf2edf80ea5/scratchpad/trial3/tune-03/courier/walk/workspace/courier/api/handlers.py", line 97, in parcel_timeline
     timeline = build_timeline(context.store, request["parcel_id"])
 NameError: name 'build_timeline' is not defined
 
@@ -1775,11 +1775,11 @@ NameError: name 'build_timeline' is not defined
 ERROR: test_handler_reports_a_missing_parcel (test_task.Timeline)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/0344f63f-7d4d-4c56-939b-1cf2edf80ea5/scratchpad/trial3/tune-03/courier/walk/hidden/02/test_task.py", line 43, in test_handler_reports_a_missing_parcel
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/0344f63f-7d4d-4c56-939b-1cf2edf80ea5/scratchpad/trial3/tune-03/courier/walk/hidden/02/test_task.py", line 43, in test_handler_reports_a_missing_parcel
     self.assertEqual(parcel_timeline({"parcel_id": "NOPE"}, context)["error"], "not_found")
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/0344f63f-7d4d-4c56-939b-1cf2edf80ea5/scratchpad/trial3/tune-03/courier/walk/workspace/courier/api/handlers.py", line 32, in wrapper
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/0344f63f-7d4d-4c56-939b-1cf2edf80ea5/scratchpad/trial3/tune-03/courier/walk/workspace/courier/api/handlers.py", line 32, in wrapper
     return function(request, context)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/0344f63f-7d4d-4c56-939b-1cf2edf80ea5/scratchpad/trial3/tune-03/courier/walk/workspace/courier/api/handlers.py", line 97, in parcel_timeline
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/0344f63f-7d4d-4c56-939b-1cf2edf80ea5/scratchpad/trial3/tune-03/courier/walk/workspace/courier/api/handlers.py", line 97, in parcel_timeline
     timeline = build_timeline(context.store, request["parcel_id"])
 NameError: name 'build_timeline' is not defined
 
@@ -1787,7 +1787,7 @@ NameError: name 'build_timeline' is not defined
 FAIL: test_unknown_parcel (test_task.Timeline)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/0344f63f-7d4d-4c56-939b-1cf2edf80ea5/scratchpad/trial3/tune-03/courier/walk/hidden/02/test_task.py", line 31, in test_unknown_parcel
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/0344f63f-7d4d-4c56-939b-1cf2edf80ea5/scratchpad/trial3/tune-03/courier/walk/hidden/02/test_task.py", line 31, in test_unknown_parcel
     build_timeline(InMemoryStore(), "NOPE")
 AssertionError: NotFound not raised
 
@@ -1802,7 +1802,7 @@ F
 FAIL: test_timeline_is_oldest_first (test_decisions.OldestFirst)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/0344f63f-7d4d-4c56-939b-1cf2edf80ea5/scratchpad/trial3/tune-03/courier/walk/hidden/02/test_decisions.py", line 17, in test_timeline_is_oldest_first
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/0344f63f-7d4d-4c56-939b-1cf2edf80ea5/scratchpad/trial3/tune-03/courier/walk/hidden/02/test_decisions.py", line 17, in test_timeline_is_oldest_first
     self.assertEqual([event["at"] for event in build_timeline(store, "P1")], [100, 200, 300])
 AssertionError: Lists differ: [200, 100, 300] != [100, 200, 300]
 

@@ -1836,7 +1836,7 @@ def render_statement(statement: Dict) -> str:
 FAIL: test_counts_what_was_undone (test_task.ReversedCount)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-4b/sacco/search/hidden/05/test_task.py", line 25, in test_counts_what_was_undone
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-4b/sacco/search/hidden/05/test_task.py", line 25, in test_counts_what_was_undone
     self.assertEqual(statement["reversed_count"], 1)
 AssertionError: 0 != 1
 

@@ -2311,11 +2311,11 @@ To implement the requested behavior, the `charge_invoice` function would need to
 ERROR: test_timeout_goes_to_review (test_task.Timeouts)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/trial06/tune-06/courier/walk/hidden/01/test_task.py", line 23, in test_timeout_goes_to_review
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/trial06/tune-06/courier/walk/hidden/01/test_task.py", line 23, in test_timeout_goes_to_review
     invoice = charge_invoice(store, "I1", gateway, clock)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/trial06/tune-06/courier/walk/workspace/courier/billing/checkout.py", line 22, in charge_invoice
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/trial06/tune-06/courier/walk/workspace/courier/billing/checkout.py", line 22, in charge_invoice
     receipt = gateway.charge(customer.payment_token, invoice.total_cents, reference=invoice.id)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/trial06/tune-06/courier/walk/workspace/courier/billing/gateway.py", line 44, in charge
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/trial06/tune-06/courier/walk/workspace/courier/billing/gateway.py", line 44, in charge
     raise problem
 courier.errors.GatewayTimeout: gateway did not answer
 

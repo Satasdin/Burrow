@@ -1,7 +1,7 @@
 0.00.001.231 I srv  llama_server: initializing ...
 0.00.060.357 I cmn  common_param: common_params_print_info: verbosity = 3 (adjust with the `-lv N` CLI arg)
 0.00.060.844 W srv  server_setup: security: no API key is set and CORS allows all origins (see https://github.com/ggml-org/llama.cpp/pull/25655)
-0.00.062.300 I srv    load_model: loading model '/Users/p3wrky/.ollama/models/blobs/sha256-85e4a5b7b8ef0e48af0e8658f5aaab9c2324c76c1641493f4d1e25fce54b18b9'
+0.00.062.300 I srv    load_model: loading model '/Users/author/.ollama/models/blobs/sha256-85e4a5b7b8ef0e48af0e8658f5aaab9c2324c76c1641493f4d1e25fce54b18b9'
 0.00.171.065 W load: control-looking token: 128247 '</s>' was not control-type; this is probably a bug in the model. its type will be overridden
 0.00.813.691 I cmn          init: llama threadpool init, n_threads = 5
 0.00.962.605 I srv    load_model: initializing, n_slots = 2, n_ctx_slot = 32768, kv_unified = 'false'

@@ -2166,9 +2166,9 @@ EEEEEEE
 ERROR: test_bad_weight (test_task.Dose)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/hidden/02/test_task.py", line 25, in test_bad_weight
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/hidden/02/test_task.py", line 25, in test_bad_weight
     paediatric_dose("ZLV-SUS", weight)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/workspace/clinic/prescriptions/dosing.py", line 30, in paediatric_dose
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/workspace/clinic/prescriptions/dosing.py", line 30, in paediatric_dose
     drug = get_drug(drug_code)
 NameError: name 'get_drug' is not defined
 
@@ -2176,9 +2176,9 @@ NameError: name 'get_drug' is not defined
 ERROR: test_exact_amount (test_task.Dose)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/hidden/02/test_task.py", line 14, in test_exact_amount
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/hidden/02/test_task.py", line 14, in test_exact_amount
     self.assertEqual(paediatric_dose("ZLV-SUS", 10.0), 150)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/workspace/clinic/prescriptions/dosing.py", line 30, in paediatric_dose
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/workspace/clinic/prescriptions/dosing.py", line 30, in paediatric_dose
     drug = get_drug(drug_code)
 NameError: name 'get_drug' is not defined
 
@@ -2186,9 +2186,9 @@ NameError: name 'get_drug' is not defined
 ERROR: test_held_at_the_maximum (test_task.Dose)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/hidden/02/test_task.py", line 17, in test_held_at_the_maximum
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/hidden/02/test_task.py", line 17, in test_held_at_the_maximum
     self.assertEqual(paediatric_dose("ZLV-SUS", 60.0), 500)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/workspace/clinic/prescriptions/dosing.py", line 30, in paediatric_dose
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/workspace/clinic/prescriptions/dosing.py", line 30, in paediatric_dose
     drug = get_drug(drug_code)
 NameError: name 'get_drug' is not defined
 
@@ -2196,9 +2196,9 @@ NameError: name 'get_drug' is not defined
 ERROR: test_result_is_a_whole_number_of_steps (test_task.Dose)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/hidden/02/test_task.py", line 20, in test_result_is_a_whole_number_of_steps
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/hidden/02/test_task.py", line 20, in test_result_is_a_whole_number_of_steps
     self.assertEqual(paediatric_dose("ZLV-SUS", 10.4), 150)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/workspace/clinic/prescriptions/dosing.py", line 30, in paediatric_dose
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/workspace/clinic/prescriptions/dosing.py", line 30, in paediatric_dose
     drug = get_drug(drug_code)
 NameError: name 'get_drug' is not defined
 
@@ -2206,9 +2206,9 @@ NameError: name 'get_drug' is not defined
 ERROR: test_unknown_drug (test_task.Dose)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/hidden/02/test_task.py", line 29, in test_unknown_drug
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/hidden/02/test_task.py", line 29, in test_unknown_drug
     paediatric_dose("NOPE", 10.0)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/workspace/clinic/prescriptions/dosing.py", line 30, in paediatric_dose
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/workspace/clinic/prescriptions/dosing.py", line 30, in paediatric_dose
     drug = get_drug(drug_code)
 NameError: name 'get_drug' is not defined
 
@@ -2216,11 +2216,11 @@ NameError: name 'get_drug' is not defined
 ERROR: test_allergy_check_still_applies (test_task.Prescribing)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/hidden/02/test_task.py", line 46, in test_allergy_check_still_applies
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/hidden/02/test_task.py", line 46, in test_allergy_check_still_applies
     prescribe_for_child(self.store, "P1", "D1", "PRN-SYR", 10.0, 5, FixedClock())
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/workspace/clinic/prescriptions/prescribing.py", line 49, in prescribe_for_child
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/workspace/clinic/prescriptions/prescribing.py", line 49, in prescribe_for_child
     dose_mg = paediatric_dose(drug_code, weight_kg)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/workspace/clinic/prescriptions/dosing.py", line 30, in paediatric_dose
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/workspace/clinic/prescriptions/dosing.py", line 30, in paediatric_dose
     drug = get_drug(drug_code)
 NameError: name 'get_drug' is not defined
 
@@ -2228,11 +2228,11 @@ NameError: name 'get_drug' is not defined
 ERROR: test_prescription_carries_the_dose (test_task.Prescribing)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/hidden/02/test_task.py", line 39, in test_prescription_carries_the_dose
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/hidden/02/test_task.py", line 39, in test_prescription_carries_the_dose
     prescription = prescribe_for_child(self.store, "P1", "D1", "ZLV-SUS", 10.0, 5, FixedClock())
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/workspace/clinic/prescriptions/prescribing.py", line 49, in prescribe_for_child
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/workspace/clinic/prescriptions/prescribing.py", line 49, in prescribe_for_child
     dose_mg = paediatric_dose(drug_code, weight_kg)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/workspace/clinic/prescriptions/dosing.py", line 30, in paediatric_dose
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/workspace/clinic/prescriptions/dosing.py", line 30, in paediatric_dose
     drug = get_drug(drug_code)
 NameError: name 'get_drug' is not defined
 
@@ -2247,9 +2247,9 @@ EE
 ERROR: test_between_two_steps_goes_to_the_lower_one (test_decisions.LowerAmountBetweenSteps)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/hidden/02/test_decisions.py", line 13, in test_between_two_steps_goes_to_the_lower_one
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/hidden/02/test_decisions.py", line 13, in test_between_two_steps_goes_to_the_lower_one
     self.assertEqual(paediatric_dose("ZLV-SUS", 8.0), 100)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/workspace/clinic/prescriptions/dosing.py", line 30, in paediatric_dose
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/workspace/clinic/prescriptions/dosing.py", line 30, in paediatric_dose
     drug = get_drug(drug_code)
 NameError: name 'get_drug' is not defined
 
@@ -2257,11 +2257,11 @@ NameError: name 'get_drug' is not defined
 ERROR: test_prescription_takes_the_lower_amount (test_decisions.LowerAmountBetweenSteps)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/hidden/02/test_decisions.py", line 20, in test_prescription_takes_the_lower_amount
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/hidden/02/test_decisions.py", line 20, in test_prescription_takes_the_lower_amount
     self.assertEqual(prescribe_for_child(store, "P1", "D1", "ZLV-SUS", 8.0, 5, FixedClock()).dose_mg, 100)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/workspace/clinic/prescriptions/prescribing.py", line 49, in prescribe_for_child
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/workspace/clinic/prescriptions/prescribing.py", line 49, in prescribe_for_child
     dose_mg = paediatric_dose(drug_code, weight_kg)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/workspace/clinic/prescriptions/dosing.py", line 30, in paediatric_dose
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-8b/clinic/search/workspace/clinic/prescriptions/dosing.py", line 30, in paediatric_dose
     drug = get_drug(drug_code)
 NameError: name 'get_drug' is not defined
 

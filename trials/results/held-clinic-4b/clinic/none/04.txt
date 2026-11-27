@@ -438,15 +438,15 @@ EEE
 ERROR: test_email_is_unchanged (test_task.WhereToGo)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/hidden/04/test_task.py", line 31, in test_email_is_unchanged
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/hidden/04/test_task.py", line 31, in test_email_is_unchanged
     self.assertIn("Dr Otieno, Oncology, room B12", messages()["email"].body)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/hidden/04/test_task.py", line 17, in messages
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/hidden/04/test_task.py", line 17, in messages
     send_reminders(store, outbox_sender(store), FixedClock(moment_at("2024-03-04", 12)))
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/workspace/clinic/reminders/dispatch.py", line 36, in send_reminders
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/workspace/clinic/reminders/dispatch.py", line 36, in send_reminders
     count += sum(1 for message in messages_for(patient, doctor, appointment, now) if sender.send(message))
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/workspace/clinic/reminders/dispatch.py", line 23, in messages_for
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/workspace/clinic/reminders/dispatch.py", line 23, in messages_for
     out.append(Message(channel="sms", to=patient.phone, body=sms_body(patient, appointment), sent_at=now))
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/workspace/clinic/reminders/templates.py", line 30, in sms_body
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/workspace/clinic/reminders/templates.py", line 30, in sms_body
     f"You will be seen by: {location_line(appointment.doctor)}. "
 AttributeError: 'Appointment' object has no attribute 'doctor'
 
@@ -454,15 +454,15 @@ AttributeError: 'Appointment' object has no attribute 'doctor'
 ERROR: test_sms_gives_the_room (test_task.WhereToGo)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/hidden/04/test_task.py", line 23, in test_sms_gives_the_room
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/hidden/04/test_task.py", line 23, in test_sms_gives_the_room
     self.assertIn("B12", messages()["sms"].body)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/hidden/04/test_task.py", line 17, in messages
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/hidden/04/test_task.py", line 17, in messages
     send_reminders(store, outbox_sender(store), FixedClock(moment_at("2024-03-04", 12)))
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/workspace/clinic/reminders/dispatch.py", line 36, in send_reminders
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/workspace/clinic/reminders/dispatch.py", line 36, in send_reminders
     count += sum(1 for message in messages_for(patient, doctor, appointment, now) if sender.send(message))
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/workspace/clinic/reminders/dispatch.py", line 23, in messages_for
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/workspace/clinic/reminders/dispatch.py", line 23, in messages_for
     out.append(Message(channel="sms", to=patient.phone, body=sms_body(patient, appointment), sent_at=now))
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/workspace/clinic/reminders/templates.py", line 30, in sms_body
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/workspace/clinic/reminders/templates.py", line 30, in sms_body
     f"You will be seen by: {location_line(appointment.doctor)}. "
 AttributeError: 'Appointment' object has no attribute 'doctor'
 
@@ -470,15 +470,15 @@ AttributeError: 'Appointment' object has no attribute 'doctor'
 ERROR: test_sms_still_gives_when_and_the_reference (test_task.WhereToGo)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/hidden/04/test_task.py", line 26, in test_sms_still_gives_when_and_the_reference
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/hidden/04/test_task.py", line 26, in test_sms_still_gives_when_and_the_reference
     body = messages()["sms"].body
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/hidden/04/test_task.py", line 17, in messages
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/hidden/04/test_task.py", line 17, in messages
     send_reminders(store, outbox_sender(store), FixedClock(moment_at("2024-03-04", 12)))
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/workspace/clinic/reminders/dispatch.py", line 36, in send_reminders
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/workspace/clinic/reminders/dispatch.py", line 36, in send_reminders
     count += sum(1 for message in messages_for(patient, doctor, appointment, now) if sender.send(message))
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/workspace/clinic/reminders/dispatch.py", line 23, in messages_for
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/workspace/clinic/reminders/dispatch.py", line 23, in messages_for
     out.append(Message(channel="sms", to=patient.phone, body=sms_body(patient, appointment), sent_at=now))
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/workspace/clinic/reminders/templates.py", line 30, in sms_body
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/workspace/clinic/reminders/templates.py", line 30, in sms_body
     f"You will be seen by: {location_line(appointment.doctor)}. "
 AttributeError: 'Appointment' object has no attribute 'doctor'
 
@@ -493,13 +493,13 @@ E
 ERROR: test_sms_does_not_name_the_doctor_department_or_reason (test_decisions.NothingAboutTheVisitInTheText)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/hidden/04/test_decisions.py", line 18, in test_sms_does_not_name_the_doctor_department_or_reason
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/hidden/04/test_decisions.py", line 18, in test_sms_does_not_name_the_doctor_department_or_reason
     send_reminders(store, outbox_sender(store), FixedClock(moment_at("2024-03-04", 12)))
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/workspace/clinic/reminders/dispatch.py", line 36, in send_reminders
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/workspace/clinic/reminders/dispatch.py", line 36, in send_reminders
     count += sum(1 for message in messages_for(patient, doctor, appointment, now) if sender.send(message))
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/workspace/clinic/reminders/dispatch.py", line 23, in messages_for
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/workspace/clinic/reminders/dispatch.py", line 23, in messages_for
     out.append(Message(channel="sms", to=patient.phone, body=sms_body(patient, appointment), sent_at=now))
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/workspace/clinic/reminders/templates.py", line 30, in sms_body
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-4b/clinic/none/workspace/clinic/reminders/templates.py", line 30, in sms_body
     f"You will be seen by: {location_line(appointment.doctor)}. "
 AttributeError: 'Appointment' object has no attribute 'doctor'
 

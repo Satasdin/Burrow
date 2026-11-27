@@ -1,4 +1,4 @@
-Output "/Users/p3wrky/Developer/burrow/docs/demo/clips/06-weaknesses-burrow-covers.mp4"
+Output "docs/demo/clips/06-weaknesses-burrow-covers.mp4"
 Set Shell "bash"
 Set FontSize 17
 Set Width 1600

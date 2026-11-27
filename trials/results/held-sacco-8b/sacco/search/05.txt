@@ -1852,9 +1852,9 @@ EEE
 ERROR: test_a_later_undo_is_not_counted_in_an_earlier_period (test_task.ReversedCount)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/search/hidden/05/test_task.py", line 39, in test_a_later_undo_is_not_counted_in_an_earlier_period
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/search/hidden/05/test_task.py", line 39, in test_a_later_undo_is_not_counted_in_an_earlier_period
     self.assertEqual(member_statement(store, member.id, 0, end)["reversed_count"], 0)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/search/workspace/sacco/statements/member.py", line 24, in member_statement
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/search/workspace/sacco/statements/member.py", line 24, in member_statement
     if entry.kind == ENTRY_REVERSAL:
 NameError: name 'ENTRY_REVERSAL' is not defined
 
@@ -1862,9 +1862,9 @@ NameError: name 'ENTRY_REVERSAL' is not defined
 ERROR: test_counts_what_was_undone (test_task.ReversedCount)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/search/hidden/05/test_task.py", line 24, in test_counts_what_was_undone
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/search/hidden/05/test_task.py", line 24, in test_counts_what_was_undone
     statement = member_statement(store, member.id, 0, clock.now() + 1)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/search/workspace/sacco/statements/member.py", line 24, in member_statement
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/search/workspace/sacco/statements/member.py", line 24, in member_statement
     if entry.kind == ENTRY_REVERSAL:
 NameError: name 'ENTRY_REVERSAL' is not defined
 
@@ -1872,9 +1872,9 @@ NameError: name 'ENTRY_REVERSAL' is not defined
 ERROR: test_zero_when_nothing_was_undone (test_task.ReversedCount)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/search/hidden/05/test_task.py", line 30, in test_zero_when_nothing_was_undone
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/search/hidden/05/test_task.py", line 30, in test_zero_when_nothing_was_undone
     statement = member_statement(store, member.id, 0, clock.now() + 1)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/search/workspace/sacco/statements/member.py", line 24, in member_statement
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/search/workspace/sacco/statements/member.py", line 24, in member_statement
     if entry.kind == ENTRY_REVERSAL:
 NameError: name 'ENTRY_REVERSAL' is not defined
 
@@ -1889,9 +1889,9 @@ E
 ERROR: test_the_money_going_in_and_back_out_are_both_listed (test_decisions.EveryLineStaysOnTheStatement)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/search/hidden/05/test_decisions.py", line 19, in test_the_money_going_in_and_back_out_are_both_listed
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/search/hidden/05/test_decisions.py", line 19, in test_the_money_going_in_and_back_out_are_both_listed
     lines = member_statement(store, member.id, 0, clock.now() + 1)["lines"]
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/search/workspace/sacco/statements/member.py", line 24, in member_statement
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/search/workspace/sacco/statements/member.py", line 24, in member_statement
     if entry.kind == ENTRY_REVERSAL:
 NameError: name 'ENTRY_REVERSAL' is not defined
 

@@ -15,7 +15,7 @@ from langchain_core.callbacks import CallbackManagerForRetrieverRun
 from langchain_core.documents import Document
 from langchain_core.retrievers import BaseRetriever
 
-DEFAULT_BURROW = "/Users/p3wrky/Developer/burrow/.build/release/burrow"
+DEFAULT_BURROW = os.path.expanduser("~/Developer/burrow/.build/release/burrow")
 
 
 class BurrowRetriever(BaseRetriever):

@@ -1,1 +1,1 @@
-{"mcpServers": {"burrow": {"command": "/Users/p3wrky/.local/bin/burrow", "args": ["mcp", "/Users/p3wrky/BurrowStress/run/Notes", "--llama", "http://127.0.0.1:8080"]}}}
+{"mcpServers": {"burrow": {"command": "/Users/author/.local/bin/burrow", "args": ["mcp", "/Users/author/BurrowStress/run/Notes", "--llama", "http://127.0.0.1:8080"]}}}

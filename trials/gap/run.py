@@ -24,7 +24,7 @@ import urllib.request
 from scoring import is_correct, visible
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-DEFAULT_BURROW = "/Users/p3wrky/Developer/burrow/.build/release/burrow"
+DEFAULT_BURROW = os.path.expanduser("~/Developer/burrow/.build/release/burrow")
 OLLAMA = os.environ.get("OLLAMA_HOST_URL", "http://localhost:11434")
 KEY_FILE = os.path.expanduser("~/.config/camr/anthropic.env")
 ANTHROPIC_URL = "https://api.anthropic.com/v1/messages"

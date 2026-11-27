@@ -13,7 +13,7 @@ locator.innerText: Timeout 30000ms exceeded.
 Call log:
   - waiting for locator('main')
 
-    at /Users/p3wrky/Developer/burrow/trials/stress/llama-ask.mjs:36:61 {
+    at /Users/author/Developer/burrow/trials/stress/llama-ask.mjs:36:61 {
   log: [ "  - waiting for locator('main')" ],
   name: 'TimeoutError'
 }

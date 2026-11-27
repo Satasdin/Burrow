@@ -4,7 +4,7 @@
 0.00.109.058 I srv         start: MCP warmup: 'burrow' discovered 4 tools
 0.00.109.977 I srv         setup: Added 4 MCP tools
 0.00.109.982 W srv  server_setup: security: MCP servers (experimental) enabled - do not expose to untrusted environments
-0.00.111.655 I srv    load_model: loading model '/Users/p3wrky/.ollama/models/blobs/sha256-85e4a5b7b8ef0e48af0e8658f5aaab9c2324c76c1641493f4d1e25fce54b18b9'
+0.00.111.655 I srv    load_model: loading model '/Users/author/.ollama/models/blobs/sha256-85e4a5b7b8ef0e48af0e8658f5aaab9c2324c76c1641493f4d1e25fce54b18b9'
 0.00.214.551 W load: control-looking token: 128247 '</s>' was not control-type; this is probably a bug in the model. its type will be overridden
 0.00.544.746 I cmn          init: llama threadpool init, n_threads = 5
 0.00.642.977 I srv    load_model: initializing, n_slots = 2, n_ctx_slot = 32768, kv_unified = 'false'

@@ -412,9 +412,9 @@ EEE
 ERROR: test_adds_up_the_owners_vehicles (test_task.OwnerPayout)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-1.7b/matatu/none/hidden/05/test_task.py", line 34, in test_adds_up_the_owners_vehicles
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-1.7b/matatu/none/hidden/05/test_task.py", line 34, in test_adds_up_the_owners_vehicles
     result = owner_payout(store, "O1", "2023-11-15")
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-1.7b/matatu/none/workspace/matatu/fleet/owners.py", line 21, in owner_payout
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-1.7b/matatu/none/workspace/matatu/fleet/owners.py", line 21, in owner_payout
     if vehicle.active and vehicle.issued_at.date() == date:
 AttributeError: 'Vehicle' object has no attribute 'issued_at'
 
@@ -422,9 +422,9 @@ AttributeError: 'Vehicle' object has no attribute 'issued_at'
 ERROR: test_nothing_earned (test_task.OwnerPayout)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-1.7b/matatu/none/hidden/05/test_task.py", line 38, in test_nothing_earned
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-1.7b/matatu/none/hidden/05/test_task.py", line 38, in test_nothing_earned
     result = owner_payout(fleet(), "O2", "2023-11-15")
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-1.7b/matatu/none/workspace/matatu/fleet/owners.py", line 21, in owner_payout
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-1.7b/matatu/none/workspace/matatu/fleet/owners.py", line 21, in owner_payout
     if vehicle.active and vehicle.issued_at.date() == date:
 AttributeError: 'Vehicle' object has no attribute 'issued_at'
 
@@ -432,9 +432,9 @@ AttributeError: 'Vehicle' object has no attribute 'issued_at'
 ERROR: test_unknown_owner (test_task.OwnerPayout)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-1.7b/matatu/none/hidden/05/test_task.py", line 43, in test_unknown_owner
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-1.7b/matatu/none/hidden/05/test_task.py", line 43, in test_unknown_owner
     owner_payout(fleet(), "NOPE", "2023-11-15")
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-1.7b/matatu/none/workspace/matatu/fleet/owners.py", line 24, in owner_payout
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-1.7b/matatu/none/workspace/matatu/fleet/owners.py", line 24, in owner_payout
     levy_kes = gross_kes * SACCO_LEVY_PERCENT / 100
 NameError: name 'SACCO_LEVY_PERCENT' is not defined
 
@@ -449,9 +449,9 @@ EE
 ERROR: test_a_ticket_after_three_counts_for_its_own_day (test_decisions.OperatingDay)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-1.7b/matatu/none/hidden/05/test_decisions.py", line 27, in test_a_ticket_after_three_counts_for_its_own_day
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-1.7b/matatu/none/hidden/05/test_decisions.py", line 27, in test_a_ticket_after_three_counts_for_its_own_day
     self.assertEqual(owner_payout(store, "O1", "2023-11-16")["gross_kes"], 500)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-1.7b/matatu/none/workspace/matatu/fleet/owners.py", line 21, in owner_payout
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-1.7b/matatu/none/workspace/matatu/fleet/owners.py", line 21, in owner_payout
     if vehicle.active and vehicle.issued_at.date() == date:
 AttributeError: 'Vehicle' object has no attribute 'issued_at'
 
@@ -459,9 +459,9 @@ AttributeError: 'Vehicle' object has no attribute 'issued_at'
 ERROR: test_a_ticket_in_the_small_hours_counts_for_the_day_before (test_decisions.OperatingDay)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-1.7b/matatu/none/hidden/05/test_decisions.py", line 22, in test_a_ticket_in_the_small_hours_counts_for_the_day_before
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-1.7b/matatu/none/hidden/05/test_decisions.py", line 22, in test_a_ticket_in_the_small_hours_counts_for_the_day_before
     self.assertEqual(owner_payout(store, "O1", "2023-11-15")["gross_kes"], 500)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-1.7b/matatu/none/workspace/matatu/fleet/owners.py", line 21, in owner_payout
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-1.7b/matatu/none/workspace/matatu/fleet/owners.py", line 21, in owner_payout
     if vehicle.active and vehicle.issued_at.date() == date:
 AttributeError: 'Vehicle' object has no attribute 'issued_at'
 

@@ -2233,9 +2233,9 @@ Traceback (most recent call last):
     module = self._get_module_from_name(name)
   File "/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/unittest/loader.py", line 377, in _get_module_from_name
     __import__(name)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-4b/sacco/search/hidden/01/test_task.py", line 3, in <module>
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-4b/sacco/search/hidden/01/test_task.py", line 3, in <module>
     from sacco.api.handlers import Context, reverse_posting
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-4b/sacco/search/workspace/sacco/api/handlers.py", line 124
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-4b/sacco/search/workspace/sacco/api/handlers.py", line 124
     </opened>
     ^
 SyntaxError: invalid syntax

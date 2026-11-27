@@ -1,5 +1,5 @@
-Wrote /private/tmp/claude-501/-Users-p3wrky-Developer-burrow/194f3ce6-bca4-4b00-a331-521f0694f63d/scratchpad/gate-final/fx-git/code/matatu/.git/hooks/pre-commit. A commit that touches a decision in the Ledger is refused once, with the decisions shown; the same change commits on the next try.
-Wrote /private/tmp/claude-501/-Users-p3wrky-Developer-burrow/194f3ce6-bca4-4b00-a331-521f0694f63d/scratchpad/gate-final/fx-git/code/matatu/.git/hooks/post-commit.
+Wrote /private/tmp/claude-501/-Users-author-Developer-burrow/194f3ce6-bca4-4b00-a331-521f0694f63d/scratchpad/gate-final/fx-git/code/matatu/.git/hooks/pre-commit. A commit that touches a decision in the Ledger is refused once, with the decisions shown; the same change commits on the next try.
+Wrote /private/tmp/claude-501/-Users-author-Developer-burrow/194f3ce6-bca4-4b00-a331-521f0694f63d/scratchpad/gate-final/fx-git/code/matatu/.git/hooks/post-commit.
 == a change no decision rests on
 commit exit 0
 == Gemma new-1, the phone and amount fallback

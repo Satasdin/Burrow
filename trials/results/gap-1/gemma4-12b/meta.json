@@ -21,55 +21,55 @@
   "local_database": {
    "model": "gemma4:12b",
    "burrow_sha256": "172c3b3831c4d7cf2c1c60e8abd216669cdc56c2c1df07f14642a8293312cc8a",
-   "vault": "/Users/p3wrky/Developer/burrow/trials/gap/vault",
+   "vault": "/Users/author/Developer/burrow/trials/gap/vault",
    "reasoning_suffix": true
   },
   "chroma": {
    "model": "gemma4:12b",
    "embed_model": "qwen3-embedding:0.6b",
-   "vault": "/Users/p3wrky/Developer/burrow/trials/gap/vault",
+   "vault": "/Users/author/Developer/burrow/trials/gap/vault",
    "reasoning_suffix": true
   },
   "local_engine": {
    "model": "gemma4:12b",
    "burrow_sha256": "172c3b3831c4d7cf2c1c60e8abd216669cdc56c2c1df07f14642a8293312cc8a",
-   "vault": "/Users/p3wrky/Developer/burrow/trials/gap/vault",
+   "vault": "/Users/author/Developer/burrow/trials/gap/vault",
    "reasoning_suffix": true
   },
   "local_engine_noskills": {
    "model": "gemma4:12b",
    "burrow_sha256": "172c3b3831c4d7cf2c1c60e8abd216669cdc56c2c1df07f14642a8293312cc8a",
-   "vault": "/Users/p3wrky/Developer/burrow/trials/gap/vault",
+   "vault": "/Users/author/Developer/burrow/trials/gap/vault",
    "reasoning_suffix": true
   },
   "local_engine_nocheck": {
    "model": "gemma4:12b",
    "burrow_sha256": "172c3b3831c4d7cf2c1c60e8abd216669cdc56c2c1df07f14642a8293312cc8a",
-   "vault": "/Users/p3wrky/Developer/burrow/trials/gap/vault",
+   "vault": "/Users/author/Developer/burrow/trials/gap/vault",
    "reasoning_suffix": true
   },
   "local_engine_c2000": {
    "model": "gemma4:12b",
    "burrow_sha256": "172c3b3831c4d7cf2c1c60e8abd216669cdc56c2c1df07f14642a8293312cc8a",
-   "vault": "/Users/p3wrky/Developer/burrow/trials/gap/vault",
+   "vault": "/Users/author/Developer/burrow/trials/gap/vault",
    "reasoning_suffix": true
   },
   "local_engine_c4000": {
    "model": "gemma4:12b",
    "burrow_sha256": "172c3b3831c4d7cf2c1c60e8abd216669cdc56c2c1df07f14642a8293312cc8a",
-   "vault": "/Users/p3wrky/Developer/burrow/trials/gap/vault",
+   "vault": "/Users/author/Developer/burrow/trials/gap/vault",
    "reasoning_suffix": true
   },
   "local_engine_c8000": {
    "model": "gemma4:12b",
    "burrow_sha256": "172c3b3831c4d7cf2c1c60e8abd216669cdc56c2c1df07f14642a8293312cc8a",
-   "vault": "/Users/p3wrky/Developer/burrow/trials/gap/vault",
+   "vault": "/Users/author/Developer/burrow/trials/gap/vault",
    "reasoning_suffix": true
   },
   "local_engine_c32000": {
    "model": "gemma4:12b",
    "burrow_sha256": "172c3b3831c4d7cf2c1c60e8abd216669cdc56c2c1df07f14642a8293312cc8a",
-   "vault": "/Users/p3wrky/Developer/burrow/trials/gap/vault",
+   "vault": "/Users/author/Developer/burrow/trials/gap/vault",
    "reasoning_suffix": true
   }
  },
@@ -92,8 +92,8 @@
     "tasks/project.jsonl": "667f0303f8e23ffa67a8b2388878a8f211880e33ba772f2cdc1705488cd25b84",
     "tasks/reasoning.jsonl": "0b938b170ed0b1399a2a2bbec6337a4cbafa17eec29177478f57809bae6d98c9"
    },
-   "vault": "/Users/p3wrky/Developer/burrow/trials/gap/vault",
-   "store": "/Users/p3wrky/Developer/burrow/trials/gap/work/store",
+   "vault": "/Users/author/Developer/burrow/trials/gap/vault",
+   "store": "/Users/author/Developer/burrow/trials/gap/work/store",
    "tasks_selected": 170,
    "python": "3.9.6",
    "reasoning_suffix": "\n\nShow your working briefly, then give the final answer as a number on the last line.",
@@ -136,8 +136,8 @@
     "tasks/project.jsonl": "667f0303f8e23ffa67a8b2388878a8f211880e33ba772f2cdc1705488cd25b84",
     "tasks/reasoning.jsonl": "0b938b170ed0b1399a2a2bbec6337a4cbafa17eec29177478f57809bae6d98c9"
    },
-   "vault": "/Users/p3wrky/Developer/burrow/trials/gap/vault",
-   "store": "/Users/p3wrky/Developer/burrow/trials/gap/work/store",
+   "vault": "/Users/author/Developer/burrow/trials/gap/vault",
+   "store": "/Users/author/Developer/burrow/trials/gap/work/store",
    "tasks_selected": 170,
    "python": "3.9.6",
    "reasoning_suffix": "\n\nShow your working briefly, then give the final answer as a number on the last line.",
@@ -179,8 +179,8 @@
     "tasks/knowledge.jsonl": "fdd35a67b0369edf26ad0e4dbfd5f122a390b975dc8ec3dcfeb45476521b16b9",
     "tasks/project.jsonl": "667f0303f8e23ffa67a8b2388878a8f211880e33ba772f2cdc1705488cd25b84"
    },
-   "vault": "/Users/p3wrky/Developer/burrow/trials/gap/vault",
-   "store": "/Users/p3wrky/Developer/burrow/trials/gap/work/store",
+   "vault": "/Users/author/Developer/burrow/trials/gap/vault",
+   "store": "/Users/author/Developer/burrow/trials/gap/work/store",
    "tasks_selected": 120,
    "python": "3.9.6",
    "reasoning_suffix": "\n\nShow your working briefly, then give the final answer as a number on the last line.",

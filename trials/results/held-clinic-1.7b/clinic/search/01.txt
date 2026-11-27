@@ -4415,7 +4415,7 @@ F...F
 FAIL: test_both_messages_are_counted (test_task.SmsReminders)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-1.7b/clinic/search/hidden/01/test_task.py", line 38, in test_both_messages_are_counted
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-1.7b/clinic/search/hidden/01/test_task.py", line 38, in test_both_messages_are_counted
     self.assertEqual(send_reminders(store, outbox_sender(store), clock), 2)
 AssertionError: 1 != 2
 
@@ -4423,7 +4423,7 @@ AssertionError: 1 != 2
 FAIL: test_sms_says_who_when_and_the_reference (test_task.SmsReminders)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-1.7b/clinic/search/hidden/01/test_task.py", line 31, in test_sms_says_who_when_and_the_reference
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-clinic-1.7b/clinic/search/hidden/01/test_task.py", line 31, in test_sms_says_who_when_and_the_reference
     self.assertEqual(len(texts), 1)
 AssertionError: 0 != 1
 

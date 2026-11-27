@@ -858,18 +858,18 @@ def charge_invoice(store, invoice_id: str, gateway, clock) -> Invoice:
 ERROR: test_timeout_goes_to_review (test_task.Timeouts)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/0344f63f-7d4d-4c56-939b-1cf2edf80ea5/scratchpad/trial/tune-01/courier/none/workspace/courier/billing/checkout.py", line 22, in charge_invoice
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/0344f63f-7d4d-4c56-939b-1cf2edf80ea5/scratchpad/trial/tune-01/courier/none/workspace/courier/billing/checkout.py", line 22, in charge_invoice
     receipt = gateway.charge(customer.payment_token, invoice.total_cents, reference=invoice.id)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/0344f63f-7d4d-4c56-939b-1cf2edf80ea5/scratchpad/trial/tune-01/courier/none/workspace/courier/billing/gateway.py", line 44, in charge
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/0344f63f-7d4d-4c56-939b-1cf2edf80ea5/scratchpad/trial/tune-01/courier/none/workspace/courier/billing/gateway.py", line 44, in charge
     raise problem
 courier.errors.GatewayTimeout: gateway did not answer
 
 During handling of the above exception, another exception occurred:
 
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/0344f63f-7d4d-4c56-939b-1cf2edf80ea5/scratchpad/trial/tune-01/courier/none/hidden/01/test_task.py", line 23, in test_timeout_goes_to_review
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/0344f63f-7d4d-4c56-939b-1cf2edf80ea5/scratchpad/trial/tune-01/courier/none/hidden/01/test_task.py", line 23, in test_timeout_goes_to_review
     invoice = charge_invoice(store, "I1", gateway, clock)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/0344f63f-7d4d-4c56-939b-1cf2edf80ea5/scratchpad/trial/tune-01/courier/none/workspace/courier/billing/checkout.py", line 26, in charge_invoice
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/0344f63f-7d4d-4c56-939b-1cf2edf80ea5/scratchpad/trial/tune-01/courier/none/workspace/courier/billing/checkout.py", line 26, in charge_invoice
     if isinstance(e, (TimeoutError, GatewayTimeout)):
 NameError: name 'GatewayTimeout' is not defined
 
@@ -884,18 +884,18 @@ E
 ERROR: test_a_timed_out_charge_is_not_tried_again (test_decisions.OneChargePerAttempt)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/0344f63f-7d4d-4c56-939b-1cf2edf80ea5/scratchpad/trial/tune-01/courier/none/workspace/courier/billing/checkout.py", line 22, in charge_invoice
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/0344f63f-7d4d-4c56-939b-1cf2edf80ea5/scratchpad/trial/tune-01/courier/none/workspace/courier/billing/checkout.py", line 22, in charge_invoice
     receipt = gateway.charge(customer.payment_token, invoice.total_cents, reference=invoice.id)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/0344f63f-7d4d-4c56-939b-1cf2edf80ea5/scratchpad/trial/tune-01/courier/none/hidden/01/test_decisions.py", line 17, in charge
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/0344f63f-7d4d-4c56-939b-1cf2edf80ea5/scratchpad/trial/tune-01/courier/none/hidden/01/test_decisions.py", line 17, in charge
     raise GatewayTimeout("no answer")
 courier.errors.GatewayTimeout: no answer
 
 During handling of the above exception, another exception occurred:
 
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/0344f63f-7d4d-4c56-939b-1cf2edf80ea5/scratchpad/trial/tune-01/courier/none/hidden/01/test_decisions.py", line 30, in test_a_timed_out_charge_is_not_tried_again
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/0344f63f-7d4d-4c56-939b-1cf2edf80ea5/scratchpad/trial/tune-01/courier/none/hidden/01/test_decisions.py", line 30, in test_a_timed_out_charge_is_not_tried_again
     charge_invoice(store, "I1", gateway, FixedClock())
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/0344f63f-7d4d-4c56-939b-1cf2edf80ea5/scratchpad/trial/tune-01/courier/none/workspace/courier/billing/checkout.py", line 26, in charge_invoice
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/0344f63f-7d4d-4c56-939b-1cf2edf80ea5/scratchpad/trial/tune-01/courier/none/workspace/courier/billing/checkout.py", line 26, in charge_invoice
     if isinstance(e, (TimeoutError, GatewayTimeout)):
 NameError: name 'GatewayTimeout' is not defined
 

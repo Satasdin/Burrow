@@ -2076,9 +2076,9 @@ EEEEE
 ERROR: test_amount_must_be_positive (test_task.Correcting)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/search/hidden/04/test_task.py", line 43, in test_amount_must_be_positive
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/search/hidden/04/test_task.py", line 43, in test_amount_must_be_positive
     correct_deposit(store, mistyped.id, 0, clock)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/search/workspace/sacco/savings/deposits.py", line 24, in correct_deposit
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/search/workspace/sacco/savings/deposits.py", line 24, in correct_deposit
     entry = find_entry(store, entry_id)
 NameError: name 'find_entry' is not defined
 
@@ -2086,9 +2086,9 @@ NameError: name 'find_entry' is not defined
 ERROR: test_balance_shows_the_right_amount (test_task.Correcting)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/search/hidden/04/test_task.py", line 25, in test_balance_shows_the_right_amount
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/search/hidden/04/test_task.py", line 25, in test_balance_shows_the_right_amount
     self.assertEqual(correct_deposit(store, mistyped.id, 50_000, clock), 1_050_000)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/search/workspace/sacco/savings/deposits.py", line 24, in correct_deposit
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/search/workspace/sacco/savings/deposits.py", line 24, in correct_deposit
     entry = find_entry(store, entry_id)
 NameError: name 'find_entry' is not defined
 
@@ -2096,9 +2096,9 @@ NameError: name 'find_entry' is not defined
 ERROR: test_only_deposits_can_be_corrected (test_task.Correcting)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/search/hidden/04/test_task.py", line 38, in test_only_deposits_can_be_corrected
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/search/hidden/04/test_task.py", line 38, in test_only_deposits_can_be_corrected
     correct_deposit(store, taken.id, 50_000, clock)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/search/workspace/sacco/savings/deposits.py", line 24, in correct_deposit
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/search/workspace/sacco/savings/deposits.py", line 24, in correct_deposit
     entry = find_entry(store, entry_id)
 NameError: name 'find_entry' is not defined
 
@@ -2106,9 +2106,9 @@ NameError: name 'find_entry' is not defined
 ERROR: test_statement_closes_on_the_right_amount (test_task.Correcting)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/search/hidden/04/test_task.py", line 30, in test_statement_closes_on_the_right_amount
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/search/hidden/04/test_task.py", line 30, in test_statement_closes_on_the_right_amount
     correct_deposit(store, mistyped.id, 50_000, clock)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/search/workspace/sacco/savings/deposits.py", line 24, in correct_deposit
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/search/workspace/sacco/savings/deposits.py", line 24, in correct_deposit
     entry = find_entry(store, entry_id)
 NameError: name 'find_entry' is not defined
 
@@ -2116,9 +2116,9 @@ NameError: name 'find_entry' is not defined
 ERROR: test_unknown_entry (test_task.Correcting)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/search/hidden/04/test_task.py", line 48, in test_unknown_entry
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/search/hidden/04/test_task.py", line 48, in test_unknown_entry
     correct_deposit(store, "ENT-NOPE", 50_000, clock)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/search/workspace/sacco/savings/deposits.py", line 24, in correct_deposit
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/search/workspace/sacco/savings/deposits.py", line 24, in correct_deposit
     entry = find_entry(store, entry_id)
 NameError: name 'find_entry' is not defined
 
@@ -2133,9 +2133,9 @@ EE
 ERROR: test_the_correction_is_posted_as_further_lines (test_decisions.PostedLinesStayAsPosted)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/search/hidden/04/test_decisions.py", line 30, in test_the_correction_is_posted_as_further_lines
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/search/hidden/04/test_decisions.py", line 30, in test_the_correction_is_posted_as_further_lines
     correct_deposit(store, mistyped.id, 50_000, clock)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/search/workspace/sacco/savings/deposits.py", line 24, in correct_deposit
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/search/workspace/sacco/savings/deposits.py", line 24, in correct_deposit
     entry = find_entry(store, entry_id)
 NameError: name 'find_entry' is not defined
 
@@ -2143,9 +2143,9 @@ NameError: name 'find_entry' is not defined
 ERROR: test_the_mistyped_line_is_still_there_unchanged (test_decisions.PostedLinesStayAsPosted)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/search/hidden/04/test_decisions.py", line 23, in test_the_mistyped_line_is_still_there_unchanged
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/search/hidden/04/test_decisions.py", line 23, in test_the_mistyped_line_is_still_there_unchanged
     correct_deposit(store, mistyped.id, 50_000, clock)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/search/workspace/sacco/savings/deposits.py", line 24, in correct_deposit
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/search/workspace/sacco/savings/deposits.py", line 24, in correct_deposit
     entry = find_entry(store, entry_id)
 NameError: name 'find_entry' is not defined
 

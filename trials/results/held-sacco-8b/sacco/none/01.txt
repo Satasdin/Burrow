@@ -1120,9 +1120,9 @@ EEEEE
 ERROR: test_balance_goes_back_and_is_returned (test_task.Reversing)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/none/hidden/01/test_task.py", line 26, in test_balance_goes_back_and_is_returned
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/none/hidden/01/test_task.py", line 26, in test_balance_goes_back_and_is_returned
     self.assertEqual(reverse_entry(store, wrong.id, "wrong member", clock), 20_000)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/none/workspace/sacco/savings/reversals.py", line 9, in reverse_entry
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/none/workspace/sacco/savings/reversals.py", line 9, in reverse_entry
     entry = find_entry(store, entry_id)
 NameError: name 'find_entry' is not defined
 
@@ -1130,9 +1130,9 @@ NameError: name 'find_entry' is not defined
 ERROR: test_cannot_reverse_twice (test_task.Reversing)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/none/hidden/01/test_task.py", line 31, in test_cannot_reverse_twice
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/none/hidden/01/test_task.py", line 31, in test_cannot_reverse_twice
     reverse_entry(store, wrong.id, "wrong member", clock)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/none/workspace/sacco/savings/reversals.py", line 9, in reverse_entry
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/none/workspace/sacco/savings/reversals.py", line 9, in reverse_entry
     entry = find_entry(store, entry_id)
 NameError: name 'find_entry' is not defined
 
@@ -1140,13 +1140,13 @@ NameError: name 'find_entry' is not defined
 ERROR: test_handler (test_task.Reversing)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/none/hidden/01/test_task.py", line 43, in test_handler
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/none/hidden/01/test_task.py", line 43, in test_handler
     response = reverse_posting({"entry_id": wrong.id, "reason": "wrong member"}, context)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/none/workspace/sacco/api/handlers.py", line 35, in wrapper
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/none/workspace/sacco/api/handlers.py", line 35, in wrapper
     return function(request, context)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/none/workspace/sacco/api/handlers.py", line 45, in reverse_posting
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/none/workspace/sacco/api/handlers.py", line 45, in reverse_posting
     balance_cents = reverse_entry(context.store, request["entry_id"], request["reason"], context.clock)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/none/workspace/sacco/savings/reversals.py", line 9, in reverse_entry
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/none/workspace/sacco/savings/reversals.py", line 9, in reverse_entry
     entry = find_entry(store, entry_id)
 NameError: name 'find_entry' is not defined
 
@@ -1154,13 +1154,13 @@ NameError: name 'find_entry' is not defined
 ERROR: test_handler_reports_a_missing_entry (test_task.Reversing)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/none/hidden/01/test_task.py", line 49, in test_handler_reports_a_missing_entry
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/none/hidden/01/test_task.py", line 49, in test_handler_reports_a_missing_entry
     self.assertEqual(reverse_posting({"entry_id": "ENT-NOPE", "reason": "x"}, context)["error"], "not_found")
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/none/workspace/sacco/api/handlers.py", line 35, in wrapper
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/none/workspace/sacco/api/handlers.py", line 35, in wrapper
     return function(request, context)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/none/workspace/sacco/api/handlers.py", line 45, in reverse_posting
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/none/workspace/sacco/api/handlers.py", line 45, in reverse_posting
     balance_cents = reverse_entry(context.store, request["entry_id"], request["reason"], context.clock)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/none/workspace/sacco/savings/reversals.py", line 9, in reverse_entry
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/none/workspace/sacco/savings/reversals.py", line 9, in reverse_entry
     entry = find_entry(store, entry_id)
 NameError: name 'find_entry' is not defined
 
@@ -1168,9 +1168,9 @@ NameError: name 'find_entry' is not defined
 ERROR: test_unknown_entry (test_task.Reversing)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/none/hidden/01/test_task.py", line 38, in test_unknown_entry
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/none/hidden/01/test_task.py", line 38, in test_unknown_entry
     reverse_entry(store, "ENT-NOPE", "wrong member", clock)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/none/workspace/sacco/savings/reversals.py", line 9, in reverse_entry
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/none/workspace/sacco/savings/reversals.py", line 9, in reverse_entry
     entry = find_entry(store, entry_id)
 NameError: name 'find_entry' is not defined
 
@@ -1185,9 +1185,9 @@ EE
 ERROR: test_the_original_line_stays_as_posted (test_decisions.ReversalsPostANewLine)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/none/hidden/01/test_decisions.py", line 24, in test_the_original_line_stays_as_posted
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/none/hidden/01/test_decisions.py", line 24, in test_the_original_line_stays_as_posted
     reverse_entry(store, wrong.id, "wrong member", clock)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/none/workspace/sacco/savings/reversals.py", line 9, in reverse_entry
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/none/workspace/sacco/savings/reversals.py", line 9, in reverse_entry
     entry = find_entry(store, entry_id)
 NameError: name 'find_entry' is not defined
 
@@ -1195,9 +1195,9 @@ NameError: name 'find_entry' is not defined
 ERROR: test_the_reversal_is_its_own_opposite_line (test_decisions.ReversalsPostANewLine)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/none/hidden/01/test_decisions.py", line 31, in test_the_reversal_is_its_own_opposite_line
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/none/hidden/01/test_decisions.py", line 31, in test_the_reversal_is_its_own_opposite_line
     reverse_entry(store, wrong.id, "wrong member", clock)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/none/workspace/sacco/savings/reversals.py", line 9, in reverse_entry
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-8b/sacco/none/workspace/sacco/savings/reversals.py", line 9, in reverse_entry
     entry = find_entry(store, entry_id)
 NameError: name 'find_entry' is not defined
 

@@ -1,4 +1,4 @@
-Output "/Users/p3wrky/Developer/burrow/docs/demo/clips/02-install-and-connect.mp4"
+Output "docs/demo/clips/02-install-and-connect.mp4"
 Set Shell "bash"
 Set FontSize 20
 Set Width 1600

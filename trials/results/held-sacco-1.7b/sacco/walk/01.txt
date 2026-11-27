@@ -1390,9 +1390,9 @@ EEEE.
 ERROR: test_balance_goes_back_and_is_returned (test_task.Reversing)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-1.7b/sacco/walk/hidden/01/test_task.py", line 26, in test_balance_goes_back_and_is_returned
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-1.7b/sacco/walk/hidden/01/test_task.py", line 26, in test_balance_goes_back_and_is_returned
     self.assertEqual(reverse_entry(store, wrong.id, "wrong member", clock), 20_000)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-1.7b/sacco/walk/workspace/sacco/savings/reversals.py", line 12, in reverse_entry
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-1.7b/sacco/walk/workspace/sacco/savings/reversals.py", line 12, in reverse_entry
     if entry.is_reversed:
 AttributeError: 'LedgerEntry' object has no attribute 'is_reversed'
 
@@ -1400,9 +1400,9 @@ AttributeError: 'LedgerEntry' object has no attribute 'is_reversed'
 ERROR: test_cannot_reverse_twice (test_task.Reversing)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-1.7b/sacco/walk/hidden/01/test_task.py", line 31, in test_cannot_reverse_twice
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-1.7b/sacco/walk/hidden/01/test_task.py", line 31, in test_cannot_reverse_twice
     reverse_entry(store, wrong.id, "wrong member", clock)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-1.7b/sacco/walk/workspace/sacco/savings/reversals.py", line 12, in reverse_entry
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-1.7b/sacco/walk/workspace/sacco/savings/reversals.py", line 12, in reverse_entry
     if entry.is_reversed:
 AttributeError: 'LedgerEntry' object has no attribute 'is_reversed'
 
@@ -1410,11 +1410,11 @@ AttributeError: 'LedgerEntry' object has no attribute 'is_reversed'
 ERROR: test_handler (test_task.Reversing)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-1.7b/sacco/walk/hidden/01/test_task.py", line 43, in test_handler
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-1.7b/sacco/walk/hidden/01/test_task.py", line 43, in test_handler
     response = reverse_posting({"entry_id": wrong.id, "reason": "wrong member"}, context)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-1.7b/sacco/walk/workspace/sacco/api/handlers.py", line 34, in wrapper
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-1.7b/sacco/walk/workspace/sacco/api/handlers.py", line 34, in wrapper
     return function(request, context)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-1.7b/sacco/walk/workspace/sacco/api/handlers.py", line 117, in reverse_posting
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-1.7b/sacco/walk/workspace/sacco/api/handlers.py", line 117, in reverse_posting
     entry = find_entry(context.store, entry_id)
 NameError: name 'find_entry' is not defined
 
@@ -1422,11 +1422,11 @@ NameError: name 'find_entry' is not defined
 ERROR: test_handler_reports_a_missing_entry (test_task.Reversing)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-1.7b/sacco/walk/hidden/01/test_task.py", line 49, in test_handler_reports_a_missing_entry
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-1.7b/sacco/walk/hidden/01/test_task.py", line 49, in test_handler_reports_a_missing_entry
     self.assertEqual(reverse_posting({"entry_id": "ENT-NOPE", "reason": "x"}, context)["error"], "not_found")
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-1.7b/sacco/walk/workspace/sacco/api/handlers.py", line 34, in wrapper
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-1.7b/sacco/walk/workspace/sacco/api/handlers.py", line 34, in wrapper
     return function(request, context)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-1.7b/sacco/walk/workspace/sacco/api/handlers.py", line 117, in reverse_posting
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-1.7b/sacco/walk/workspace/sacco/api/handlers.py", line 117, in reverse_posting
     entry = find_entry(context.store, entry_id)
 NameError: name 'find_entry' is not defined
 
@@ -1441,9 +1441,9 @@ EE
 ERROR: test_the_original_line_stays_as_posted (test_decisions.ReversalsPostANewLine)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-1.7b/sacco/walk/hidden/01/test_decisions.py", line 24, in test_the_original_line_stays_as_posted
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-1.7b/sacco/walk/hidden/01/test_decisions.py", line 24, in test_the_original_line_stays_as_posted
     reverse_entry(store, wrong.id, "wrong member", clock)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-1.7b/sacco/walk/workspace/sacco/savings/reversals.py", line 12, in reverse_entry
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-1.7b/sacco/walk/workspace/sacco/savings/reversals.py", line 12, in reverse_entry
     if entry.is_reversed:
 AttributeError: 'LedgerEntry' object has no attribute 'is_reversed'
 
@@ -1451,9 +1451,9 @@ AttributeError: 'LedgerEntry' object has no attribute 'is_reversed'
 ERROR: test_the_reversal_is_its_own_opposite_line (test_decisions.ReversalsPostANewLine)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-1.7b/sacco/walk/hidden/01/test_decisions.py", line 31, in test_the_reversal_is_its_own_opposite_line
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-1.7b/sacco/walk/hidden/01/test_decisions.py", line 31, in test_the_reversal_is_its_own_opposite_line
     reverse_entry(store, wrong.id, "wrong member", clock)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-1.7b/sacco/walk/workspace/sacco/savings/reversals.py", line 12, in reverse_entry
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-sacco-1.7b/sacco/walk/workspace/sacco/savings/reversals.py", line 12, in reverse_entry
     if entry.is_reversed:
 AttributeError: 'LedgerEntry' object has no attribute 'is_reversed'
 

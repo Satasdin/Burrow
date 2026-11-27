@@ -2599,11 +2599,11 @@ def check_day_pass(request, context):
 ERROR: test_handler_reports_a_missing_pass (test_task.DayPass)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/walk/hidden/06/test_task.py", line 37, in test_handler_reports_a_missing_pass
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/walk/hidden/06/test_task.py", line 37, in test_handler_reports_a_missing_pass
     self.assertEqual(check_day_pass({"pass_id": "NOPE"}, context)["error"], "not_found")
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/walk/workspace/matatu/api/handlers.py", line 36, in wrapper
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/walk/workspace/matatu/api/handlers.py", line 36, in wrapper
     return function(request, context)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/walk/workspace/matatu/api/handlers.py", line 106, in check_day_pass
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/walk/workspace/matatu/api/handlers.py", line 106, in check_day_pass
     valid = pass_is_valid(context.store, request["pass_id"], context.clock.now())
 NameError: name 'pass_is_valid' is not defined
 
@@ -2611,11 +2611,11 @@ NameError: name 'pass_is_valid' is not defined
 ERROR: test_handler_uses_the_clock (test_task.DayPass)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/walk/hidden/06/test_task.py", line 31, in test_handler_uses_the_clock
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/walk/hidden/06/test_task.py", line 31, in test_handler_uses_the_clock
     self.assertEqual(check_day_pass({"pass_id": self.day_pass.id}, context), {"pass_id": self.day_pass.id, "valid": True})
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/walk/workspace/matatu/api/handlers.py", line 36, in wrapper
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/walk/workspace/matatu/api/handlers.py", line 36, in wrapper
     return function(request, context)
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/walk/workspace/matatu/api/handlers.py", line 106, in check_day_pass
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/walk/workspace/matatu/api/handlers.py", line 106, in check_day_pass
     valid = pass_is_valid(context.store, request["pass_id"], context.clock.now())
 NameError: name 'pass_is_valid' is not defined
 
@@ -2623,16 +2623,16 @@ NameError: name 'pass_is_valid' is not defined
 ERROR: test_unknown_pass (test_task.DayPass)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/walk/workspace/matatu/tickets/passes.py", line 22, in pass_is_valid
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/walk/workspace/matatu/tickets/passes.py", line 22, in pass_is_valid
     day_pass = store.day_passes[pass_id]
 KeyError: 'NOPE'
 
 During handling of the above exception, another exception occurred:
 
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/walk/hidden/06/test_task.py", line 26, in test_unknown_pass
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/walk/hidden/06/test_task.py", line 26, in test_unknown_pass
     pass_is_valid(self.store, "NOPE", moment_of("2023-11-15", 16))
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/walk/workspace/matatu/tickets/passes.py", line 27, in pass_is_valid
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/walk/workspace/matatu/tickets/passes.py", line 27, in pass_is_valid
     raise NotFound("day pass", pass_id)
 NameError: name 'NotFound' is not defined
 
@@ -2647,7 +2647,7 @@ FF
 FAIL: test_bought_in_the_small_hours_it_ends_at_three (test_decisions.OperatingDay)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/walk/hidden/06/test_decisions.py", line 23, in test_bought_in_the_small_hours_it_ends_at_three
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/walk/hidden/06/test_decisions.py", line 23, in test_bought_in_the_small_hours_it_ends_at_three
     self.assertFalse(pass_is_valid(store, pass_id, moment_of("2023-11-16", 10)))
 AssertionError: True is not false
 
@@ -2655,7 +2655,7 @@ AssertionError: True is not false
 FAIL: test_bought_late_it_still_works_in_the_small_hours (test_decisions.OperatingDay)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/private/tmp/claude-501/-Users-p3wrky-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/walk/hidden/06/test_decisions.py", line 18, in test_bought_late_it_still_works_in_the_small_hours
+  File "/private/tmp/claude-501/-Users-author-Desktop-camr-repo/be28fc09-2c4e-4262-9b9d-b53ca265be1b/scratchpad/held/held-matatu-8b/matatu/walk/hidden/06/test_decisions.py", line 18, in test_bought_late_it_still_works_in_the_small_hours
     self.assertTrue(pass_is_valid(store, pass_id, moment_of("2023-11-16", 1, 30)))
 AssertionError: False is not true
 
